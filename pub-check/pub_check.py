@@ -83,14 +83,14 @@ class Findings:
     def observe(self, check: str, **kv) -> None:
         """Record the concrete values a check pulled from the package, so a
         validation report can show observed-vs-expected for conditions that
-        PASS (a silent pass is unreviewable). Values are stringified and
-        truncated; lists join with commas."""
+        PASS (a silent pass is unreviewable). Values are stringified in full,
+        never truncated: the observed value is the evidence the report exists
+        to show. Lists join with commas."""
         slot = self.observed.setdefault(check, {})
         for k, v in kv.items():
             if isinstance(v, (list, tuple, set)):
                 v = ", ".join(str(x) for x in sorted(v)) if v else "(none)"
-            s = str(v)
-            slot[k] = s if len(s) <= 400 else s[:397] + "..."
+            slot[k] = str(v)
 
     @property
     def blockers(self) -> int:
