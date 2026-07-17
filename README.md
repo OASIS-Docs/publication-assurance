@@ -86,15 +86,6 @@ blockers it reproduces exactly), and the set grows: each new failure mode
 a correction round surfaces becomes a new acceptance criterion. Full
 provenance: [pub-check/README.md](pub-check/README.md).
 
-## Pipeline stages
-
-![Pipeline](assets/pipeline.png?v=98)
-
-Three GitHub Actions wrap six commands. Nothing else in the YAML affects the
-output. [TRANSFORMS.md](TRANSFORMS.md) documents the exact commands, the nine
-OASIS-specific HTML fix-ups, and the renderer's limits. Run them from the
-Actions tab (each takes a stage directory and a date) or locally.
-
 ## Verification chain
 
 ![Verification chain](assets/chain.png?v=98)
