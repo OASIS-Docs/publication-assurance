@@ -49,7 +49,7 @@ This repository contains:
 
 ```bash
 python3 pub-check/oasis_pub_check.py <stage-dir or submission.zip>   # exit 0 = publishable
-python3 pub-check/oasis_pub_check.py <stage-dir> --emit-manifest     # + provenance manifest
+python3 pub-check/oasis_pub_check.py <stage-dir> --emit-manifest     # + both release manifests
 python3 pub-check/oasis_pub_check.py <stage-dir> --json              # machine-readable
 ```
 

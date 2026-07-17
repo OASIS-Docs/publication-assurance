@@ -204,7 +204,8 @@ python3 pub-check/oasis_pub_check.py <target> --json
 # the check inventory, asserted from the code itself
 python3 pub-check/oasis_pub_check.py --list-checks
 
-# also write manifest.json (per-file sha256, source commit, tool versions)
+# write the release manifests (manifest.json + the Work Product
+# Manifest File, <stem>-manifest.txt)
 python3 pub-check/oasis_pub_check.py <target> --emit-manifest
 ```
 
