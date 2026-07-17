@@ -95,17 +95,22 @@ against the criteria, and the manifest lets every later step verify both.
 Two layers, one engine. The TC side runs pub-check in its own CI and owns
 "the document is ready": all 92 conditions, each reported as the value the
 tool pulled from the package set against the value it was compared to, in
-full. TC Administration re-runs the identical code at intake (audit gate 4b)
-and wraps it with the gates only a human or a live check can do: byte
-identity against the published site, render class against the TC's own
-precedent, the live roster, directory index chains, announcement channels,
-and an independent adversarial verifier. Both reports are filed to the TC's
-ticket and the internal audit record.
+full. TC Administration re-runs the identical code at intake (checklist
+step 4b) and wraps it with the 15 mandatory audit gates only a human or a
+live check can do: byte identity against the published site, render class
+against the TC's own precedent, the live roster, directory index chains,
+announcement channels, and an independent adversarial verifier.
+Both reports are filed to the TC's ticket and the internal audit record.
+
+**[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** is the full guide for
+TC editors and chairs: both layers, all 15 audit gates, the per-condition
+catalog, and a worked example with the real reports from a real publication
+([examples/eox-core-v1.0-csd01/](examples/eox-core-v1.0-csd01/)).
 
 ![Publication quality stack](assets/architecture/two-layer-stack.svg)
 
-Sources and a regenerating build script:
-[assets/architecture/](assets/architecture/).
+Every diagram in this repository regenerates from one build script and one
+set of design tokens: [assets/build.py](assets/build.py).
 
 ## CI
 
@@ -127,10 +132,14 @@ pub-check:
 publication-sandbox/
 ├── pub-check/                       # The publication gate
 │   ├── pub_check.py                 #   92 individual checks in 34 classes, stdlib only
+│   ├── CHECKS.md                    #   per-condition catalog, generated from the code
+│   ├── render_checks_md.py          #   the generator (keeps CHECKS.md in sync)
 │   ├── manifest-schema.json         #   provenance manifest contract
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
+├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
+├── examples/eox-core-v1.0-csd01/    # Real reports from a real publication
 ├── TRANSFORMS.md                    # The pipeline, command by command (canonical criteria)
-├── assets/                          # README diagrams (SVG)
+├── assets/                          # All diagrams (SVG) + build.py to regenerate them
 ├── .github/
 │   ├── src/                         # Pipeline source (pandoc + BeautifulSoup post-processing,
 │   │                                #   HTML preprocessor, wkhtmltopdf renderer)
@@ -177,4 +186,4 @@ The OASIS name and logo are trademarks of OASIS Open.
 
 **Repository maintained by**: Michael Coletta, Technical Advisor, OASIS Open  
 **Contact**: michael.coletta@oasis-open.org (OASIS TC Administration)  
-**Documentation**: [TRANSFORMS.md](TRANSFORMS.md) for the pipeline, [pub-check/](pub-check/) for the publication gate, individual specification folders for spec-level detail
+**Documentation**: [PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md) for the whole quality architecture, [TRANSFORMS.md](TRANSFORMS.md) for the pipeline, [pub-check/](pub-check/) for the publication gate, individual specification folders for spec-level detail

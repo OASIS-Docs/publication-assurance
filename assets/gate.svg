@@ -1,59 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="525" viewBox="0 0 1200 525" role="img" aria-label="pub-check validation flow from work product through 91 grouped checks to publishable or blocker verdicts">
-  <defs>
-    <marker id="arrow-gate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a86e8"/>
-    </marker>
-  </defs>
-
-  <rect x="1" y="1" width="1198" height="523" rx="14" fill="#f5f8fe" stroke="#d7e2f6" stroke-width="1"/>
-
-  <text x="50" y="50" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="700" fill="#1f2a44">pub-check: Validation Flow</text>
-  <text x="50" y="82" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#5b6b8c">One stdlib Python file. Every check traces to a real correction round. No separate configuration: authority is derived from the package itself.</text>
-
-  <rect x="50" y="200" width="205" height="150" rx="12" fill="#ffffff" stroke="#4a86e8" stroke-width="2"/>
-  <text x="75" y="234" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#1f2a44">Work Product</text>
-  <text x="75" y="266" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14" fill="#44536e">spec-vX.Y-csdNN.md</text>
-  <text x="75" y="291" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14" fill="#44536e">+ .html + .pdf</text>
-  <text x="75" y="316" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14" fill="#44536e">schema/*.json</text>
-  <text x="75" y="341" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="14" fill="#44536e">manifest.json</text>
-
-  <line x1="255" y1="275" x2="278" y2="275" stroke="#4a86e8" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow-gate)"/>
-
-  <rect x="285" y="105" width="635" height="390" rx="14" fill="#ffffff" stroke="#d7e2f6" stroke-width="1"/>
-  <text x="310" y="139" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#1f2a44">92 checks in 34 classes, grouped</text>
-
-  <rect x="310" y="160" width="290" height="62" rx="10" fill="#eef4ff"/>
-  <text x="322" y="184" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#446CAA">Template and Policy</text>
-  <text x="322" y="207" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#44536e">sections, order, Conformance, RFC 2119</text>
-  <rect x="620" y="160" width="290" height="62" rx="10" fill="#eef4ff"/>
-  <text x="632" y="184" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#446CAA">Front Matter and Links</text>
-  <text x="632" y="207" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#44536e">This/Latest URLs, anchors, link targets</text>
-  <rect x="310" y="236" width="290" height="62" rx="10" fill="#eef4ff"/>
-  <text x="322" y="260" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#446CAA">Residue and Naming</text>
-  <text x="322" y="283" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#44536e">TODO/tbd, draft files, case, versions</text>
-  <rect x="620" y="236" width="290" height="62" rx="10" fill="#eef4ff"/>
-  <text x="632" y="260" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#446CAA">Cross-Format Sync</text>
-  <text x="632" y="283" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#44536e">PDF sync, dates, fonts, autolink trap</text>
-  <rect x="310" y="312" width="290" height="62" rx="10" fill="#eef4ff"/>
-  <text x="322" y="336" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#446CAA">Schemas and References</text>
-  <text x="322" y="359" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#44536e">$id vs path, cited files, dead lists</text>
-  <rect x="620" y="312" width="290" height="62" rx="10" fill="#eef4ff"/>
-  <text x="632" y="336" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#446CAA">Hygiene and Fidelity</text>
-  <text x="632" y="359" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#44536e">junk, symlinks, sha256, Word render</text>
-
-  <text x="310" y="426" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6b8c">Code fences and pre/code content are excluded from prose checks.</text>
-  <text x="310" y="449" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6b8c">Track-aware: DOCX-native packages skip Markdown-only checks and gain render-fidelity checks.</text>
-
-  <path d="M 920 275 H 935 V 220 H 950" fill="none" stroke="#4a86e8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-gate)"/>
-  <path d="M 935 275 V 370 H 950" fill="none" stroke="#4a86e8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-gate)"/>
-
-  <rect x="950" y="165" width="210" height="110" rx="12" fill="#eef9f0" stroke="#2f6b3c" stroke-width="2"/>
-  <text x="966" y="198" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#2f6b3c">exit 0 &#183; Publishable</text>
-  <text x="966" y="229" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2f6b3c">No resubmission cycle:</text>
-  <text x="966" y="251" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#2f6b3c">intake verifies and publishes</text>
-
-  <rect x="950" y="315" width="210" height="110" rx="12" fill="#fdf0f0" stroke="#b04a4a" stroke-width="2"/>
-  <text x="966" y="348" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#a03535">exit 1 &#183; Blockers</text>
-  <text x="966" y="379" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#a03535">Resolve blockers</text>
-  <text x="966" y="401" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#a03535">before the vote</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif">
+<defs><marker id="aInk" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#0a2540"/></marker><marker id="aAcc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#2248e5"/></marker><marker id="aNavy" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#0a4a8f"/></marker><marker id="aMut" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#aeb7c4"/></marker><marker id="aGood" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#15803d"/></marker><marker id="aRed" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#b3261e"/></marker></defs>
+<rect width="1200" height="600" fill="#edf3f9"/><rect x="0.5" y="0.5" width="1199" height="599" fill="none" stroke="#d5dae0" stroke-width="1"/>
+<text x="56" y="52" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="500" fill="#0a4a8f" text-anchor="start" letter-spacing="2.2">LAYER 1 · VALIDATION</text>
+<text x="56" y="86" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="700" fill="#0a2540" text-anchor="start">pub-check: the publication gate</text>
+<text x="56" y="112" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6b7380" text-anchor="start">One stdlib Python file. Every check traces to a real correction round. Authority is derived from the package itself.</text>
+<rect x="56" y="210" width="200" height="190" rx="2" ry="2" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
+<text x="74" y="242" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="500" fill="#0a2540" text-anchor="start" letter-spacing="1.1">WORK PRODUCT</text>
+<line x1="74" y1="254" x2="238" y2="254" stroke="#d5dae0" stroke-width="1"/>
+<text x="74" y="284" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#313131" text-anchor="start">spec-vN.N-csdNN.md</text>
+<text x="74" y="310" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#313131" text-anchor="start">        + .html + .pdf</text>
+<text x="74" y="336" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#313131" text-anchor="start">schema/*.json</text>
+<text x="74" y="362" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#313131" text-anchor="start">manifest.json</text>
+<line x1="264" y1="305.0" x2="298" y2="305.0" stroke="#0a2540" stroke-width="1.4" marker-end="url(#aInk)"/>
+<rect x="306" y="152" width="564" height="356" rx="3" ry="3" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
+<text x="330" y="188" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" fill="#0a2540" text-anchor="start">92 checks in 34 classes</text>
+<text x="846" y="188" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6b7380" text-anchor="end">grouped by what they protect</text>
+<line x1="330" y1="202" x2="846" y2="202" stroke="#d5dae0" stroke-width="1"/>
+<rect x="330" y="218" width="250" height="78" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="344" y="244" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0a2540" text-anchor="start">Naming &amp; stages</text>
+<text x="566" y="244" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="700" fill="#2248e5" text-anchor="end">16</text>
+<text x="344" y="264" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#6b7380" text-anchor="start">stage tokens, versions, filenames,</text>
+<text x="344" y="280" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#6b7380" text-anchor="start">collisions</text>
+<rect x="596" y="218" width="250" height="78" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="610" y="244" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0a2540" text-anchor="start">Front matter &amp; links</text>
+<text x="832" y="244" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="700" fill="#2248e5" text-anchor="end">22</text>
+<text x="610" y="264" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#6b7380" text-anchor="start">This/Latest URLs, anchors, dead lists</text>
+<rect x="330" y="310" width="250" height="78" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="344" y="336" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0a2540" text-anchor="start">Content residue</text>
+<text x="566" y="336" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="700" fill="#2248e5" text-anchor="end">11</text>
+<text x="344" y="356" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#6b7380" text-anchor="start">TODO/tbd, stale headers, working titles</text>
+<rect x="596" y="310" width="250" height="78" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="610" y="336" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0a2540" text-anchor="start">Rendering &amp; sync</text>
+<text x="832" y="336" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="700" fill="#2248e5" text-anchor="end">24</text>
+<text x="610" y="356" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#6b7380" text-anchor="start">PDF sync, fonts, images, Word fidelity</text>
+<rect x="330" y="402" width="250" height="78" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="344" y="428" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0a2540" text-anchor="start">Template &amp; policy</text>
+<text x="566" y="428" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="700" fill="#2248e5" text-anchor="end">9</text>
+<text x="344" y="448" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#6b7380" text-anchor="start">sections, Conformance, RFC 2119, logo</text>
+<rect x="596" y="402" width="250" height="78" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="610" y="428" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="500" fill="#0a2540" text-anchor="start">Package hygiene</text>
+<text x="832" y="428" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="700" fill="#2248e5" text-anchor="end">10</text>
+<text x="610" y="448" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#6b7380" text-anchor="start">junk files, symlinks, schema $id, sha256</text>
+<text x="330" y="536" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6b7380" text-anchor="start">Code fences and pre/code content are excluded from prose checks.</text>
+<text x="330" y="554" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6b7380" text-anchor="start">Track-aware: DOCX-native packages skip Markdown-only checks and gain render-fidelity checks.</text>
+<line x1="878" y1="262" x2="918" y2="262" stroke="#15803d" stroke-width="1.5" marker-end="url(#aGood)"/>
+<line x1="878" y1="414" x2="918" y2="414" stroke="#b3261e" stroke-width="1.5" marker-end="url(#aRed)"/>
+<rect x="926" y="208" width="218" height="108" rx="2" ry="2" fill="#e9f3ec" stroke="#15803d" stroke-width="1.5"/>
+<text x="944" y="240" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="14.5" font-weight="700" fill="#15803d" text-anchor="start">exit 0 · publishable</text>
+<text x="944" y="266" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="start">no resubmission cycle:</text>
+<text x="944" y="284" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="start">intake verifies and publishes</text>
+<rect x="926" y="360" width="218" height="108" rx="2" ry="2" fill="#f9ecea" stroke="#b3261e" stroke-width="1.5"/>
+<text x="944" y="392" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="14.5" font-weight="700" fill="#b3261e" text-anchor="start">exit 1 · blockers</text>
+<text x="944" y="418" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="start">resolve every blocker</text>
+<text x="944" y="436" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="start">before the TC votes</text>
 </svg>

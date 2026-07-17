@@ -1,62 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330" role="img" aria-label="Publication pipeline: markdown to HTML to PDF to zip">
-  <defs>
-    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="#4a86e8"/>
-    </marker>
-  </defs>
-  <rect width="1200" height="330" rx="14" fill="#f5f8fe" stroke="#d7e2f6"/>
-  <text x="40" y="52" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1f2a44">Pipeline Stages</text>
-
-  <!-- Stage 1 -->
-  <g>
-    <rect x="40" y="80" width="330" height="170" rx="12" fill="#ffffff" stroke="#4a86e8" stroke-width="2"/>
-    <rect x="40" y="80" width="330" height="40" rx="12" fill="#446CAA"/>
-    <rect x="40" y="104" width="330" height="16" fill="#446CAA"/>
-    <text x="205" y="106" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">STAGE 1 &#183; Markdown &#8594; HTML</text>
-    <g font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="13" fill="#1f2a44">
-      <rect x="58" y="134" width="294" height="26" rx="6" fill="#eef4ff"/>
-      <text x="70" y="152">prettier --write spec.md</text>
-      <rect x="58" y="166" width="294" height="26" rx="6" fill="#eef4ff"/>
-      <text x="70" y="184">pandoc -f markdown+autolink&#8230;</text>
-      <rect x="58" y="198" width="294" height="26" rx="6" fill="#eef4ff"/>
-      <text x="70" y="216">9 OASIS HTML fix-ups (python)</text>
-    </g>
-  </g>
-
-  <!-- Stage 2 -->
-  <g>
-    <rect x="435" y="80" width="330" height="170" rx="12" fill="#ffffff" stroke="#4a86e8" stroke-width="2"/>
-    <rect x="435" y="80" width="330" height="40" rx="12" fill="#446CAA"/>
-    <rect x="435" y="104" width="330" height="16" fill="#446CAA"/>
-    <text x="600" y="106" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">STAGE 2 &#183; HTML &#8594; PDF</text>
-    <g font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="13" fill="#1f2a44">
-      <rect x="453" y="134" width="294" height="26" rx="6" fill="#eef4ff"/>
-      <text x="465" y="152">fix_html_for_pdf.py</text>
-      <rect x="453" y="166" width="294" height="26" rx="6" fill="#eef4ff"/>
-      <text x="465" y="184">wkhtmltopdf + A4 + footers</text>
-    </g>
-    <text x="453" y="232" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6b8c">production has moved to headless Chrome + CSS Paged Media</text>
-  </g>
-
-  <!-- Stage 3 -->
-  <g>
-    <rect x="830" y="80" width="330" height="170" rx="12" fill="#ffffff" stroke="#4a86e8" stroke-width="2"/>
-    <rect x="830" y="80" width="330" height="40" rx="12" fill="#446CAA"/>
-    <rect x="830" y="104" width="330" height="16" fill="#446CAA"/>
-    <text x="995" y="106" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">STAGE 3 &#183; Package</text>
-    <g font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="13" fill="#1f2a44">
-      <rect x="848" y="134" width="294" height="26" rx="6" fill="#eef4ff"/>
-      <text x="860" y="152">zip -r spec-stage.zip .</text>
-      <rect x="848" y="166" width="294" height="26" rx="6" fill="#eef4ff"/>
-      <text x="860" y="184">touch &#8594; publication date</text>
-    </g>
-  </g>
-
-  <!-- arrows between stages -->
-  <g stroke="#4a86e8" stroke-width="2.5" fill="none">
-    <path d="M372 165 H431" marker-end="url(#arr)"/>
-    <path d="M767 165 H826" marker-end="url(#arr)"/>
-  </g>
-
-  <text x="40" y="300" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#44536e">The workflow YAML around these commands is CI plumbing only. Full command reference: <tspan font-weight="700" fill="#2c4a8a">TRANSFORMS.md</tspan></text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif">
+<defs><marker id="aInk" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#0a2540"/></marker><marker id="aAcc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#2248e5"/></marker><marker id="aNavy" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#0a4a8f"/></marker><marker id="aMut" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#aeb7c4"/></marker><marker id="aGood" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#15803d"/></marker><marker id="aRed" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#b3261e"/></marker></defs>
+<rect width="1200" height="330" fill="#edf3f9"/><rect x="0.5" y="0.5" width="1199" height="329" fill="none" stroke="#d5dae0" stroke-width="1"/>
+<text x="56" y="52" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="500" fill="#0a4a8f" text-anchor="start" letter-spacing="2.2">THE PUBLICATION PIPELINE</text>
+<text x="56" y="86" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="700" fill="#0a2540" text-anchor="start">Three stages, six commands</text>
+<text x="56" y="112" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6b7380" text-anchor="start">The workflow YAML around these commands is CI plumbing only. Full command reference: TRANSFORMS.md.</text>
+<rect x="56" y="140" width="330" height="158" rx="3" ry="3" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
+<circle cx="82" cy="168" r="11" fill="none" stroke="#2248e5" stroke-width="1.5"/><text x="82" y="172" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700" fill="#2248e5" text-anchor="middle">1</text>
+<text x="102" y="173" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="500" fill="#0a2540" text-anchor="start">Markdown to HTML</text>
+<line x1="74" y1="188" x2="368" y2="188" stroke="#d5dae0" stroke-width="1"/>
+<rect x="74" y="202" width="294" height="24" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="84" y="218.5" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" fill="#313131" text-anchor="start">prettier --write spec.md</text>
+<rect x="74" y="234" width="294" height="24" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="84" y="250.5" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" fill="#313131" text-anchor="start">pandoc -f markdown+autolink...</text>
+<rect x="74" y="266" width="294" height="24" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="84" y="282.5" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" fill="#313131" text-anchor="start">9 OASIS HTML fix-ups (python)</text>
+<line x1="394" y1="219.0" x2="418" y2="219.0" stroke="#2248e5" stroke-width="1.5" marker-end="url(#aAcc)"/>
+<rect x="426" y="140" width="330" height="158" rx="3" ry="3" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
+<circle cx="452" cy="168" r="11" fill="none" stroke="#2248e5" stroke-width="1.5"/><text x="452" y="172" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700" fill="#2248e5" text-anchor="middle">2</text>
+<text x="472" y="173" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="500" fill="#0a2540" text-anchor="start">HTML to PDF</text>
+<line x1="444" y1="188" x2="738" y2="188" stroke="#d5dae0" stroke-width="1"/>
+<rect x="444" y="202" width="294" height="24" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="454" y="218.5" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" fill="#313131" text-anchor="start">fix_html_for_pdf.py</text>
+<rect x="444" y="234" width="294" height="24" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="454" y="250.5" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" fill="#313131" text-anchor="start">wkhtmltopdf + A4 + footers</text>
+<line x1="764" y1="219.0" x2="788" y2="219.0" stroke="#2248e5" stroke-width="1.5" marker-end="url(#aAcc)"/>
+<text x="444" y="282" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#6b7380" text-anchor="start">production renders via headless Chrome + CSS Paged Media</text>
+<rect x="796" y="140" width="330" height="158" rx="3" ry="3" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
+<circle cx="822" cy="168" r="11" fill="none" stroke="#2248e5" stroke-width="1.5"/><text x="822" y="172" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="700" fill="#2248e5" text-anchor="middle">3</text>
+<text x="842" y="173" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="500" fill="#0a2540" text-anchor="start">Package</text>
+<line x1="814" y1="188" x2="1108" y2="188" stroke="#d5dae0" stroke-width="1"/>
+<rect x="814" y="202" width="294" height="24" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="824" y="218.5" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" fill="#313131" text-anchor="start">zip -r spec-stage.zip .</text>
+<rect x="814" y="234" width="294" height="24" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
+<text x="824" y="250.5" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11" font-weight="400" fill="#313131" text-anchor="start">touch: the publication date</text>
 </svg>

@@ -1,30 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="250" viewBox="0 0 1200 250" role="img" aria-label="OASIS Docs Publication Sandbox hero: Markdown to HTML to PDF publication pipeline with pub-check validation">
-  <defs>
-    <marker id="arrow-hero" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a86e8"/>
-    </marker>
-  </defs>
-
-  <rect x="1" y="1" width="1198" height="248" rx="14" fill="#f5f8fe" stroke="#d7e2f6" stroke-width="1"/>
-
-  <text x="60" y="66" font-family="Helvetica, Arial, sans-serif" font-size="34" font-weight="700" fill="#1f2a44">OASIS Docs Publication Sandbox</text>
-  <text x="60" y="104" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#44536e">Markdown &#8594; HTML &#8594; PDF publication pipeline,</text>
-  <text x="60" y="132" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#44536e">with pre-submission validation (pub-check)</text>
-  <text x="60" y="178" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#5b6b8c">Michael Coletta &#183; Technical Advisor, OASIS Open</text>
-
-  <rect x="760" y="58" width="100" height="52" rx="10" fill="#ffffff" stroke="#4a86e8" stroke-width="2"/>
-  <text x="810" y="91" text-anchor="middle" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="20" font-weight="700" fill="#1f2a44">.md</text>
-
-  <line x1="872" y1="84" x2="898" y2="84" stroke="#4a86e8" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow-hero)"/>
-
-  <rect x="910" y="58" width="100" height="52" rx="10" fill="#ffffff" stroke="#4a86e8" stroke-width="2"/>
-  <text x="960" y="91" text-anchor="middle" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="20" font-weight="700" fill="#1f2a44">.html</text>
-
-  <line x1="1022" y1="84" x2="1048" y2="84" stroke="#4a86e8" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow-hero)"/>
-
-  <rect x="1060" y="58" width="100" height="52" rx="10" fill="#ffffff" stroke="#4a86e8" stroke-width="2"/>
-  <text x="1110" y="91" text-anchor="middle" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="20" font-weight="700" fill="#1f2a44">.pdf</text>
-
-  <rect x="760" y="148" width="400" height="48" rx="10" fill="#eef9f0" stroke="#2f6b3c" stroke-width="2"/>
-  <text x="960" y="178" text-anchor="middle" font-family="SFMono-Regular, Consolas, Menlo, monospace" font-size="15" font-weight="700" fill="#2f6b3c">pub-check &#183; 92 checks &#183; exit 0 = publish</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="250" viewBox="0 0 1200 250" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif">
+<defs><marker id="aInk" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#0a2540"/></marker><marker id="aAcc" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#2248e5"/></marker><marker id="aNavy" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#0a4a8f"/></marker><marker id="aMut" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#aeb7c4"/></marker><marker id="aGood" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#15803d"/></marker><marker id="aRed" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="#b3261e"/></marker></defs>
+<rect width="1200" height="250" fill="#edf3f9"/><rect x="0.5" y="0.5" width="1199" height="249" fill="none" stroke="#d5dae0" stroke-width="1"/>
+<text x="56" y="62" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="500" fill="#0a4a8f" text-anchor="start" letter-spacing="2.2">OASIS TC ADMINISTRATION</text>
+<text x="56" y="102" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="30" font-weight="700" fill="#0a2540" text-anchor="start">OASIS Docs Publication Sandbox</text>
+<text x="56" y="132" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#313131" text-anchor="start">The Markdown to HTML to PDF publication pipeline, and the</text>
+<text x="56" y="152" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#313131" text-anchor="start">acceptance gate a TC can run before it submits.</text>
+<text x="56" y="196" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6b7380" text-anchor="start">Michael Coletta  ·  Technical Advisor, OASIS Open</text>
+<rect x="742" y="66.0" width="96" height="44" rx="2" ry="2" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
+<text x="790.0" y="93" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="15" font-weight="500" fill="#0a2540" text-anchor="middle">.md</text>
+<line x1="845" y1="88" x2="873" y2="88" stroke="#2248e5" stroke-width="1.5" marker-end="url(#aAcc)"/>
+<rect x="880" y="66.0" width="96" height="44" rx="2" ry="2" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
+<text x="928.0" y="93" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="15" font-weight="500" fill="#0a2540" text-anchor="middle">.html</text>
+<line x1="983" y1="88" x2="1011" y2="88" stroke="#2248e5" stroke-width="1.5" marker-end="url(#aAcc)"/>
+<rect x="1018" y="66.0" width="96" height="44" rx="2" ry="2" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
+<text x="1066.0" y="93" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="15" font-weight="500" fill="#0a2540" text-anchor="middle">.pdf</text>
+<rect x="742" y="132" width="372" height="44" rx="2" ry="2" fill="#e9f3ec" stroke="#15803d" stroke-width="1.5"/>
+<text x="928.0" y="159" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" font-weight="500" fill="#15803d" text-anchor="middle">pub-check · 92 checks · exit 0 = publish</text>
 </svg>

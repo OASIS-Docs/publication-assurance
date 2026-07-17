@@ -35,6 +35,17 @@ lint registry (lint D1-D7 and PDF assertions A1/A2, absorbed 15 July 2026),
 validated by a 12-month retrospective over real submissions in their
 original received form.
 
+Three companion documents:
+
+- [CHECKS.md](CHECKS.md): the per-condition catalog, one row per check with
+  the value the tool pulls and what it compares that value against.
+  Generated from the code's own condition registry by
+  [render_checks_md.py](render_checks_md.py).
+- [../PUBLICATION-QUALITY.md](../PUBLICATION-QUALITY.md): the TC-facing
+  guide to the whole quality architecture, validation and audit.
+- [../examples/eox-core-v1.0-csd01/](../examples/eox-core-v1.0-csd01/):
+  the real validation and audit reports from a real publication.
+
 ## Usage
 
 ```bash
@@ -87,6 +98,9 @@ except RC1 which is the known-bad submission candidate):
 | KMIP Profiles v3.0 csd02 (DOCX-native, published) | publishable; warnings include the inherited #RFC8174 dangler |
 
 ## The checks
+
+Class-level summary; the full per-condition catalog with observed-vs-expected
+detail is [CHECKS.md](CHECKS.md).
 
 | Check | Severity | What it catches |
 |---|---|---|
