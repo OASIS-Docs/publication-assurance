@@ -920,6 +920,45 @@ def check_manifest(stage_dir: str, f: Findings) -> None:
     except json.JSONDecodeError as e:
         f.add(BLOCKER, "manifest", f"manifest.json is not valid JSON: {e}")
         return
+    if man.get("schema") == "nide-manifest":
+        # A nide build-provenance record (schema nide-manifest, currently v1.0):
+        # source files, build outputs, and toolchain, hashed at build time in the
+        # TC repository. Its output paths name the build tree, not the delivery
+        # package, so per-item path verification does not apply. Binary-norm
+        # hashes (the PDFs) survive the delivery renaming byte-identical, so
+        # those are matched against the package's own files.
+        tool = (man.get("toolchain") or {}).get("nide", "?")
+        rev = str((man.get("source") or {}).get("revision") or "")[:12]
+        f.observe("manifest", nide_manifest=f"nide {tool}" + (f" @ {rev}" if rev else ""))
+        binary = {h.get("value") for o in (man.get("outputs") or {}).values()
+                  for h in (o.get("hashes") or [])
+                  if h.get("alg") == "sha256" and h.get("norm") == "binary"}
+        pdfs = [os.path.relpath(os.path.join(r, n), stage_dir)
+                for r, _d, files in os.walk(stage_dir) for n in files
+                if n.lower().endswith(".pdf")]
+        for rel in sorted(pdfs):
+            digest = sha256_file(os.path.join(stage_dir, rel))
+            if digest in binary:
+                f.add(INFO, "manifest",
+                      f"{rel} is byte-identical to a nide build output "
+                      f"(sha256 {digest[:12]}…): the delivered PDF is the recorded build.")
+            else:
+                f.add(INFO, "manifest",
+                      f"{rel} matches none of the manifest's binary-norm hashes: the "
+                      f"delivered PDF is not the build this manifest records. Confirm "
+                      f"the package and manifest come from the same build.")
+        f.add(INFO, "manifest",
+              "nide-manifest is a build-provenance record; per-item delivery "
+              "verification (path + sha256 of each shipped file) still comes from "
+              "the items[] manifest (--emit-manifest). Ship both until the formats "
+              "converge.")
+        return
+    if not man.get("items"):
+        f.add(INFO, "manifest",
+              "manifest.json parses but lists no items[]; nothing was verified. "
+              "Emit one with --emit-manifest, or ship a recognized provenance "
+              "record (schema: nide-manifest).")
+        return
     for item in man.get("items", []):
         p = os.path.join(stage_dir, item.get("path", ""))
         if not os.path.isfile(p):
