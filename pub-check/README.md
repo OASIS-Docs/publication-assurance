@@ -38,7 +38,7 @@ The shape of the tool:
 - **No configuration.** Every expectation is derived from the package
   itself: its own front matter, its own CSS, its own schema `$id`s, its own
   publish path.
-- **98 individual checks across 35 check classes**, and the set grows.
+- **100 individual checks across 37 check classes**, and the set grows.
   `--list-checks` asserts the inventory from the code, so the advertised
   numbers cannot drift from the implementation.
 - **The union of two histories**: the intake acceptance criteria and the

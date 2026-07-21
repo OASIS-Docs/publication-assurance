@@ -57,6 +57,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.parse
 import zipfile
 from html.parser import HTMLParser
 
@@ -374,6 +375,17 @@ def check_filenames(items: dict[str, str], stage: str, f: Findings,
     return stem
 
 
+def uri_path(u: str) -> str:
+    """The path portion of a docs URL, ready for character inspection:
+    scheme+host removed, query and fragment dropped, percent-decoded so an
+    encoded %5F reads as the underscore it is. Used by the URI-character
+    checks; a bare string with no scheme is returned unchanged."""
+    p = u.split("://", 1)[-1]
+    p = p.split("/", 1)[1] if "/" in p else ""
+    p = p.split("?", 1)[0].split("#", 1)[0]
+    return urllib.parse.unquote(p)
+
+
 def check_front_matter(md_text: str, items: dict[str, str], version: str, stage: str,
                        f: Findings) -> str:
     """Validate This/Latest stage URL blocks. Returns the This-Stage base URL."""
@@ -381,6 +393,18 @@ def check_front_matter(md_text: str, items: dict[str, str], version: str, stage:
     latest_urls = stage_urls_from_md(md_text, "Latest")
     f.observe("front-matter", this_stage_urls=this_urls or "(none)",
               latest_stage_urls=latest_urls or "(none)")
+    # AC-NAMING-08: no underscore in a document (cover-page) URI. The
+    # This/Latest-stage blocks are the URIs the current submission constructs
+    # and controls; the Previous-stage block cites an immutable prior artifact
+    # (Resource Permanence) the TC cannot rename, so it is out of scope here.
+    f.observe("uri-chars", cover_uris_scanned=len(this_urls + latest_urls))
+    for u in this_urls + latest_urls:
+        if "_" in uri_path(u):
+            f.add(BLOCKER, "uri-chars",
+                  f"Underscore in a document (cover-page) URI: {u.rstrip('.,)')}. "
+                  f"Naming Directives v1.7 s3 bars '_' from any filename or "
+                  f"directory name used in a document URI (alphanumerics, "
+                  f"'-' and '.' only).")
     base = ""
     if not this_urls:
         f.add(BLOCKER, "front-matter", "No 'This stage' URL block found in the markdown.")
@@ -423,6 +447,29 @@ def check_front_matter(md_text: str, items: dict[str, str], version: str, stage:
                   f"URL declares version v{m.group(1)} (package is {version}): {u.rstrip('.,)')}"
                   " -- confirm this is an intentional external reference.")
     return base
+
+
+# OASIS member-only (Kavi) tool URIs: password-protected, must never be cited
+# in a public work product (Naming Directives v1.7 s6.6). The two path shapes
+# below are the unambiguous Kavi member-only tools; public docs.oasis-open.org
+# and groups.oasis-open.org discussion links are NOT matched.
+KAVI_MEMBER_URI = re.compile(
+    r"https?://(?:www\.)?oasis-open\.org/(?:apps/org/|committees/download\.php)",
+    re.IGNORECASE)
+
+
+def check_member_uri(md_text: str, html_text: str, f: Findings) -> None:
+    """AC-PACKAGING-18: no OASIS member-only (Kavi) URI cited in the package.
+    Scans the authoritative markdown and the rendered HTML (code blocks
+    included: a member-only link is a defect wherever it appears)."""
+    hits = sorted({m.group(0) for t in (md_text, html_text)
+                   for m in KAVI_MEMBER_URI.finditer(t)})
+    f.observe("member-uri", member_only_uris=hits or "(none)")
+    for u in hits:
+        f.add(BLOCKER, "member-uri",
+              f"Cites an OASIS member-only (Kavi) URI: {u}. Naming Directives "
+              f"v1.7 s6.6 bars password-protected member-only references from "
+              f"any TC document that is or may become public.")
 
 
 def check_residue(md_text: str, html_text: str, f: Findings) -> None:
@@ -1465,6 +1512,7 @@ def run(stage_dir: str, f: Findings) -> None:
                           f"case-sensitive): {u}")
     check_revision_collision(base, version, stage, f)
     check_residue(md_text, html_text, f)
+    check_member_uri(md_text, html_text, f)
     check_image_policy(stage_dir, html_text, f)
 
     # ---- output suite: PDF -----------------------------------------------
@@ -1609,6 +1657,18 @@ CONDITION_DOCS: list[dict] = [
          condition="No Latest-labelled line cites a stage-pinned URL for this spec",
          pulls="URLs on lines labelled 'Latest' in the prose",
          compares_to="the persistent version-root form (no /<stage>/ segment)"),
+    # uri-chars  (AC-NAMING-08; Naming Directives v1.7 s3)
+    dict(check="uri-chars", sig="Underscore in a document (cover-page) URI", applies="md",
+         condition="No underscore appears in a This/Latest-stage document URI",
+         pulls="the percent-decoded path of each This-stage and Latest-stage cover URI",
+         compares_to="Naming Directives v1.7 s3: '_' is barred from any filename or "
+                     "directory name used in a document URI"),
+    # member-uri  (AC-PACKAGING-18; Naming Directives v1.7 s6.6)
+    dict(check="member-uri", sig="Cites an OASIS member-only (Kavi) URI", applies="both",
+         condition="No OASIS member-only (Kavi) URI is cited in the package",
+         pulls="every oasis-open.org /apps/org/ or /committees/download.php URL in the md and html",
+         compares_to="Naming Directives v1.7 s6.6: member-only (password-protected) Kavi "
+                     "references must not appear in public TC documents"),
     dict(check="front-matter", sig="No 'This version' URL block found on the HTML cover", applies="docx",
          condition="HTML cover carries a This-version URL block",
          pulls="URLs following 'This version/stage' on the rendered HTML cover",

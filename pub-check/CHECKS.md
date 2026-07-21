@@ -35,7 +35,7 @@ other condition runs on every package regardless of how it was authored.
 A package that ships only its outputs still gets the full output and
 package suites.
 
-98 conditions across 35 check classes.
+100 conditions across 37 check classes.
 
 ## Legend
 
@@ -235,18 +235,26 @@ Markdown link forms that render wrong under pandoc autolinking.
 | 56 | No dual [url](url) links in the markdown | every [text](target) link where text is itself a URL | text and target being the same URL calls for a bare autolink or real anchor text | WARN | md | - |
 | 57 | No bare URL runs into '.\' without a space | each markdown line ending a URL with .\ | the safe form '. \' (otherwise pandoc pulls the period and backslash into the href) | BLOCKER | md | - |
 
+### member-uri
+
+No OASIS member-only (Kavi) URI may be cited in a public work product (Naming Directives v1.7 s6.6).
+
+| # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
+|---|---|---|---|---|---|---|
+| 58 | No OASIS member-only (Kavi) URI is cited in the package | every oasis-open.org /apps/org/ or /committees/download.php URL in the md and html | Naming Directives v1.7 s6.6: member-only (password-protected) Kavi references must not appear in public TC documents | BLOCKER | both | - |
+
 ### odt-integrity
 
 The ODT source must be a valid, macro-free OpenDocument container.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 58 | The ODT source opens as a ZIP archive | the result of opening the .odt with the stdlib zip reader | a readable OpenDocument container | BLOCKER | odt | - |
-| 59 | The ODT archive carries a mimetype member | the archive member listing | the OpenDocument package requirement of a mimetype entry | BLOCKER | odt | - |
-| 60 | The declared mimetype is an OpenDocument type | the content of the mimetype member | the application/vnd.oasis.opendocument.* family | BLOCKER | odt | - |
-| 61 | The ODT archive carries the document body (content.xml) | the archive member listing | the OpenDocument package requirement of a content.xml body | BLOCKER | odt | - |
-| 62 | The ODT document body parses as XML | content.xml, parsed with the stdlib XML parser | well-formed XML | BLOCKER | odt | - |
-| 63 | The ODT carries no embedded macros or scripts | archive member paths under Basic/ and Scripts/ | the host's active-content policy (none permitted, same as SVG scripts) | BLOCKER | odt | - |
+| 59 | The ODT source opens as a ZIP archive | the result of opening the .odt with the stdlib zip reader | a readable OpenDocument container | BLOCKER | odt | - |
+| 60 | The ODT archive carries a mimetype member | the archive member listing | the OpenDocument package requirement of a mimetype entry | BLOCKER | odt | - |
+| 61 | The declared mimetype is an OpenDocument type | the content of the mimetype member | the application/vnd.oasis.opendocument.* family | BLOCKER | odt | - |
+| 62 | The ODT archive carries the document body (content.xml) | the archive member listing | the OpenDocument package requirement of a content.xml body | BLOCKER | odt | - |
+| 63 | The ODT document body parses as XML | content.xml, parsed with the stdlib XML parser | well-formed XML | BLOCKER | odt | - |
+| 64 | The ODT carries no embedded macros or scripts | archive member paths under Basic/ and Scripts/ | the host's active-content policy (none permitted, same as SVG scripts) | BLOCKER | odt | - |
 
 ### package-refs
 
@@ -254,7 +262,7 @@ Files the document cites under its own stage path must ship in the package.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 64 | Every file the document cites under its own stage path ships in the package | each cited URL under the this-stage base and the package file tree | the cited relative path must exist as a file in the package | BLOCKER | md | - |
+| 65 | Every file the document cites under its own stage path ships in the package | each cited URL under the this-stage base and the package file tree | the cited relative path must exist as a file in the package | BLOCKER | md | - |
 
 ### pdf-cover
 
@@ -262,8 +270,8 @@ The rendered PDF cover must carry the title exactly once and no CI paths.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 65 | The document title appears exactly once on the PDF cover page | the count of title occurrences in the PDF's first page text | exactly 1 (more means stale title-block residue baked into the render, assertion A1) | BLOCKER | both | pdftotext |
-| 66 | No CI runner path anywhere in the PDF text | the full extracted PDF text | the /home/runner/ path must not occur (assertion A2) | BLOCKER | both | pdftotext |
+| 66 | The document title appears exactly once on the PDF cover page | the count of title occurrences in the PDF's first page text | exactly 1 (more means stale title-block residue baked into the render, assertion A1) | BLOCKER | both | pdftotext |
+| 67 | No CI runner path anywhere in the PDF text | the full extracted PDF text | the /home/runner/ path must not occur (assertion A2) | BLOCKER | both | pdftotext |
 
 ### pdf-fonts
 
@@ -271,8 +279,8 @@ PDF embedded fonts are compared against the package's own CSS as typography auth
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 67 | pdffonts executes against the PDF | the pdffonts process outcome | a clean execution | WARN | both | pdffonts |
-| 68 | The PDF's embedded fonts are declared by the package's own CSS | the font base names embedded in the PDF (pdffonts) | the font families declared in the package's HTML/CSS (its own typography authority) | WARN | both | pdffonts |
+| 68 | pdffonts executes against the PDF | the pdffonts process outcome | a clean execution | WARN | both | pdffonts |
+| 69 | The PDF's embedded fonts are declared by the package's own CSS | the font base names embedded in the PDF (pdffonts) | the font families declared in the package's HTML/CSS (its own typography authority) | WARN | both | pdffonts |
 
 ### pdf-sync
 
@@ -280,11 +288,11 @@ The PDF must be readable and rendered from the same revision as the rest of the 
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 69 | The PDF cross-check toolchain is available | the PATH lookup for pdftotext (poppler) | pdftotext present; absent means the PDF front-matter cross-check is skipped here and runs at intake | WARN | both | - |
-| 70 | pdftotext executes against the PDF | the pdftotext process outcome | a clean execution | WARN | both | pdftotext |
-| 71 | The PDF is machine-readable | pdftotext's exit status on the delivery PDF | exit 0 | BLOCKER | both | pdftotext |
-| 72 | The PDF front matter carries the canonical this-stage URL | the first three pages of extracted PDF text | the this-stage base URL declared by the package front matter | BLOCKER | both | pdftotext |
-| 73 | The PDF cites no unexpected other version of this spec | every this-spec version URL in the extracted PDF text | the package's own version (previous-stage citations expected, anything else confirmed) | WARN | both | pdftotext |
+| 70 | The PDF cross-check toolchain is available | the PATH lookup for pdftotext (poppler) | pdftotext present; absent means the PDF front-matter cross-check is skipped here and runs at intake | WARN | both | - |
+| 71 | pdftotext executes against the PDF | the pdftotext process outcome | a clean execution | WARN | both | pdftotext |
+| 72 | The PDF is machine-readable | pdftotext's exit status on the delivery PDF | exit 0 | BLOCKER | both | pdftotext |
+| 73 | The PDF front matter carries the canonical this-stage URL | the first three pages of extracted PDF text | the this-stage base URL declared by the package front matter | BLOCKER | both | pdftotext |
+| 74 | The PDF cites no unexpected other version of this spec | every this-spec version URL in the extracted PDF text | the package's own version (previous-stage citations expected, anything else confirmed) | WARN | both | pdftotext |
 
 ### previous-stage
 
@@ -292,8 +300,8 @@ Second and later stages must cite the previous stage's URLs.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 74 | A stage past 01 cites its previous stage | the URLs in the markdown's Previous-stage block | at least one docs.oasis-open.org URL required when the revision number exceeds 01 | BLOCKER | md | - |
-| 75 | A stage past 01 cites its previous stage on the HTML cover | the URLs in the cover's Previous-version block | at least one docs.oasis-open.org URL required when the revision number exceeds 01 | BLOCKER | docx | - |
+| 75 | A stage past 01 cites its previous stage | the URLs in the markdown's Previous-stage block | at least one docs.oasis-open.org URL required when the revision number exceeds 01 | BLOCKER | md | - |
+| 76 | A stage past 01 cites its previous stage on the HTML cover | the URLs in the cover's Previous-version block | at least one docs.oasis-open.org URL required when the revision number exceeds 01 | BLOCKER | docx | - |
 
 ### residue
 
@@ -301,9 +309,9 @@ Editor placeholders (TODO, tbd, 'Will be filled in') must not ship.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 76 | No editor TODO markers left in prose | prose of the markdown and HTML (code blocks stripped) | the patterns TODO(...) and TODO: must not occur | BLOCKER | both | - |
-| 77 | No bare 'tbd' placeholder sections | prose of the markdown and HTML (code blocks stripped) | no line consisting solely of 'tbd' | BLOCKER | both | - |
-| 78 | No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS) | prose of the markdown and HTML (code blocks stripped) | the phrase 'Will be filled in' must not occur | WARN | both | - |
+| 77 | No editor TODO markers left in prose | prose of the markdown and HTML (code blocks stripped) | the patterns TODO(...) and TODO: must not occur | BLOCKER | both | - |
+| 78 | No bare 'tbd' placeholder sections | prose of the markdown and HTML (code blocks stripped) | no line consisting solely of 'tbd' | BLOCKER | both | - |
+| 79 | No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS) | prose of the markdown and HTML (code blocks stripped) | the phrase 'Will be filled in' must not occur | WARN | both | - |
 
 ### revision-collision
 
@@ -311,7 +319,7 @@ A new submission must not collide with a stage already live for the version.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 79 | The submitted stage does not already exist on the live site | the HTTP status of the this-stage URL on docs.oasis-open.org | expected non-200 for a NEW submission; an existing stage means the revision must increment | WARN | both | network |
+| 80 | The submitted stage does not already exist on the live site | the HTTP status of the this-stage URL on docs.oasis-open.org | expected non-200 for a NEW submission; an existing stage means the revision must increment | WARN | both | network |
 
 ### rfc-keywords
 
@@ -319,8 +327,8 @@ Normative key words require the RFC 2119 (and 8174) citations.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 80 | Normative key words are backed by an RFC 2119 citation | normative key words (MUST, SHALL, SHOULD, MAY, ...) found in the prose | an RFC 2119 citation must be present when key words are used | BLOCKER | md | - |
-| 81 | RFC 2119 citation is paired with RFC 8174 | the RFC citations in the document | the current template cites both 2119 and 8174 (uppercase-only clarification) | WARN | md | - |
+| 81 | Normative key words are backed by an RFC 2119 citation | normative key words (MUST, SHALL, SHOULD, MAY, ...) found in the prose | an RFC 2119 citation must be present when key words are used | BLOCKER | md | - |
+| 82 | RFC 2119 citation is paired with RFC 8174 | the RFC citations in the document | the current template cites both 2119 and 8174 (uppercase-only clarification) | WARN | md | - |
 
 ### schema-id
 
@@ -328,10 +336,10 @@ Every JSON schema's $id must agree with where the file actually publishes.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 82 | Every .json file in the package parses as JSON | each .json file's content | must parse without error | BLOCKER | both | schemas |
-| 83 | A flattened $id under the version root is a conscious convention | each schema's declared $id | the file's publish path; a version-root flattened $id (CSAF v2.0 style) needs a copy at that location | WARN | both | schemas |
-| 84 | Each schema's $id agrees with where the file publishes | each schema's declared $id | the canonical latest-version URL derived from the package path | BLOCKER | both | schemas |
-| 85 | Schema-internal self-references agree with the declared $id | every docs.oasis-open.org .json URL inside each schema body | the schema's own declared $id | BLOCKER | both | schemas |
+| 83 | Every .json file in the package parses as JSON | each .json file's content | must parse without error | BLOCKER | both | schemas |
+| 84 | A flattened $id under the version root is a conscious convention | each schema's declared $id | the file's publish path; a version-root flattened $id (CSAF v2.0 style) needs a copy at that location | WARN | both | schemas |
+| 85 | Each schema's $id agrees with where the file publishes | each schema's declared $id | the canonical latest-version URL derived from the package path | BLOCKER | both | schemas |
+| 86 | Schema-internal self-references agree with the declared $id | every docs.oasis-open.org .json URL inside each schema body | the schema's own declared $id | BLOCKER | both | schemas |
 
 ### stage-name
 
@@ -339,9 +347,9 @@ The stage token must be a current, correctly numbered stage per the Naming Direc
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 86 | Stage directory name carries a two-digit revision number | the stage directory name | valid stage prefixes must carry a two-digit suffix (csd01, never bare csd) | BLOCKER | both | - |
-| 87 | Stage token is not a retired abbreviation | the alphabetic prefix of the stage directory name | retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7 | BLOCKER | both | - |
-| 88 | Stage token is a recognized current stage | the alphabetic prefix of the stage directory name | valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata | BLOCKER | both | - |
+| 87 | Stage directory name carries a two-digit revision number | the stage directory name | valid stage prefixes must carry a two-digit suffix (csd01, never bare csd) | BLOCKER | both | - |
+| 88 | Stage token is not a retired abbreviation | the alphabetic prefix of the stage directory name | retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7 | BLOCKER | both | - |
+| 89 | Stage token is a recognized current stage | the alphabetic prefix of the stage directory name | valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata | BLOCKER | both | - |
 
 ### symlinks
 
@@ -349,7 +357,7 @@ Self-referential symlinks materialize into unbounded recursion on deploy.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 89 | No symlink points at itself or an ancestor directory | each symlink's resolved target | must not equal or contain its own directory (deploys materialize symlinks into unbounded recursion) | BLOCKER | both | - |
+| 90 | No symlink points at itself or an ancestor directory | each symlink's resolved target | must not equal or contain its own directory (deploys materialize symlinks into unbounded recursion) | BLOCKER | both | - |
 
 ### template
 
@@ -357,9 +365,9 @@ The OASIS template's required front-matter sections, in order, plus Conformance.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 90 | All required template front-matter sections are present | the markdown headings | the template's required set: This/Previous/Latest stage, Technical Committee, Chairs, Editors, Abstract | BLOCKER | md | - |
-| 91 | Front-matter sections appear in template order | the order of found front-matter sections | the canonical template ordering | WARN | md | - |
-| 92 | A Conformance section exists | the markdown headings | the TC Process requirement: every Standards Track Work Product carries conformance clauses | BLOCKER | md | - |
+| 91 | All required template front-matter sections are present | the markdown headings | the template's required set: This/Previous/Latest stage, Technical Committee, Chairs, Editors, Abstract | BLOCKER | md | - |
+| 92 | Front-matter sections appear in template order | the order of found front-matter sections | the canonical template ordering | WARN | md | - |
+| 93 | A Conformance section exists | the markdown headings | the TC Process requirement: every Standards Track Work Product carries conformance clauses | BLOCKER | md | - |
 
 ### template-css
 
@@ -367,8 +375,16 @@ The HTML must carry a stylesheet; the canonical CSS is the default expectation.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 93 | A non-canonical stylesheet keeps the template font family | the primary font-family declared by the HTML's own stylesheet | the template look: Liberation Sans / Arial / Helvetica | WARN | md | - |
-| 94 | The HTML carries a stylesheet | the HTML's &lt;link rel=stylesheet&gt; and &lt;style&gt; elements | at least one styling source must be present | BLOCKER | md | - |
+| 94 | A non-canonical stylesheet keeps the template font family | the primary font-family declared by the HTML's own stylesheet | the template look: Liberation Sans / Arial / Helvetica | WARN | md | - |
+| 95 | The HTML carries a stylesheet | the HTML's &lt;link rel=stylesheet&gt; and &lt;style&gt; elements | at least one styling source must be present | BLOCKER | md | - |
+
+### uri-chars
+
+No underscore may appear in a document (cover-page) URI (Naming Directives v1.7 s3).
+
+| # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
+|---|---|---|---|---|---|---|
+| 96 | No underscore appears in a This/Latest-stage document URI | the percent-decoded path of each This-stage and Latest-stage cover URI | Naming Directives v1.7 s3: '_' is barred from any filename or directory name used in a document URI | BLOCKER | md | - |
 
 ### version-naming
 
@@ -376,9 +392,9 @@ The version directory and delivery filenames must agree on one vN.N(.N) version.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 95 | Version directory matches the vN.N(.N) convention | the version directory name from the package path | the Naming Directives version-segment pattern vN.N(.N), e.g. v1.0, v2.0.1 | BLOCKER | both | - |
-| 96 | Version embedded in the delivery filename agrees with the version directory | the version segment embedded in the delivery filename stem | the version directory the package publishes under | BLOCKER | both | - |
-| 97 | Delivery filename embeds the version segment | the delivery filename stem | the Naming Directives filename shape &lt;base&gt;-&lt;version&gt;-&lt;stage&gt; | WARN | both | - |
+| 97 | Version directory matches the vN.N(.N) convention | the version directory name from the package path | the Naming Directives version-segment pattern vN.N(.N), e.g. v1.0, v2.0.1 | BLOCKER | both | - |
+| 98 | Version embedded in the delivery filename agrees with the version directory | the version segment embedded in the delivery filename stem | the version directory the package publishes under | BLOCKER | both | - |
+| 99 | Delivery filename embeds the version segment | the delivery filename stem | the Naming Directives filename shape &lt;base&gt;-&lt;version&gt;-&lt;stage&gt; | WARN | both | - |
 
 ### vml-fallback
 
@@ -386,7 +402,7 @@ VML-only images in Word HTML renders are invisible in every modern browser.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 98 | Every VML image has an &lt;![if !vml]&gt; img fallback | the counts of v:imagedata elements and vml-fallback img tags | fallback count must cover VML count (the invisible-cover-logo class) | BLOCKER | both | - |
+| 100 | Every VML image has an &lt;![if !vml]&gt; img fallback | the counts of v:imagedata elements and vml-fallback img tags | fallback count must cover VML count (the invisible-cover-logo class) | BLOCKER | both | - |
 
 ---
 

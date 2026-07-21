@@ -11,7 +11,7 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
   <a href="NOTICE"><img alt="Criteria prose: OASIS verbatim-only" src="https://img.shields.io/badge/criteria_prose-OASIS_verbatim--only-446CAA"></a>
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776ab">
   <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/gate_dependencies-stdlib_only-2f9e44">
-  <img alt="Checks: 98 individual, 35 classes" src="https://img.shields.io/badge/checks-98_individual_%C2%B7_35_classes-f08c00">
+  <img alt="Checks: 100 individual, 37 classes" src="https://img.shields.io/badge/checks-100_individual_%C2%B7_37_classes-f08c00">
   <img alt="Regression corpus: 13 packages" src="https://img.shields.io/badge/regression_corpus-13_packages-6741d9">
 </p>
 
@@ -55,8 +55,8 @@ python3 pub-check/oasis_pub_check.py <stage-dir> --json              # machine-r
 
 oasis-pub-check is one Python file, uses only the standard library, and needs no
 configuration. Every expectation is derived from the package itself (its own
-front matter, its own CSS, its own schema `$id`s). The 98 individual checks
-(35 check classes; `--list-checks` asserts the inventory from the code, and
+front matter, its own CSS, its own schema `$id`s). The 100 individual checks
+(37 check classes; `--list-checks` asserts the inventory from the code, and
 the set grows) cover six areas:
 
 - **Naming and stages**: stage tokens, version directories, filename
@@ -101,7 +101,7 @@ against the criteria, and the manifest lets every later step verify both.
 ![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=98)
 
 Two layers, one engine. The TC side runs oasis-pub-check in its own CI and owns
-"the document is ready": all 98 conditions, each reported as the value the
+"the document is ready": all 100 conditions, each reported as the value the
 tool pulled from the package set against the value it was compared to, in
 full. TC Administration re-runs the identical code at intake (checklist
 step 4b) and wraps it with the 15 mandatory audit gates only a human or a
@@ -136,7 +136,7 @@ pub-check:
 ```
 publication-assurance/
 ├── pub-check/                       # The acceptance criteria (the primary content)
-│   ├── oasis_pub_check.py           #   98 individual checks in 35 classes, stdlib only
+│   ├── oasis_pub_check.py           #   100 individual checks in 37 classes, stdlib only
 │   ├── CHECKS.md                    #   the acceptance criteria catalog, generated from the code
 │   ├── render_checks_md.py          #   the generator (keeps CHECKS.md in sync)
 │   ├── manifest-schema.json         #   provenance manifest contract
