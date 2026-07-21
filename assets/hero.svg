@@ -25,5 +25,5 @@
 <text x="1011.0" y="106" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="14" font-weight="500" fill="#2248e5" text-anchor="middle">.html + .pdf</text>
 <text x="1011.0" y="141" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#6b7380" text-anchor="middle">the fixed output contract</text>
 <rect x="742" y="190" width="372" height="44" rx="2" ry="2" fill="#e9f3ec" stroke="#15803d" stroke-width="1.5"/>
-<text x="928.0" y="217" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" font-weight="500" fill="#15803d" text-anchor="middle">oasis-pub-check · 98 checks · exit 0 = publish</text>
+<text x="928.0" y="217" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13" font-weight="500" fill="#15803d" text-anchor="middle">oasis-pub-check · 164 checks · exit 0 = publish</text>
 </svg>

@@ -23,13 +23,13 @@ yourself, today, to make that path a straight line.
 The short version: there are two layers of quality control, and you own the
 first one.
 
-![How the two layers dovetail](assets/architecture/validation-audit-dovetail.svg?v=98)
+![How the two layers dovetail](assets/architecture/validation-audit-dovetail.png?v=164)
 
 ## The two layers
 
 **Layer 1 is validation: the acceptance criteria, run as code.** A single
 Python file, [`pub-check/oasis_pub_check.py`](pub-check/),
-runs 98 individual checks across 35 check classes (a set that grows)
+runs 164 individual checks across 55 check classes (a set that grows)
 against your package: the files you are about to submit, exactly as you
 would submit them. Every
 condition is reported; one that does not apply to your package's track, or
@@ -64,9 +64,9 @@ point of sharing the tool: both sides run the same code, so acceptance is
 mechanical on both ends instead of trusted on either. Your green run
 predicts our green run; it never substitutes for it.
 
-![The OASIS publication quality stack](assets/architecture/two-layer-stack.svg?v=98)
+![The OASIS publication quality stack](assets/architecture/two-layer-stack.png?v=164)
 
-## Layer 1: the 98 checks
+## Layer 1: the 164 checks
 
 Every check exists because a real publication went wrong in that specific
 way:
@@ -83,7 +83,7 @@ regression corpus of real submissions in their original received form.
 
 The checks group into six areas:
 
-![pub-check validation flow](assets/gate.svg?v=98)
+![pub-check validation flow](assets/gate.png?v=164)
 
 | Area | Checks | What it protects |
 |---|---|---|
@@ -153,7 +153,7 @@ record; your own run of the tool gives you the identical underlying data
 (the findings, the exit code, and with `--json` the full per-condition
 record), just not the formatted document:
 
-- **The Validation Report** itemizes all 98 conditions: the condition
+- **The Validation Report** itemizes all 164 conditions: the condition
   verified, the value the tool pulled from your package, the value it was
   compared against, and the result. Nothing is truncated. A condition that
   could not be evaluated (no network, no `pdftotext`, no manifest shipped)
@@ -204,7 +204,8 @@ python3 pub-check/oasis_pub_check.py <target> --json
 # the check inventory, asserted from the code itself
 python3 pub-check/oasis_pub_check.py --list-checks
 
-# also write manifest.json (per-file sha256, source commit, tool versions)
+# write the release manifests (manifest.json + the Work Product
+# Manifest File, <stem>-manifest.txt)
 python3 pub-check/oasis_pub_check.py <target> --emit-manifest
 ```
 

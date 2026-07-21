@@ -4,7 +4,7 @@
 # Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Generate every SVG diagram in assets/ from one design system.
 
-Six diagrams, one set of tokens (the OASIS TC Handbook visual system:
+Eight diagrams, one set of tokens (the OASIS TC Handbook visual system:
 Poppins, ink #0a2540, accent #2248e5, hairline borders, 2px radii):
 
   hero.svg                                 README masthead
@@ -13,6 +13,8 @@ Poppins, ink #0a2540, accent #2248e5, hairline borders, 2px radii):
   chain.svg                                the end-to-end verification chain
   architecture/validation-audit-dovetail.svg   flagship two-lane architecture
   architecture/two-layer-stack.svg             portrait slide summary
+  authority.svg                            policy provenance: one criterion, sourced
+  architecture/nide-bridge.svg             how pub-check dovetails with nide
 
 Self-contained SVG: shapes and <text> only, no scripts, no external refs.
 Text uses the Poppins stack and falls back to Helvetica/Arial where Poppins
@@ -212,7 +214,7 @@ def build_hero():
 
     gx, gy, gw, gh = x0, 190, 372, 44
     e.append(rect(gx, gy, gw, gh, GOOD_T, GOOD, EMPH))
-    e.append(text(gx + gw / 2, gy + 27, "oasis-pub-check · 98 checks · exit 0 = publish",
+    e.append(text(gx + gw / 2, gy + 27, "oasis-pub-check · 164 checks · exit 0 = publish",
                   13, GOOD, 500, anchor="middle", font=MONO))
 
     e.append("</svg>")
@@ -229,8 +231,8 @@ def build_gate():
 
     e.append(kicker(56, 52, "Layer 1 · Validation"))
     e.append(text(56, 86, "oasis-pub-check: the acceptance criteria", 26, INK, 700))
-    e.append(text(56, 112, "One stdlib Python file. Every check traces to a real correction round. "
-                           "Authority is derived from the package itself.", 12.5, MUTED))
+    e.append(text(56, 112, "One stdlib Python file. Every check is sourced from written OASIS policy "
+                           "(the TC Process, Naming Directives v1.7, the TC Handbook) or a real correction round.", 12.5, MUTED))
 
     # left: work product
     wx, wy, ww, wh = 56, 210, 200, 190
@@ -245,17 +247,17 @@ def build_gate():
     # center: grouped checks panel
     px, py, pw, ph = 306, 152, 564, 356
     e.append(rect(px, py, pw, ph, SURFACE, BORDER2, HAIR, r=3))
-    e.append(text(px + 24, py + 36, "98 checks in 35 classes", 16, INK, 700))
+    e.append(text(px + 24, py + 36, "164 checks in 55 classes", 16, INK, 700))
     e.append(text(px + pw - 24, py + 36, "grouped by what they protect", 11, MUTED, anchor="end"))
     e.append(rule(px + 24, py + 50, px + pw - 24, py + 50))
 
     groups = [
-        ("Naming & stages", 16, "stage tokens, versions, filenames, collisions"),
-        ("Front matter & links", 22, "This/Latest URLs, anchors, dead lists"),
-        ("Content residue", 11, "TODO/tbd, stale headers, working titles"),
-        ("Rendering & sync", 24, "PDF sync, fonts, images, Word fidelity"),
-        ("Template & policy", 9, "sections, Conformance, RFC 2119, logo"),
-        ("Package hygiene", 16, "junk files, symlinks, schema $id, ODT integrity"),
+        ("Naming, versions & URIs", 53, "stage tokens, versions, filenames, URIs, XML namespaces"),
+        ("Front matter & links", 34, "This/Latest URLs, titles, authors, anchors, dead lists"),
+        ("Content, refs & residue", 14, "TODO/tbd, normative/informative refs, non-normative labels"),
+        ("Template & conformance", 15, "template sections, Conformance structure, RFC 2119, logo"),
+        ("Rendering & sync", 25, "PDF sync, fonts, images, Word fidelity"),
+        ("Package & provenance", 23, "junk, symlinks, schema $id, manifest, ODT integrity"),
     ]
     gw, gh, ggx, ggy = 250, 78, 16, 14
     for i, (name, n, det) in enumerate(groups):
@@ -359,7 +361,7 @@ def build_chain():
     nodes = [
         ("TC build", ["make / CI / editor tools", "renders source · html · pdf"], SURFACE, BORDER2, INK),
         ("manifest.json", ["sha256 + roles", "source commit · tools"], SURFACE, BORDER2, INK),
-        ("oasis-pub-check", ["98 checks, before the vote", "TC side · exit 0"], ACC_T, ACCENT, ACCENT),
+        ("oasis-pub-check", ["164 checks, before the vote", "TC side · exit 0"], ACC_T, ACCENT, ACCENT),
         ("OASIS intake", ["independent re-run", "gate + audit record"], SURFACE, BORDER2, INK),
         ("docs.oasis-open.org", ["published"], INK, INK, "#ffffff"),
     ]
@@ -439,7 +441,7 @@ def build_dovetail():
 
     e.append(doc_glyph(bx + 16, 506, bw - 32, 96, 16, ACCENT, EMPH))
     e.append(text(lcx, 538, "VALIDATION REPORT", 13, ACCENT, 700, anchor="middle", ls=1.0))
-    e.append(text(lcx, 560, "all 98 conditions: observed vs expected, in full", 11, BODY, anchor="middle"))
+    e.append(text(lcx, 560, "all 164 conditions: observed vs expected, in full", 11, BODY, anchor="middle"))
     e.append(text(lcx, 580, "zero blockers = publication-ready package", 11, INK, 500, anchor="middle"))
     e.append(arrow(lcx, 606, lcx, 642, INK, 1.4))
 
@@ -460,7 +462,7 @@ def build_dovetail():
     e.append(text(rcx, 346, "CHECKLIST STEP 4b · THE DOVETAIL JOINT", 13, ACCENT, 700,
                   anchor="middle", ls=0.6))
     e.append(text(rcx, 369, "re-run oasis-pub-check, triage every finding:", 11.5, BODY, anchor="middle"))
-    e.append(text(rcx, 387, "the whole 98-check validation layer plugs in here", 11.5, BODY, anchor="middle"))
+    e.append(text(rcx, 387, "the whole 164-check validation layer plugs in here", 11.5, BODY, anchor="middle"))
     e.append(text(rcx, 406, "trust, but verify: identical code, our side", 11.5, ACCENT, 500, anchor="middle"))
 
     e.append(label(rbx, 452, "Gates only a human or live check can run", NAVY3, 11.5))
@@ -527,7 +529,7 @@ def build_dovetail():
              f'H{ex} V{ey+3} A3,3 0 0 1 {ex+3},{ey} Z" fill="{ACCENT}"/>')
     e.append(text(ecx, ey + 20, "oasis-pub-check", 13.5, "#ffffff", 700, anchor="middle", font=MONO))
     e.append(text(ecx, ey + 52, "oasis_pub_check.py", 11.5, ACCENT, 500, anchor="middle", font=MONO))
-    e.append(text(ecx, ey + 74, "98 individual checks", 11.5, BODY, anchor="middle"))
+    e.append(text(ecx, ey + 74, "164 individual checks", 11.5, BODY, anchor="middle"))
     e.append(text(ecx, ey + 92, "35 check classes", 11.5, BODY, anchor="middle"))
     e.append(rule(ex + 16, ey + 104, ex + ew - 16, ey + 104, BORDER, dash="3 3"))
     e.append(sev_badges(ecx, ey + 122))
@@ -587,12 +589,12 @@ def build_stack():
              f'A3,3 0 0 1 73,{L1Y} Z" fill="{ACCENT}"/>')
     e.append(text(450, L1Y + 25, "LAYER 1 · VALIDATION · oasis-pub-check (mechanical, tool-side)",
                   13.5, "#ffffff", 700, anchor="middle", ls=0.6))
-    e.append(text(100, L1Y + 68, "oasis_pub_check.py: 98 checks across 35 classes", 13, INK, 700))
+    e.append(text(100, L1Y + 68, "oasis_pub_check.py: 164 checks across 55 classes", 13, INK, 700))
     e.append(text(100, L1Y + 92, "Runs in the TC's own CI before submission.", 11.5, BODY))
     e.append(text(100, L1Y + 111, "Re-run identically by TC Administration at intake (step 4b).", 11.5, BODY))
     e.append(text(100, L1Y + 136, "Every finding gets a severity:", 11.5, BODY))
     e.append(sev_badges(190, L1Y + 158))
-    e.append(text(100, L1Y + 194, "Output: a Validation Report, observed vs expected for all 98.",
+    e.append(text(100, L1Y + 194, "Output: a Validation Report, observed vs expected for all 164.",
                   11.5, ACCENT, 500))
     # annotation panel
     e.append(rect(520, L1Y + 54, 286, 148, SURFACE, ACCENT, 1.2, dash="5 4"))
@@ -663,10 +665,191 @@ def build_stack():
 
 
 # ===========================================================================
+# authority.svg (1200 x 600)  policy provenance: one criterion, sourced end to end
+# ===========================================================================
+def build_authority():
+    W, H = 1200, 600
+    e = [svg_open(W, H), marker_defs(), canvas(W, H)]
+    e.append(oasis_logo(W - 196, 42, 140))
+    e.append(kicker(56, 52, "Provenance · how the criteria are sourced"))
+    e.append(text(56, 86, "Every check traces to a written rule", 26, INK, 700))
+    e.append(text(56, 112, "Each acceptance criterion cites a verbatim clause from the OASIS "
+                           "governing corpus, snapshotted and hashed. One worked example:", 12.5, MUTED))
+
+    midy = 300
+
+    # 1 · governing corpus
+    cx, cy, cw, ch = 48, 190, 210, 234
+    e.append(rect(cx, cy, cw, ch, SURFACE, BORDER2, HAIR))
+    e.append(label(cx + 16, cy + 30, "Governing corpus", INK, 12))
+    e.append(rule(cx + 16, cy + 42, cx + cw - 16, cy + 42))
+    for i, d in enumerate(["OASIS TC Process", "Committee Operations",
+                           "Naming Directives v1.7", "TC Handbook"]):
+        gy = cy + 64 + i * 34
+        e.append(doc_glyph(cx + 18, gy - 14, 14, 18))
+        e.append(text(cx + 42, gy, d, 11.5, BODY, 500))
+    e.append(text(cx + 16, cy + ch - 16, "25 pages · snapshotted + hashed", 10, MUTED))
+    e.append(arrow(cx + cw + 6, midy, cx + cw + 40, midy, INK, 1.4))
+
+    # 2 · verbatim clause
+    qx, qy, qw, qh = cx + cw + 40, 172, 318, 252
+    e.append(rect(qx, qy, qw, qh, SURFACE, BORDER2, HAIR))
+    e.append(label(qx + 18, qy + 30, "Verbatim clause", INK, 12))
+    e.append(rule(qx + 18, qy + 42, qx + qw - 18, qy + 42))
+    e.append(text(qx + 18, qy + 62, "Naming Directives v1.7 · §6.6", 9.5, ACCENT, 600, font=MONO))
+    for i, ln in enumerate([
+            "“The OASIS member-only (private,",
+            "password-protected) URI references …",
+            "must not be cited in … any TC",
+            "documents that are or may become",
+            "public.”"]):
+        e.append(text(qx + 18, qy + 88 + i * 25, ln, 12, INK, 400))
+    e.append(text(qx + 18, qy + qh - 16, "the exact words, quoted, not paraphrased", 10, MUTED))
+    e.append(arrow(qx + qw + 6, midy, qx + qw + 40, midy, INK, 1.4))
+    e.append(text(qx + qw + 23, midy - 10, "derives", 9.5, MUTED, anchor="middle"))
+
+    # 3 · acceptance criterion
+    rx, ry, rw, rh = qx + qw + 40, 206, 224, 188
+    e.append(rect(rx, ry, rw, rh, ACC_T, ACCENT, HAIR))
+    e.append(label(rx + 16, ry + 30, "Acceptance criterion", INK, 12))
+    e.append(text(rx + 16, ry + 52, "AC-PACKAGING-18", 11, ACCENT, 700, font=MONO))
+    e.append(rule(rx + 16, ry + 62, rx + rw - 16, ry + 62, ACCENT, HAIR))
+    for i, ln in enumerate(["No OASIS member-only", "(Kavi) URI may be cited",
+                            "in a work product."]):
+        e.append(text(rx + 16, ry + 86 + i * 20, ln, 12, INK, 500))
+    e.append(pill(rx + 48, ry + rh - 24, "BLOCKER", RED, 9.5))
+    e.append(arrow(rx + rw + 6, midy, rx + rw + 40, midy, INK, 1.4))
+
+    # 4 · both gates
+    fx = rx + rw + 40
+    e.append(rect(fx, 196, 210, 96, SURF2, BORDER, HAIR))
+    e.append(pill(fx + 52, 220, "AUTHORING · nide", NAVY3, 8.5))
+    e.append(text(fx + 16, 250, "nide quality", 12, INK, 600, font=MONO))
+    e.append(text(fx + 16, 270, "OASIS-MEMBER-URI", 10, NAVY3, 600, font=MONO))
+    e.append(rect(fx, 308, 210, 96, SURF2, BORDER, HAIR))
+    e.append(pill(fx + 46, 332, "INTAKE · pub-check", RED, 8.5))
+    e.append(text(fx + 16, 362, "member-uri", 12, INK, 600, font=MONO))
+    e.append(text(fx + 16, 382, "BLOCKER at the gate", 10, RED, 600, font=MONO))
+    e.append(text(fx, 424, "same rule, both gates", 10, MUTED))
+
+    # summary bar
+    by = 466
+    e.append(rect(56, by, W - 112, 82, NAVY_T, NAVY3, HAIR, r=3))
+    e.append(text(76, by + 32, "38 of 164 checks cite a written clause like this one.",
+                  13, INK, 600))
+    e.append(text(76, by + 56, "The rest are operational rules earned from a year of published "
+                               "corrections. The full criterion-to-clause map is AUTHORITIES.md.",
+                  11.5, BODY))
+
+    e.append("</svg>")
+    write(OUT / "authority.svg", e)
+
+
+# ===========================================================================
+# architecture/nide-bridge.svg (1240 x 640)  how pub-check dovetails with nide
+# ===========================================================================
+def build_nide_bridge():
+    W, H = 1240, 640
+    e = [svg_open(W, H), marker_defs(), canvas(W, H)]
+    e.append(oasis_logo(W - 196, 42, 140))
+    e.append(kicker(56, 52, "Interoperation · authoring meets intake"))
+    e.append(text(56, 86, "How pub-check dovetails with nide", 26, INK, 700))
+    e.append(text(56, 112, "The TC authors and self-checks with Stefan Hagen’s nide; OASIS "
+                           "verifies and publishes with pub-check.", 12.5, MUTED))
+    e.append(text(56, 131, "They share one rules file and one manifest, so a green authoring "
+                           "run predicts a green intake run.", 12.5, MUTED))
+
+    ly, lh = 178, 300
+    midy = ly + lh / 2
+
+    # ---- LEFT lane: nide (Stefan / TC authoring) ----
+    lx, lw = 48, 372
+    e.append(rect(lx, ly, lw, lh, NAVY_T, NAVY3, EMPH, r=3))
+    e.append(text(lx + 22, ly + 34, "nide", 18, INK, 700, font=MONO))
+    e.append(text(lx + 22, ly + 54, "TC SIDE · AUTHORING (Stefan Hagen)", 9.5, NAVY3, 600, ls=1))
+    e.append(rule(lx + 22, ly + 66, lx + lw - 22, ly + 66, NAVY3, HAIR))
+    nrows = [
+        ("assemble · render", "md source → html + pdf (pandoc, typst)"),
+        ("quality", "reads oasis.rules.yaml, fails on any BLOCKER"),
+        ("manifest", "emits nide-manifest 1.0 (sha256 + blake3)"),
+    ]
+    for i, (a, b) in enumerate(nrows):
+        ry0 = ly + 86 + i * 68
+        e.append(rect(lx + 20, ry0, lw - 40, 56, SURFACE, BORDER, HAIR))
+        e.append(text(lx + 34, ry0 + 24, a, 12.5, INK, 600, font=MONO))
+        e.append(text(lx + 34, ry0 + 43, b, 10.5, BODY))
+
+    # ---- RIGHT lane: pub-check (OASIS intake) ----
+    rx, rw = 820, 372
+    e.append(rect(rx, ly, rw, lh, ACC_T, ACCENT, EMPH, r=3))
+    e.append(text(rx + 22, ly + 34, "pub-check", 18, INK, 700, font=MONO))
+    e.append(text(rx + 22, ly + 54, "OASIS SIDE · INTAKE GATE", 9.5, ACCENT, 600, ls=1))
+    e.append(rule(rx + 22, ly + 66, rx + rw - 22, ly + 66, ACCENT, HAIR))
+    prows = [
+        ("164 checks / 55 classes", "the delivered package, gated"),
+        ("verify", "delivered PDF bytes vs manifest hashes"),
+        ("exit 0 · publish   exit 1 · back to TC", "intake accepts with the same rules"),
+    ]
+    for i, (a, b) in enumerate(prows):
+        ry0 = ly + 86 + i * 68
+        e.append(rect(rx + 20, ry0, rw - 40, 56, SURFACE, BORDER, HAIR))
+        e.append(text(rx + 34, ry0 + 24, a, 11.5 if i == 2 else 12.5, INK, 600, font=MONO))
+        e.append(text(rx + 34, ry0 + 43, b, 10.5, BODY))
+
+    # ---- MIDDLE seam: the two shared artifacts + directional flows ----
+    mcx = (lx + lw + rx) / 2  # centre of the gap
+    # top artifact: shared rules (flows OASIS -> nide, back-flow)
+    aw, ah = 300, 92
+    ax = mcx - aw / 2
+    ry_rules = 196
+    e.append(rect(ax, ry_rules, aw, ah, SURFACE, BORDER2, EMPH))
+    e.append(text(mcx, ry_rules + 26, "oasis.rules.yaml", 12.5, INK, 700, anchor="middle", font=MONO))
+    e.append(text(mcx, ry_rules + 46, "16 org rules · authored by OASIS", 10, MUTED, anchor="middle"))
+    e.append(text(mcx, ry_rules + 64, "nide pulls via  extends: oasis", 10, NAVY3, 600, anchor="middle", font=MONO))
+    e.append(text(mcx, ry_rules + 82, "read by BOTH gates", 9.5, MUTED, anchor="middle"))
+    # back-flow arrows (right -> left): pub-check publishes -> rules -> nide reads
+    e.append(arrow(rx - 8, ry_rules + 22, ax + aw + 8, ry_rules + 22, ACCENT, 1.5, "aAcc"))
+    e.append(text((rx + ax + aw) / 2, ry_rules + 14, "OASIS publishes", 9, ACCENT, 600, anchor="middle"))
+    e.append(arrow(ax - 8, ry_rules + 22, lx + lw + 8, ry_rules + 22, NAVY3, 1.5, "aNavy"))
+    e.append(text((lx + lw + ax) / 2, ry_rules + 14, "nide reads", 9, NAVY3, 600, anchor="middle"))
+
+    # bottom artifact: package + manifest (flows nide -> pub-check, forward-flow)
+    ry_pkg = 388
+    e.append(rect(ax, ry_pkg, aw, ah, SURFACE, BORDER2, EMPH))
+    e.append(text(mcx, ry_pkg + 26, "delivery package", 12.5, INK, 700, anchor="middle"))
+    e.append(text(mcx, ry_pkg + 45, "md · html · pdf · schemas", 10, MUTED, anchor="middle", font=MONO))
+    e.append(text(mcx, ry_pkg + 66, "+ nide-manifest 1.0", 11, ACCENT, 700, anchor="middle", font=MONO))
+    e.append(text(mcx, ry_pkg + 83, "provenance: source · outputs · toolchain", 9.5, MUTED, anchor="middle"))
+    # forward-flow arrows (left -> right): nide emits -> pkg -> pub-check verifies
+    e.append(arrow(lx + lw + 8, ry_pkg + 22, ax - 8, ry_pkg + 22, NAVY3, 1.5, "aNavy"))
+    e.append(text((lx + lw + ax) / 2, ry_pkg + 14, "nide emits", 9, NAVY3, 600, anchor="middle"))
+    e.append(arrow(ax + aw + 8, ry_pkg + 22, rx - 8, ry_pkg + 22, ACCENT, 1.5, "aAcc"))
+    e.append(text((rx + ax + aw) / 2, ry_pkg + 14, "pub-check verifies", 9, ACCENT, 600, anchor="middle"))
+
+    # dovetail joint glyph between the two artifacts (the interlock)
+    jy = ry_rules + ah + 6
+    tab = f'{mcx-46},{jy} {mcx+46},{jy} {mcx+30},{ry_pkg-6} {mcx-30},{ry_pkg-6}'
+    e.append(f'<polygon points="{tab}" fill="#c9d6f8" stroke="{ACCENT}" stroke-width="1.3"/>')
+    e.append(text(mcx, (jy + ry_pkg) / 2 + 4, "the dovetail", 9.5, ACCENT, 600, anchor="middle"))
+
+    # ---- takeaway bar ----
+    by = 502
+    e.append(rect(56, by, W - 112, 96, SURF2, BORDER2, HAIR, r=3))
+    e.append(text(76, by + 30, "One rules file, one manifest, two gates.", 13.5, INK, 700))
+    e.append(text(76, by + 54, "The rules are authored by OASIS and pulled by nide, so both gates "
+                               "check the same source rules: a green  nide quality  run predicts a green intake.", 11.5, BODY))
+    e.append(text(76, by + 74, "The manifest is emitted by nide and hash-verified at intake, so the "
+                               "published bytes are provably the build the TC voted on.", 11.5, BODY))
+
+    e.append("</svg>")
+    write(ARCH / "nide-bridge.svg", e)
+
+
+# ===========================================================================
 def render_pngs():
     targets = [OUT / "hero.svg", OUT / "gate.svg", OUT / "pipeline.svg",
                OUT / "chain.svg", ARCH / "validation-audit-dovetail.svg",
-               ARCH / "two-layer-stack.svg"]
+               ARCH / "two-layer-stack.svg", OUT / "authority.svg", ARCH / "nide-bridge.svg"]
     for t in targets:
         png = t.with_suffix(".png")
         subprocess.run(["rsvg-convert", "-z", "2", str(t), "-o", str(png)], check=True)
@@ -680,5 +863,7 @@ if __name__ == "__main__":
     build_chain()
     build_dovetail()
     build_stack()
+    build_authority()
+    build_nide_bridge()
     if "--png" in sys.argv:
         render_pngs()

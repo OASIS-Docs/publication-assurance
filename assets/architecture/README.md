@@ -1,26 +1,17 @@
 # Publication quality architecture diagrams
 
-Hand-authored, self-contained SVGs (shapes and text only, no scripts, no
-external references). Both diagrams, and every other SVG under `assets/`,
-regenerate from one build script and one set of design tokens, the OASIS TC
-Handbook visual system: Poppins with Helvetica/Arial fallback, ink `#0a2540`,
-accent `#2248e5`, hairline borders, 2px radii. Each SVG has a companion PNG
-rendered at 2x.
-
-```bash
-python3 ../build.py          # rewrites all six SVGs from assets/
-python3 ../build.py --png    # also renders the 2x PNGs (needs rsvg-convert)
-```
+Three diagrams on the OASIS design system (Poppins, ink `#0a2540`, accent
+`#2248e5`), shipped as 2x PNGs.
 
 ## Subject
 
 How the OASIS publication quality architecture's two layers dovetail:
 
 - **Layer 1, validation (pub-check):** mechanical, tool-side. `oasis_pub_check.py`,
-  92 checks across 34 check classes. The TC runs it in its own CI before
+  164 checks across 55 check classes. The TC runs it in its own CI before
   submission, and TC Administration re-runs the identical code at intake. It
   only ever sees the package files. Output: the Validation Report, every one
-  of the 92 conditions with the observed value the tool pulled set against
+  of the 164 conditions with the observed value the tool pulled set against
   the expected value it was compared to, never truncated (rendered landscape
   so the full values stay legible).
 - **Layer 2, the publication audit:** human and adversarial, event-side. 15
@@ -31,7 +22,7 @@ How the OASIS publication quality architecture's two layers dovetail:
   needs recorded evidence; the verdict is computed from the record, not
   asserted. Output: the Publication Audit Report.
 - **The dovetail:** intake checklist step 4b requires running oasis-pub-check and
-  triaging every finding, so the whole 92-check validation layer plugs into
+  triaging every finding, so the whole 164-check validation layer plugs into
   the audit as one step. Both reports are filed to the TC's ticket and the
   internal `_audit/` directory.
 
@@ -40,7 +31,7 @@ The prose companion to these diagrams is
 
 ## Files
 
-### `validation-audit-dovetail.svg` (1400 x 900, landscape), flagship
+### `validation-audit-dovetail.png` (2800 x 1800, landscape), flagship
 
 Two swim lanes, TC side (Layer 1) and TC Administration side (Layer 2). The
 shared `pub-check` engine sits in the seam between them with dovetail keys
@@ -51,13 +42,24 @@ verifier is called out separately, and both report artifacts flow down to
 the shared TCADMIN ticket and `_audit/` record. Primary explainer figure for
 TC editors and for TC Administration process documentation.
 
-### `two-layer-stack.svg` (900 x 1100, portrait), slide summary
+### `two-layer-stack.png` (1800 x 2200, portrait), slide summary
 
 A vertical stack that reads bottom to top: package in, Layer 1 validation,
 the step-4b dovetail joint, Layer 2 audit, published and verified
 publication. Each layer carries a "what the tool sees" (Layer 1) versus
 "what only a human or live check can see" (Layer 2) annotation panel. One
 slide in a deck, or a sidebar summary next to the flagship diagram.
+
+### `nide-bridge.png` (2480 x 1280, landscape)
+
+The *cross-tool* dovetail: how pub-check (OASIS intake) interoperates with
+Stefan Hagen's `nide` (TC-side authoring). Two engine lanes with a shared
+seam. The rules flow one way (OASIS authors `oasis.rules.yaml`, nide pulls it
+via `extends: oasis`, both gates evaluate it), the package and its
+`nide-manifest` flow the other (nide emits, pub-check hash-verifies the
+delivered bytes). One rules file, one manifest, two gates: a green
+`nide quality` run predicts a green intake. Distinct from the two diagrams
+above, which show the *internal* dovetail of validation into the human audit.
 
 ---
 
