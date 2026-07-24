@@ -28,7 +28,7 @@
 <line x1="316.0" y1="470" x2="316.0" y2="502" stroke="#0a2540" stroke-width="1.4" marker-end="url(#aInk)"/>
 <path d="M92,506 H524 L540,522 V602 H92 Z" fill="#fafcfe" stroke="#2248e5" stroke-width="1.5"/><path d="M524,506 V522 H540" fill="none" stroke="#2248e5" stroke-width="1.5" stroke-linejoin="round"/>
 <text x="316.0" y="538" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#2248e5" text-anchor="middle" letter-spacing="1.0">VALIDATION REPORT</text>
-<text x="316.0" y="560" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#313131" text-anchor="middle">all 164 conditions: observed vs expected, in full</text>
+<text x="316.0" y="560" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#313131" text-anchor="middle">all 165 conditions: observed vs expected, in full</text>
 <text x="316.0" y="580" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="500" fill="#0a2540" text-anchor="middle">zero blockers = publication-ready package</text>
 <line x1="316.0" y1="606" x2="316.0" y2="642" stroke="#0a2540" stroke-width="1.4" marker-end="url(#aInk)"/>
 <rect x="136.0" y="646" width="360" height="38" rx="19" ry="19" fill="#2248e5"/>
@@ -42,7 +42,7 @@
 <rect x="844" y="320" width="480" height="104" rx="2" ry="2" fill="#e7ecfc" stroke="#2248e5" stroke-width="2"/>
 <text x="1084.0" y="346" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#2248e5" text-anchor="middle" letter-spacing="0.6">CHECKLIST STEP 4b · THE DOVETAIL JOINT</text>
 <text x="1084.0" y="369" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="middle">re-run oasis-pub-check, triage every finding:</text>
-<text x="1084.0" y="387" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="middle">the whole 164-check validation layer plugs in here</text>
+<text x="1084.0" y="387" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="middle">the whole 165-check validation layer plugs in here</text>
 <text x="1084.0" y="406" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="500" fill="#2248e5" text-anchor="middle">trust, but verify: identical code, our side</text>
 <text x="844" y="452" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="500" fill="#0a4a8f" text-anchor="start" letter-spacing="1.1">GATES ONLY A HUMAN OR LIVE CHECK CAN RUN</text>
 <text x="844" y="469" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#6b7380" text-anchor="start">live ground truth the tool never sees</text>
@@ -97,8 +97,8 @@
 <path d="M609,320 H791 A3,3 0 0 1 794,323 V350 H606 V323 A3,3 0 0 1 609,320 Z" fill="#2248e5"/>
 <text x="700.0" y="340" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="13.5" font-weight="700" fill="#ffffff" text-anchor="middle">oasis-pub-check</text>
 <text x="700.0" y="372" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11.5" font-weight="500" fill="#2248e5" text-anchor="middle">oasis_pub_check.py</text>
-<text x="700.0" y="394" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="middle">164 individual checks</text>
-<text x="700.0" y="412" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="middle">35 check classes</text>
+<text x="700.0" y="394" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="middle">165 individual checks</text>
+<text x="700.0" y="412" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#313131" text-anchor="middle">55 check classes</text>
 <line x1="622" y1="424" x2="778" y2="424" stroke="#d5dae0" stroke-width="1" stroke-dasharray="3 3"/>
 <rect x="610.85" y="433.25" width="68.53999999999999" height="17.5" rx="8.75" ry="8.75" fill="#b3261e"/><text x="645.12" y="445.42" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">BLOCKER</text><rect x="687.3899999999999" y="433.25" width="46.879999999999995" height="17.5" rx="8.75" ry="8.75" fill="#b94a0d"/><text x="710.8299999999999" y="445.42" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">WARN</text><rect x="742.27" y="433.25" width="46.879999999999995" height="17.5" rx="8.75" ry="8.75" fill="#0a4a8f"/><text x="765.71" y="445.42" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">INFO</text>
 <text x="700.0" y="472" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#6b7380" text-anchor="middle">sees only the package files,</text>
