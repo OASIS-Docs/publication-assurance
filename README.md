@@ -152,6 +152,31 @@ pub-check:
 	python3 pub-check/oasis_pub_check.py path/to/stage-dir
 ```
 
+### Drop it into a TC repo
+
+A TC does not vendor the engine. This repository ships a composite GitHub
+Action ([`action.yml`](action.yml)), so a TC imports the whole gate with one
+step. Copy [`examples/consumer-workflow.yml`](examples/consumer-workflow.yml)
+to `.github/workflows/pub-check.yml` in the TC repo, or add the step directly:
+
+```yaml
+name: pub-check
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  pub-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: OASIS-Docs/publication-assurance@v1   # pin to a release SHA in production
+        with:
+          target: path/to/stage-dir-or-package.zip
+```
+
+The engine, `authorities.yaml`, and `rules/` travel with the action, so the TC
+carries no copy and gets fixes by bumping the tag. The job fails on any
+blocker; warnings are reported but do not fail the build. Inputs: `target`
+(required), `args` (e.g. `--json`), `python-version`, `install-poppler`.
+
 ## Repository structure
 
 <details>
