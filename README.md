@@ -191,6 +191,7 @@ build; warnings do not. Inputs: `target` (required), `args` (e.g. `--json`),
 
 ```
 publication-assurance/
+├── CHANGELOG.md                     # Versioned audit trail: which issue drove which criteria
 ├── pub-check/                       # The acceptance criteria
 │   ├── oasis_pub_check.py           #   169 individual checks in 57 classes, stdlib only
 │   ├── CHECKS.md                    #   the acceptance criteria catalog, generated from the code
