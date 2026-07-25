@@ -33,7 +33,7 @@ The shape of the tool:
 - No configuration. Every expectation is derived from the package itself:
   its own front matter, its own CSS, its own schema `$id`s, its own publish
   path.
-- 165 individual checks across 55 check classes.
+- 169 individual checks across 57 check classes.
   `--list-checks` asserts the inventory from the code, so the advertised
   numbers cannot drift from the implementation.
 - It combines the intake acceptance criteria with the publication

@@ -24,7 +24,7 @@
 <text x="842" y="232" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="600" fill="#2248e5" text-anchor="start" letter-spacing="1">OASIS SIDE · INTAKE GATE</text>
 <line x1="842" y1="244" x2="1170" y2="244" stroke="#2248e5" stroke-width="1"/>
 <rect x="840" y="264" width="332" height="56" rx="2" ry="2" fill="#fafcfe" stroke="#d5dae0" stroke-width="1"/>
-<text x="854" y="288" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" fill="#0a2540" text-anchor="start">164 checks / 55 classes</text>
+<text x="854" y="288" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" fill="#0a2540" text-anchor="start">169 checks / 57 classes</text>
 <text x="854" y="307" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#313131" text-anchor="start">the delivered package, gated</text>
 <rect x="840" y="332" width="332" height="56" rx="2" ry="2" fill="#fafcfe" stroke="#d5dae0" stroke-width="1"/>
 <text x="854" y="356" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="600" fill="#0a2540" text-anchor="start">verify</text>

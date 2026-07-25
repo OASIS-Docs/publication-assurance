@@ -87,6 +87,7 @@ nide rule added here passes on every currently-published OASIS document.
 | OASIS-RESID-TBD | WARN | residue |
 | OASIS-RESID-FILL-IN | WARN | residue |
 | OASIS-RESID-TEMPLATE-INSTRUCTION | BLOCKER | residue |
+| OASIS-COMMENTS-PARA-DUP | WARN | boilerplate-dup |
 | OASIS-LINK-DEAD-LISTS | WARN | dead-lists |
 | OASIS-LINK-DOUBLE-SLASH | WARN | double-slash |
 | OASIS-MEMBER-URI | BLOCKER | member-uri |
@@ -95,3 +96,10 @@ nide rule added here passes on every currently-published OASIS document.
 The set grows the same way the acceptance criteria grow: a defect that
 reaches intake and is expressible as a source-side rule is added here so
 the next TC catches it at authoring time.
+
+Two source-text criteria from the same correction round as
+OASIS-COMMENTS-PARA-DUP stay pub-check-only because they compare two
+captured values, which a single-pattern rule cannot express: `ref-rfc`
+(an [RFCnnnn] references entry's label, body number, and URL number must
+agree) and the rendered-HTML half of `link-mismatch` (anchor text that
+displays a URL must agree with its href).

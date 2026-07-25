@@ -159,6 +159,25 @@ rules:
       flags: IGNORECASE
       invert: true
 
+  # The template's status-section comments paragraph appears exactly once. A
+  # second copy rides in on a stale template merge and truncates the sentence
+  # it collides with. KMIP Usage Guide v3.0 cnd01 reached public review with
+  # the paragraph twice on page 2, the first copy cut off mid-sentence, and a
+  # public-review commenter reported it on day 3. [\s\S] spans the whole
+  # document because the two copies need not be adjacent.
+  - id: OASIS-COMMENTS-PARA-DUP
+    severity: WARN
+    description: >-
+      The template's 'send comments' status paragraph must appear exactly once
+      (a duplicated boilerplate block usually truncates the sentence it
+      collides with)
+    check:
+      type: all-match
+      target: prose
+      pattern: 'should send comments on this[\s\S]{1,6000}?should send comments on this'
+      flags: IGNORECASE
+      invert: true
+
   # ── Link hygiene ───────────────────────────────────────────────────────────
 
   - id: OASIS-LINK-DEAD-LISTS

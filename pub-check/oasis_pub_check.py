@@ -71,6 +71,16 @@ SITE = "https://docs.oasis-open.org"
 VALID_STAGE_PREFIXES = {"wd", "csd", "cs", "cnd", "cn", "os", "ps", "psd", "pn", "pnd", "errata"}
 RETIRED_STAGE_TOKENS = {"csprd", "cnprd", "cos", "csdpr", "cndpr"}
 
+# Previous-stage cover URIs a csd/cnd draft may legitimately point at: the
+# draft family's own token, or the APPROVED stage of the track when the
+# previous publication is a prior version rather than a prior draft (a
+# 'Previous version' block on a cnd correctly links the last approved cn;
+# a csd's previous version may sit at cs, os, or an os errata). Scarred
+# 24-Jul-2026: KMIP Usage Guide v3.0 cnd01's Previous-version links to
+# v2.1 cn01 drew six spurious WARNs.
+PREVIOUS_STAGE_COUNTERPARTS = {"csd": {"csd", "cs", "os", "errata"},
+                               "cnd": {"cnd", "cn"}}
+
 BLOCKER, WARN, INFO = "BLOCKER", "WARN", "INFO"
 
 
@@ -80,7 +90,14 @@ class Findings:
         self.observed: dict[str, dict[str, str]] = {}
 
     def add(self, severity: str, check: str, message: str) -> None:
-        self.items.append({"severity": severity, "check": check, "message": message})
+        item = {"severity": severity, "check": check, "message": message}
+        # An identical (severity, check, message) triple is the same fact:
+        # every message embeds its specifics (URL, filename, matched text),
+        # so a repeat can only come from a check being invoked twice on the
+        # same inputs. Suppress it rather than report one defect as two.
+        if item in self.items:
+            return
+        self.items.append(item)
 
     def observe(self, check: str, **kv) -> None:
         """Record the concrete values a check pulled from the package, so a
@@ -926,6 +943,229 @@ def check_correction_classes(md_text: str, stage_dir: str, base: str, stage: str
                     f.add(BLOCKER, "front-matter",
                           f"'Latest'-labelled URL carries the stage segment /{stage}/ "
                           f"(should be the persistent version-root path): {u.rstrip('.,)')}")
+
+
+class _LinkTextParser(HTMLParser):
+    """Collect (href, visible text) pairs for anchors whose href is an
+    absolute http(s) URL, so the displayed text can be compared against the
+    actual target. EVERY <a> start goes on the stack (Word HTML rides
+    <a name="_Toc..."> bookmark anchors inside and between hyperlinks; if
+    only tracked anchors were stacked, a bookmark's </a> would pop the
+    hyperlink instead), and anchors left unclosed at EOF are flushed rather
+    than dropped -- their over-collected text then simply fails the
+    is-it-a-URL gate."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self._open: list[list] = []   # [href-or-None, [text chunks]] per open <a>
+        self.pairs: list[tuple[str, str]] = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            href = dict(attrs).get("href", "")
+            self._open.append(
+                [href if href.startswith(("http://", "https://")) else None, []])
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self._open:
+            href, chunks = self._open.pop()
+            if href:
+                self.pairs.append((href, "".join(chunks)))
+
+    def handle_data(self, data):
+        for entry in self._open:
+            if entry[0]:
+                entry[1].append(data)
+
+    def flush(self) -> None:
+        # An anchor left open at EOF has over-collected the rest of the
+        # document; whitespace-stripping would glue that prose onto the URL
+        # and fabricate a mismatch. Emit an unclosed anchor only when its
+        # collected text is a single whitespace-free token (the pure-URL
+        # case); drop the rest as malformed markup, best effort.
+        while self._open:
+            href, chunks = self._open.pop()
+            text = "".join(chunks)
+            if href and not re.search(r"\s", text.strip()):
+                self.pairs.append((href, text))
+
+
+def _shown_url(text: str) -> str | None:
+    """The anchor's visible text iff it claims to be exactly ONE absolute
+    URL. Word hard-wraps long URLs mid-string and pads with NBSPs and
+    zero-width/soft-hyphen characters; a URL contains no whitespace, so all
+    of it is removed before the claim is read, along with prose punctuation
+    the sentence glued onto the end. Text that carries a second scheme after
+    collapsing (two URLs displayed in one anchor) is ambiguous, not a
+    claim, and is skipped rather than compared."""
+    raw = html_lib.unescape(text).strip()
+    # a second scheme AFTER whitespace is two separate displayed URLs in one
+    # anchor: ambiguous, not a claim. A second scheme with NO whitespace
+    # before it is one URL embedding another (web.archive.org wrappers) and
+    # stays comparable.
+    if re.search(r"(?i)\shttps?://", raw):
+        return None
+    t = re.sub(r"[\s\u00ad\u200b\ufeff]+", "", raw)
+    # a 3+ dot run is ellipsis display-truncation evidence for the caller's
+    # excuse branch, not prose punctuation -- preserve it
+    if not re.search(r"\.{3,}$", t):
+        t = t.rstrip(".,;:")
+    return t if re.match(r"(?i)https?://\S+$", t) else None
+
+
+def check_link_text(html_text: str, f: Findings) -> None:
+    """The prov-meta link-mismatch class, applied to the RENDERED HTML every
+    track ships: when an anchor's visible text is itself an absolute URL, it
+    must name the same resource the href actually targets. The markdown-track
+    check reads [shown](target) pairs from the source; Word/ODT-track
+    packages carry no markdown, so the same defect class has to be read off
+    the render. Scarred 24-Jul-2026: KMIP Usage Guide v3.0 cnd01's [RFC4880]
+    entry displays 'https://www.ietf.org/rfc/rfc4880.txtt' over a correct
+    rfc4880.txt href -- a live link crawl passes (the href resolves) while
+    every reader who types the citation gets a 404; a public-review
+    commenter reported it on day 3 of the review. Scheme, www., and
+    trailing-slash differences are not divergence (http-to-https rewriting
+    is routine CDN behaviour), and an ellipsis-truncated display string that
+    prefixes the href is display shortening, not divergence."""
+    if not html_text:
+        f.observe("link-mismatch", html_url_text_anchors="(no HTML)")
+        return
+    p = _LinkTextParser()
+    p.feed(html_text)
+    p.close()
+    p.flush()
+
+    def canon(u: str) -> str:
+        u = re.sub(r"[\s\u00ad\u200b\ufeff]+", "", html_lib.unescape(u))
+        # percent-decode both sides symmetrically so equivalent encodings
+        # (%7E vs ~, hex-digit case) read as agreement, not divergence
+        u = urllib.parse.unquote(u)
+        return re.sub(r"(?i)^https?://(?:www\.)?", "", u).rstrip("/")
+
+    checked = 0
+    for href, text in p.pairs:
+        shown = _shown_url(text)
+        if not shown:
+            continue
+        checked += 1
+        s, h = canon(shown), canon(href)
+        if s == h:
+            continue
+        prefix = s.rstrip(".…")
+        if (s.endswith(("...", "…")) and len(prefix) >= 12
+                and h.startswith(prefix)):
+            continue
+        if h.rstrip(".,;:") == s:
+            detail = ("The href carries trailing sentence punctuation as part "
+                      "of the link target (typically a 404): the punctuation "
+                      "belongs to the prose, not the URL.")
+        else:
+            detail = ("One of them is wrong; readers cite what they see, not "
+                      "what the anchor resolves to.")
+        f.add(BLOCKER, "link-mismatch",
+              f"Visible link text and href disagree in the HTML: the text shows "
+              f"'{shown}' but the link targets '{href}'. {detail}")
+    f.observe("link-mismatch", html_url_text_anchors=checked)
+
+
+def check_ref_rfc(md_text: str, html_text: str, f: Findings) -> None:
+    """References-entry self-agreement for RFC citations: inside the entry
+    labelled [RFCnnnn], the RFC number written in the entry body and the RFC
+    number embedded in the entry's ietf.org / rfc-editor.org URL must agree
+    with the label. Scarred 24-Jul-2026: KMIP Usage Guide v3.0 cnd01's
+    [RFC4210] entry reads 'IETF RFC 2510, Sep 2005' beside the correct
+    rfc4210.txt URL (RFC 4210 obsoleted RFC 2510; the entry's URL was
+    updated and its prose number was not), reported by a public-review
+    commenter on day 3. Only label windows that contain an RFC URL are
+    treated as References entries -- a bracketed citation in running text
+    has no URL beside it and is skipped. Deliberate phrasing about an OTHER
+    RFC ('obsoletes RFC 2510', 'see RFC 1234') is excused by the
+    immediately preceding words; WARN severity because a legitimate
+    cross-mention can still sit outside the excuse vocabulary."""
+    excuse = re.compile(
+        r"(?i)\b(?:obsolet\w*|supersed\w*|replac\w*|updat\w*|deprecat\w*|"
+        r"formerly|errata|see|also|instead|and|or|with|cf|by|vs|versus)\W{0,3}$")
+    for label, text in (("markdown", md_text), ("html", html_text)):
+        if not text:
+            continue
+        prose = re.sub(r"<[^>]+>", " ", text) if label == "html" else text
+        prose = re.sub(r"\s+", " ", html_lib.unescape(prose))
+        entries = 0
+        for m in re.finditer(r"\[RFC\s?(\d{3,5})\]", prose):
+            num = m.group(1)
+            window = prose[m.end():m.end() + 600]
+            nxt = window.find("[")
+            if nxt >= 0:
+                window = window[:nxt]
+            url_hits = list(re.finditer(
+                r"(?i)(?:ietf\.org|rfc-editor\.org)/[^\s]*?rfc\.?(\d{3,5})\b",
+                window))
+            # compare RFC numbers as integers: canonical IETF URLs zero-pad
+            # to four digits (rfc0793.txt), so '793' vs '0793' is agreement,
+            # not drift
+            url_nums = {int(u.group(1)) for u in url_hits}
+            if not url_hits:
+                continue
+            entries += 1
+            reported_urls = set()
+            for uh in url_hits:
+                u = int(uh.group(1))
+                if u == int(num) or u in reported_urls:
+                    continue
+                # the same excuse window as the body branch: a deliberately
+                # cross-cited URL ('see .../rfc6818 for updates') is prose,
+                # not a stale entry link. Anchor at the URL token's start
+                # (window is single-spaced), or the scheme prefix would sit
+                # between the excuse word and the host match.
+                tok_start = window.rfind(" ", 0, uh.start()) + 1
+                if excuse.search(window[max(0, tok_start - 40):tok_start]):
+                    continue
+                reported_urls.add(u)
+                f.add(WARN, "ref-rfc",
+                      f"References entry [RFC{num}] links an RFC URL that names "
+                      f"RFC {u} instead ({label}): the label and the linked "
+                      f"document disagree; one of them is stale.")
+            for bm in re.finditer(r"\bRFC\s?(\d{3,5})\b", window):
+                if int(bm.group(1)) == int(num) or int(bm.group(1)) in url_nums:
+                    continue
+                if excuse.search(window[max(0, bm.start() - 40):bm.start()]):
+                    continue
+                # RFC 8174's own title is 'Ambiguity of Uppercase vs
+                # Lowercase in RFC 2119 Key Words': the cross-mention IS the
+                # reference's name, present in nearly every OASIS spec.
+                if (int(num), int(bm.group(1))) == (8174, 2119):
+                    continue
+                f.add(WARN, "ref-rfc",
+                      f"References entry [RFC{num}] says 'RFC {bm.group(1)}' in its "
+                      f"body text ({label}); the entry's label and URL both say "
+                      f"RFC {num}. RFC numbers drift when a reference is upgraded "
+                      f"to a successor RFC and the prose is not -- confirm which "
+                      f"number the citation means.")
+        f.observe("ref-rfc", **{f"{label}_rfc_reference_entries": entries})
+
+
+def check_comments_boilerplate(md_text: str, html_text: str, f: Findings) -> None:
+    """The template's status-section comments paragraph ('...should send
+    comments on this document/specification to...') appears exactly once per
+    document. A second copy usually rides in on a stale template merge and
+    truncates the sentence it collides with. Scarred 24-Jul-2026: KMIP Usage
+    Guide v3.0 cnd01 page 2 carries the paragraph twice, the first copy cut
+    off mid-sentence at 'after subscribing to it by' with the duplicate run
+    straight in, and a public-review commenter reported it on day 3."""
+    for label, text in (("markdown", md_text), ("html", html_text)):
+        if not text:
+            continue
+        prose = re.sub(r"<[^>]+>", " ", text) if label == "html" else text
+        prose = re.sub(r"\s+", " ", html_lib.unescape(prose))
+        n = len(re.findall(r"(?i)should send comments on this", prose))
+        f.observe("boilerplate-dup", **{f"{label}_comments_paragraphs": n})
+        if n > 1:
+            f.add(WARN, "boilerplate-dup",
+                  f"The template's 'send comments' status paragraph appears {n} "
+                  f"times in the {label} (the template carries it once). A "
+                  f"duplicated boilerplate block routinely truncates the sentence "
+                  f"it collides with -- diff both copies against the current "
+                  f"template and keep one.")
 
 
 def check_pdf_fonts(stage_dir: str, pdf_path: str, html_text: str, f: Findings) -> None:
@@ -2620,13 +2860,17 @@ def check_stage_token(md_text: str, html_text: str, stage: str, f: Findings) -> 
                           f"before Naming Directives v1.7 took effect (naming-directives.txt "
                           f"6.3 Resource Permanence) -- verify the linked document's original "
                           f"publication date before treating this as an error.")
-                elif bare != doc_stage_token:
+                elif bare not in PREVIOUS_STAGE_COUNTERPARTS[doc_stage_token]:
                     fired = True
+                    allowed = "/".join(sorted(PREVIOUS_STAGE_COUNTERPARTS[doc_stage_token]))
                     f.add(WARN, "stage-token",
                           f"Previous-stage URL's {position} carries stage token '{candidate}' "
-                          f"(expected '{doc_stage_token}'): {u}. handbook-PublicReviews.txt: "
-                          f"the three cover page URIs 'should all reflect the "
-                          f"{doc_stage_token} stage abbreviation.'")
+                          f"(expected '{doc_stage_token}', or the track's approved stage "
+                          f"{allowed} for a previous-version link): {u}. "
+                          f"handbook-PublicReviews.txt: the three cover page URIs "
+                          f"'should all reflect the {doc_stage_token} stage abbreviation'; "
+                          f"a Previous VERSION block correctly retains the linked "
+                          f"publication's own approved-stage token.")
     for raw_u in latest_urls:
         u = _clean_url(raw_u)
         _dir_cand, stem_cand = _extract_stage_tokens(u)
@@ -5788,45 +6032,36 @@ def run(stage_dir: str, f: Findings) -> None:
                     f.add(WARN, "case",
                           f"Mixed-case path in docs.oasis-open.org URL (host is "
                           f"case-sensitive): {u}")
+    # One call per check. (A duplicated-call regression here once reported
+    # single defects as doubles: residue ran twice, image-policy twelve
+    # times. Findings.add now also suppresses identical repeats as a
+    # backstop, but the call list itself stays deduplicated.)
     check_revision_collision(base, version, stage, f)
     check_residue(md_text, html_text, f)
     check_member_uri(md_text, html_text, f)
+    check_link_text(html_text, f)
+    check_ref_rfc(md_text, html_text, f)
+    check_comments_boilerplate(md_text, html_text, f)
     check_conformance_structure(md_text, html_text, stage_dir, stage, f)
     check_image_policy(stage_dir, html_text, f)
     check_references_split(stage, md_text, html_text, f)
     check_content_labels(md_text, html_text, stage, f)
-    check_image_policy(stage_dir, html_text, f)
     check_stage_token(md_text, html_text, stage, f)
-    check_image_policy(stage_dir, html_text, f)
     check_title_version(html_text, version, stage, is_word, f)
     check_frontmatter_title_oasis_prefix(html_text, stage, f)
-    check_image_policy(stage_dir, html_text, f)
     check_authors(md_text, is_word, is_odt, f)
-    check_image_policy(stage_dir, html_text, f)
     check_name_chars(stage_dir, version, stage, stem, f)
     check_extension_count(stage_dir, items, stem, stage, f)
-    check_image_policy(stage_dir, html_text, f)
     check_extension_conformance(stage_dir, stage, stem, f)
-    check_image_policy(stage_dir, html_text, f)
     check_stable_artifact_names(stage_dir, items, stem, f)
     check_multipart_naming(stage_dir, f)
-    check_image_policy(stage_dir, html_text, f)
     check_multipart_part_identifiers(stage_dir, version, stage, f)
-    check_image_policy(stage_dir, html_text, f)
     check_public_review_metadata(base, stage, stem, f)
     check_comment_resolution_log(stage_dir, stage, stem, f)
-    check_member_uri(md_text, html_text, f)
     check_normdef_refs(stage_dir, items, md_text, html_text, stage, f)
-    check_image_policy(stage_dir, html_text, f)
     check_uri_alias(stage_dir, items, md_text, html_text, f)
-    check_image_policy(stage_dir, html_text, f)
-    check_revision_collision(base, version, stage, f)
-    check_residue(md_text, html_text, f)
-    check_member_uri(md_text, html_text, f)
     check_xml_namespaces(stage_dir, base, f)
-    check_image_policy(stage_dir, html_text, f)
     check_ns_segment(md_text, html_text, f)
-    check_image_policy(stage_dir, html_text, f)
 
     # ---- output suite: PDF -----------------------------------------------
     if "pdf" in items:
@@ -6180,6 +6415,24 @@ CONDITION_DOCS: list[dict] = [
          condition="Visible URL text and its link target agree",
          pulls="each [shown-url](target-url) pair in the prose",
          compares_to="shown and target must be the same URL (a disagreement is a rename artifact)"),
+    dict(check="link-mismatch", sig="Visible link text and href disagree in the HTML", applies="both",
+         condition="Anchor text that displays a URL agrees with the anchor's href",
+         pulls="each <a> whose visible text is an absolute URL, paired with its href, from the rendered HTML",
+         compares_to="the displayed URL and the href must name the same resource (scheme, www., and trailing-slash differences and ellipsis display-truncation excepted); readers cite what they see"),
+    # ref-rfc
+    dict(check="ref-rfc", sig="links an RFC URL that names", applies="both",
+         condition="An [RFCnnnn] references entry's URL cites the same RFC number as its label",
+         pulls="each RFC number embedded in an ietf.org / rfc-editor.org URL inside the entry window that follows an [RFCnnnn] label",
+         compares_to="the RFC number in the entry's own label; a disagreement means the label or the linked document is stale"),
+    dict(check="ref-rfc", sig="says 'RFC ", applies="both",
+         condition="An [RFCnnnn] references entry's body text cites the same RFC number as its label and URL",
+         pulls="each 'RFC nnnn' mention in the entry window that follows an [RFCnnnn] label, excluding mentions excused by obsoletes/supersedes/replaces/updates/see phrasing",
+         compares_to="the RFC number in the entry's label and URL (numbers drift when a reference is upgraded to a successor RFC and the prose is not)"),
+    # boilerplate-dup
+    dict(check="boilerplate-dup", sig="status paragraph appears", applies="both",
+         condition="The template's 'send comments' status paragraph appears exactly once",
+         pulls="the count of 'should send comments on this' occurrences in the prose",
+         compares_to="exactly one occurrence per the Board-approved template (a duplicate rides in on a stale template merge and truncates the sentence it collides with)"),
     # double-slash
     dict(check="double-slash", sig="contains a double slash", applies="md",
          condition="No relative link path contains a double slash",
@@ -6330,7 +6583,7 @@ CONDITION_DOCS: list[dict] = [
     dict(check='references-split', sig='is listed under both Normative References and', applies='both', condition='No reference-entry ID appears under both a Normative References heading and an Informative References heading anywhere in the document', pulls="the set of reference-entry IDs found in the span of every 'normative references'-classified heading, and the same for every 'informative references'-classified heading", compares_to='the two ID sets must not intersect; a shared ID is a labeling inconsistency or editorial duplication (handbook-WPQualityChecklist.txt same checklist bullet)'),
     dict(check='content-labels', sig='the Handbook classifies Examples as non-normative content', applies='both', condition='Every Examples/Illustrative-Examples/Sample-<noun> heading carries a structural content-type label (heading suffix, first-sentence lead/predicate, labeled ancestor heading, or document-wide blanket statement)', pulls='markdown ATX/setext headings (or, DOCX-native track, rendered HTML h1-h6 elements via an HTMLParser walk, entities decoded), in document order, each with its heading text, nesting level, and the first sentence of the body block immediately following it', compares_to="handbook-Conformance.txt 'Normative versus non-normative content': Examples content is classified non-normative and 'should be clearly labelled'"),
     dict(check='stage-token', sig='carries a retired stage token', applies='both', condition='Previous-stage URL stage token is not a retired abbreviation', pulls="the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem", compares_to='retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7; WARN with a legacy-URI verification caveat since a pre-2024 Previous-stage URI may permanently retain a retired token (naming-directives.txt 6.3 Resource Permanence)'),
-    dict(check='stage-token', sig="carries stage token '", applies='both', condition="Previous-stage URL stage token matches the document's own current csd/cnd stage abbreviation", pulls="the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem", compares_to="the document's own current stage token (handbook-PublicReviews.txt: the cover page URIs 'should all reflect the csd stage abbreviation')"),
+    dict(check='stage-token', sig="carries stage token '", applies='both', condition="Previous-stage URL stage token matches the document's own current csd/cnd stage abbreviation or the track's approved-stage counterpart", pulls="the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem", compares_to="the document's own current stage token, or the track's approved-stage set (csd: cs/os/errata; cnd: cn) when the block links a previous VERSION at its own approved stage (handbook-PublicReviews.txt: the cover page URIs 'should all reflect the csd stage abbreviation')"),
     dict(check='stage-token', sig='embeds a stage-abbreviation token', applies='both', condition="Latest-stage URL's filename embeds no stage-abbreviation/revision token at all", pulls='the filename-stem-position stage-abbreviation token (if any) extracted from the Latest-stage URL', compares_to="naming-directives.txt 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', an absolute prohibition independent of whether the token matches the current stage"),
     dict(check='title-version', sig='does not incorporate a Version identifier', applies='both', condition="The rendered cover-page title incorporates the package's own Version identifier", pulls='the resolved cover-page title text (HTML <title>/<h1> on the markdown track, the MsoTitle-styled or first non-empty non-logo cover paragraph on the DOCX-native track)', compares_to="naming-directives.txt 5.1: 'A Version identifier must also be incorporated into a Work Product name/title'"),
     dict(check='title-version', sig="cites a different Version than the package's own Version identifier", applies='both', condition="The Version cited in the title agrees with the package's own Version identifier", pulls="the numeric run of the rightmost 'Version <n>' token in the resolved title", compares_to="the package's own Version identifier (the version directory segment, with a leading 'v' stripped per naming-directives.txt Section 4's [version-id] grammar)"),

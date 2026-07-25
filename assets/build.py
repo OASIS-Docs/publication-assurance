@@ -25,12 +25,44 @@ is not installed (layout is sized for Poppins, the widest of the three).
 """
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parent
 ARCH = OUT / "architecture"
+
+def check_counts() -> tuple[int, int]:
+    """Derive the advertised counts from the gate itself: --list-checks
+    asserts them from the AST, so the diagrams can never drift from the
+    code again (the hardcoded copies here once said 164 while the shipped
+    SVGs said 165)."""
+    out = subprocess.run(
+        [sys.executable,
+         str(OUT.parent / "pub-check" / "oasis_pub_check.py"), "--list-checks"],
+        capture_output=True, text=True).stdout
+    m = re.search(r"(\d+) individual checks across (\d+) check classes", out)
+    if not m:
+        raise SystemExit("could not derive check counts from --list-checks")
+    return int(m.group(1)), int(m.group(2))
+
+
+N_CHECKS, N_CLASSES = check_counts()
+
+def policy_grounded_count() -> int:
+    """authorities.yaml carries the policy-grounded tally; read it rather
+    than repeat it."""
+    import re as _re
+    y = (OUT.parent / "pub-check" / "authorities.yaml").read_text(encoding="utf-8")
+    m = _re.search(r"^policy_grounded_count:\s*(\d+)", y, _re.M)
+    if not m:
+        raise SystemExit("could not read policy_grounded_count from authorities.yaml")
+    return int(m.group(1))
+
+
+N_POLICY = policy_grounded_count()
+
 
 # ---- design tokens (OASIS TC Handbook system) -----------------------------
 CLOUD   = "#edf3f9"   # page background
@@ -214,7 +246,7 @@ def build_hero():
 
     gx, gy, gw, gh = x0, 190, 372, 44
     e.append(rect(gx, gy, gw, gh, GOOD_T, GOOD, EMPH))
-    e.append(text(gx + gw / 2, gy + 27, "oasis-pub-check · 164 checks · exit 0 = publish",
+    e.append(text(gx + gw / 2, gy + 27, f"oasis-pub-check · {N_CHECKS} checks · exit 0 = publish",
                   13, GOOD, 500, anchor="middle", font=MONO))
 
     e.append("</svg>")
@@ -247,7 +279,7 @@ def build_gate():
     # center: grouped checks panel
     px, py, pw, ph = 306, 152, 564, 356
     e.append(rect(px, py, pw, ph, SURFACE, BORDER2, HAIR, r=3))
-    e.append(text(px + 24, py + 36, "164 checks in 55 classes", 16, INK, 700))
+    e.append(text(px + 24, py + 36, f"{N_CHECKS} checks in {N_CLASSES} classes", 16, INK, 700))
     e.append(text(px + pw - 24, py + 36, "grouped by what they protect", 11, MUTED, anchor="end"))
     e.append(rule(px + 24, py + 50, px + pw - 24, py + 50))
 
@@ -361,7 +393,7 @@ def build_chain():
     nodes = [
         ("TC build", ["make / CI / editor tools", "renders source · html · pdf"], SURFACE, BORDER2, INK),
         ("manifest.json", ["sha256 + roles", "source commit · tools"], SURFACE, BORDER2, INK),
-        ("oasis-pub-check", ["164 checks, before the vote", "TC side · exit 0"], ACC_T, ACCENT, ACCENT),
+        ("oasis-pub-check", [f"{N_CHECKS} checks, before the vote", "TC side · exit 0"], ACC_T, ACCENT, ACCENT),
         ("OASIS intake", ["independent re-run", "gate + audit record"], SURFACE, BORDER2, INK),
         ("docs.oasis-open.org", ["published"], INK, INK, "#ffffff"),
     ]
@@ -441,7 +473,7 @@ def build_dovetail():
 
     e.append(doc_glyph(bx + 16, 506, bw - 32, 96, 16, ACCENT, EMPH))
     e.append(text(lcx, 538, "VALIDATION REPORT", 13, ACCENT, 700, anchor="middle", ls=1.0))
-    e.append(text(lcx, 560, "all 164 conditions: observed vs expected, in full", 11, BODY, anchor="middle"))
+    e.append(text(lcx, 560, f"all {N_CHECKS} conditions: observed vs expected, in full", 11, BODY, anchor="middle"))
     e.append(text(lcx, 580, "zero blockers = publication-ready package", 11, INK, 500, anchor="middle"))
     e.append(arrow(lcx, 606, lcx, 642, INK, 1.4))
 
@@ -462,7 +494,7 @@ def build_dovetail():
     e.append(text(rcx, 346, "CHECKLIST STEP 4b · THE DOVETAIL JOINT", 13, ACCENT, 700,
                   anchor="middle", ls=0.6))
     e.append(text(rcx, 369, "re-run oasis-pub-check, triage every finding:", 11.5, BODY, anchor="middle"))
-    e.append(text(rcx, 387, "the whole 164-check validation layer plugs in here", 11.5, BODY, anchor="middle"))
+    e.append(text(rcx, 387, f"the whole {N_CHECKS}-check validation layer plugs in here", 11.5, BODY, anchor="middle"))
     e.append(text(rcx, 406, "trust, but verify: identical code, our side", 11.5, ACCENT, 500, anchor="middle"))
 
     e.append(label(rbx, 452, "Gates only a human or live check can run", NAVY3, 11.5))
@@ -529,8 +561,8 @@ def build_dovetail():
              f'H{ex} V{ey+3} A3,3 0 0 1 {ex+3},{ey} Z" fill="{ACCENT}"/>')
     e.append(text(ecx, ey + 20, "oasis-pub-check", 13.5, "#ffffff", 700, anchor="middle", font=MONO))
     e.append(text(ecx, ey + 52, "oasis_pub_check.py", 11.5, ACCENT, 500, anchor="middle", font=MONO))
-    e.append(text(ecx, ey + 74, "164 individual checks", 11.5, BODY, anchor="middle"))
-    e.append(text(ecx, ey + 92, "35 check classes", 11.5, BODY, anchor="middle"))
+    e.append(text(ecx, ey + 74, f"{N_CHECKS} individual checks", 11.5, BODY, anchor="middle"))
+    e.append(text(ecx, ey + 92, f"{N_CLASSES} check classes", 11.5, BODY, anchor="middle"))
     e.append(rule(ex + 16, ey + 104, ex + ew - 16, ey + 104, BORDER, dash="3 3"))
     e.append(sev_badges(ecx, ey + 122))
     e.append(text(ecx, ey + 152, "sees only the package files,", 10, MUTED, anchor="middle"))
@@ -589,12 +621,12 @@ def build_stack():
              f'A3,3 0 0 1 73,{L1Y} Z" fill="{ACCENT}"/>')
     e.append(text(450, L1Y + 25, "LAYER 1 · VALIDATION · oasis-pub-check (mechanical, tool-side)",
                   13.5, "#ffffff", 700, anchor="middle", ls=0.6))
-    e.append(text(100, L1Y + 68, "oasis_pub_check.py: 164 checks across 55 classes", 13, INK, 700))
+    e.append(text(100, L1Y + 68, f"oasis_pub_check.py: {N_CHECKS} checks across {N_CLASSES} classes", 13, INK, 700))
     e.append(text(100, L1Y + 92, "Runs in the TC's own CI before submission.", 11.5, BODY))
     e.append(text(100, L1Y + 111, "Re-run identically by TC Administration at intake (step 4b).", 11.5, BODY))
     e.append(text(100, L1Y + 136, "Every finding gets a severity:", 11.5, BODY))
     e.append(sev_badges(190, L1Y + 158))
-    e.append(text(100, L1Y + 194, "Output: a Validation Report, observed vs expected for all 164.",
+    e.append(text(100, L1Y + 194, f"Output: a Validation Report, observed vs expected for all {N_CHECKS}.",
                   11.5, ACCENT, 500))
     # annotation panel
     e.append(rect(520, L1Y + 54, 286, 148, SURFACE, ACCENT, 1.2, dash="5 4"))
@@ -735,7 +767,7 @@ def build_authority():
     # summary bar
     by = 466
     e.append(rect(56, by, W - 112, 82, NAVY_T, NAVY3, HAIR, r=3))
-    e.append(text(76, by + 32, "38 of 164 checks cite a written clause like this one.",
+    e.append(text(76, by + 32, f"{N_POLICY} of {N_CHECKS} checks cite a written clause like this one.",
                   13, INK, 600))
     e.append(text(76, by + 56, "The rest are operational rules earned from a year of published "
                                "corrections. The full criterion-to-clause map is AUTHORITIES.md.",
@@ -786,7 +818,7 @@ def build_nide_bridge():
     e.append(text(rx + 22, ly + 54, "OASIS SIDE · INTAKE GATE", 9.5, ACCENT, 600, ls=1))
     e.append(rule(rx + 22, ly + 66, rx + rw - 22, ly + 66, ACCENT, HAIR))
     prows = [
-        ("164 checks / 55 classes", "the delivered package, gated"),
+        (f"{N_CHECKS} checks / {N_CLASSES} classes", "the delivered package, gated"),
         ("verify", "delivered PDF bytes vs manifest hashes"),
         ("exit 0 · publish   exit 1 · back to TC", "intake accepts with the same rules"),
     ]

@@ -15,7 +15,7 @@
 <text x="74" y="372" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#313131" text-anchor="start">manifest.json</text>
 <line x1="264" y1="305.0" x2="298" y2="305.0" stroke="#0a2540" stroke-width="1.4" marker-end="url(#aInk)"/>
 <rect x="306" y="152" width="564" height="356" rx="3" ry="3" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
-<text x="330" y="188" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" fill="#0a2540" text-anchor="start">164 checks in 55 classes</text>
+<text x="330" y="188" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" fill="#0a2540" text-anchor="start">169 checks in 57 classes</text>
 <text x="846" y="188" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6b7380" text-anchor="end">grouped by what they protect</text>
 <line x1="330" y1="202" x2="846" y2="202" stroke="#d5dae0" stroke-width="1"/>
 <rect x="330" y="218" width="250" height="78" rx="2" ry="2" fill="#f2f6fb" stroke="#d5dae0" stroke-width="1"/>
