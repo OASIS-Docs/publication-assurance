@@ -126,7 +126,7 @@ catalog, and a worked example with the Validation Report from a publication
 
 ## Interoperating with nide
 
-The acceptance criteria are also consumed at authoring time. Stefan Hagen's
+The acceptance criteria are also consumed at authoring time. [Stefan Hagen](https://github.com/sthagen)'s
 [`nide`](https://codes.dilettant.life/docs/nide/) engine, which several TCs
 use to author and build their specifications, reads the shared
 [`oasis.rules.yaml`](pub-check/rules/oasis.rules.yaml) via `extends: oasis`

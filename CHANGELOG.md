@@ -24,6 +24,34 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.1.1 - 2026-07-27
+
+Commits `fc94fe0`, `bd0481b`, `3633a49` - driven by
+[#2](https://github.com/OASIS-Docs/publication-assurance/issues/2):
+the policy-authority catalog was pinned to the 96-condition July snapshot
+while the registry had grown to 169. No executable check changed
+(still **169 checks, 57 classes**); this is a provenance and documentation
+completion.
+
+Provenance:
+
+- `AUTHORITIES.md` / `authorities.yaml` extended from the 96-condition
+  snapshot to the full registry: **93 of the 169 checks now trace to a
+  verbatim clause** of written OASIS policy (was 38). Eight new acceptance
+  criteria (`AC-CONTENT-09/10/11`, `AC-NAMING-31/32/33`,
+  `AC-PACKAGING-24/25`), each grounded in a verbatim corpus substring and
+  adversarially reviewed; every quote mechanically re-verified. The stale
+  "original 96 / folding outstanding" caveat is gone; the README count and
+  the provenance diagram are regenerated to match.
+
+Documentation:
+
+- The OpenEoX eox-core v1.0 csd01 worked example re-run against the current
+  169-check tool (0 blockers; 12 warnings, 9 informational; publishable).
+- The CSAF regression corpus (`csaf/`, `csaf-cvrf/`) moved under
+  `examples/`, alongside the worked example; pure git-mv renames.
+- Authored references to Stefan Hagen now link to his GitHub profile.
+
 ## v1.1.0 - 2026-07-25
 
 Commit `7431c2d` - driven by

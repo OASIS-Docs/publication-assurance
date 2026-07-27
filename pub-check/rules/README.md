@@ -37,7 +37,7 @@ rules with `nide quality` and fails the build on any BLOCKER. The two-file
 convention is nide's design: the organisation file is fetched from here and
 left unchanged locally; the spec file carries TC- and spec-specific rules on
 top. Credit where due: the rules-as-data interface and the first cut of
-this file came from Stefan Hagen's work bridging nide to the acceptance
+this file came from [Stefan Hagen](https://github.com/sthagen)'s work bridging nide to the acceptance
 criteria in this repository.
 
 ## Contract
