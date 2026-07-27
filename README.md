@@ -88,7 +88,7 @@ correction rounds become new checks.
 
 ![How a criterion is sourced from policy](assets/authority.png?v=169)
 
-Every acceptance criterion cites the rule it enforces. 38 of the 169 checks
+Every acceptance criterion cites the rule it enforces. 93 of the 169 checks
 trace to a verbatim clause in the governing corpus (25 pages, snapshotted
 and hashed); the rest are operational rules from correction
 rounds. The full criterion-to-clause map, with the exact quoted text and

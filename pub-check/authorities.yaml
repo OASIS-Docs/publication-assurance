@@ -1,5 +1,5 @@
 snapshot_date: '2026-07-21'
-policy_grounded_count: 38
+policy_grounded_count: 93
 note: Corpus digests in corpus/MANIFEST.json. Quotes are verbatim, mechanically proven.
 conditions:
   stage-name/is missing its two-digit number:
@@ -2209,4 +2209,1601 @@ conditions:
       section: 2.2.1 General
       quote: All documents and other files produced by the TC, including Work Products at any level of
         approval, must use the OASIS file naming scheme and must include the OASIS copyright notice
+      severity: BLOCKER
+  uri-chars/Underscore in a document (cover-page) URI:
+    check: uri-chars
+    sig: Underscore in a document (cover-page) URI
+    criteria:
+    - AC-NAMING-08
+    authorities:
+    - criterion: AC-NAMING-08
+      criterion_statement: Underscores MUST NOT appear anywhere in a document URI (docs.oasis-open.org
+        path or self-referential link).
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 3 Name Characters for Files and Directories
+      quote: 'An UNDERSCORE must never be used in a filename or directory name that
+
+        is used in a document URI'
+      severity: BLOCKER
+    - criterion: AC-NAMING-08
+      criterion_statement: Underscores MUST NOT appear anywhere in a document URI (docs.oasis-open.org
+        path or self-referential link).
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: File naming and URI pattern
+      quote: Filenames and URIs follow a structured pattern defined in the Naming Directives. Allowed
+        characters are alphanumerics, periods, and hyphens; underscores may appear in generated filenames
+        but not in document URIs.
+      severity: BLOCKER
+    - criterion: AC-NAMING-08
+      criterion_statement: Underscores MUST NOT appear anywhere in a document URI (docs.oasis-open.org
+        path or self-referential link).
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: Allowed characters (Policy requirement)
+      quote: Only alphanumerics ( A–Z , a–z , 0–9 ), hyphens ( - ), and periods ( . ) are permitted in
+        document URIs. Underscores ( _ ) may appear in generated filenames but must not appear in document
+        URIs.
+      severity: BLOCKER
+  member-uri/Cites an OASIS member-only (Kavi) URI:
+    check: member-uri
+    sig: Cites an OASIS member-only (Kavi) URI
+    criteria:
+    - AC-PACKAGING-18
+    authorities:
+    - criterion: AC-PACKAGING-18
+      criterion_statement: The specification text and other public/potentially-public TC materials MUST
+        NOT cite an OASIS member-only (private, password-protected, Kavi-generated) URI.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 6.6 Using Appropriate URI References
+      quote: 'The OASIS member-only (private, password-protected)
+
+        URI references created by OASIS [Kavi] tools must not be cited in TC
+
+        mailing list messages, Wiki pages, TC public web pages, JIRA tickets,
+
+        specifications, meeting minutes, or in any TC "documents" that are or
+
+        may become public.'
+      severity: BLOCKER
+  conformance-structure/Conformance section is a buried subsection:
+    check: conformance-structure
+    sig: Conformance section is a buried subsection
+    criteria:
+    - AC-CONTENT-03
+    authorities:
+    - criterion: AC-CONTENT-03
+      criterion_statement: Where a Conformance section is present, it MUST be a top-level numbered section
+        (not a subsection buried elsewhere) populated with individually and uniquely numbered conformance
+        clauses, and clause numbering MUST remain stable across document revisions.
+      doc: handbook-Conformance.txt
+      doc_label: 'TC Handbook: Conformance'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Conformance.html
+      section: Required structure of the conformance section (Policy requirement)
+      quote: A separate, top-level numbered section of the work product (not a subsection buried elsewhere).
+      severity: BLOCKER
+    - criterion: AC-CONTENT-03
+      criterion_statement: Where a Conformance section is present, it MUST be a top-level numbered section
+        (not a subsection buried elsewhere) populated with individually and uniquely numbered conformance
+        clauses, and clause numbering MUST remain stable across document revisions.
+      doc: handbook-Conformance.txt
+      doc_label: 'TC Handbook: Conformance'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Conformance.html
+      section: Required structure of the conformance section (Policy requirement)
+      quote: Populated with individually numbered conformance clauses (e.g., Clause 1, Clause 2, …) so
+        that implementers and Statements of Use can cite specific clauses by number.
+      severity: BLOCKER
+    - criterion: AC-CONTENT-03
+      criterion_statement: Where a Conformance section is present, it MUST be a top-level numbered section
+        (not a subsection buried elsewhere) populated with individually and uniquely numbered conformance
+        clauses, and clause numbering MUST remain stable across document revisions.
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: Writing conformance clauses
+      quote: Clause numbering must be unique and stable across revisions.
+      severity: BLOCKER
+  conformance-structure/not populated with numbered clauses:
+    check: conformance-structure
+    sig: not populated with numbered clauses
+    criteria:
+    - AC-CONTENT-01
+    authorities:
+    - criterion: AC-CONTENT-01
+      criterion_statement: A Standards Track work product package MUST contain a separate, top-level,
+        numbered Conformance section, populated with substantive clauses (not the unpopulated template
+        placeholder), once it is submitted for public review (Committee Specification Draft on the public-review
+        track), approved as a Committee Specification, or approved as an OASIS Standard.
+      doc: tc-process.txt
+      doc_label: OASIS TC Process (2017-05-26)
+      url: https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/
+      section: 2.2.6 Conformance Clauses
+      quote: A Standards Track Work Product that is approved by the TC at the Committee Specification
+        Public Review Draft, Committee Specification or OASIS Standard level must include a separate section,
+        listing a set of numbered conformance clauses , to which any implementation of the specification
+        must adhere in order to claim conformance to the specification (or any optional portion thereof).
+      severity: BLOCKER
+    - criterion: AC-CONTENT-01
+      criterion_statement: A Standards Track work product package MUST contain a separate, top-level,
+        numbered Conformance section, populated with substantive clauses (not the unpopulated template
+        placeholder), once it is submitted for public review (Committee Specification Draft on the public-review
+        track), approved as a Committee Specification, or approved as an OASIS Standard.
+      doc: handbook-Conformance.txt
+      doc_label: 'TC Handbook: Conformance'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Conformance.html
+      section: When conformance clauses are required (Policy requirement)
+      quote: A Standards Track work product must include a conformance clause section before it can be
+        submitted for public review (the Committee Specification Public Review Draft stage), approved
+        as a Committee Specification (CS) , or approved as an OASIS Standard (OS) .
+      severity: BLOCKER
+    - criterion: AC-CONTENT-01
+      criterion_statement: A Standards Track work product package MUST contain a separate, top-level,
+        numbered Conformance section, populated with substantive clauses (not the unpopulated template
+        placeholder), once it is submitted for public review (Committee Specification Draft on the public-review
+        track), approved as a Committee Specification, or approved as an OASIS Standard.
+      doc: handbook-WorkProductLifecycle.txt
+      doc_label: 'TC Handbook: WorkProductLifecycle'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WorkProductLifecycle.html
+      section: Standards Track (Public Review)
+      quote: A Standards Track work product approved at the Committee Specification Public Review Draft
+        , Committee Specification, or OASIS Standard level must include a separate, numbered conformance
+        clause section
+      severity: BLOCKER
+    - criterion: AC-CONTENT-01
+      criterion_statement: A Standards Track work product package MUST contain a separate, top-level,
+        numbered Conformance section, populated with substantive clauses (not the unpopulated template
+        placeholder), once it is submitted for public review (Committee Specification Draft on the public-review
+        track), approved as a Committee Specification, or approved as an OASIS Standard.
+      doc: handbook-CommitteeSpecDrafts.txt
+      doc_label: 'TC Handbook: CommitteeSpecDrafts'
+      url: https://docs.oasis-open.org/TChandbook/Reference/CommitteeSpecDrafts.html
+      section: Quality requirements at the csd stage
+      quote: The trigger is therefore the public-review stage (the Committee Specification Public Review
+        Draft level), not the initial §2.5 CSD-approval ballot . A CSD approved only for internal development
+        need not yet carry the conformance section; the obligation attaches when that CSD is submitted
+        for public review.
+      severity: BLOCKER
+    - criterion: AC-CONTENT-01
+      criterion_statement: A Standards Track work product package MUST contain a separate, top-level,
+        numbered Conformance section, populated with substantive clauses (not the unpopulated template
+        placeholder), once it is submitted for public review (Committee Specification Draft on the public-review
+        track), approved as a Committee Specification, or approved as an OASIS Standard.
+      doc: handbook-Conformance.txt
+      doc_label: 'TC Handbook: Conformance'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Conformance.html
+      section: Required structure of the conformance section
+      quote: Work product templates provided by OASIS TC Administration include a placeholder conformance
+        section; editors must populate it with substantive clauses before the work product is submitted
+        for public review.
+      severity: BLOCKER
+  conformance-structure/Duplicate clause number:
+    check: conformance-structure
+    sig: Duplicate clause number
+    criteria:
+    - AC-CONTENT-10
+    authorities:
+    - criterion: AC-CONTENT-10
+      criterion_statement: Conformance clause numbering SHOULD be unique within the work product and stable
+        across revisions, so that a clause number continues to identify the same requirement.
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: Key principles
+      quote: Clause numbering must be unique and stable across revisions.
+      severity: WARN
+  conformance-structure/Clause number removed/renumbered:
+    check: conformance-structure
+    sig: Clause number removed/renumbered
+    criteria:
+    - AC-CONTENT-10
+    authorities:
+    - criterion: AC-CONTENT-10
+      criterion_statement: Conformance clause numbering SHOULD be unique within the work product and stable
+        across revisions, so that a clause number continues to identify the same requirement.
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: Key principles
+      quote: Clause numbering must be unique and stable across revisions.
+      severity: WARN
+  conformance-structure/Clause silently renumbered:
+    check: conformance-structure
+    sig: Clause silently renumbered
+    criteria:
+    - AC-CONTENT-10
+    authorities:
+    - criterion: AC-CONTENT-10
+      criterion_statement: Conformance clause numbering SHOULD be unique within the work product and stable
+        across revisions, so that a clause number continues to identify the same requirement.
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: Key principles
+      quote: Clause numbering must be unique and stable across revisions.
+      severity: WARN
+  conformance-structure/OS conformance clause numbering differs from approved CS:
+    check: conformance-structure
+    sig: OS conformance clause numbering differs from approved CS
+    criteria:
+    - AC-CONTENT-09
+    authorities:
+    - criterion: AC-CONTENT-09
+      criterion_statement: An OASIS Standard's conformance clauses MUST be preserved unchanged from the
+        approved Committee Specification they were promoted from; substantive changes follow the Approved
+        Errata process, not republication.
+      doc: handbook-Conformance.txt
+      doc_label: 'TC Handbook: Conformance'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Conformance.html
+      section: OASIS Standard os
+      quote: Conformance clauses are preserved unchanged from the approved Committee Specification. Amendments
+        to a published OASIS Standard follow the Approved Errata process.
+      severity: BLOCKER
+  conformance-structure/OS conformance clause wording differs from approved CS under a stable number:
+    check: conformance-structure
+    sig: OS conformance clause wording differs from approved CS under a stable number
+    criteria:
+    - AC-CONTENT-09
+    authorities:
+    - criterion: AC-CONTENT-09
+      criterion_statement: An OASIS Standard's conformance clauses MUST be preserved unchanged from the
+        approved Committee Specification they were promoted from; substantive changes follow the Approved
+        Errata process, not republication.
+      doc: handbook-Conformance.txt
+      doc_label: 'TC Handbook: Conformance'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Conformance.html
+      section: OASIS Standard os
+      quote: Conformance clauses are preserved unchanged from the approved Committee Specification. Amendments
+        to a published OASIS Standard follow the Approved Errata process.
+      severity: BLOCKER
+  references-split/is not labeled Normative References / Informative References:
+    check: references-split
+    sig: is not labeled Normative References / Informative References
+    criteria:
+    - AC-CONTENT-05
+    authorities:
+    - criterion: AC-CONTENT-05
+      criterion_statement: A Standards Track work product package SHOULD include a References section
+        that lists Normative References separately from Informative References, with normative and informative
+        content marked consistently throughout the document.
+      doc: handbook-WPQualityChecklist.txt
+      doc_label: 'TC Handbook: WPQualityChecklist'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html
+      section: Editorial quality verification checklist, key areas
+      quote: 'Normative vs. informative content: sections marked consistently; normative references listed
+        separately from informative references.'
+      severity: WARN
+    - criterion: AC-CONTENT-05
+      criterion_statement: A Standards Track work product package SHOULD include a References section
+        that lists Normative References separately from Informative References, with normative and informative
+        content marked consistently throughout the document.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 9 Notes - Track
+      quote: 'A Standards Track Work Product, intended as an implementation
+
+        specification, contains a required set of numbered conformance clauses
+
+        and has Normative References.'
+      severity: WARN
+  references-split/is listed under both Normative References and:
+    check: references-split
+    sig: is listed under both Normative References and
+    criteria:
+    - AC-CONTENT-05
+    authorities:
+    - criterion: AC-CONTENT-05
+      criterion_statement: A Standards Track work product package SHOULD include a References section
+        that lists Normative References separately from Informative References, with normative and informative
+        content marked consistently throughout the document.
+      doc: handbook-WPQualityChecklist.txt
+      doc_label: 'TC Handbook: WPQualityChecklist'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html
+      section: Editorial quality verification checklist, key areas
+      quote: 'Normative vs. informative content: sections marked consistently; normative references listed
+        separately from informative references.'
+      severity: WARN
+    - criterion: AC-CONTENT-05
+      criterion_statement: A Standards Track work product package SHOULD include a References section
+        that lists Normative References separately from Informative References, with normative and informative
+        content marked consistently throughout the document.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 9 Notes - Track
+      quote: 'A Standards Track Work Product, intended as an implementation
+
+        specification, contains a required set of numbered conformance clauses
+
+        and has Normative References.'
+      severity: WARN
+  content-labels/the Handbook classifies Examples as non-normative content:
+    check: content-labels
+    sig: the Handbook classifies Examples as non-normative content
+    criteria:
+    - AC-CONTENT-08
+    authorities:
+    - criterion: AC-CONTENT-08
+      criterion_statement: Appendices, examples, and other non-normative content SHOULD be explicitly
+        labelled 'Non-normative' so they are not mistaken for conformance requirements.
+      doc: handbook-Conformance.txt
+      doc_label: 'TC Handbook: Conformance'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Conformance.html
+      section: Normative versus non-normative content
+      quote: Appendices and examples that are not part of the conformance requirements should be marked
+        "Non-normative".
+      severity: WARN
+    - criterion: AC-CONTENT-08
+      criterion_statement: Appendices, examples, and other non-normative content SHOULD be explicitly
+        labelled 'Non-normative' so they are not mistaken for conformance requirements.
+      doc: handbook-Conformance.txt
+      doc_label: 'TC Handbook: Conformance'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Conformance.html
+      section: Normative versus non-normative content
+      quote: Provides explanatory, illustrative, or informative content; does not create binding obligations
+        for conformance. Should be clearly labelled.
+      severity: WARN
+  stage-token/carries a retired stage token:
+    check: stage-token
+    sig: carries a retired stage token
+    criteria:
+    - AC-NAMING-01
+    authorities:
+    - criterion: AC-NAMING-01
+      criterion_statement: The package MUST NOT use the retired stage abbreviations csprd, cnprd, or cos
+        in any filename, directory name, URI, or cover-page text.
+      doc: handbook-PublicReviews.txt
+      doc_label: 'TC Handbook: PublicReviews'
+      url: https://docs.oasis-open.org/TChandbook/Reference/PublicReviews.html
+      section: What changed since the 2010 handbook / Stage names removed
+      quote: Do not use csprd or cnprd in any filename, URI, or cover page.
+      severity: BLOCKER
+    - criterion: AC-NAMING-01
+      criterion_statement: The package MUST NOT use the retired stage abbreviations csprd, cnprd, or cos
+        in any filename, directory name, URI, or cover-page text.
+      doc: handbook-CommitteeSpecs.txt
+      doc_label: 'TC Handbook: CommitteeSpecs'
+      url: https://docs.oasis-open.org/TChandbook/Reference/CommitteeSpecs.html
+      section: Naming and URIs after approval
+      quote: The abbreviation csprd is obsolete and must not be used .
+      severity: BLOCKER
+    - criterion: AC-NAMING-01
+      criterion_statement: The package MUST NOT use the retired stage abbreviations csprd, cnprd, or cos
+        in any filename, directory name, URI, or cover-page text.
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: File naming and URI pattern
+      quote: The abbreviations csprd , cnprd , and cos are obsolete and removed as of Naming Directives
+        v1.7.
+      severity: BLOCKER
+    - criterion: AC-NAMING-01
+      criterion_statement: The package MUST NOT use the retired stage abbreviations csprd, cnprd, or cos
+        in any filename, directory name, URI, or cover-page text.
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: Historical note
+      quote: 'The following abbreviations were used before Naming Directives v1.7 (January 2, 2024) and
+        are now obsolete and removed : csprd (Committee Specification Public Review Draft), cnprd (Committee
+        Note Public Review Draft), cos (Candidate OASIS Standard as a named stage). They must not appear
+        in any new or revised work-product filenames or URIs.'
+      severity: BLOCKER
+    - criterion: AC-NAMING-01
+      criterion_statement: The package MUST NOT use the retired stage abbreviations csprd, cnprd, or cos
+        in any filename, directory name, URI, or cover-page text.
+      doc: handbook-CommitteeNoteDrafts.txt
+      doc_label: 'TC Handbook: CommitteeNoteDrafts'
+      url: https://docs.oasis-open.org/TChandbook/Reference/CommitteeNoteDrafts.html
+      section: Naming and URI conventions
+      quote: The abbreviations cnprd and csprd were removed from the Naming Directives in v1.7 (effective
+        2 January 2024) and must not appear in new filenames or URIs.
+      severity: BLOCKER
+  stage-token/carries stage token ':
+    check: stage-token
+    sig: carries stage token '
+    criteria:
+    - AC-NAMING-02
+    authorities:
+    - criterion: AC-NAMING-02
+      criterion_statement: A Standards Track package MUST use one of the current stage abbreviations csd,
+        cs, os, or errata as its stage token.
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: File naming and URI pattern
+      quote: 'Standards Track: csd , cs , os , errata (the os stage never carries a revision number).'
+      severity: BLOCKER
+    - criterion: AC-NAMING-02
+      criterion_statement: A Standards Track package MUST use one of the current stage abbreviations csd,
+        cs, os, or errata as its stage token.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 5.2 Stage
+      quote: 'a release is thus identified using a string
+
+        matching "[stage-abbrev][revisionNumber]", where "stage-abbrev" is one
+
+        of the following, in lower case: csd, cs, os, errata, cnd, cn.'
+      severity: BLOCKER
+    - criterion: AC-NAMING-02
+      criterion_statement: A Standards Track package MUST use one of the current stage abbreviations csd,
+        cs, os, or errata as its stage token.
+      doc: handbook-Maintenance.txt
+      doc_label: 'TC Handbook: Maintenance'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Maintenance.html
+      section: Naming and stage abbreviation
+      quote: 'Documents published through the Approved Errata process use the errata stage abbreviation
+        in their filenames and URIs. This is one of the four current Standards Track stage abbreviations:
+        csd , cs , os , errata .'
+      severity: BLOCKER
+  stage-token/embeds a stage-abbreviation token:
+    check: stage-token
+    sig: embeds a stage-abbreviation token
+    criteria:
+    - AC-FRONTMATTER-04
+    authorities:
+    - criterion: AC-FRONTMATTER-04
+      criterion_statement: The 'Latest stage' cover-page URI MUST resolve to the persistent version-root
+        location, MUST NOT contain the stage-abbreviation/revision-number path component, and is the only
+        one of the three required URIs that may be overwritten by a later publication.
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: Cover-page metadata and the three required URIs (Latest stage)
+      quote: This is the only URI that may be updated (overwritten) when a newer version is published.
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-04
+      criterion_statement: The 'Latest stage' cover-page URI MUST resolve to the persistent version-root
+        location, MUST NOT contain the stage-abbreviation/revision-number path component, and is the only
+        one of the three required URIs that may be overwritten by a later publication.
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: Three required cover-page URIs (Policy requirement)
+      quote: 'Latest stage : an alias URI that always points to the most current publication of this work
+        product, regardless of stage or revision. Unlike the "This stage" URI, the latest-stage alias
+        is overwritten with each new publication (it is the only URI that may be updated after a document
+        is published).'
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-04
+      criterion_statement: The 'Latest stage' cover-page URI MUST resolve to the persistent version-root
+        location, MUST NOT contain the stage-abbreviation/revision-number path component, and is the only
+        one of the three required URIs that may be overwritten by a later publication.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 6.2 Required Document URIs
+      quote: 'This locator URI does not contain the path component [stage-abbrev][revisionNumber] or stage
+
+        identifier in the filename.'
+      severity: BLOCKER
+  title-version/does not incorporate a Version identifier:
+    check: title-version
+    sig: does not incorporate a Version identifier
+    criteria:
+    - AC-FRONTMATTER-10
+    authorities:
+    - criterion: AC-FRONTMATTER-10
+      criterion_statement: The work product title MUST incorporate the Version identifier; the title SHOULD
+        be composed as the name/identifier followed immediately (without punctuation) by the word 'Version'
+        and the version number.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 5.1 Version
+      quote: 'A Version identifier must also be incorporated into a Work Product name/title , where a
+        title should be composed
+
+        from a suitable name/identifier followed immediately (without
+
+        punctuation) by the word "Version" and the Version number'
+      severity: BLOCKER
+  title-version/cites a different Version than the package's own Version identifier:
+    check: title-version
+    sig: cites a different Version than the package's own Version identifier
+    criteria:
+    - AC-FRONTMATTER-10
+    authorities:
+    - criterion: AC-FRONTMATTER-10
+      criterion_statement: The work product title MUST incorporate the Version identifier; the title SHOULD
+        be composed as the name/identifier followed immediately (without punctuation) by the word 'Version'
+        and the version number.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 5.1 Version
+      quote: 'A Version identifier must also be incorporated into a Work Product name/title , where a
+        title should be composed
+
+        from a suitable name/identifier followed immediately (without
+
+        punctuation) by the word "Version" and the Version number'
+      severity: BLOCKER
+  title-version/Version composition does not follow the required:
+    check: title-version
+    sig: Version composition does not follow the required
+    criteria:
+    - AC-FRONTMATTER-10
+    - AC-NAMING-06
+    authorities:
+    - criterion: AC-FRONTMATTER-10
+      criterion_statement: The work product title MUST incorporate the Version identifier; the title SHOULD
+        be composed as the name/identifier followed immediately (without punctuation) by the word 'Version'
+        and the version number.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 5.1 Version
+      quote: 'A Version identifier must also be incorporated into a Work Product name/title , where a
+        title should be composed
+
+        from a suitable name/identifier followed immediately (without
+
+        punctuation) by the word "Version" and the Version number'
+      severity: BLOCKER
+    - criterion: AC-NAMING-06
+      criterion_statement: 'The version-id component of package filenames, directory names, and URIs MUST
+        be a lower-case ''v'' followed by a numeric string in the #.#, #.##, #.#.#, or ##.# form.'
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: '[version-id] is a versioning
+
+        identifier component composed of the single character "v" (lower case),
+
+        followed by a numeric string matching the rules for Version'
+      severity: BLOCKER
+    - criterion: AC-NAMING-06
+      criterion_statement: 'The version-id component of package filenames, directory names, and URIs MUST
+        be a lower-case ''v'' followed by a numeric string in the #.#, #.##, #.#.#, or ##.# form.'
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 5.1 Version
+      quote: 'A Version in this formal sense must be represented textually by a
+
+        numeric string composed of digits [0-9] and period (".") corresponding
+
+        to any of the approved lexical models'
+      severity: BLOCKER
+    - criterion: AC-NAMING-06
+      criterion_statement: 'The version-id component of package filenames, directory names, and URIs MUST
+        be a lower-case ''v'' followed by a numeric string in the #.#, #.##, #.#.#, or ##.# form.'
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: Filename pattern
+      quote: '[version-id] : the version identifier in #.# , #.## , #.#.# , or ##.# form (e.g., v1.0 ,
+        v1.01 , v1.2.1 , v10.1 ). The version identifier should also appear in the work product''s title.'
+      severity: BLOCKER
+  title-oasis-prefix/Work Product title begins with 'OASIS':
+    check: title-oasis-prefix
+    sig: Work Product title begins with 'OASIS'
+    criteria:
+    - AC-FRONTMATTER-12
+    authorities:
+    - criterion: AC-FRONTMATTER-12
+      criterion_statement: The work product title SHOULD NOT begin with the word 'OASIS', absent a Project
+        Administration recommendation for a special case.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 7 Work Product Title/Name and Acronym
+      quote: 'Preferably, a title should not begin with the name "OASIS" except
+
+        on the recommendation of Project Administration for special cases.'
+      severity: WARN
+  authors/No Authors section or byline found:
+    check: authors
+    sig: No Authors section or byline found
+    criteria:
+    - AC-FRONTMATTER-18
+    authorities:
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-TechnicalReports.txt
+      doc_label: 'TC Handbook: TechnicalReports'
+      url: https://docs.oasis-open.org/TChandbook/Reference/TechnicalReports.html
+      section: Key characteristics
+      quote: A Technical Report has one or more named Authors . This distinguishes it from Committee Notes,
+        which list editors. Authorship is recorded on the cover page and is part of the definition of
+        the work product type.
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-Glossary.txt
+      doc_label: 'TC Handbook: Glossary'
+      url: https://docs.oasis-open.org/TChandbook/Concepts/Glossary.html
+      section: Technical Report (TR)
+      quote: Unlike a Committee Note, a Technical Report has one or more named Authors (not just editors).
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-WorkProductLifecycle.txt
+      doc_label: 'TC Handbook: WorkProductLifecycle'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WorkProductLifecycle.html
+      section: Technical Reports
+      quote: The TC approves a Technical Report Draft (TRD) by Full Majority Vote . Unlike Committee Notes,
+        a Technical Report has one or more named Authors (not just editors).
+      severity: BLOCKER
+  authors/Authors section is empty or placeholder-only:
+    check: authors
+    sig: Authors section is empty or placeholder-only
+    criteria:
+    - AC-FRONTMATTER-18
+    authorities:
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-TechnicalReports.txt
+      doc_label: 'TC Handbook: TechnicalReports'
+      url: https://docs.oasis-open.org/TChandbook/Reference/TechnicalReports.html
+      section: Key characteristics
+      quote: A Technical Report has one or more named Authors . This distinguishes it from Committee Notes,
+        which list editors. Authorship is recorded on the cover page and is part of the definition of
+        the work product type.
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-Glossary.txt
+      doc_label: 'TC Handbook: Glossary'
+      url: https://docs.oasis-open.org/TChandbook/Concepts/Glossary.html
+      section: Technical Report (TR)
+      quote: Unlike a Committee Note, a Technical Report has one or more named Authors (not just editors).
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-WorkProductLifecycle.txt
+      doc_label: 'TC Handbook: WorkProductLifecycle'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WorkProductLifecycle.html
+      section: Technical Reports
+      quote: The TC approves a Technical Report Draft (TRD) by Full Majority Vote . Unlike Committee Notes,
+        a Technical Report has one or more named Authors (not just editors).
+      severity: BLOCKER
+  authors/unresolved 'will be filled in' placeholder:
+    check: authors
+    sig: unresolved 'will be filled in' placeholder
+    criteria:
+    - AC-FRONTMATTER-18
+    authorities:
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-TechnicalReports.txt
+      doc_label: 'TC Handbook: TechnicalReports'
+      url: https://docs.oasis-open.org/TChandbook/Reference/TechnicalReports.html
+      section: Key characteristics
+      quote: A Technical Report has one or more named Authors . This distinguishes it from Committee Notes,
+        which list editors. Authorship is recorded on the cover page and is part of the definition of
+        the work product type.
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-Glossary.txt
+      doc_label: 'TC Handbook: Glossary'
+      url: https://docs.oasis-open.org/TChandbook/Concepts/Glossary.html
+      section: Technical Report (TR)
+      quote: Unlike a Committee Note, a Technical Report has one or more named Authors (not just editors).
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-WorkProductLifecycle.txt
+      doc_label: 'TC Handbook: WorkProductLifecycle'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WorkProductLifecycle.html
+      section: Technical Reports
+      quote: The TC approves a Technical Report Draft (TRD) by Full Majority Vote . Unlike Committee Notes,
+        a Technical Report has one or more named Authors (not just editors).
+      severity: BLOCKER
+  authors/still reads 'will be filled in' on an approved Technical Report:
+    check: authors
+    sig: still reads 'will be filled in' on an approved Technical Report
+    criteria:
+    - AC-FRONTMATTER-18
+    authorities:
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-TechnicalReports.txt
+      doc_label: 'TC Handbook: TechnicalReports'
+      url: https://docs.oasis-open.org/TChandbook/Reference/TechnicalReports.html
+      section: Key characteristics
+      quote: A Technical Report has one or more named Authors . This distinguishes it from Committee Notes,
+        which list editors. Authorship is recorded on the cover page and is part of the definition of
+        the work product type.
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-Glossary.txt
+      doc_label: 'TC Handbook: Glossary'
+      url: https://docs.oasis-open.org/TChandbook/Concepts/Glossary.html
+      section: Technical Report (TR)
+      quote: Unlike a Committee Note, a Technical Report has one or more named Authors (not just editors).
+      severity: BLOCKER
+    - criterion: AC-FRONTMATTER-18
+      criterion_statement: If the package is a Technical Report, its cover page MUST record one or more
+        named Authors; a Committee Note, by contrast, need only list editors.
+      doc: handbook-WorkProductLifecycle.txt
+      doc_label: 'TC Handbook: WorkProductLifecycle'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WorkProductLifecycle.html
+      section: Technical Reports
+      quote: The TC approves a Technical Report Draft (TRD) by Full Majority Vote . Unlike Committee Notes,
+        a Technical Report has one or more named Authors (not just editors).
+      severity: BLOCKER
+  name-chars/must never be used in a filename or directory name that is used in a document URI:
+    check: name-chars
+    sig: must never be used in a filename or directory name that is used in a document URI
+    criteria:
+    - AC-NAMING-08
+    - AC-NAMING-07
+    authorities:
+    - criterion: AC-NAMING-08
+      criterion_statement: Underscores MUST NOT appear anywhere in a document URI (docs.oasis-open.org
+        path or self-referential link).
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 3 Name Characters for Files and Directories
+      quote: 'An UNDERSCORE must never be used in a filename or directory name that
+
+        is used in a document URI'
+      severity: BLOCKER
+    - criterion: AC-NAMING-08
+      criterion_statement: Underscores MUST NOT appear anywhere in a document URI (docs.oasis-open.org
+        path or self-referential link).
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: File naming and URI pattern
+      quote: Filenames and URIs follow a structured pattern defined in the Naming Directives. Allowed
+        characters are alphanumerics, periods, and hyphens; underscores may appear in generated filenames
+        but not in document URIs.
+      severity: BLOCKER
+    - criterion: AC-NAMING-08
+      criterion_statement: Underscores MUST NOT appear anywhere in a document URI (docs.oasis-open.org
+        path or self-referential link).
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: Allowed characters (Policy requirement)
+      quote: Only alphanumerics ( A–Z , a–z , 0–9 ), hyphens ( - ), and periods ( . ) are permitted in
+        document URIs. Underscores ( _ ) may appear in generated filenames but must not appear in document
+        URIs.
+      severity: BLOCKER
+    - criterion: AC-NAMING-07
+      criterion_statement: Filenames and directory names in the package MUST contain only alphanumeric
+        characters, periods, and hyphens.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 3 Name Characters for Files and Directories
+      quote: 'TCs must use only the sixty-four characters from among
+
+        alphanumerics [A-Za-z0-9] and the two punctuation characters: "."
+
+        (PERIOD), and "-" (HYPHEN)'
+      severity: BLOCKER
+  name-chars/no exception applies to an identifying package name:
+    check: name-chars
+    sig: no exception applies to an identifying package name
+    criteria:
+    - AC-NAMING-07
+    authorities:
+    - criterion: AC-NAMING-07
+      criterion_statement: Filenames and directory names in the package MUST contain only alphanumeric
+        characters, periods, and hyphens.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 3 Name Characters for Files and Directories
+      quote: 'TCs must use only the sixty-four characters from among
+
+        alphanumerics [A-Za-z0-9] and the two punctuation characters: "."
+
+        (PERIOD), and "-" (HYPHEN)'
+      severity: BLOCKER
+  name-chars/no other character is permitted anywhere in the package:
+    check: name-chars
+    sig: no other character is permitted anywhere in the package
+    criteria:
+    - AC-NAMING-07
+    authorities:
+    - criterion: AC-NAMING-07
+      criterion_statement: Filenames and directory names in the package MUST contain only alphanumeric
+        characters, periods, and hyphens.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 3 Name Characters for Files and Directories
+      quote: 'TCs must use only the sixty-four characters from among
+
+        alphanumerics [A-Za-z0-9] and the two punctuation characters: "."
+
+        (PERIOD), and "-" (HYPHEN)'
+      severity: BLOCKER
+  extension-count/has no file extension after the document-identifier stem:
+    check: extension-count
+    sig: has no file extension after the document-identifier stem
+    criteria:
+    - AC-NAMING-16
+    authorities:
+    - criterion: AC-NAMING-16
+      criterion_statement: Every filename in the package MUST carry exactly one file extension, except
+        for a recognized set of extensionless filenames in common use (the Naming Directives' examples
+        include CATALOG, catalog, README, and ChangeLog).
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: 'A single file(name) extension must be
+
+        used in each filename except for a recognized set of extensionless
+
+        filenames in common use.'
+      severity: BLOCKER
+    - criterion: AC-NAMING-16
+      criterion_statement: Every filename in the package MUST carry exactly one file extension, except
+        for a recognized set of extensionless filenames in common use (the Naming Directives' examples
+        include CATALOG, catalog, README, and ChangeLog).
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 9 Notes - Filenames without extensions
+      quote: 'Exceptions to the rule that every
+
+        filename much include a file extension include: CATALOG or catalog,
+
+        README, ChangeLog.'
+      severity: BLOCKER
+  extension-count/carries more than one file extension after the stem:
+    check: extension-count
+    sig: carries more than one file extension after the stem
+    criteria:
+    - AC-NAMING-16
+    authorities:
+    - criterion: AC-NAMING-16
+      criterion_statement: Every filename in the package MUST carry exactly one file extension, except
+        for a recognized set of extensionless filenames in common use (the Naming Directives' examples
+        include CATALOG, catalog, README, and ChangeLog).
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: 'A single file(name) extension must be
+
+        used in each filename except for a recognized set of extensionless
+
+        filenames in common use.'
+      severity: BLOCKER
+    - criterion: AC-NAMING-16
+      criterion_statement: Every filename in the package MUST carry exactly one file extension, except
+        for a recognized set of extensionless filenames in common use (the Naming Directives' examples
+        include CATALOG, catalog, README, and ChangeLog).
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 9 Notes - Filenames without extensions
+      quote: 'Exceptions to the rule that every
+
+        filename much include a file extension include: CATALOG or catalog,
+
+        README, ChangeLog.'
+      severity: BLOCKER
+  extension-count/outside the recognized common-use set:
+    check: extension-count
+    sig: outside the recognized common-use set
+    criteria:
+    - AC-NAMING-16
+    authorities:
+    - criterion: AC-NAMING-16
+      criterion_statement: Every filename in the package MUST carry exactly one file extension, except
+        for a recognized set of extensionless filenames in common use (the Naming Directives' examples
+        include CATALOG, catalog, README, and ChangeLog).
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: 'A single file(name) extension must be
+
+        used in each filename except for a recognized set of extensionless
+
+        filenames in common use.'
+      severity: BLOCKER
+    - criterion: AC-NAMING-16
+      criterion_statement: Every filename in the package MUST carry exactly one file extension, except
+        for a recognized set of extensionless filenames in common use (the Naming Directives' examples
+        include CATALOG, catalog, README, and ChangeLog).
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 9 Notes - Filenames without extensions
+      quote: 'Exceptions to the rule that every
+
+        filename much include a file extension include: CATALOG or catalog,
+
+        README, ChangeLog.'
+      severity: BLOCKER
+  extension-conformance/is not on this check's table of common OASIS publication rendering-format extensions:
+    check: extension-conformance
+    sig: is not on this check's table of common OASIS publication rendering-format extensions
+    criteria:
+    - AC-NAMING-17
+    authorities:
+    - criterion: AC-NAMING-17
+      criterion_statement: File extensions used in the package SHOULD conform to well-known IANA MIME
+        media types.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: 'File extensions should conform to industry best practice — matching well-known IANA MIME
+        Media
+
+        Types .'
+      severity: WARN
+  artifact-naming/filename embeds a stage/revision token:
+    check: artifact-naming
+    sig: filename embeds a stage/revision token
+    criteria:
+    - AC-NAMING-31
+    authorities:
+    - criterion: AC-NAMING-31
+      criterion_statement: Instance-specific stage and revision data SHOULD NOT be embedded in artifact
+        filenames other than the document-identifier files that are required to carry it.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: it is considered inadvisable to incorporate instance-specific [ stage ][ revision ] data
+        for any release in filenames other than in the document identifier files, as required
+      severity: WARN
+  multi-part-naming/inconsistent WP-abbrev tokens:
+    check: multi-part-naming
+    sig: inconsistent WP-abbrev tokens
+    criteria:
+    - AC-NAMING-19
+    authorities:
+    - criterion: AC-NAMING-19
+      criterion_statement: A multi-part Work Product MUST share exactly one Work Product name and one
+        version number across all constituent part files.
+      doc: tc-process.txt
+      doc_label: OASIS TC Process (2017-05-26)
+      url: https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/
+      section: 2.2.3 Multi-Part Work Products
+      quote: any such multi-part Work Product must have a single Work Product name and version number
+      severity: BLOCKER
+    - criterion: AC-NAMING-19
+      criterion_statement: A multi-part Work Product MUST share exactly one Work Product name and one
+        version number across all constituent part files.
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: Multi-part work products
+      quote: A multi-part Work Product must have a single Work Product name and version number across
+        all parts, and the entire Work Product receives unified approval through a single ballot regardless
+        of the number of constituent files.
+      severity: BLOCKER
+  multi-part-naming/inconsistent version-id tokens:
+    check: multi-part-naming
+    sig: inconsistent version-id tokens
+    criteria:
+    - AC-NAMING-19
+    authorities:
+    - criterion: AC-NAMING-19
+      criterion_statement: A multi-part Work Product MUST share exactly one Work Product name and one
+        version number across all constituent part files.
+      doc: tc-process.txt
+      doc_label: OASIS TC Process (2017-05-26)
+      url: https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/
+      section: 2.2.3 Multi-Part Work Products
+      quote: any such multi-part Work Product must have a single Work Product name and version number
+      severity: BLOCKER
+    - criterion: AC-NAMING-19
+      criterion_statement: A multi-part Work Product MUST share exactly one Work Product name and one
+        version number across all constituent part files.
+      doc: handbook-WPQualityRequirements.txt
+      doc_label: 'TC Handbook: WPQualityRequirements'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html
+      section: Multi-part work products
+      quote: A multi-part Work Product must have a single Work Product name and version number across
+        all parts, and the entire Work Product receives unified approval through a single ballot regardless
+        of the number of constituent files.
+      severity: BLOCKER
+  multi-part-naming/bare canonical filename in a multi-part package:
+    check: multi-part-naming
+    sig: bare canonical filename in a multi-part package
+    criteria:
+    - AC-NAMING-20
+    authorities:
+    - criterion: AC-NAMING-20
+      criterion_statement: Multi-part Work Product filenames MUST insert a part identifier between the
+        stage designator and the extension, composed of the literal 'part' plus a monotonically increasing
+        Arabic numeral beginning at 1.
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: Multi-part work products
+      quote: 'For work products published in multiple parts, insert a part identifier between the stage
+        designator and the extension: Naming Directives v1.7 [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-[partNumber]-[partName].[ext]'
+      severity: BLOCKER
+    - criterion: AC-NAMING-20
+      criterion_statement: Multi-part Work Product filenames MUST insert a part identifier between the
+        stage designator and the extension, composed of the literal 'part' plus a monotonically increasing
+        Arabic numeral beginning at 1.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: 'The filename for a distinct
+
+        separately-titled prose part of a Multi-Part Work Product must
+
+        (typically) have the following structure unless otherwise approved by
+
+        Project Administration'
+      severity: BLOCKER
+    - criterion: AC-NAMING-20
+      criterion_statement: Multi-part Work Product filenames MUST insert a part identifier between the
+        stage designator and the extension, composed of the literal 'part' plus a monotonically increasing
+        Arabic numeral beginning at 1.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: '[partNumber] is composed of
+
+        literal "part" concatenated with an Arabic number, beginning with the
+
+        number "1" (for Part 1) and increasing monotonically (2, 3, 4, ...) for
+
+        other parts'
+      severity: BLOCKER
+  multi-part-naming/missing part identifier:
+    check: multi-part-naming
+    sig: missing part identifier
+    criteria:
+    - AC-NAMING-20
+    authorities:
+    - criterion: AC-NAMING-20
+      criterion_statement: Multi-part Work Product filenames MUST insert a part identifier between the
+        stage designator and the extension, composed of the literal 'part' plus a monotonically increasing
+        Arabic numeral beginning at 1.
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: Multi-part work products
+      quote: 'For work products published in multiple parts, insert a part identifier between the stage
+        designator and the extension: Naming Directives v1.7 [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-[partNumber]-[partName].[ext]'
+      severity: BLOCKER
+    - criterion: AC-NAMING-20
+      criterion_statement: Multi-part Work Product filenames MUST insert a part identifier between the
+        stage designator and the extension, composed of the literal 'part' plus a monotonically increasing
+        Arabic numeral beginning at 1.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: 'The filename for a distinct
+
+        separately-titled prose part of a Multi-Part Work Product must
+
+        (typically) have the following structure unless otherwise approved by
+
+        Project Administration'
+      severity: BLOCKER
+    - criterion: AC-NAMING-20
+      criterion_statement: Multi-part Work Product filenames MUST insert a part identifier between the
+        stage designator and the extension, composed of the literal 'part' plus a monotonically increasing
+        Arabic numeral beginning at 1.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: '[partNumber] is composed of
+
+        literal "part" concatenated with an Arabic number, beginning with the
+
+        number "1" (for Part 1) and increasing monotonically (2, 3, 4, ...) for
+
+        other parts'
+      severity: BLOCKER
+  multi-part-naming/part number reused for different parts:
+    check: multi-part-naming
+    sig: part number reused for different parts
+    criteria:
+    - AC-NAMING-32
+    authorities:
+    - criterion: AC-NAMING-32
+      criterion_statement: In a multi-part Work Product, each part number MUST begin at 1 for the first
+        part and increase monotonically (2, 3, 4, ...) for subsequent parts, so part numbers are unique
+        and gap-free.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: beginning with the number "1" (for Part 1) and increasing monotonically (2, 3, 4, ...) for
+        other parts
+      severity: BLOCKER
+  multi-part-naming/part numbering does not begin at 1:
+    check: multi-part-naming
+    sig: part numbering does not begin at 1
+    criteria:
+    - AC-NAMING-32
+    authorities:
+    - criterion: AC-NAMING-32
+      criterion_statement: In a multi-part Work Product, each part number MUST begin at 1 for the first
+        part and increase monotonically (2, 3, 4, ...) for subsequent parts, so part numbers are unique
+        and gap-free.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: beginning with the number "1" (for Part 1) and increasing monotonically (2, 3, 4, ...) for
+        other parts
+      severity: BLOCKER
+  multi-part-naming/part numbering is not monotonically increasing / contains a gap:
+    check: multi-part-naming
+    sig: part numbering is not monotonically increasing / contains a gap
+    criteria:
+    - AC-NAMING-32
+    authorities:
+    - criterion: AC-NAMING-32
+      criterion_statement: In a multi-part Work Product, each part number MUST begin at 1 for the first
+        part and increase monotonically (2, 3, 4, ...) for subsequent parts, so part numbers are unique
+        and gap-free.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 4 Name Construction Rules for Files and Directories
+      quote: beginning with the number "1" (for Part 1) and increasing monotonically (2, 3, 4, ...) for
+        other parts
+      severity: BLOCKER
+  public-review-metadata/does not carry the required companion file:
+    check: public-review-metadata
+    sig: does not carry the required companion file
+    criteria:
+    - AC-NAMING-21
+    authorities:
+    - criterion: AC-NAMING-21
+      criterion_statement: A package that underwent public review MUST include a companion metadata file
+        named [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 5.2 Stage
+      quote: 'The "public review
+
+        metadata" filename follows the pattern:
+
+        [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html'
+      severity: BLOCKER
+    - criterion: AC-NAMING-21
+      criterion_statement: A package that underwent public review MUST include a companion metadata file
+        named [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html.
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: Public-review metadata filename (new in v1.7)
+      quote: 'Work products undergoing public review must include a companion metadata file. The filename
+        pattern is: Naming Directives v1.7 [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html'
+      severity: BLOCKER
+  public-review-metadata/but is empty (0 bytes):
+    check: public-review-metadata
+    sig: but is empty (0 bytes)
+    criteria:
+    - AC-NAMING-33
+    authorities:
+    - criterion: AC-NAMING-33
+      criterion_statement: The public-review metadata companion file MUST carry the publication-history
+        content it exists to provide; an empty file does not satisfy the requirement.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 5.2 Stage
+      quote: This HTML file provides a publication history of the Work Product, and serves to document
+        the occurrence of the public review.
+      severity: BLOCKER
+  comment-resolution-log/resembling the required comment-resolution-log is present but misnamed:
+    check: comment-resolution-log
+    sig: resembling the required comment-resolution-log is present but misnamed
+    criteria:
+    - AC-NAMING-22
+    authorities:
+    - criterion: AC-NAMING-22
+      criterion_statement: A package that underwent public review MUST include a comment resolution log
+        filename following the [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-comment-resolution-log.[ext]
+        pattern.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 5.2 Stage
+      quote: 'The "comment resolution
+
+        log" filename follows the pattern:
+
+        [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-comment-resolution-log.[ext]'
+      severity: BLOCKER
+    - criterion: AC-NAMING-22
+      criterion_statement: A package that underwent public review MUST include a comment resolution log
+        filename following the [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-comment-resolution-log.[ext]
+        pattern.
+      doc: handbook-Sources.txt
+      doc_label: 'TC Handbook: Sources'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Sources.html
+      section: 'OASIS TC Handbook: Public Reviews (registry row)'
+      quote: the log is a per-spec deliverable named <spec>-<stage>-comment-resolution-log.{xls,pdf,md}
+      severity: BLOCKER
+  comment-resolution-log/appears to have concluded:
+    check: comment-resolution-log
+    sig: appears to have concluded
+    criteria:
+    - AC-CONTENT-11
+    authorities:
+    - criterion: AC-CONTENT-11
+      criterion_statement: After a public review concludes, the TC MUST prepare a comment resolution log,
+        approve it by Full Majority Vote, and submit it to the OASIS TC Administrator.
+      doc: tc-process.txt
+      doc_label: OASIS TC Process (2017-05-26)
+      url: https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/
+      section: 2.6 Public Review
+      quote: the TC shall prepare a comment resolution log, approve it by Full Majority Vote and submit
+        it to the OASIS TC Administrator.
+      severity: BLOCKER
+  normdef-refs/normative-definition file is never referenced from the Work Product:
+    check: normdef-refs
+    sig: normative-definition file is never referenced from the Work Product
+    criteria:
+    - AC-PACKAGING-05
+    authorities:
+    - criterion: AC-PACKAGING-05
+      criterion_statement: Each separate normative-definition plain-text file (schema, grammar, code)
+        MUST be referenced from within the specification document itself.
+      doc: tc-process.txt
+      doc_label: OASIS TC Process (2017-05-26)
+      url: https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/
+      section: 2.2.5 Computer Language Definitions
+      quote: Each text file must be referenced from the Work Product; and
+      severity: BLOCKER
+  uri-alias/live <meta http-equiv="refresh">:
+    check: uri-alias
+    sig: live <meta http-equiv="refresh">
+    criteria:
+    - AC-PACKAGING-17
+    authorities:
+    - criterion: AC-PACKAGING-17
+      criterion_statement: The package/deploy MUST NOT alias URIs by any means, including META-refresh
+        elements, duplicate-content files under two different filenames within the same published instance,
+        or redirect services hosted on other Internet domains.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 6.5 URI Aliases
+      quote: 'TCs must not use URI aliasing by any means, including, for example,
+
+        unauthorized: (a) use of META-refresh elements, (b) preparing files with
+
+        identical content under two different filenames within a given published
+
+        instance, or (c) constructing URIs for canonical OASIS resources by
+
+        using redirects supported by services on other Internet domains'
+      severity: BLOCKER
+  uri-alias/including a delivery/manifest-cited file:
+    check: uri-alias
+    sig: including a delivery/manifest-cited file
+    criteria:
+    - AC-PACKAGING-17
+    authorities:
+    - criterion: AC-PACKAGING-17
+      criterion_statement: The package/deploy MUST NOT alias URIs by any means, including META-refresh
+        elements, duplicate-content files under two different filenames within the same published instance,
+        or redirect services hosted on other Internet domains.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 6.5 URI Aliases
+      quote: 'TCs must not use URI aliasing by any means, including, for example,
+
+        unauthorized: (a) use of META-refresh elements, (b) preparing files with
+
+        identical content under two different filenames within a given published
+
+        instance, or (c) constructing URIs for canonical OASIS resources by
+
+        using redirects supported by services on other Internet domains'
+      severity: BLOCKER
+  uri-alias/none of which is a delivery/manifest-cited file:
+    check: uri-alias
+    sig: none of which is a delivery/manifest-cited file
+    criteria:
+    - AC-PACKAGING-17
+    authorities:
+    - criterion: AC-PACKAGING-17
+      criterion_statement: The package/deploy MUST NOT alias URIs by any means, including META-refresh
+        elements, duplicate-content files under two different filenames within the same published instance,
+        or redirect services hosted on other Internet domains.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 6.5 URI Aliases
+      quote: 'TCs must not use URI aliasing by any means, including, for example,
+
+        unauthorized: (a) use of META-refresh elements, (b) preparing files with
+
+        identical content under two different filenames within a given published
+
+        instance, or (c) constructing URIs for canonical OASIS resources by
+
+        using redirects supported by services on other Internet domains'
+      severity: BLOCKER
+  uri-alias/Previous-stage front-matter cites a redirect:
+    check: uri-alias
+    sig: Previous-stage front-matter cites a redirect
+    criteria:
+    - AC-PACKAGING-17
+    authorities:
+    - criterion: AC-PACKAGING-17
+      criterion_statement: The package/deploy MUST NOT alias URIs by any means, including META-refresh
+        elements, duplicate-content files under two different filenames within the same published instance,
+        or redirect services hosted on other Internet domains.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 6.5 URI Aliases
+      quote: 'TCs must not use URI aliasing by any means, including, for example,
+
+        unauthorized: (a) use of META-refresh elements, (b) preparing files with
+
+        identical content under two different filenames within a given published
+
+        instance, or (c) constructing URIs for canonical OASIS resources by
+
+        using redirects supported by services on other Internet domains'
+      severity: BLOCKER
+  uri-alias/DOCX-native cover field cites a redirect:
+    check: uri-alias
+    sig: DOCX-native cover field cites a redirect
+    criteria:
+    - AC-PACKAGING-17
+    authorities:
+    - criterion: AC-PACKAGING-17
+      criterion_statement: The package/deploy MUST NOT alias URIs by any means, including META-refresh
+        elements, duplicate-content files under two different filenames within the same published instance,
+        or redirect services hosted on other Internet domains.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 6.5 URI Aliases
+      quote: 'TCs must not use URI aliasing by any means, including, for example,
+
+        unauthorized: (a) use of META-refresh elements, (b) preparing files with
+
+        identical content under two different filenames within a given published
+
+        instance, or (c) constructing URIs for canonical OASIS resources by
+
+        using redirects supported by services on other Internet domains'
+      severity: BLOCKER
+  uri-alias/names oasis-open.org but links to a redirect:
+    check: uri-alias
+    sig: names oasis-open.org but links to a redirect
+    criteria:
+    - AC-PACKAGING-17
+    authorities:
+    - criterion: AC-PACKAGING-17
+      criterion_statement: The package/deploy MUST NOT alias URIs by any means, including META-refresh
+        elements, duplicate-content files under two different filenames within the same published instance,
+        or redirect services hosted on other Internet domains.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 6.5 URI Aliases
+      quote: 'TCs must not use URI aliasing by any means, including, for example,
+
+        unauthorized: (a) use of META-refresh elements, (b) preparing files with
+
+        identical content under two different filenames within a given published
+
+        instance, or (c) constructing URIs for canonical OASIS resources by
+
+        using redirects supported by services on other Internet domains'
+      severity: BLOCKER
+  uri-alias/cites oasis-open.org while linking a redirect:
+    check: uri-alias
+    sig: cites oasis-open.org while linking a redirect
+    criteria:
+    - AC-PACKAGING-17
+    authorities:
+    - criterion: AC-PACKAGING-17
+      criterion_statement: The package/deploy MUST NOT alias URIs by any means, including META-refresh
+        elements, duplicate-content files under two different filenames within the same published instance,
+        or redirect services hosted on other Internet domains.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 6.5 URI Aliases
+      quote: 'TCs must not use URI aliasing by any means, including, for example,
+
+        unauthorized: (a) use of META-refresh elements, (b) preparing files with
+
+        identical content under two different filenames within a given published
+
+        instance, or (c) constructing URIs for canonical OASIS resources by
+
+        using redirects supported by services on other Internet domains'
+      severity: BLOCKER
+  xml-namespace/does not match the required:
+    check: xml-namespace
+    sig: does not match the required
+    criteria:
+    - AC-PACKAGING-20
+    authorities:
+    - criterion: AC-PACKAGING-20
+      criterion_statement: An HTTP-scheme XML namespace name declared by the Work Product MUST conform
+        to the pattern http(s)://docs.oasis-open.org/[tc-shortname]/ns/xxxx and MUST use http or https
+        consistently (never interchangeably) across the namespace name; URN-based XML namespaces MUST
+        NOT be declared except by existing TCs that have already used URNs, or associated Maintenance
+        Activity TCs, where architectural considerations require their continued use.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 8 XML Namespace Identifiers and Namespace Documents
+      quote: 'An XML namespace name
+
+        identified by an HTTP scheme URI reference must conform to the
+
+        pattern:
+
+        http://docs.oasis-open.org/ [tc-shortname]/ns/xxxx'
+      severity: BLOCKER
+    - criterion: AC-PACKAGING-20
+      criterion_statement: An HTTP-scheme XML namespace name declared by the Work Product MUST conform
+        to the pattern http(s)://docs.oasis-open.org/[tc-shortname]/ns/xxxx and MUST use http or https
+        consistently (never interchangeably) across the namespace name; URN-based XML namespaces MUST
+        NOT be declared except by existing TCs that have already used URNs, or associated Maintenance
+        Activity TCs, where architectural considerations require their continued use.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 8 XML Namespace Identifiers and Namespace Documents
+      quote: 'While either "http" or "https" may be
+
+        used in defining a namespace name, they are not interchangeable. One or
+
+        the other must be used consistently.'
+      severity: BLOCKER
+    - criterion: AC-PACKAGING-20
+      criterion_statement: An HTTP-scheme XML namespace name declared by the Work Product MUST conform
+        to the pattern http(s)://docs.oasis-open.org/[tc-shortname]/ns/xxxx and MUST use http or https
+        consistently (never interchangeably) across the namespace name; URN-based XML namespaces MUST
+        NOT be declared except by existing TCs that have already used URNs, or associated Maintenance
+        Activity TCs, where architectural considerations require their continued use.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 8 XML Namespace Identifiers and Namespace Documents
+      quote: 'URN-based XML namespaces may
+
+        be declared by existing TCs that have already used this feature, or by
+
+        associated Maintenance Activity TCs, where architectural considerations
+
+        require continued use of URNs. URN-based XML namespaces must not be
+
+        declared otherwise, since they lack a standard, ubiquitous resolution
+
+        method using DNS[+HTTP].'
+      severity: BLOCKER
+  xml-namespace/declared under both http and https scheme:
+    check: xml-namespace
+    sig: declared under both http and https scheme
+    criteria:
+    - AC-PACKAGING-24
+    authorities:
+    - criterion: AC-PACKAGING-24
+      criterion_statement: An XML namespace name declared by the Work Product MUST use the http and https
+        schemes consistently; the two schemes are not interchangeable and MUST NOT both be declared for
+        the same namespace.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 8 Namespace Identifiers
+      quote: While either "http" or "https" may be used in defining a namespace name, they are not interchangeable.
+        One or the other must be used consistently.
+      severity: BLOCKER
+  xml-namespace/not on the URN-grandfather allowlist:
+    check: xml-namespace
+    sig: not on the URN-grandfather allowlist
+    criteria:
+    - AC-PACKAGING-25
+    authorities:
+    - criterion: AC-PACKAGING-25
+      criterion_statement: URN-based XML namespaces MUST NOT be declared, except where a TC's earlier
+        practice was grandfathered with Project Administration approval.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 8 Namespace Identifiers
+      quote: URN-based XML namespaces must not be declared otherwise, since they lack a standard, ubiquitous
+        resolution method using DNS[+HTTP].
+      severity: BLOCKER
+  ns-segment/reuses the reserved /ns/ segment:
+    check: ns-segment
+    sig: reuses the reserved /ns/ segment
+    criteria:
+    - AC-PACKAGING-21
+    authorities:
+    - criterion: AC-PACKAGING-21
+      criterion_statement: The /ns/ URI path segment MUST be used only for XML namespace identifiers,
+        never as the location of a retrievable published document; no regular file, directory, or symlink
+        in the package may reuse an /ns/ namespace-name string for information-resource identification.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 8 XML Namespace Identifiers and Namespace Documents
+      quote: 'no (file-system) regular files,
+
+        directories/folders, or symbolic links matching information resources
+
+        may make use of these URI strings for resource identification.'
+      severity: BLOCKER
+    - criterion: AC-PACKAGING-21
+      criterion_statement: The /ns/ URI path segment MUST be used only for XML namespace identifiers,
+        never as the location of a retrievable published document; no regular file, directory, or symlink
+        in the package may reuse an /ns/ namespace-name string for information-resource identification.
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: XML namespace rule (/ns/) (Policy requirement)
+      quote: 'The /ns/ path element is reserved for non-information resources only : it is for namespace
+        identifiers, not for retrievable documents. Do not use /ns/ in the URI of a document you intend
+        to publish as a retrievable resource.'
+      severity: BLOCKER
+  ns-segment/cited as the immediately-preceding-stage document:
+    check: ns-segment
+    sig: cited as the immediately-preceding-stage document
+    criteria:
+    - AC-PACKAGING-21
+    authorities:
+    - criterion: AC-PACKAGING-21
+      criterion_statement: The /ns/ URI path segment MUST be used only for XML namespace identifiers,
+        never as the location of a retrievable published document; no regular file, directory, or symlink
+        in the package may reuse an /ns/ namespace-name string for information-resource identification.
+      doc: naming-directives.txt
+      doc_label: OASIS Naming Directives v1.7 (2 Jan 2024)
+      url: https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html
+      section: 8 XML Namespace Identifiers and Namespace Documents
+      quote: 'no (file-system) regular files,
+
+        directories/folders, or symbolic links matching information resources
+
+        may make use of these URI strings for resource identification.'
+      severity: BLOCKER
+    - criterion: AC-PACKAGING-21
+      criterion_statement: The /ns/ URI path segment MUST be used only for XML namespace identifiers,
+        never as the location of a retrievable published document; no regular file, directory, or symlink
+        in the package may reuse an /ns/ namespace-name string for information-resource identification.
+      doc: handbook-Naming.txt
+      doc_label: 'TC Handbook: Naming'
+      url: https://docs.oasis-open.org/TChandbook/Reference/Naming.html
+      section: XML namespace rule (/ns/) (Policy requirement)
+      quote: 'The /ns/ path element is reserved for non-information resources only : it is for namespace
+        identifiers, not for retrievable documents. Do not use /ns/ in the URI of a document you intend
+        to publish as a retrievable resource.'
       severity: BLOCKER
