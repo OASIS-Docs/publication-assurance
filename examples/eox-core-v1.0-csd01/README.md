@@ -14,7 +14,7 @@ This is the standard record every TC receives for every publication.
 
 | File | What it is |
 |---|---|
-| `eox-core-v1.0-csd01-pub-check-validation-2026-07-16.md` / `.pdf` | The Validation Report: all 92 conditions, each with the value the tool pulled from the package set against the value it was compared to. Zero blockers; 9 warnings and 3 informational notes, triaged in the header. |
+| `eox-core-v1.0-csd01-pub-check-validation-2026-07-27.md` / `.pdf` | The Validation Report: all 169 conditions across 57 check classes, each with the value the tool pulled from the package set against the value it was compared to. Zero blockers; 12 warnings and 9 informational notes, triaged in the header. |
 
 Running `oasis_pub_check.py` yourself gives you the
 findings, the exit code, and with `--json` the full per-condition record
