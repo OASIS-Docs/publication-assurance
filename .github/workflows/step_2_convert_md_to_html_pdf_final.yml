@@ -13,7 +13,7 @@ on:
           Example: ap-hunt/v1.0/csd02
           Ensure the path is copied from GitHub and formatted correctly.
         required: true
-        default: csaf/v2.1/csd01
+        default: examples/csaf/v2.1/csd01
       modify_date:
         description: |
           Enter the modification date for the directory in yyyy-mm-dd format.

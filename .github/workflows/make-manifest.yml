@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       stage_dir:
-        description: "Stage directory (e.g. csaf/csaf/v2.1/csd01)"
+        description: "Stage directory (e.g. examples/csaf/csaf/v2.1/csd01)"
         required: true
 jobs:
   manifest:

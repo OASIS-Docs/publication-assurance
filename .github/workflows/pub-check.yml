@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       stage_dir:
-        description: "Stage directory to check, e.g. csaf/v2.1/csd01"
+        description: "Stage directory to check, e.g. examples/csaf/v2.1/csd01"
         required: true
 
 jobs:

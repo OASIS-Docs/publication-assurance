@@ -20,8 +20,8 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
 This repository holds the tooling that publishes OASIS TC work products to
 `docs.oasis-open.org`: the pipeline, the acceptance gate, and the audit
 record, for any TC on any authoring track. The archived CSAF packages
-under `csaf/` and `csaf-cvrf/` are the regression corpus; the
-worked example is the OpenEoX
+under `examples/csaf/` and `examples/csaf-cvrf/` are the regression corpus;
+the worked example is the OpenEoX
 publication in [examples/](examples/eox-core-v1.0-csd01/).
 
 This repository contains:
@@ -199,7 +199,10 @@ publication-assurance/
 │   ├── manifest-schema.json         #   provenance manifest contract
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
-├── examples/eox-core-v1.0-csd01/    # The Validation Report from a publication
+├── examples/                        # Worked example + the regression corpus
+│   ├── eox-core-v1.0-csd01/         #   The Validation Report from a publication
+│   ├── csaf/                        #   Archived CSAF work products (v2.0 lineage, v2.1 csd01)
+│   └── csaf-cvrf/                   #   Archived CSAF-CVRF v1.2 work products
 ├── TRANSFORMS.md                    # The pipeline, command by command (canonical criteria)
 ├── assets/                          # The diagrams (PNG)
 ├── .github/
@@ -209,8 +212,6 @@ publication-assurance/
 │   ├── styles/                      # OASIS markdown-styles CSS lineage (v1.1 → v1.8.1)
 │   └── workflows/                   # step_1 (MD→HTML), step_2 (HTML→PDF),
 │                                    #   step_3 (zip), pub-check (the gate)
-├── csaf/                            # Archived CSAF work products (v2.0 lineage, v2.1 csd01)
-├── csaf-cvrf/                       # Archived CSAF-CVRF v1.2 work products
 ├── LICENSE                          # Apache-2.0 (software tier)
 └── NOTICE                           # The three-tier IP statement
 ```
@@ -239,7 +240,7 @@ Three tiers, stated precisely in [NOTICE](NOTICE):
    works require prior written authorization from OASIS Open. These
    documents are the canonical statement of the OASIS publication
    acceptance criteria.
-3. **Archived OASIS specification packages** (`csaf/`, `csaf-cvrf/`) are
+3. **Archived OASIS specification packages** (`examples/csaf/`, `examples/csaf-cvrf/`) are
    OASIS Work Products and retain their own published OASIS copyright, IPR,
    and license notices. Nothing in this repository relicenses them.
 
