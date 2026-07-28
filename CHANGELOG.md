@@ -24,6 +24,27 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.1.2 - 2026-07-28
+
+A documentation release: no executable check changed (still **169 checks,
+57 classes**). The README now leads with a Quick start so a TC can run the
+gate before reading anything else.
+
+Documentation:
+
+- New **Quick start** at the top of the README: the local one-command run
+  (`oasis_pub_check.py <package>`) and the GitHub Actions path (copy
+  `examples/consumer-workflow.yml` into the TC repo and run it from the
+  Actions tab), with the minimal workflow step shown inline.
+- New **guides table** mapping each companion document
+  (`PUBLICATION-QUALITY.md`, `pub-check/README.md`, `CHECKS.md`,
+  `TRANSFORMS.md`, `AUTHORITIES.md`, and the worked example) to the moment a
+  TC reaches for it.
+- The reference sections (what the gate checks, provenance, validation and
+  audit, nide, layout, license) move below the Quick start with their
+  content unchanged; `action.yml` and `examples/consumer-workflow.yml` are
+  added to the layout tree.
+
 ## v1.1.1 - 2026-07-27
 
 Commits `fc94fe0`, `bd0481b`, `3633a49` - driven by
@@ -84,8 +105,8 @@ Fixes:
 - `stage-token` no longer warns on Previous-version cover links that
   correctly carry the linked publication's own approved stage token
   (`cn01` for a cnd draft, `cs01` for a csd draft).
-- `assets/build.py` derives the diagram check counts from `--list-checks`
-  instead of hardcoding them.
+- The check counts shown in the architecture diagrams were corrected to
+  match `--list-checks` rather than a hardcoded figure.
 
 Validation: 12-package regression corpus byte-diffed before and after
 (zero new findings, exit codes unchanged); two independent adversarial
