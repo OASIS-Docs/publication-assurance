@@ -27,7 +27,7 @@
 <text x="316" y="310" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#0a2540" text-anchor="start">must not be cited in … any TC</text>
 <text x="316" y="335" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#0a2540" text-anchor="start">documents that are or may become</text>
 <text x="316" y="360" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="400" fill="#0a2540" text-anchor="start">public.”</text>
-<text x="316" y="408" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#6b7380" text-anchor="start">the exact words, quoted, not paraphrased</text>
+<text x="316" y="408" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#6b7380" text-anchor="start">the exact words, quoted verbatim</text>
 <line x1="622" y1="300" x2="656" y2="300" stroke="#0a2540" stroke-width="1.4" marker-end="url(#aInk)"/>
 <text x="639" y="290" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="9.5" font-weight="400" fill="#6b7380" text-anchor="middle">derives</text>
 <rect x="656" y="206" width="224" height="188" rx="2" ry="2" fill="#e7ecfc" stroke="#2248e5" stroke-width="1"/>

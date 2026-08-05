@@ -24,6 +24,45 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.1.3 - 2026-08-05
+
+A maintenance release: no executable check changed (still **169 checks,
+57 classes**). The action and its workflows move to the Node 24 runtimes
+before GitHub retires Node 20, and the repository's scope is settled in
+writing.
+
+Action and CI runtimes:
+
+- `action.yml` and every bundled workflow now pin `actions/checkout@v5`,
+  `actions/setup-python@v6`, and `actions/setup-node@v5`. GitHub is
+  deprecating the Node 20 action runtime; a consumer on the old pins would
+  have started seeing runner warnings and, eventually, failures. The gate
+  logic, inputs, and exit-code contract are untouched.
+
+Distribution:
+
+- The floating **`v1`** major tag is now published and tracks the newest
+  `v1.x` release. `README.md`, `action.yml`, and
+  `examples/consumer-workflow.yml` have documented
+  `uses: OASIS-Docs/publication-assurance@v1` since v1.0.0, but no such tag
+  existed, so a TC copying the Quick start hit `Unable to resolve action`.
+  The documented usage now resolves.
+
+Scope:
+
+- The step 6.0 deploy engine, the central dispatcher, and `index_audit.py`
+  live in `OASIS-Docs/publisher-toolkit`, not here. This repository is the
+  publication acceptance criteria and the `oasis-pub-check` gate; the
+  toolkit consumes the gate as a public action. (These files were briefly
+  added and then moved during the 30 July work; the net change to this
+  repository is zero, and the commits are squashed away.)
+
+Documentation:
+
+- Figure footnotes in the architecture diagrams drop the "X, not Y"
+  construction; the SVG sources and their exported PNGs are regenerated in
+  step so the raster and vector twins stay identical.
+
 ## v1.1.2 - 2026-07-28
 
 A documentation release: no executable check changed (still **169 checks,

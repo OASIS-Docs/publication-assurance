@@ -26,7 +26,7 @@
 <text x="534" y="861" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#313131" text-anchor="start">anchors · fonts · placeholders</text>
 <text x="534" y="880" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#313131" text-anchor="start">schema $id · stage naming</text>
 <text x="534" y="899" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#313131" text-anchor="start">image policy · junk files</text>
-<text x="534" y="937" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#6b7380" text-anchor="start">only the package, never the live site</text>
+<text x="534" y="937" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#6b7380" text-anchor="start">the package only</text>
 <rect x="70" y="306" width="760" height="376" rx="3" ry="3" fill="#fafcfe" stroke="#aeb7c4" stroke-width="1"/>
 <path d="M73,306 H827 A3,3 0 0 1 830,309 V344 H70 V309 A3,3 0 0 1 73,306 Z" fill="#0a4a8f"/>
 <text x="450" y="331" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="0.4">LAYER 2 · PUBLICATION AUDIT · human + adversarial (event-side)</text>
