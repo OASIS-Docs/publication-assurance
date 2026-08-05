@@ -816,6 +816,14 @@ def check_pdf(pdf_path: str, this_urls_base: str, version: str, f: Findings) -> 
                       f"as a previous-stage reference -- confirm.")
 
 
+# The cover heading naming the governing body, and therefore the boundary that closes
+# the stage-URL block sitting above it. A Technical Committee's cover says "Technical
+# Committee:"; an OASIS Open Project's says "Open Project:". Every block terminator has
+# to accept both, or an Open Project cover never closes and the This/Previous/Latest
+# blocks run past their intended end into whatever follows -- silently, with no finding
+# to say the parse went wrong.
+ORG_HEADING = r"(?:Technical Committee|Open Project)"
+
 # Template front-matter sections, in canonical order. (label, pattern, required)
 TEMPLATE_SECTIONS = [
     ("This stage/version", r"This (Stage|Version)", True),
@@ -825,11 +833,18 @@ TEMPLATE_SECTIONS = [
     # and their template says 'Open Project:' / 'Project Chair:'. Accept both
     # forms; requiring the TC wording would push an Open Project spec (NIEMOpen)
     # to fabricate a Technical Committee section it does not have.
+    # NOTE: ORG_HEADING above carries the same alternation into every place that
+    # uses this heading as a BLOCK BOUNDARY. Accepting it here and not there
+    # would leave an Open Project cover parsing wrong while reporting no finding.
     # The qualified-Chair form is scoped to the front-matter window (see
     # check_template) so an appendix heading like '### Working Group Chairs'
     # cannot satisfy a cover page that has no Chairs block at all.
-    ("Technical Committee / Open Project", r"(?:Technical Committee|Open Project)", True),
-    ("Chair(s)", r"(?:[\w/&.-]+\s+)*Chairs?\b", True),
+    ("Technical Committee / Open Project", ORG_HEADING, True),
+    # Bounded, not open-ended: a qualifier is at most a few words ("Project Chair",
+    # "NTAC Technical Steering Committee Chairs"), and an unbounded run would let a
+    # sentence of prose ending in the word satisfy the requirement. Kept identical in
+    # intent to OASIS-CHAIRS in pub-check/rules/oasis.rules.yaml, which nide reads.
+    ("Chair(s)", r"(?:[\w/&.-]+\s+){0,5}Chairs?\b", True),
     ("Editor(s)", r"Editors?\b", True),
     ("Abstract", r"Abstract", True),
     ("Status", r"(Document )?Status", False),
@@ -1665,11 +1680,11 @@ def check_html_cover(html_text: str, version: str, stage: str,
 
     this_urls = urls_between(r"This (version|stage)",
                              [r"Previous (version|stage)", r"Latest (version|stage)",
-                              r"Technical Committee"])
+                              ORG_HEADING])
     prev_urls = urls_between(r"Previous (version|stage)",
-                             [r"Latest (version|stage)", r"Technical Committee"])
+                             [r"Latest (version|stage)", ORG_HEADING])
     latest_urls = urls_between(r"Latest (version|stage)",
-                               [r"Technical Committee", r"Chairs?\b"])
+                               [ORG_HEADING, r"Chairs?\b"])
     base = ""
     f.observe("front-matter", cover_this_urls=this_urls or "(none)",
               cover_previous_urls=prev_urls or "(none)", cover_latest_urls=latest_urls or "(none)")
@@ -2832,12 +2847,12 @@ def check_stage_token(md_text: str, html_text: str, stage: str, f: Findings) -> 
         # same labelled blocks from the rendered HTML cover.
         _, this_urls = _cover_block(html_text, r"This (version|stage)",
                                      [r"Previous (version|stage)", r"Latest (version|stage)",
-                                      r"Technical Committee"])
+                                      ORG_HEADING])
         previous_block_text, previous_urls = _cover_block(
             html_text, r"Previous (version|stage)",
-            [r"Latest (version|stage)", r"Technical Committee"])
+            [r"Latest (version|stage)", ORG_HEADING])
         _, latest_urls = _cover_block(html_text, r"Latest (version|stage)",
-                                       [r"Technical Committee", r"Chairs?\b"])
+                                       [ORG_HEADING, r"Chairs?\b"])
     if not this_urls:
         f.observe("stage-token", applicability="This-stage block missing/empty; deferred "
                   "to the existing front-matter BLOCKER, not independently re-checked here")
@@ -4457,7 +4472,7 @@ def check_public_review_metadata(base: str, stage: str, stem: str,
                 head = re.sub(r"&nbsp;|&#160;|\s+", " ", head)
                 pm = re.search(
                     r"Previous (Stage|Version)\b(.*?)(?=Latest (Stage|Version)|"
-                    r"Technical Committee|$)", head, re.I | re.S)
+                    + ORG_HEADING + r"|$)", head, re.I | re.S)
                 prev_urls = (re.findall(r"https?://docs\.oasis-open\.org/\S+", pm.group(2))
                              if pm else [])
                 if any(uri_path(u).rstrip("/") == base_path for u in prev_urls):
@@ -5352,7 +5367,7 @@ def _uri_alias_excise_html_noise_zones(html_text: str) -> str:
     m = re.search(r"This (version|stage)", out, re.I)
     if m:
         rest = out[m.start():]
-        m2 = re.search(r"Chairs?\b|Technical Committee", rest, re.I)
+        m2 = re.search(r"Chairs?\b|" + ORG_HEADING, rest, re.I)
         end = m.start() + (m2.end() if m2 else min(len(rest), 6000))
         out = out[:m.start()] + (" " * (end - m.start())) + out[end:]
     m3 = re.search(r"Related [Ww]ork", out, re.I)
@@ -5575,13 +5590,13 @@ def check_uri_alias(stage_dir: str, items: dict, md_text: str, html_text: str,
         cover_urls = (
             _uri_alias_cover_block_urls(
                 html_text, r"This (version|stage)",
-                [r"Previous (version|stage)", r"Latest (version|stage)", r"Technical Committee"])
+                [r"Previous (version|stage)", r"Latest (version|stage)", ORG_HEADING])
             + _uri_alias_cover_block_urls(
                 html_text, r"Previous (version|stage)",
-                [r"Latest (version|stage)", r"Technical Committee"])
+                [r"Latest (version|stage)", ORG_HEADING])
             + _uri_alias_cover_block_urls(
                 html_text, r"Latest (version|stage)",
-                [r"Technical Committee", r"Chairs?\b"]))
+                [ORG_HEADING, r"Chairs?\b"]))
         cover_urls = list(dict.fromkeys(cover_urls))  # de-dupe (text+href can name the same URL)
         f.observe("uri-alias", prong_c_docx_cover_urls_scanned=len(cover_urls))
         for u in cover_urls:
@@ -5895,11 +5910,11 @@ def html_cover_urls(html_text: str) -> dict[str, list[str] | None]:
     return {
         "this": urls_between(r"This (version|stage)",
                               [r"Previous (version|stage)", r"Latest (version|stage)",
-                               r"Technical Committee"]),
+                               ORG_HEADING]),
         "previous": urls_between(r"Previous (version|stage)",
-                                  [r"Latest (version|stage)", r"Technical Committee"]),
+                                  [r"Latest (version|stage)", ORG_HEADING]),
         "latest": urls_between(r"Latest (version|stage)",
-                                [r"Previous (version|stage)", r"Technical Committee",
+                                [r"Previous (version|stage)", ORG_HEADING,
                                  r"Chairs?\b"]),
     }
 
