@@ -237,7 +237,12 @@ def stage_urls_from_md(md_text: str, heading: str) -> list[str]:
                   md_text, re.M | re.S | re.I)
     if not m:
         return []
-    return re.findall(r"https?://\S+?(?=[)\s\\]|$)", m.group(1))
+    # '<' terminates the URL: a TC may wrap a cover-page URL in inline HTML
+    # (NIEMOpen NDR authors <link>https://...</link>, expanded to an <a> by the
+    # TC's own preprocessor). Without '<' in the terminator set the closing tag
+    # is absorbed into the URL and every This/Latest-stage URL reports a false
+    # 'points at link>' 404. A URL never legitimately continues through '<'.
+    return re.findall(r"https?://\S+?(?=[)\s\\<]|$)", m.group(1))
 
 
 # ---------------------------------------------------------------- checks
@@ -816,8 +821,15 @@ TEMPLATE_SECTIONS = [
     ("This stage/version", r"This (Stage|Version)", True),
     ("Previous stage/version", r"Previous (Stage|Version)", True),
     ("Latest stage/version", r"Latest (Stage|Version)", True),
-    ("Technical Committee", r"Technical Committee", True),
-    ("Chair(s)", r"Chairs?\b", True),
+    # OASIS Open Projects are governed by a Project Governing Board, not a TC,
+    # and their template says 'Open Project:' / 'Project Chair:'. Accept both
+    # forms; requiring the TC wording would push an Open Project spec (NIEMOpen)
+    # to fabricate a Technical Committee section it does not have.
+    # The qualified-Chair form is scoped to the front-matter window (see
+    # check_template) so an appendix heading like '### Working Group Chairs'
+    # cannot satisfy a cover page that has no Chairs block at all.
+    ("Technical Committee / Open Project", r"(?:Technical Committee|Open Project)", True),
+    ("Chair(s)", r"(?:[\w/&.-]+\s+)*Chairs?\b", True),
     ("Editor(s)", r"Editors?\b", True),
     ("Abstract", r"Abstract", True),
     ("Status", r"(Document )?Status", False),
@@ -830,8 +842,15 @@ def check_template(md_text: str, html_text: str, f: Findings) -> None:
     """Template structure per the OASIS spec template and TC Process:
     front-matter section order, mandatory Conformance section, stylesheet."""
     positions = []
+    # The Chair(s) pattern admits a qualifier ('Project Chair', 'NTAC Technical
+    # Steering Committee Chairs') so an OASIS Open Project is not forced to
+    # invent TC wording. That widening is scoped to the front-matter window, or
+    # a body/appendix heading ending in 'Chairs' could satisfy a cover page that
+    # carries no Chairs block at all.
+    fm_window = _front_matter_window(md_text)
     for label, pat, required in TEMPLATE_SECTIONS:
-        m = re.search(rf"^#+\s+{pat}", md_text, re.M | re.I)
+        haystack = fm_window if label == "Chair(s)" else md_text
+        m = re.search(rf"^#+\s+{pat}", haystack, re.M | re.I)
         if not m:
             if required:
                 f.add(BLOCKER, "template",

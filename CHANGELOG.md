@@ -24,6 +24,38 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.1.4 - 2026-08-05
+
+A fix release: no new criteria (still **169 checks, 57 classes**). Two
+existing checks reported findings that were defects in the gate rather than
+in the package, both surfaced by a remediation run against NIEMOpen
+`ndr/v6.0/ps01`. Verified against all ten packages in `examples/`: zero
+findings changed on any of them.
+
+`front-matter`, cover-page URL extraction:
+
+- `stage_urls_from_md` terminated a URL on `)`, whitespace or a backslash,
+  but not on `<`. A TC that wraps its cover-page URLs in inline HTML (NDR
+  authors `<link>https://...</link>`, which its own preprocessor expands to
+  an anchor) had the closing tag absorbed into the URL, so every This-stage
+  and Latest-stage URL reported a false
+  `points at 'link>' which is not a file in the package`. A URL never
+  legitimately continues through `<`, so `<` joins the terminator set. This
+  also unblocked `conformance-structure`, which could not fetch the previous
+  stage while the URL was mangled.
+
+`template`, required front-matter sections:
+
+- The registry required a literal `Technical Committee` heading and a
+  heading beginning `Chair`. OASIS **Open Projects** are governed by a
+  Project Governing Board and their template says `Open Project:` and
+  `Project Chair:`, so an Open Project specification was told to supply a
+  Technical Committee section it does not have and cannot honestly add.
+  Both forms are now accepted, and the qualified-Chair form
+  (`Project Chair`, `NTAC Technical Steering Committee Chairs`) is scoped to
+  the front-matter window so a body or appendix heading ending in "Chairs"
+  cannot satisfy a cover page that carries no Chairs block at all.
+
 ## v1.1.3 - 2026-08-05
 
 A maintenance release: no executable check changed (still **169 checks,
