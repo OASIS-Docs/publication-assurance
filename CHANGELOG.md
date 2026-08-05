@@ -44,6 +44,17 @@ findings changed on any of them.
   also unblocked `conformance-structure`, which could not fetch the previous
   stage while the URL was mangled.
 
+`oasis.rules.yaml`, kept in lockstep (nide):
+
+- `OASIS-TECHNICAL-COMMITTEE` and `OASIS-CHAIRS` encode the same two requirements
+  for the authoring-time engine. Changing only the Python would have broken the
+  property the README advertises, that "a green `nide quality` run at authoring
+  time predicts a green intake run": an Open Project work product would have
+  failed `nide quality` and passed intake. Both rules now accept the same prose
+  the Python does. Both changes are strict **supersets**, verified over the
+  heading set: nothing that matched before fails now, so no TC currently building
+  against these rules can be broken by the change.
+
 `template`, required front-matter sections:
 
 - The registry required a literal `Technical Committee` heading and a
@@ -54,7 +65,18 @@ findings changed on any of them.
   Both forms are now accepted, and the qualified-Chair form
   (`Project Chair`, `NTAC Technical Steering Committee Chairs`) is scoped to
   the front-matter window so a body or appendix heading ending in "Chairs"
-  cannot satisfy a cover page that carries no Chairs block at all.
+  cannot satisfy a cover page that carries no Chairs block at all. The
+  qualifier is bounded to five words, so a sentence of prose ending in the
+  word cannot satisfy it either.
+
+- The same heading also serves as a **block boundary** in twelve other places,
+  where it terminates the This/Previous/Latest stage-URL blocks parsed off the
+  cover. Accepting `Open Project` in the section check without accepting it
+  there would have left an Open Project cover never closing its stage block,
+  parsing past its intended end into whatever followed, silently and with no
+  finding to say the parse had gone wrong. All twelve now route through one
+  `ORG_HEADING` constant, which the section registry shares, so the wording is
+  defined once.
 
 ## v1.1.3 - 2026-08-05
 

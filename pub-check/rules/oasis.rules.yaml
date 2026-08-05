@@ -30,20 +30,31 @@ rules:
       pattern: '^Conformance'
       flags: IGNORECASE
 
+  # An OASIS Open Project is governed by a Project Governing Board, not a TC, and
+  # its template says "Open Project:" and "Project Chair:". Requiring the TC wording
+  # would tell an Open Project work product (NIEMOpen) to invent a Technical
+  # Committee section it does not have. Kept in step with ORG_HEADING and
+  # TEMPLATE_SECTIONS in pub-check/oasis_pub_check.py: the two homes check the same
+  # prose, so they must accept the same prose or a document passes one and fails the
+  # other for no reason a reader can see.
   - id: OASIS-TECHNICAL-COMMITTEE
     severity: BLOCKER
-    description: A Technical Committee entry must appear in the front matter
+    description: >-
+      A Technical Committee entry (or, for an Open Project, an Open Project entry)
+      must appear in the front matter
     check:
       type: section-present
-      pattern: 'Technical Committee'
+      pattern: 'Technical Committee|Open Project'
       flags: IGNORECASE
 
   - id: OASIS-CHAIRS
     severity: WARN
-    description: A Chairs entry must appear in the front matter
+    description: >-
+      A Chairs entry must appear in the front matter, with or without a qualifier
+      ("Chairs", "Project Chair", "NTAC Technical Steering Committee Chairs")
     check:
       type: section-present
-      pattern: '^Chairs?$'
+      pattern: '^([\w/&.-]+ ){0,5}Chairs?$'
       flags: IGNORECASE
 
   - id: OASIS-EDITORS
