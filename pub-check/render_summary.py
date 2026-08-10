@@ -6,11 +6,16 @@
 
 Used by action.yml's "Write step summary" step so a TC member who opens a
 run page sees the actual findings without opening raw logs: the target, the
-verdict line (N blockers / N warnings -> PUBLISHABLE or NOT), and the full
-ordered findings list in a collapsible fenced block.
+verdict line (N blockers / N warnings -> PUBLISHABLE or NOT), the full
+ordered findings list in a collapsible fenced block, and -- when --report-dir
+is given -- the exact report file paths written on the runner, so a caller
+who forgets to add an upload-artifact step is still told where the files
+are, and a caller who does upload them still gets a starting point before
+its own follow-up step (if any) appends the precise artifact-url.
 
 Usage:
   render_summary.py <report.json> [--txt <report.txt>] [--title <label>]
+                     [--report-dir <dir>]
 
 Reads $GITHUB_STEP_SUMMARY from the environment and appends to it (creating
 it if absent, matching the file GitHub Actions provides at runtime). Exits 0
@@ -26,7 +31,8 @@ import os
 import sys
 
 
-def build_section(report: dict, title: str, txt_body: str | None) -> str:
+def build_section(report: dict, title: str, txt_body: str | None,
+                   report_dir: str | None) -> str:
     findings = report.get("findings", [])
     blockers = sum(1 for f in findings if f.get("severity") == "BLOCKER")
     warnings = sum(1 for f in findings if f.get("severity") == "WARN")
@@ -55,6 +61,16 @@ def build_section(report: dict, title: str, txt_body: str | None) -> str:
             "</details>",
             "",
         ]
+    if report_dir:
+        txt_path = f"{report_dir}/pubcheck-report.txt"
+        json_path = f"{report_dir}/pubcheck-report.json"
+        lines += [
+            f"**Report files:** `{txt_path}`, `{json_path}` (written on the "
+            "runner). If this workflow uploads them as a build artifact, a "
+            "follow-up step below states the download link directly; "
+            "otherwise check this run's Artifacts section.",
+            "",
+        ]
     lines.append("---")
     lines.append("")
     return "\n".join(lines)
@@ -70,6 +86,11 @@ def main() -> int:
                      help="label for the summary heading; defaults to the report's "
                           "own target field (use this when calling the action more "
                           "than once, e.g. in a matrix, to distinguish the sections)")
+    ap.add_argument("--report-dir", default=None,
+                     help="directory the caller wrote pubcheck-report.txt/.json into "
+                          "(action.yml's report-dir input); if given, the summary "
+                          "section states these paths so a caller who forgets to "
+                          "upload them as an artifact is still told where they are")
     args = ap.parse_args()
 
     with open(args.report_json) as f:
@@ -80,7 +101,7 @@ def main() -> int:
         with open(args.txt) as f:
             txt_body = f.read()
 
-    section = build_section(report, args.title, txt_body)
+    section = build_section(report, args.title, txt_body, args.report_dir)
 
     summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_path:
