@@ -24,6 +24,51 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.1.5 - 2026-08-10
+
+A maintenance release: no executable check changed (still **169 checks,
+57 classes**), and the exit-code gate contract is unchanged. `action.yml`
+gains an output surface a consumer workflow was previously left to build
+itself: a run page showed only the pass/fail dot, and the actual findings
+were reachable only by opening raw step logs (which GitHub restricts on
+some repos even for maintainers of a public fork).
+
+Action:
+
+- `action.yml` gains three new inputs, all additive and backward
+  compatible: `report-dir` (default `pubcheck-report`; writes
+  `pubcheck-report.txt`/`.json`, set to `''` to disable), `write-summary`
+  (default `true`; a GitHub Step Summary section with the verdict and full
+  ordered findings list), and `summary-title` (label the summary heading
+  when the action is called more than once, e.g. in a matrix).
+  `target`/`args`/`python-version`/`install-poppler` and the exit-code
+  contract behave exactly as before.
+- New outputs: `exit-code`, `blockers`, `warnings`, `report-txt`,
+  `report-json`, so a caller can branch on the result without re-parsing
+  logs.
+- Internally the gate step now runs `continue-on-error` and a final
+  "Enforce gate result" step re-raises the same exit code, so the summary
+  and report-file steps run even when the gate found blockers (`if:
+  always()`), while the step the caller sees still fails on a blocker,
+  exactly as every release before this one.
+- New `pub-check/render_summary.py`: renders the Step Summary section from
+  a `--json` report (and an optional plain-text report for the full
+  findings block); used by `action.yml`, also runnable standalone for a
+  quick local look at a report.
+
+Examples:
+
+- New `examples/consumer-workflow-matrix.yml`: a multi-package caller
+  (matrix over several targets, readable job names, `report-dir` per
+  package, `upload-artifact` with `if: always()`) that uses the action's
+  new native output surface instead of reimplementing report capture.
+
+Validation: exercised end to end against a real (unpublished, pre-CSD02)
+package on a fork before this PR opened — step summary rendered the
+verdict and full findings list, `pubcheck-report.txt`/`.json` uploaded as
+artifacts and downloaded back byte-identical, and the job still concluded
+`failure` on the package's real blockers.
+
 ## v1.1.4 - 2026-08-05
 
 A fix release: no new criteria (still **169 checks, 57 classes**). Two

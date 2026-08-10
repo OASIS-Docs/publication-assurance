@@ -1,0 +1,65 @@
+# Copyright 2025-2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+#
+# MULTI-PACKAGE publication gate for a TC repository that publishes more
+# than one work product (e.g. a core spec plus one or more profiles).
+#
+# Copy this file to your repo as .github/workflows/pub-check.yml and edit
+# the `matrix.package` list below to your own targets, OR start from
+# consumer-workflow.yml if you only have one package to check.
+#
+# Unlike the single-target example, this one leans on the action's own
+# report-dir / write-summary / summary-title inputs (added in v1.1.4) rather
+# than reimplementing report capture in the caller: the action itself writes
+# pubcheck-report.txt/.json and a GitHub Step Summary section per package, and
+# still fails the step on a blocker exactly as before. The caller only adds
+# an upload-artifact step (if: always(), so it runs even when the gate found
+# blockers) to make the reports downloadable from the run page.
+#
+# Any blocker fails the job; warnings do not.
+
+name: pub-check
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Override: a single stage dir or .zip to check (skips the matrix below)"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  pub-check:
+    name: "pub-check / ${{ matrix.package.name }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          # One entry per package/track this repo publishes. EDIT to your own.
+          - id: my-spec-core-v1.0-csd01
+            name: "My Spec Core v1.0 csd01"
+            target: work/core/v1.0/csd01
+          - id: my-spec-profile-v1.0-csd01
+            name: "My Spec Profile v1.0 csd01"
+            target: work/profile/v1.0/csd01
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run oasis-pub-check (${{ matrix.package.name }})
+        uses: OASIS-Docs/publication-assurance@v1 # for production, pin to a full commit SHA
+        with:
+          target: ${{ github.event.inputs.target || matrix.package.target }}
+          report-dir: pubcheck-report-${{ matrix.package.id }}
+          summary-title: ${{ matrix.package.name }}
+
+      - name: Upload pub-check report (${{ matrix.package.id }})
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pubcheck-report-${{ matrix.package.id }}
+          path: pubcheck-report-${{ matrix.package.id }}
+          if-no-files-found: error
