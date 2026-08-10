@@ -173,11 +173,17 @@ runs:
       env:
         ACTION_PATH: ${{ github.action_path }}
         SUMMARY_TITLE: ${{ inputs.summary-title }}
+        REPORT_DIR: ${{ inputs.report-dir }}
       run: |
+        REPORT_DIR_ARGS=()
+        if [ -n "$REPORT_DIR" ]; then
+          REPORT_DIR_ARGS=(--report-dir "$REPORT_DIR")
+        fi
         python3 "$ACTION_PATH/pub-check/render_summary.py" \
           "$RUNNER_TEMP/oasis-pub-check.json" \
           --txt "$RUNNER_TEMP/oasis-pub-check.txt" \
-          --title "$SUMMARY_TITLE"
+          --title "$SUMMARY_TITLE" \
+          "${REPORT_DIR_ARGS[@]}"
 
     - name: Enforce gate result
       if: always()

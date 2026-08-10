@@ -9,7 +9,7 @@
 # consumer-workflow.yml if you only have one package to check.
 #
 # Unlike the single-target example, this one leans on the action's own
-# report-dir / write-summary / summary-title inputs (added in v1.1.4) rather
+# report-dir / write-summary / summary-title inputs (added in v1.1.5) rather
 # than reimplementing report capture in the caller: the action itself writes
 # pubcheck-report.txt/.json and a GitHub Step Summary section per package, and
 # still fails the step on a blocker exactly as before. The caller only adds
@@ -58,8 +58,24 @@ jobs:
 
       - name: Upload pub-check report (${{ matrix.package.id }})
         if: always()
+        id: upload
         uses: actions/upload-artifact@v4
         with:
           name: pubcheck-report-${{ matrix.package.id }}
           path: pubcheck-report-${{ matrix.package.id }}
           if-no-files-found: error
+
+      # The action's own summary (previous step) states the report file
+      # paths on the runner but has no way to know this workflow uploads
+      # them as a build artifact -- that only happens here, one step later.
+      # State the direct download link so nobody has to hunt the Artifacts
+      # section: upload-artifact@v4 exposes artifact-url as a step output.
+      - name: Note artifact location in summary
+        if: always() && steps.upload.outcome == 'success'
+        shell: bash
+        env:
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+          ARTIFACT_NAME: pubcheck-report-${{ matrix.package.id }}
+        run: |
+          echo "**Full report artifact:** [${ARTIFACT_NAME}](${ARTIFACT_URL}) (txt + json)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"

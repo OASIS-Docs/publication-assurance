@@ -54,20 +54,28 @@ Action:
 - New `pub-check/render_summary.py`: renders the Step Summary section from
   a `--json` report (and an optional plain-text report for the full
   findings block); used by `action.yml`, also runnable standalone for a
-  quick local look at a report.
+  quick local look at a report. When `report-dir` is set (the default), the
+  summary section also states the exact `pubcheck-report.txt`/`.json`
+  paths written on the runner, so a caller that forgets to upload them as
+  an artifact is still told where they are.
 
 Examples:
 
 - New `examples/consumer-workflow-matrix.yml`: a multi-package caller
   (matrix over several targets, readable job names, `report-dir` per
   package, `upload-artifact` with `if: always()`) that uses the action's
-  new native output surface instead of reimplementing report capture.
+  new native output surface instead of reimplementing report capture. A
+  follow-up step reads `upload-artifact@v4`'s own `artifact-url` output and
+  appends a direct one-click download link to the Step Summary, so the run
+  page states exactly where the report landed instead of leaving it to be
+  found in the Artifacts section.
 
 Validation: exercised end to end against a real (unpublished, pre-CSD02)
 package on a fork before this PR opened — step summary rendered the
-verdict and full findings list, `pubcheck-report.txt`/`.json` uploaded as
-artifacts and downloaded back byte-identical, and the job still concluded
-`failure` on the package's real blockers.
+verdict, full findings list, report file paths, and the artifact download
+link; `pubcheck-report.txt`/`.json` uploaded as artifacts and downloaded
+back byte-identical; the job still concluded `failure` on the package's
+real blockers.
 
 ## v1.1.4 - 2026-08-05
 
