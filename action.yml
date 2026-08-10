@@ -32,6 +32,15 @@
 #
 # The step fails (red CI) when the gate reports one or more blockers; warnings
 # do not fail the build (the gate exits 0 on "publishable").
+#
+# By default the run page is now self-contained: a GitHub Step Summary shows
+# the verdict and full findings list (no need to open raw logs), and
+# pubcheck-report.txt / pubcheck-report.json are written under report-dir
+# (default "pubcheck-report") for the caller to upload as an artifact if it
+# wants a downloadable copy. Both are purely additive -- set report-dir: ""
+# and/or write-summary: "false" to opt back out; target/args/python-version/
+# install-poppler and the exit-code gate contract are unchanged from earlier
+# releases.
 
 name: "OASIS pub-check"
 description: "Run the OASIS publication acceptance gate (oasis-pub-check) against a TC package or stage directory."
@@ -57,6 +66,35 @@ inputs:
     description: "Install poppler-utils (pdftotext/pdffonts) for the optional PDF cross-checks. Ignored on non-Linux runners; the gate runs without it either way."
     required: false
     default: "true"
+  report-dir:
+    description: "Directory (relative to the caller's working directory) to write pubcheck-report.txt and pubcheck-report.json. Set to '' to skip writing report files."
+    required: false
+    default: "pubcheck-report"
+  write-summary:
+    description: "Append a GitHub Step Summary section (verdict + full ordered findings list) for this target. Set to 'false' to skip."
+    required: false
+    default: "true"
+  summary-title:
+    description: "Label for the Step Summary heading. Defaults to the target path -- set this when calling the action more than once (e.g. in a matrix) so each section is distinguishable."
+    required: false
+    default: ""
+
+outputs:
+  exit-code:
+    description: "Exit code from the primary oasis_pub_check.py invocation (with the caller's own `args`). 0 = publishable, 1 = blockers present. This is what fails the step."
+    value: ${{ steps.pubcheck.outputs.exit_code }}
+  blockers:
+    description: "Number of BLOCKER-severity findings."
+    value: ${{ steps.pubcheck.outputs.blockers }}
+  warnings:
+    description: "Number of WARN-severity findings."
+    value: ${{ steps.pubcheck.outputs.warnings }}
+  report-txt:
+    description: "Path to the human-readable findings report. Empty if report-dir was set to ''."
+    value: ${{ steps.pubcheck.outputs.report_txt }}
+  report-json:
+    description: "Path to the --json findings report. Empty if report-dir was set to ''."
+    value: ${{ steps.pubcheck.outputs.report_json }}
 
 runs:
   using: "composite"
@@ -74,7 +112,14 @@ runs:
       run: sudo apt-get update && sudo apt-get install -y poppler-utils || echo "poppler-utils unavailable; PDF cross-checks will be skipped"
 
     - name: Run the OASIS publication gate
+      id: pubcheck
       shell: bash
+      # continue-on-error lets the remaining internal steps (summary, report
+      # files) run even when the gate finds blockers; the final "Enforce gate
+      # result" step below re-raises the SAME exit code captured here, so the
+      # step the caller sees is unaffected -- it still fails on a blocker,
+      # exactly as every release before this one.
+      continue-on-error: true
       # target and args come in as env vars, not interpolated into the command
       # line, so a value cannot inject shell. $EXTRA_ARGS stays unquoted so
       # multiple flags word-split into argv; variable expansion does not re-run
@@ -83,4 +128,60 @@ runs:
         ACTION_PATH: ${{ github.action_path }}
         TARGET: ${{ inputs.target }}
         EXTRA_ARGS: ${{ inputs.args }}
-      run: python3 "$ACTION_PATH/pub-check/oasis_pub_check.py" "$TARGET" $EXTRA_ARGS
+        REPORT_DIR: ${{ inputs.report-dir }}
+      run: |
+        set +o errexit
+
+        # Primary invocation: exactly the command every prior release ran,
+        # with the caller's own args, teed to a temp file so its exit code
+        # (the authoritative one) and its exact stdout are both preserved.
+        python3 "$ACTION_PATH/pub-check/oasis_pub_check.py" "$TARGET" $EXTRA_ARGS \
+          | tee "$RUNNER_TEMP/oasis-pub-check.txt"
+        exit_code="${PIPESTATUS[0]}"
+
+        # Second invocation, --json appended, purely to compute blockers/
+        # warnings and to emit report.json. Idempotent if the caller's own
+        # args already included --json. Its own exit code is not used --
+        # exit_code above (the primary run) remains the sole source of truth
+        # for the gate contract.
+        python3 "$ACTION_PATH/pub-check/oasis_pub_check.py" "$TARGET" $EXTRA_ARGS --json \
+          > "$RUNNER_TEMP/oasis-pub-check.json"
+
+        blockers=$(python3 -c "import json; d = json.load(open('$RUNNER_TEMP/oasis-pub-check.json')); print(sum(1 for x in d['findings'] if x['severity'] == 'BLOCKER'))")
+        warnings=$(python3 -c "import json; d = json.load(open('$RUNNER_TEMP/oasis-pub-check.json')); print(sum(1 for x in d['findings'] if x['severity'] == 'WARN'))")
+
+        echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
+        echo "blockers=${blockers}" >> "$GITHUB_OUTPUT"
+        echo "warnings=${warnings}" >> "$GITHUB_OUTPUT"
+
+        if [ -n "$REPORT_DIR" ]; then
+          mkdir -p "$REPORT_DIR"
+          cp "$RUNNER_TEMP/oasis-pub-check.txt" "$REPORT_DIR/pubcheck-report.txt"
+          cp "$RUNNER_TEMP/oasis-pub-check.json" "$REPORT_DIR/pubcheck-report.json"
+          echo "report_txt=${REPORT_DIR}/pubcheck-report.txt" >> "$GITHUB_OUTPUT"
+          echo "report_json=${REPORT_DIR}/pubcheck-report.json" >> "$GITHUB_OUTPUT"
+        else
+          echo "report_txt=" >> "$GITHUB_OUTPUT"
+          echo "report_json=" >> "$GITHUB_OUTPUT"
+        fi
+
+        echo "oasis-pub-check exit code: ${exit_code}"
+
+    - name: Write step summary
+      if: always() && inputs.write-summary == 'true'
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        SUMMARY_TITLE: ${{ inputs.summary-title }}
+      run: |
+        python3 "$ACTION_PATH/pub-check/render_summary.py" \
+          "$RUNNER_TEMP/oasis-pub-check.json" \
+          --txt "$RUNNER_TEMP/oasis-pub-check.txt" \
+          --title "$SUMMARY_TITLE"
+
+    - name: Enforce gate result
+      if: always()
+      shell: bash
+      env:
+        EXIT_CODE: ${{ steps.pubcheck.outputs.exit_code }}
+      run: exit "${EXIT_CODE}"

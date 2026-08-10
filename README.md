@@ -78,7 +78,16 @@ jobs:
 ```
 
 Inputs: `target` (required), `args` (e.g. `--json`), `python-version`,
-`install-poppler`. To also run it automatically on every push, set
+`install-poppler`, `report-dir` (default `pubcheck-report`; writes
+`pubcheck-report.txt`/`.json` there, `''` to disable), `write-summary`
+(default `true`; a GitHub Step Summary with the verdict and full findings
+list, no need to open raw logs), `summary-title` (label the summary heading
+when calling the action more than once, e.g. in a matrix). The last three
+are purely additive: `target`/`args`/`python-version`/`install-poppler` and
+the exit-code gate contract are unchanged. See
+[`examples/consumer-workflow-matrix.yml`](examples/consumer-workflow-matrix.yml)
+for a multi-package caller that uploads the reports as a downloadable
+artifact. To also run it automatically on every push, set
 `PUB_CHECK_TARGET` in the copied workflow file and uncomment its `push:` trigger.
 
 ---
