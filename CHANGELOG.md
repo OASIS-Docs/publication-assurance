@@ -24,6 +24,32 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.1.6 - 2026-08-13
+
+A patch release: no executable check changed, and the exit-code gate contract
+is unchanged. The reference markdown-to-HTML pipeline copy under `.github/src/`
+is brought to parity with the canonical publisher-toolkit pandoc semantics,
+closing three rendering defect classes the old flags produced:
+
+- `-f markdown+autolink_bare_uris-implicit_figures` (was
+  `+hard_line_breaks`, no `-implicit_figures`): stops pandoc wrapping bare
+  image lines in `<figure>`/`<figcaption>` (alt text rendered as a visible
+  caption under the logo) and stops every source newline becoming a `<br/>`.
+- `--no-highlight` added: fenced code blocks render as plain
+  `<pre><code>` so the stylesheet's continuous block background is not
+  broken into per-token bars.
+- `--toc` removed: the OASIS template carries a hand-authored, linked
+  Table of Contents in the markdown source at the template position (after
+  the Notices block); pandoc's template-position ToC is not wanted. The
+  `DropNavBlocks` and `DropLogoFigures` transforms remain as defensive
+  strips.
+
+Verified against the repository's own corpus: converting
+`examples/csaf/v2.1/csaf-v2.1.md` yields 525 fragment links with zero
+unresolved anchors, the authored ToC intact, and zero figcaptions, nav
+blocks, or highlight spans. The legacy monolith under `.github/src/test/`
+received the same flag parity.
+
 ## v1.1.5 - 2026-08-10
 
 A maintenance release: no executable check changed (still **169 checks,

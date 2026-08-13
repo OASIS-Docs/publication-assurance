@@ -78,9 +78,10 @@ class MarkdownToHtmlConverter:
         logging.info(f"Step {step}: Running pandoc to convert markdown to HTML.")
         command = [
             'pandoc', self.md_file,
-            '-f', 'markdown+autolink_bare_uris+hard_line_breaks',
+            '-f', 'markdown+autolink_bare_uris-implicit_figures',
+            '--no-highlight',
             '-c', self.css_file,
-            '--toc', '--toc-depth=5', '-s', '-o', 'temp_output.html',
+            '-s', '-o', 'temp_output.html',
             '--metadata', f'title={self.html_title}'
         ]
         logging.debug(f"Pandoc command: {' '.join(command)}")

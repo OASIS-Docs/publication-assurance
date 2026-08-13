@@ -212,17 +212,30 @@ class HtmlConverter(PipelineStep):
     # ------------------------------ stages ------------------------------
 
     def _run_pandoc(self, step: int) -> None:
-        """Run pandoc to produce the scratch HTML (standalone, with TOC)."""
+        """Run pandoc to produce the scratch HTML (standalone).
+
+        Flags mirror the canonical publisher-toolkit converter:
+        ``-implicit_figures`` stops pandoc wrapping bare image lines in
+        <figure>+<figcaption> (the alt text would render as a visible
+        caption); dropping ``+hard_line_breaks`` restores standard markdown
+        semantics (soft newline = space) instead of a <br/> per source line;
+        ``--no-highlight`` keeps fenced code blocks as plain <pre><code> so
+        the stylesheet's continuous block background is not broken into
+        per-token bars; no ``--toc`` because the OASIS template carries a
+        hand-authored Table of Contents in the source at the template's
+        position (after the Notices block). The DropLogoFigures and
+        DropNavBlocks transforms remain as defensive strips.
+        """
         logger.info("Step %s: Running pandoc.", step)
         cmd = [
             "pandoc",
             self.md_file,
-            "-f", "markdown+autolink_bare_uris+hard_line_breaks",
+            "-f", "markdown+autolink_bare_uris-implicit_figures",
+            "--no-highlight",
             "-c", self.css_ref_for_pandoc,
             "-s",
             "-o", self._temp_output,
             "--metadata", f"title={self.html_title}",
-            "--toc",
         ]
         logger.debug("Pandoc command: %s", " ".join(cmd))
         self._run_subprocess(cmd)
