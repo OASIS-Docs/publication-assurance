@@ -24,6 +24,33 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.1.7 - 2026-08-19
+
+A patch release: no executable check changed, and the exit-code gate contract
+is unchanged. Two defects in the Work Product Manifest File emitter, both
+found while staging UBL v2.5 as an OASIS Standard.
+
+- **Entity leak in the manifest title.** `emit_manifest_txt` copied the
+  document title out of the rendered HTML `<title>` without unescaping it, so
+  any entity in the title reached the published manifest verbatim. UBL 2.5
+  renders its title as `Universal Business Language Version&nbsp;2.5`, which
+  produced `Title:          Universal Business Language Version&nbsp;2.5` at a
+  citable URL. The title is now unescaped before whitespace is collapsed, so
+  the non-breaking space folds into a normal space like any other run of
+  whitespace.
+- **Unconditional claim of a JSON companion.** The preamble stated "the
+  machine-readable companion is manifest.json in this directory" whether or
+  not one was emitted. A publication that ships the text manifest alone was
+  therefore shipping a dangling reference. `emit_manifest_txt` takes a
+  `with_json` keyword, defaulting to `True` so `--emit-manifest` is unchanged;
+  callers emitting the text manifest alone pass `False` and the sentence is
+  dropped.
+
+Known gap, recorded rather than closed: this repository has no test harness,
+so neither fix carries a regression fixture. Both were verified by hand against
+the UBL 2.5 OS package. Standing up a harness is separate work and should
+happen before the next behavioural change to the emitter.
+
 ## v1.1.6 - 2026-08-13
 
 A patch release: no executable check changed, and the exit-code gate contract
