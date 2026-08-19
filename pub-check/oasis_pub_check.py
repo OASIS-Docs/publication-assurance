@@ -1383,7 +1383,8 @@ def emit_manifest_txt(stage_dir: str, version: str, stage: str) -> str:
         html = read_text(items["html"])
         m = re.search(r"<title[^>]*>(.*?)</title>", html, re.I | re.S)
         if m:
-            title = re.sub(r"\s+", " ", m.group(1)).strip()
+            title = re.sub(r"\s+", " ",
+                           html_lib.unescape(m.group(1))).strip()
         m = re.search(r"https://docs\.oasis-open\.org/[^\s\"'<>]*?/"
                       + re.escape(stage) + "/", html)
         if m:
