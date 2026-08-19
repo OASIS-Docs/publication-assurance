@@ -201,6 +201,12 @@ publication-assurance/
 │   ├── eox-core-v1.0-csd01/         #   the Validation Report from a publication
 │   ├── csaf/                        #   archived CSAF work products (v2.0 lineage, v2.1 csd01)
 │   └── csaf-cvrf/                   #   archived CSAF-CVRF v1.2 work products
+├── tests/                           # The criteria's own regression suite (pytest)
+│   ├── conftest.py                  #   loads the checker by path, copies corpus fixtures
+│   ├── test_delivery_items.py       #   delivery-item selection on a deployed tree
+│   ├── test_manifest_emitter.py     #   Work Product Manifest File emitter
+│   ├── test_cli_smoke.py            #   the CLI contract: exit codes, --json, --list-checks
+│   └── fixtures/                    #   hand-built defect trees (the corpus supplies the rest)
 ├── TRANSFORMS.md                    # The pipeline, command by command (canonical criteria)
 ├── assets/                          # The diagrams (PNG)
 ├── .github/
@@ -208,13 +214,41 @@ publication-assurance/
 │   │                                #   HTML preprocessor, wkhtmltopdf renderer)
 │   ├── scripts/                     # Shell entry points used by the workflows
 │   ├── styles/                      # OASIS markdown-styles CSS lineage (v1.1 → v1.8.1)
-│   └── workflows/                   # step_1 (MD→HTML), step_2 (HTML→PDF),
-│                                    #   step_3 (zip), pub-check (the gate)
+│   └── workflows/                   # ci (this repo's own test suite), step_1 (MD→HTML),
+│                                    #   step_2 (HTML→PDF), step_3 (zip), pub-check (the gate)
 ├── LICENSE                          # Apache-2.0 (software tier)
 └── NOTICE                           # The three-tier IP statement
 ```
 
 </details>
+
+## Running the tests
+
+The gate grades other people's publications, so a defect in it mis-grades work
+silently. `tests/` is the regression net: a fixture per fixed defect, plus smoke
+coverage over the CLI contract that `gate.py`, the composite action and the
+publication runbook depend on.
+
+The checker itself is stdlib-only. `pytest` is the one development dependency
+and is not on the system Python, so use a venv:
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install pytest
+pytest tests/ -v                                    # the full suite
+pytest tests/test_delivery_items.py -v              # one file
+pytest tests/test_delivery_items.py::test_index_html_is_never_selected_as_the_delivery_item
+```
+
+The suite runs on every push and pull request
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). A red run blocks:
+there is no inherited-baseline argument for the acceptance criteria's own
+tests.
+
+Fixtures come from the archived CSAF corpus under `examples/` wherever a
+realistic package is needed. `tests/conftest.py` copies a corpus stage
+directory into a `tmp_path` per test rather than duplicating multi-megabyte
+artifacts under `tests/fixtures/`; the corpus is read, never modified.
 
 ## Key technologies
 

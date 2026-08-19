@@ -1,0 +1,50 @@
+# Copyright 2025-2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
+
+# CI: the acceptance criteria's own test suite.
+#
+# oasis-pub-check grades other people's publications, so a defect in it
+# mis-grades work silently. This suite is the regression net: a fixture per
+# fixed defect, plus smoke coverage over the CLI contract that gate.py, the
+# composite action and the runbook all depend on.
+#
+# There is no inherited-baseline argument here. A red run blocks.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      # The checker is stdlib-only; poppler-utils matches the runtime the
+      # pub-check workflow gives it, so the optional PDF cross-check takes the
+      # same path in CI as it does on a maintainer's machine.
+      - name: Install pdftotext (optional PDF cross-check)
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
+      - name: Install test dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pytest
+
+      - name: Run pytest
+        run: pytest tests/ -v
+
+      # The registry/AST parity assertion inside --list-checks is the tool's
+      # self-audit: it raises if the documented condition registry drifts from
+      # the code. Run it as its own step so drift is legible in the log.
+      - name: Check the condition registry is in sync with the code
+        run: python3 pub-check/oasis_pub_check.py --list-checks

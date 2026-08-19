@@ -76,3 +76,6 @@ context_dump.txt
 
 # local authoring helper, not shipped
 assets/build.py
+
+# Pytest cache
+.pytest_cache/

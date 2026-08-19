@@ -24,6 +24,70 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.1.8 - 2026-08-19
+
+A patch release: no executable check changed, no check threshold moved, and the
+exit-code gate contract is unchanged. It closes the gap recorded in v1.1.7, that
+this repository had no test harness and so the three defects fixed that day
+carried no regression fixture.
+
+- **A regression suite under `tests/`.** `pytest`, laid out to match the sibling
+  `publisher-toolkit`: a `conftest.py` that loads the checker by path (the
+  `pub-check/` directory is hyphenated and cannot be imported as a package),
+  on-disk defect trees under `tests/fixtures/`, and one test module per area.
+  `pytest` is the only development dependency; the checker stays stdlib-only.
+- **A fixture per v1.1.7 defect.** Each one was demonstrated failing against the
+  parent commit before it was accepted. `test_manifest_title_unescapes_html_entities`
+  fails on a9699aa with the literal `&nbsp;` in the manifest title.
+  `test_manifest_preamble_omits_the_json_claim_when_no_json_ships` fails on
+  5c3dd27, where `emit_manifest_txt` has no `with_json` keyword to pass.
+  Five fixtures in `test_delivery_items.py` fail on 7cbe512, where
+  `find_delivery_items` returns `index.html` as the delivery HTML.
+- **The delivery-item fixtures use the shape that actually triggers the
+  defect.** `index.html` only wins the shortest-stem fallback when no `.html`
+  in the directory has a stem ending in `-<stage>`. A conforming
+  `<spec>-<stage>.html` takes the exact-match branch and was never displaced.
+  The fixture tree therefore re-stems a CSAF corpus package to drop the stage
+  token, which is the UBL v2.5 `os/` shape, and adds a generated directory
+  listing beside it. A second fixture holds the conforming shape as a
+  no-change guard.
+- **Coverage of the suppression direction.** The reported UBL symptom was
+  blockers disappearing, not appearing: a directory listing carries none of the
+  cover content the `member-uri` and `xml-namespace` checks read, so a package
+  that must not publish passed silently.
+  `test_a_directory_listing_does_not_suppress_cover_blockers` pins that
+  direction against a cover carrying member-only Kavi URIs.
+- **Smoke coverage over the entry points.** `--json` key shape and its
+  blocker-count agreement, exit-code semantics on both branches, the
+  `--list-checks` registry/AST parity assertion, `--emit-manifest` writing both
+  companion files, and the two argument-error paths. These pin the CLI contract
+  that `gate.py`, the composite action and the publication runbook consume.
+- **CI runs the suite.** `.github/workflows/ci.yml` on push, pull request and
+  manual dispatch. It installs `poppler-utils` so the optional PDF cross-check
+  takes the same path in CI as on a maintainer's machine, and runs
+  `--list-checks` as a separate step so registry drift is legible in the log.
+  A red run blocks.
+
+Blast radius of the `index.html` defect, established rather than assumed: every
+publication audit and pub-check validation report held in the OASIS docs ops
+workspace was swept, 120 report JSON files across KMIP, OpenEoX, XACML/ACAL,
+ODF, LegalDocML, NIEMOpen and UBL. None was graded against a directory listing,
+so no published verdict changes. Two conditions account for that. Most runs
+selected a delivery HTML whose stem ends in `-<stage>`, which takes the
+exact-match branch and never reaches the shortest-stem fallback, including the
+two OpenEoX runs against a staged tree that does carry `index.html`. The three
+runs that did reach the fallback pointed at directories with no `index.html` in
+them. The UBL v2.5 `os` artifacts postdate 14ad114 and record `UBL-2.5.html` as
+the delivery item, with the four `xml-namespace` and the `member-uri` blockers
+present.
+
+One latent exposure was found and is closed by the fix rather than by any
+change here: `legaldocml/akn-core/v2.0/cs01/` holds an untracked `index.html`
+beside `akn-core-v2.0-namespace.html` and no `-cs01`-suffixed HTML, so the
+pre-fix tool selects the listing there. The July 2026 LegalDocML audit escaped
+it only because it ran against a separate copy. The same shape recurs in the
+ECF `model/` directories.
+
 ## v1.1.7 - 2026-08-19
 
 A patch release: no executable check changed, and the exit-code gate contract
