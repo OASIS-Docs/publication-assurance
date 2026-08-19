@@ -185,12 +185,21 @@ def find_delivery_items(stage_dir: str,
     whose stem ends in -<stage>; if none does, fall back to the shortest
     stem (covers pre-rename working packages so the filename check can
     report them). The default extension set is the markdown track; the
-    DOCX-native track asks for (docx, html, pdf)."""
+    DOCX-native track asks for (docx, html, pdf).
+
+    index.html is never a delivery item. It is the generated directory
+    listing, server-only by the publication contract, and it is present in
+    every deployed tree. Because the fallback picks the SHORTEST stem, an
+    unfiltered scan selects `index.html` over `<spec>-<stage>.html` and every
+    downstream cover, title, front-matter and asset check then runs against a
+    directory listing."""
     stage = os.path.basename(os.path.normpath(stage_dir))
     cands: dict[str, list[str]] = {e: [] for e in exts}
     for name in sorted(os.listdir(stage_dir)):
         p = os.path.join(stage_dir, name)
         if not os.path.isfile(p):
+            continue
+        if name.lower() == "index.html":
             continue
         ext = os.path.splitext(name)[1].lstrip(".").lower()
         if ext in cands:

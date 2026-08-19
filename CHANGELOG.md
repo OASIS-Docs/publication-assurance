@@ -38,6 +38,20 @@ found while staging UBL v2.5 as an OASIS Standard.
   citable URL. The title is now unescaped before whitespace is collapsed, so
   the non-breaking space folds into a normal space like any other run of
   whitespace.
+- **`index.html` selected as the HTML delivery item.** `find_delivery_items`
+  falls back to the shortest stem when no candidate ends in `-<stage>`, and
+  `index.html` is shorter than any conforming spec filename. Every deployed
+  OASIS tree carries a generated `index.html` in each directory, so running the
+  gate against a live or fully staged tree selected the directory listing as
+  the delivery HTML, and the cover, front-matter, title-version and asset-ref
+  checks then ran against it. Symptom on UBL v2.5 os: `Delivery items do not
+  share one basename: ['UBL-2.5', 'index']`, `No 'This version' URL block found
+  on the HTML cover`, `Title does not incorporate a Version identifier: 'Index
+  of /ubl/os-UBL-2.5/'`, plus the loss of the four `xml-namespace` and the
+  `member-uri` blockers that the real cover produces. `index.html` is now
+  skipped in the candidate scan: it is server-only by the publication contract
+  and is never a delivery item. This affects audit-only runs most, since those
+  point at a deployed tree by definition.
 - **Unconditional claim of a JSON companion.** The preamble stated "the
   machine-readable companion is manifest.json in this directory" whether or
   not one was emitted. A publication that ships the text manifest alone was
