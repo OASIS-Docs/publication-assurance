@@ -199,8 +199,6 @@ def find_delivery_items(stage_dir: str,
         p = os.path.join(stage_dir, name)
         if not os.path.isfile(p):
             continue
-        if name.lower() == "index.html":
-            continue
         ext = os.path.splitext(name)[1].lstrip(".").lower()
         if ext in cands:
             cands[ext].append(p)
