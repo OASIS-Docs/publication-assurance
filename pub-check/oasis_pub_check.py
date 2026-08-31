@@ -2010,6 +2010,79 @@ def _resolve_previous_stage_artifact(stage_dir: str, prev_url: str
     except Exception:  # noqa: BLE001 - unresolvable prior artifact, not a crash
         return prev_stage, "", is_html_artifact
 
+def check_stage_uri_reachability(md_text: str, f: Findings) -> None:
+    """AC-NAMING-34: every Previous-stage and Latest-stage URI the cover
+    declares must actually retrieve. check_front_matter validates the SHAPE of
+    these blocks (site prefix, version/stage segments, underscore ban) and
+    validates This-stage URIs against the package's own file list, but nothing
+    confirmed that a Previous- or Latest-stage URI resolves. Those two blocks
+    name files that are NOT in the package, so shape is all a local check can
+    see, and a citation pointing at a file that was never published passes
+    every other gate silently.
+
+    Scarred 31-Aug-2026, OData Vocabularies v4.0 csd03: the TC's own template
+    hardcodes '.docx' into the Previous-stage line while templating the stage
+    name, so advancing csprd01 -> csd02 produced
+    .../csd02/odata-vocabularies-v4.0-csd02.docx, which never existed (csd02
+    went markdown-native). Published live, 404, invisible to pub-check. The
+    same template hardcodes a Latest-stage .docx that resolves only because a
+    stale symlink still served the December 2016 csprd01 Word file.
+
+    Only a DEFINITIVE 404/410 fires a finding. Timeouts, DNS failures, 5xx and
+    bot-challenge responses are reported as INFO, never as blockers: a network
+    blip must not manufacture a publication defect. Silent full skip under
+    PUB_CHECK_OFFLINE, matching the other live-site checks."""
+    prev_urls = stage_urls_from_md(md_text, "Previous")
+    latest_urls = stage_urls_from_md(md_text, "Latest")
+    f.observe("stage-uri-live",
+              previous_stage_urls=prev_urls or "(none)",
+              latest_stage_urls=latest_urls or "(none)")
+    if os.getenv("PUB_CHECK_OFFLINE", "").lower() in {"1", "true", "yes"}:
+        return
+    if not (prev_urls or latest_urls):
+        return
+
+    import urllib.error
+    import urllib.request
+
+    checked = 0
+    for role, urls in (("Previous stage", prev_urls), ("Latest stage", latest_urls)):
+        for raw in urls:
+            u = raw.rstrip(".,)\\")
+            if not u.startswith(SITE + "/"):
+                continue  # shape checks own off-site URIs
+            checked += 1
+            try:
+                req = urllib.request.Request(
+                    u, method="HEAD", headers={"User-Agent": "pub-check"})
+                with urllib.request.urlopen(req, timeout=15) as r:
+                    code = r.status
+            except urllib.error.HTTPError as e:
+                code = e.code
+            except Exception:  # noqa: BLE001 - transport failure, not a defect
+                f.add(INFO, "stage-uri-live",
+                      f"{role} URI could not be reached to confirm it retrieves "
+                      f"(transport failure, not a 404): {u}. Re-run with network "
+                      f"access before treating the citation as sound.")
+                continue
+            if code in (404, 410):
+                f.add(BLOCKER, "stage-uri-live",
+                      f"{role} URI returns HTTP {code}: {u}. The cover cites a "
+                      f"document that is not published at that address. A "
+                      f"Previous-stage citation whose extension does not match "
+                      f"the format that stage actually published is the usual "
+                      f"cause (a stage that went markdown-native still being "
+                      f"cited as .docx); a Latest-stage 404 means the version-root "
+                      f"link for that format does not exist and the line should "
+                      f"be dropped.")
+            elif code >= 400:
+                f.add(INFO, "stage-uri-live",
+                      f"{role} URI returned HTTP {code} (not a definitive 404): "
+                      f"{u}. Confirm in a browser; a bot challenge or transient "
+                      f"5xx is not evidence the document is missing.")
+    f.observe("stage-uri-live", stage_uris_fetched=checked)
+
+
 def check_conformance_structure(md_text: str, html_text: str, stage_dir: str,
                                 stage: str, f: Findings) -> None:
     """AC-CONTENT-03: where a Standards Track Conformance section is
@@ -6049,6 +6122,7 @@ def run(stage_dir: str, f: Findings) -> None:
     base = ""
     if md_text:
         base = check_front_matter(md_text, items, version, stage, f)
+        check_stage_uri_reachability(md_text, f)
     if html_text:
         # anchors are source-side artifacts on Word renders: WARN there
         check_html(html_text, stem, f,
@@ -6215,6 +6289,10 @@ CONDITION_DOCS: list[dict] = [
          pulls="the set of source formats found in the package root",
          compares_to="at least one authoritative source (.md, .docx, or .odt) expected beside HTML/PDF"),
     # front-matter (markdown track: 1-9; DOCX track cover: 10-12)
+    dict(check="stage-uri-live", sig="URI returns HTTP", applies="md",
+         condition="Every Previous-stage and Latest-stage URI the cover declares actually retrieves",
+         pulls="a live HEAD request for each docs.oasis-open.org URI in the Previous/Latest stage blocks",
+         compares_to="a definitive 404/410 from the published site (transport failures and non-404 errors stay INFO)"),
     dict(check="front-matter", sig="No 'This stage' URL block", applies="md",
          condition="Markdown front matter carries a This-stage URL block",
          pulls="URLs under the 'This Stage/Version' heading in the markdown",
