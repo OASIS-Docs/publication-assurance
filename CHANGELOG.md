@@ -24,6 +24,83 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.3.0 - 2026-09-04
+
+A documentation release, prepared for handing the criteria to the TCs. No
+check was added, removed or changed, and no finding changes severity. It is
+a MINOR rather than a PATCH for one reason: the `applies` field in `--json`
+and in the catalog now says `all` where it said `both`.
+
+Contract:
+
+- **`applies: "both"` is now `applies: "all"`.** The vocabulary dated from a
+  two-track world, markdown and DOCX, and the tool has had three source
+  formats since ODT landed. "Both" was wrong on its face in a column whose
+  other values are `md`, `docx` and `odt`. The `--json` keys are unchanged
+  and the exit-code contract is unchanged; a consumer that branches on the
+  string `"both"` must read `"all"` instead. The report renderer in
+  `~/.claude/tools/oasis-deploy/pubcheck_report.py` branches only on `md`,
+  `docx` and `odt`, so it is unaffected.
+
+Defects in the shipped documentation:
+
+- **`CHECKS.md` was rendering a third of a paragraph at heading size.** The
+  generator escaped angle brackets in the table cells but not in the
+  class-description paragraphs, and the `title-oasis-prefix` description
+  contains `<h1>`. GitHub parses that as an opening heading tag, so
+  everything after it on the page rendered at 32 point. Tags GitHub does not
+  recognise, `<spec>` and `<name>` among them, were deleted from the page
+  instead, silently. `AUTHORITIES.md` carried the same defect in a heading
+  and inside a verbatim policy quote. Both generators now escape angle
+  brackets in prose, leaving code spans alone, and
+  `tests/test_markdown_renders.py` fails on any angle-bracketed text that
+  reaches a shipped document unescaped.
+
+- **The catalog shipped dead links.** The dual-link check was described as
+  "No dual `[url](url)` links", which markdown renders as a link to a
+  relative path named `url`. Two per row, in the rows most likely to be read
+  by somebody whose package just failed that check. The registry text now
+  puts the illustrations in backticks, and the same test file asserts that
+  every relative link in every shipped document resolves to a file.
+
+- **The regression corpus was advertised as 13 packages.** `examples/`
+  carries 12 stage packages. `tests/test_advertised_counts.py` now counts
+  them and fails on any document that says otherwise, the same way it
+  already pins the condition and class counts.
+
+- **The worked example was described with the wrong figures.** The TC guide
+  said the eox-core CSD01 validation report showed zero blockers "across all
+  92 conditions", with 9 warnings and 3 informational notes. The report
+  itself records 169 conditions across 57 classes, 12 warnings and 9
+  informational notes. The count claim is gone (the report is dated evidence
+  and its inventory is not today's), and the warning and informational
+  figures now match the report.
+
+- **A count claim can hide from the count test by being wrapped.** That 92
+  sat in `PUBLICATION-QUALITY.md` through a green suite because the line
+  broke between "92" and "conditions" and the patterns were single-line. The
+  claim patterns now match against whitespace-collapsed text.
+
+- **The TC guide said Layer 1 "never touches the live site".** Four checks
+  do: `revision-collision`, `stage-uri-live`, `public-review-metadata`, and
+  the previous-stage resolution inside `conformance-structure`. The guide now
+  says which, and says that `PUB_CHECK_OFFLINE=1` turns those four off. It
+  also no longer implies the tool writes nothing, since `--emit-manifest`
+  does.
+
+Register:
+
+- Class descriptions in `CHECKS.md` described the implementation to a reader
+  who does not have it open: a helper shared with another check, an
+  extraction that is "percent-decode-aware", a fallback taken "rather than
+  skipping a real violation". Ten of them are rewritten to say what the check
+  requires of a package and what happens when it is not met.
+
+- Passages across the README, the TC guide and the tool README that defended
+  a choice nobody had questioned, or narrated the author's own diligence, are
+  cut or restated as plain description. The layout listing in the README was
+  four test files behind.
+
 ## v1.2.0 - 2026-09-04
 
 A minor release: one new check class, so the gate got stricter.

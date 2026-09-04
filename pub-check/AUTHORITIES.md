@@ -106,7 +106,7 @@ Acceptance criteria: AC-NAMING-22
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.2 Stage (BLOCKER)
   > The "comment resolution log" filename follows the pattern: [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-comment-resolution-log.[ext]
 - **[TC Handbook: Sources](https://docs.oasis-open.org/TChandbook/Reference/Sources.html)**, OASIS TC Handbook: Public Reviews (registry row) (BLOCKER)
-  > the log is a per-spec deliverable named <spec>-<stage>-comment-resolution-log.{xls,pdf,md}
+  > the log is a per-spec deliverable named &lt;spec&gt;-&lt;stage&gt;-comment-resolution-log.{xls,pdf,md}
 
 ## conformance-structure
 
@@ -980,7 +980,7 @@ Acceptance criteria: AC-PACKAGING-17
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.5 URI Aliases (BLOCKER)
   > TCs must not use URI aliasing by any means, including, for example, unauthorized: (a) use of META-refresh elements, (b) preparing files with identical content under two different filenames within a given published instance, or (c) constructing URIs for canonical OASIS resources by using redirects supported by services on other Internet domains
 
-### uri-alias: live <meta http-equiv="refresh">
+### uri-alias: live &lt;meta http-equiv="refresh"&gt;
 
 Acceptance criteria: AC-PACKAGING-17
 
