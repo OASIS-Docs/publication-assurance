@@ -42,12 +42,12 @@ INTRO = """\
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
 This is the acceptance criteria set for publication on docs.oasis-open.org,
-executable: every individual condition `oasis_pub_check.py` verifies, one row per condition:
-what is checked, the value the tool pulls from the package, what that value
-is compared against, and the severity if the condition fails. This file is
-GENERATED from the tool's own condition registry by `render_checks_md.py`,
-and `--list-checks` asserts the registry against the implementation every
-time it runs.
+in executable form: one row for every individual condition
+`oasis_pub_check.py` verifies. Each row gives what is checked, the value the
+tool pulls from the package, what that value is compared against, and the
+severity if the condition fails. The file is generated from the tool's own
+condition registry by `render_checks_md.py`, and `--list-checks` asserts the
+registry against the implementation on every run.
 
 The gate is input-format agnostic. A TC generates its own outputs from
 whatever source format it authors in (Markdown, Word, ODT, DocBook/XML,
@@ -66,7 +66,7 @@ package suites.
 | Field | Values |
 |---|---|
 | Severity | **BLOCKER**: the package cannot publish until fixed (exit 1). **WARN**: publishable, flagged for the record, often a must-fix before a later stage. **INFO**: recorded, no action required. |
-| Applies | **both**: every package, regardless of input format. **md** / **docx** / **odt**: add-on conditions that engage only when that source format is present; on any other package they report NA with the reason rather than passing silently. There is no closed list of input formats: DocBook/XML, LaTeX, and any other source are validated through the **both** conditions, with the cover parsed from the rendered HTML. |
+| Applies | **all**: runs on every package, whatever it was authored in. **md** / **docx** / **odt**: add-on conditions that engage only when the package carries that source format; on any other package they report NA with the reason rather than passing silently. A package authored in a format with no add-ons of its own (DocBook/XML, LaTeX, anything else) is validated through the **all** conditions, with the cover read from the rendered HTML. |
 | Requires | A package or environment feature (network, `pdftotext`, `pdffonts`, packaged schemas, a packaged manifest) without which the condition reports NA in the validation report rather than passing silently. |
 """
 
@@ -149,7 +149,7 @@ CLASS_DESCRIPTIONS = {
     "rfc-keywords": "Normative key words require the RFC 2119 (and 8174) citations.",
     "schema-id": "Every JSON schema's $id must agree with where the file actually publishes.",
     "stage-name": "The stage token must be a current, correctly numbered stage per the Naming Directives.",
-    "stage-uri-live": "The Previous-stage and Latest-stage URIs a cover declares name files that are not in the package, so a local check can only see their shape. This class fetches them: a definitive 404 or 410 is a BLOCKER, because the cover is citing a document that was never published at that address. The usual cause is a template that hardcodes the extension while templating the stage name, so a stage that went markdown-native is still cited as .docx. Transport failures, 5xx and bot challenges are reported as INFO, so a network fault cannot manufacture a defect, and the class is a silent no-op under PUB_CHECK_OFFLINE.",
+    "stage-uri-live": "The Previous-stage and Latest-stage URIs on the cover name files that are not in the package, so every other check can see only their shape. This class fetches them. A 404 or 410 is a BLOCKER: the cover cites a document that was never published at that address, usually because the template hardcodes the extension while templating the stage name, so a stage that went markdown-native is still cited as `.docx`. Transport failures, 5xx responses and bot challenges are recorded as INFO. `PUB_CHECK_OFFLINE` turns the class off.",
     "symlinks": "Self-referential symlinks materialize into unbounded recursion on deploy.",
     "member-uri": "No OASIS member-only (Kavi) URI may be cited in a public work product (Naming Directives v1.7 s6.6).",
     "template": "The OASIS template's required front-matter sections, in order, plus Conformance.",
@@ -158,20 +158,20 @@ CLASS_DESCRIPTIONS = {
     "version-naming": "The version directory and delivery filenames must agree on one vN.N(.N) version.",
     "artifact-naming": 'Non-document-identifier artifacts (schemas, images, WSDLs, codelists) should keep stable filenames across releases, not embed a stage/revision token.',
     "authors": "A Technical Report/Technical Report Draft must name one or more Authors on the cover page, distinct from a Committee Note's Editors listing.",
-    "comment-resolution-log": 'A comment-resolution-log accompanying a CSD/CND public review, if present, must carry the exact Naming Directives basename (BLOCKER if misnamed); if the review has demonstrably concluded and no log-named file exists, that unexplained absence is flagged for confirmation (WARN). Near-miss detection folds away only hyphen/underscore word-joiners (not arbitrary punctuation) so unrelated files separated by other characters do not false-fire.',
-    "conformance-structure": 'Standards Track Conformance section structure: top-level placement (not buried in an Annex/subsection), individually/uniquely numbered clauses per profile scope, and (CS->OS only) zero-tolerance clause-number-set preservation with a manual-review flag for wording-only changes.',
-    "content-labels": 'Examples/Sample-<noun> headings should carry an explicit non-normative/informative content-type label (WARN); Appendix/Annex headings get the same structural test but only as a non-scoring advisory note.',
+    "comment-resolution-log": 'A comment-resolution log accompanying a CSD or CND public review must carry the exact basename the Naming Directives prescribe (BLOCKER if it is misnamed). Where the package itself shows the review concluded and no log-named file is present, the absence is flagged for confirmation (WARN). A near-miss is matched across hyphen and underscore word-joiners only, so a file that merely shares a word or two is not read as a misnamed log.',
+    "conformance-structure": 'Standards Track Conformance section structure: the section sits at top level rather than inside an Annex or subsection, each profile scope carries individually and uniquely numbered clauses, and from CS to OS the clause-number set is preserved exactly, with wording-only changes flagged for manual review.',
+    "content-labels": 'An Examples or Sample heading should carry an explicit non-normative or informative content-type label (WARN). Appendix and Annex headings get the same structural test, recorded as an advisory note that does not score.',
     "extension-conformance": 'Principal and Multi-Part named-part filename extensions should match a common OASIS publication rendering format, not an invented or proprietary token.',
-    "extension-count": 'A delivery item must carry exactly one file extension after its document-identifier stem (BLOCKER, WARN at wd, case-folded at wd), matched only at a clean stem/extension boundary and never fooled by an empty dot-segment or an extra segment ahead of a blessed tar.gz/tar.bz2/tar.xz compound; every other package file (junk directories pruned) gets the same double-extension and missing-extension check as a non-blocking WARN advisory (Naming Directives v1.7 s4/s9).',
-    "multi-part-naming": 'Multi-Part Work Product filenames must share one WP-abbrev/version-id (AC-NAMING-19) and, where the package is multi-part, insert a correctly formed, contiguously numbered -part<N>-<name> segment (AC-NAMING-20; Naming Directives v1.7 s4/s6.1), scoped to Standards Track CSD/CS/OS and Non-Standards Track CND/CN stage directories.',
-    "name-chars": 'Every filename and directory name must stay within the sixty-four permitted characters; UNDERSCORE is a BLOCKER in an identifying (document-URI) name and a non-blocking WARN elsewhere. An empty identifying name is a BLOCKER, not silently accepted.',
+    "extension-count": 'A delivery item must carry exactly one file extension after its document-identifier stem: BLOCKER, relaxed to WARN at wd stage (Naming Directives v1.7 s4/s9). The stem is subtracted only at a clean extension boundary, and the `tar.gz`, `tar.bz2` and `tar.xz` compounds count as one extension when the compound is the whole remaining suffix. Every other file in the package gets the same double-extension and missing-extension test as a non-blocking advisory.',
+    "multi-part-naming": 'Multi-Part Work Product filenames must share one work-product abbreviation and version id (AC-NAMING-19) and, in a multi-part package, carry a well-formed, contiguously numbered `-partN-name` segment (AC-NAMING-20; Naming Directives v1.7 s4/s6.1). Scoped to Standards Track CSD/CS/OS and Non-Standards Track CND/CN stage directories.',
+    "name-chars": 'Every filename and directory name must stay within the sixty-four permitted characters. UNDERSCORE is a BLOCKER in an identifying (document-URI) name and a WARN elsewhere. An empty identifying name is a BLOCKER.',
     "normdef-refs": 'Every packaged normative schema/grammar/code file (Standards Track) must be referenced from the Work Product (TC Process 2.2.5).',
     "ns-segment": 'This/Latest-stage cover URIs must not reuse the reserved /ns/ path segment (namespace identifiers only); Previous-stage hits are WARN (inherited, immutable citation).',
     "public-review-metadata": 'Post-publication audit: a csd/cnd stage directory that underwent a TC public review must carry the [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html companion file Project Administration is obligated to publish alongside it (Naming Directives v1.7 s5.2 / TC Handbook Naming).',
     "references-split": 'On a Standards Track work product, Normative and Informative References should be separately labeled, with no reference ID listed under both (handbook-WPQualityChecklist.txt, WARN).',
-    "stage-token": "Second-and-later Previous-stage cover URIs should carry the document's own csd/cnd stage token (WARN if not: retired or mismatched, with a legacy pre-v1.7 verification caveat); Latest-stage cover URI filenames must never embed a stage-abbreviation/revision token at all (BLOCKER, matching-or-not is irrelevant). Token extraction is percent-decode-aware, prose-punctuation-tolerant, and splits on both '-' and '.' delimiters so a malformed filename that merges the version and stage with a period instead of a hyphen is still caught.",
-    "title-oasis-prefix": "A Work Product title should not begin with 'OASIS' except on Project Administration's recommendation for special cases (Naming Directives v1.7 s7); BLOCKER on Standards Track, WARN on Non-Standards Track. Title identification shares one 0/1/2+ classification helper with check_html's D1 lint (no duplicated extraction logic), tolerates a <title>-only trailing brand suffix through a prefix-relationship singular-<h1> fallback rather than skipping a real violation, HTML-unescapes <h1> text before comparing it against the already-decoded <title>, and discloses in both the finding text and the observed evidence when the Standards/Non-Standards Track classification was itself a default (ambiguous stage prefix) rather than a confirmed read.",
-    "title-version": "The cover-page title must incorporate the package's own Version identifier and, for Standards Track Work Products, compose it as '<name> Version <number>' (Naming Directives 5.1 / Section 7).",
+    "stage-token": "On a second or later stage, the Previous-stage cover URI should carry the document's own csd or cnd stage token; a retired or mismatched token is a WARN, with a caveat for pre-v1.7 legacy paths. A Latest-stage cover URI filename must embed no stage-abbreviation or revision token at all (BLOCKER; whether it matches is beside the point). Tokens are read after percent-decoding, tolerate surrounding prose punctuation, and split on '-' and '.', so a filename that joins the version and stage with a period still yields its token.",
+    "title-oasis-prefix": "A Work Product title should not begin with 'OASIS' unless Project Administration recommends it for a special case (Naming Directives v1.7 s7). BLOCKER on Standards Track, WARN on Non-Standards Track. The title is the cover `<h1>` that matches the HTML `<title>`; where the only difference is a trailing brand suffix on the `<title>`, the single `<h1>` is taken as the title. Where the stage prefix does not identify the track (`wd` sits on both), the finding and the observed evidence say which track was assumed.",
+    "title-version": "The cover-page title must carry the package's own Version identifier, composed for a Standards Track Work Product as `<name> Version <number>` (Naming Directives 5.1 / Section 7).",
     "uri-alias": 'No unauthorized URI aliasing within a stage/revision package: META-refresh, byte-identical duplicate files, or a redirect/URL-shortening domain citing a canonical OASIS resource (Naming Directives v1.7 s6.5).',
     "xml-namespace": 'Every namespace a packaged .xsd/.wsdl/.rng declares as its own must be a docs.oasis-open.org/[tc-shortname]/ns/xxxx URI (consistent scheme) or an allowlisted urn:.',
     "vml-fallback": "VML-only images in Word HTML renders are invisible in every modern browser.",
@@ -179,7 +179,23 @@ CLASS_DESCRIPTIONS = {
 
 
 def esc(s: str) -> str:
+    """Escape a registry string for a markdown table cell."""
     return s.replace("|", "\\|").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def esc_prose(s: str) -> str:
+    """Escape angle brackets in prose, leaving code spans alone.
+
+    A bare `<h1>` in a paragraph is not text on GitHub: it opens a real
+    heading element and everything after it renders at heading size, which
+    is how the title-oasis-prefix description shipped as a wall of 32-point
+    type. Text inside backticks is already literal, so it is passed through
+    untouched; everything outside them gets its angle brackets escaped.
+    """
+    out, parts = [], s.split("`")
+    for i, part in enumerate(parts):
+        out.append(part if i % 2 else part.replace("<", "&lt;").replace(">", "&gt;"))
+    return "`".join(out)
 
 
 def main() -> None:
@@ -210,7 +226,7 @@ def main() -> None:
     n = 0
     for cls in classes:
         lines.append(f"### {cls}\n")
-        lines.append(CLASS_DESCRIPTIONS[cls] + "\n")
+        lines.append(esc_prose(CLASS_DESCRIPTIONS[cls]) + "\n")
         lines.append("| # | Condition verified | Value pulled (observed) | "
                      "Compared against | Severity | Applies | Requires |")
         lines.append("|---|---|---|---|---|---|---|")
