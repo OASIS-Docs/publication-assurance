@@ -27,6 +27,13 @@ import pytest
 
 from conftest import REPO_ROOT, oasis_pub_check
 
+# A claim can be wrapped across a line break by the editor who wrote it, and
+# "all 92\nconditions" then hides from a single-line pattern. It did: the
+# worked-example paragraph in PUBLICATION-QUALITY.md carried a stale 92 for
+# months while this file was green. Every document is matched with its
+# whitespace collapsed.
+WS = re.compile(r"\s+")
+
 INVENTORY = oasis_pub_check.conditions_inventory()
 TOTAL = len(INVENTORY)
 CLASSES = len({c["check"] for c in INVENTORY})
@@ -59,8 +66,31 @@ def _svgs():
     return sorted(p for p in (REPO_ROOT / "assets").rglob("*.svg"))
 
 
+CORPUS_CLAIMS = [
+    re.compile(r"corpus of (\d+) archived"),
+    re.compile(r"regression_corpus-(\d+)_packages"),
+    re.compile(r"Regression corpus: (\d+) packages"),
+]
+
+# A corpus package is a stage directory: the unit oasis_pub_check.py is
+# pointed at. Version-root directories (the "latest version" copies) hold the
+# same bytes again and are not separate submissions.
+STAGE_DIR = re.compile(
+    r"^(wd|csd|cs|cnd|cn|os|ps|psd|pn|pnd|errata|csprd|cnprd|cos)\d*$")
+DELIVERY_SUFFIXES = {".html", ".pdf", ".docx", ".odt", ".md"}
+
+
+def _corpus_packages():
+    return sorted(
+        d for d in (REPO_ROOT / "examples").rglob("*")
+        if d.is_dir() and STAGE_DIR.match(d.name)
+        and any(f.is_file() and f.suffix.lower() in DELIVERY_SUFFIXES
+                for f in d.iterdir()))
+
+
 def _claims(text, patterns):
-    return [int(n) for pat in patterns for n in pat.findall(text)]
+    flat = WS.sub(" ", text)
+    return [int(n) for pat in patterns for n in pat.findall(flat)]
 
 
 @pytest.mark.parametrize("rel", DOCS)
@@ -114,3 +144,59 @@ def test_the_claim_patterns_actually_match_something():
     assert any(_claims(p.read_text(encoding="utf-8"),
                        CONDITION_CLAIMS + CLASS_CLAIMS) for p in _svgs()), \
         "no diagram matched any count pattern"
+
+
+@pytest.mark.parametrize("rel", ["README.md", "PUBLICATION-QUALITY.md",
+                                 "pub-check/README.md"])
+def test_documentation_advertises_the_corpus_that_is_here(rel):
+    """The corpus size is advertised in three places and counted in none.
+    It said 13 while the repository carried 12 stage packages."""
+    here = len(_corpus_packages())
+    text = (REPO_ROOT / rel).read_text(encoding="utf-8")
+    wrong = [n for n in _claims(text, CORPUS_CLAIMS) if n != here]
+    assert not wrong, (
+        f"{rel} advertises a {sorted(set(wrong))}-package regression corpus; "
+        f"examples/ holds {here} stage packages.")
+
+
+def test_the_corpus_claim_patterns_actually_match_something():
+    assert _claims((REPO_ROOT / "README.md").read_text(encoding="utf-8"),
+                   CORPUS_CLAIMS), "corpus patterns matched nothing in README.md"
+    assert len(_corpus_packages()) > 1, "the corpus walk found nothing"
+
+
+def _area_totals():
+    """The per-area figures the TC guide prints, computed from the registry.
+
+    `render_checks_md.py` asserts the areas are a partition and that they sum to
+    the registry total. It only PRINTS the six per-area numbers, so moving one
+    class between areas left the guide's table silently wrong with every gate
+    green.
+    """
+    import importlib.util
+    from collections import Counter
+    spec = importlib.util.spec_from_file_location(
+        "render_checks_md", REPO_ROOT / "pub-check" / "render_checks_md.py")
+    gen = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gen)          # import only; main() is not called
+    counts = Counter(c["check"] for c in INVENTORY)
+    return {area: sum(counts[c] for c in classes)
+            for area, classes in gen.AREAS.items()}
+
+
+def test_the_tc_guide_area_table_matches_the_registry():
+    table = (REPO_ROOT / "PUBLICATION-QUALITY.md").read_text(encoding="utf-8")
+    wrong = {}
+    for area, total in _area_totals().items():
+        m = re.search(rf"\|\s*{re.escape(area)}\s*\|\s*(\d+)\s*\|", table)
+        assert m, f"PUBLICATION-QUALITY.md has no area row for {area!r}"
+        if int(m.group(1)) != total:
+            wrong[area] = (int(m.group(1)), total)
+    assert not wrong, (
+        f"the area table says {{a: claimed for a, (claimed, _) in wrong.items()}} "
+        f"where the registry has {{a: real for a, (_, real) in wrong.items()}}: "
+        f"{wrong}")
+
+
+def test_the_area_totals_sum_to_the_registry():
+    assert sum(_area_totals().values()) == TOTAL

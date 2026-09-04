@@ -35,10 +35,14 @@ jobs:
       - name: Install pdftotext (optional PDF cross-check)
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
 
+      # The checker is stdlib-only. beautifulsoup4 is not its dependency: it
+      # belongs to the document pipeline under .github/src/, which
+      # tests/test_pdf_command.py exercises to pin the wkhtmltopdf argument
+      # vector. Without it that file skips, and a skipped test proves nothing.
       - name: Install test dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install pytest
+          python3 -m pip install pytest beautifulsoup4
 
       - name: Run pytest
         run: pytest tests/ -v

@@ -27,8 +27,10 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Optional
 
@@ -223,6 +225,41 @@ class PdfRenderer(PipelineStep):
 
         return str(soup)
 
+    def document_title(self) -> str:
+        """The running-header title, read from the document being rendered.
+
+        The <title> element, falling back to the first heading, falling back to
+        an empty header. This was a literal 'Common Security Advisory Framework
+        Version 2.1' until 4 September 2026, which put the CSAF title on the
+        running header of every PDF this pipeline produced for any TC.
+        """
+        try:
+            soup = BeautifulSoup(self.html_file.read_text(encoding="utf-8",
+                                                          errors="replace"),
+                                 "html.parser")
+        except OSError:
+            return ""
+        if soup.title and soup.title.string:
+            return " ".join(soup.title.string.split())
+        heading = soup.find(["h1", "h1big"])
+        if heading:
+            return " ".join(heading.get_text().split())
+        return ""
+
+    def copyright_line(self) -> str:
+        """The footer copyright, taking its year from the document itself.
+
+        A hardcoded year is wrong for every document published in a later one.
+        """
+        try:
+            text = self.html_file.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            text = ""
+        m = re.search(r"Copyright\s*(?:\(c\)|&copy;|©)\s*OASIS Open\s*(\d{4})",
+                      text, re.IGNORECASE)
+        year = m.group(1) if m else str(date.today().year)
+        return f"Copyright © OASIS Open {year}. All Rights Reserved."
+
     def build_command(self, html_file_path: str) -> list[str]:
         """Return the exact wkhtmltopdf argument vector for this conversion.
 
@@ -239,11 +276,11 @@ class PdfRenderer(PipelineStep):
             '--margin-left', '20mm',
             '--header-spacing', '6',
             '--header-font-size', '10',
-            '--header-center', 'Common Security Advisory Framework Version 2.1',
+            '--header-center', self.document_title(),
             '--footer-line',
             '--footer-spacing', '4',
             '--footer-left', str(self.html_file.name),
-            '--footer-center', 'Copyright © OASIS Open 2025. All Rights Reserved.',
+            '--footer-center', self.copyright_line(),
             '--footer-right', '[date] - Page [page] of [topage]',
             '--footer-font-size', '8',
             '--footer-font-name', 'Times',

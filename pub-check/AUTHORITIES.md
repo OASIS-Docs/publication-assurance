@@ -7,11 +7,11 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-This catalog records, for the acceptance-criteria checks that trace to **written OASIS policy**, exactly which policy each one answers to: the governing document, the section, and the verbatim clause. Of the 170 individual check conditions, **96 are grounded in written policy** and appear below as 93 catalog entries: three check signatures each cover two conditions, the markdown-source and HTML-render forms of one rule. The remaining 74 are operational quality rules earned from a year of real publications, with no single written clause behind them, and are listed as such in the crosswalk (not here).
+This catalog records, for the acceptance-criteria checks that trace to **written OASIS policy**, exactly which policy each one answers to: the governing document, the section, and the verbatim clause. Of the 170 individual check conditions, **96 are grounded in written policy** and appear below as 93 catalog entries: three check signatures each cover two conditions, the markdown-source and HTML-render forms of one rule. The remaining 74 are operational quality rules earned from a year of real publications, with no single written clause behind them, and are not listed here.
 
-Corpus snapshot **2026-07-21**. Every quote below is a verbatim substring of the snapshotted source; document digests are in `corpus/MANIFEST.json`. The crosswalk was last extended against that corpus on 27 July 2026; conditions added to the registry after that date sit in the ungrounded set until it is re-run. The governing documents are the OASIS TC Process, the Committee Operations Process, the Naming Directives v1.7, and the TC Handbook.
+Corpus snapshot **2026-07-21**: 25 source pages fetched, hashed and kept as text, 19 of which are cited below. Every quote is a verbatim substring of its snapshotted source. The corpus, its digests and the criterion-to-clause crosswalk are held by TC Administration and are not distributed with this repository; the machine-readable half of the map that is, is `authorities.yaml` beside this file. The crosswalk was last extended against that corpus on 27 July 2026, so a condition added to the registry after that date is ungrounded for want of a re-run rather than by any judgement about it. The governing documents are the OASIS TC Process, the Committee Operations Process, the Naming Directives v1.7, and the TC Handbook.
 
-The check name and signature match the tool's own catalog (`CHECKS.md`); the `AC-*` ids are the policy-derived acceptance criteria in `criteria.yaml`.
+The check name and signature match the tool's own catalog (`CHECKS.md`); the `AC-*` ids are the policy-derived acceptance criteria in TC Administration's `criteria.yaml`.
 
 ## artifact-naming
 
@@ -106,7 +106,7 @@ Acceptance criteria: AC-NAMING-22
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.2 Stage (BLOCKER)
   > The "comment resolution log" filename follows the pattern: [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-comment-resolution-log.[ext]
 - **[TC Handbook: Sources](https://docs.oasis-open.org/TChandbook/Reference/Sources.html)**, OASIS TC Handbook: Public Reviews (registry row) (BLOCKER)
-  > the log is a per-spec deliverable named <spec>-<stage>-comment-resolution-log.{xls,pdf,md}
+  > the log is a per-spec deliverable named &lt;spec&gt;-&lt;stage&gt;-comment-resolution-log.{xls,pdf,md}
 
 ## conformance-structure
 
@@ -980,7 +980,7 @@ Acceptance criteria: AC-PACKAGING-17
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.5 URI Aliases (BLOCKER)
   > TCs must not use URI aliasing by any means, including, for example, unauthorized: (a) use of META-refresh elements, (b) preparing files with identical content under two different filenames within a given published instance, or (c) constructing URIs for canonical OASIS resources by using redirects supported by services on other Internet domains
 
-### uri-alias: live <meta http-equiv="refresh">
+### uri-alias: live &lt;meta http-equiv="refresh"&gt;
 
 Acceptance criteria: AC-PACKAGING-17
 

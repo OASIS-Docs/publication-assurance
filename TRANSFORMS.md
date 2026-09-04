@@ -11,19 +11,21 @@ licensed under the Apache License 2.0 (see LICENSE at the repository root).
 Author: Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-# The transforms, without the Actions
+# Pipeline transforms, run locally
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-The three GitHub Actions workflows in this repository are thin CI wrappers.
-Each one wraps a small number of plain commands. This page lists those
-commands so the transforms can be read and run locally
-with no GitHub Actions involved.
+The three document-transform workflows in this repository (`step_1`, `step_2`,
+`step_3`) are thin CI wrappers. Each one wraps a small number of plain
+commands. This page lists those commands so the transforms can be read and run
+locally with no GitHub Actions involved. The other three workflows (`ci`,
+`pub-check`, `make-manifest`) run the test suite, the gate and the manifest
+emitter, and are documented in the README.
 
-Everything in the workflow YAML that is *not* listed below is CI plumbing:
-repository checkout, venv creation, `chmod`, input validation, git
-commit/push, and `touch`-based timestamp management. None of it affects the
-document output.
+The rest of each transform workflow is CI plumbing and does not change the
+document:
+repository checkout, venv creation, `chmod`, input validation, git commit and
+push, and `touch`-based timestamp management.
 
 ## Map
 
@@ -41,11 +43,12 @@ Three commands, in order:
 # 1. Normalize the markdown in place
 prettier --write spec.md
 
-# 2. Base conversion (this is the exact pandoc invocation the pipeline uses)
+# 2. Base conversion (the invocation in .github/src/pipeline/html_converter.py)
 pandoc spec.md \
-  -f markdown+autolink_bare_uris+hard_line_breaks \
+  -f markdown+autolink_bare_uris-implicit_figures \
+  --no-highlight \
   -c https://docs.oasis-open.org/styles/markdown-styles-v1.7.3.css \
-  -s --toc \
+  -s \
   --metadata title="<document title>" \
   -o temp_output.html
 
@@ -54,9 +57,18 @@ python3 .github/src/step_1_markdown_to_html_converter_V3_0.py \
   path/to/spec.md "$(pwd)" path/to/dir --md-format --md-to-html
 ```
 
-The Python post-processor (`_post_process_html` in
-`.github/src/step_1_markdown_to_html_converter_V3_0.py`) is where the
-OASIS-specific knowledge lives. It applies, in order:
+`-implicit_figures` stops pandoc wrapping a bare image line in
+`<figure>`/`<figcaption>`, where the alt text renders as a visible caption.
+Leaving out `+hard_line_breaks` keeps standard markdown semantics, a soft
+newline being a space rather than a `<br/>`. `--no-highlight` keeps fenced
+code blocks as plain `<pre><code>`, so the stylesheet's block background is
+not broken into per-token bars. There is no `--toc` because the OASIS template
+carries a hand-authored Table of Contents at its own position in the source.
+
+The Python post-processor (`HtmlConverter._post_process_html` in
+`.github/src/pipeline/html_converter.py`, reached through the
+`step_1_markdown_to_html_converter_V3_0.py` shim) is where the OASIS-specific
+knowledge lives. It applies, in order:
 
 1. Drops the pandoc-generated `<header>` block and stray `<nav>` TOC
    (the document carries its own Table of Contents section).
@@ -82,7 +94,7 @@ Two commands:
 # 1. Inject targeted monospace/code-block CSS without touching the OASIS styles
 python3 .github/src/fix_html_for_pdf.py spec.html -o spec_pdf.html
 
-# 2. Render (exact flags used by the pipeline)
+# 2. Render (the argument vector PdfRenderer.build_command returns)
 wkhtmltopdf \
   --page-size A4 --orientation Portrait \
   --margin-top 25mm --margin-right 20mm --margin-bottom 25mm --margin-left 20mm \
@@ -90,13 +102,19 @@ wkhtmltopdf \
   --header-center "<document title>" \
   --footer-line --footer-spacing 4 \
   --footer-left "spec.html" \
-  --footer-center "Copyright © OASIS Open 2026. All Rights Reserved." \
+  --footer-center "Copyright © OASIS Open <year>. All Rights Reserved." \
   --footer-right "[date] - Page [page] of [topage]" \
   --footer-font-size 8 --footer-font-name Times \
   --no-outline --print-media-type \
   --enable-local-file-access \
+  --load-error-handling ignore \
+  --load-media-error-handling ignore \
   spec_pdf.html spec.pdf
 ```
+
+The header title and the copyright year are read from the document being
+rendered: its `<title>` element (falling back to the first heading) and the
+copyright line in its own front matter.
 
 A note on renderers: wkhtmltopdf is what this repository's workflows run, but
 the production pipeline has since moved to headless Chrome print-to-PDF with
@@ -115,10 +133,13 @@ cd path/to/stage-dir && zip -r ../spec-version-stage.zip .
 ```
 
 The workflow additionally runs `touch -d "<date> 17:00:00 UTC"` across the
-directory so every published file carries the publication date. That step is
-release management: it changes file timestamps only.
+directory, which sets every published file's timestamp to the publication
+date.
 
-Every defect class these transforms guard against (the lint series D1-D7 and the post-render assertions A1/A2) is also enforceable in a TC's own build before submission, via [oasis-pub-check](pub-check/): `python3 pub-check/oasis_pub_check.py <stage-dir>`.
+Every defect class these transforms guard against (the lint series D1-D7 and
+the post-render assertions A1/A2) is enforceable in a TC's own build before
+submission, via [oasis-pub-check](pub-check/):
+`python3 pub-check/oasis_pub_check.py <stage-dir>`.
 
 ---
 

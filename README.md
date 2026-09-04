@@ -12,7 +12,7 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776ab">
   <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/gate_dependencies-stdlib_only-2f9e44">
   <img alt="Checks: 170 individual, 58 classes" src="https://img.shields.io/badge/checks-170_individual_%C2%B7_58_classes-f08c00">
-  <img alt="Regression corpus: 13 packages" src="https://img.shields.io/badge/regression_corpus-13_packages-6741d9">
+  <img alt="Regression corpus: 12 packages" src="https://img.shields.io/badge/regression_corpus-12_packages-6741d9">
 </p>
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
@@ -29,7 +29,8 @@ yours to change.
 
 `oasis-pub-check` is one Python file (`pub-check/oasis_pub_check.py`), standard
 library only, no install, no config. `<package>` is a stage directory or a
-`.zip`. **Exit `0` means publishable.** Two ways to run it:
+`.zip`. **Exit `0` means publishable**, `1` means blockers, `2` means the
+target could not be read. Two ways to run it:
 
 ### 1. On your machine
 
@@ -39,7 +40,8 @@ python3 publication-assurance/pub-check/oasis_pub_check.py <package>
 ```
 
 Add `--json` for machine-readable output, or `--emit-manifest` to also
-write the release manifest.
+write the two release manifests: `manifest.json` and the `<stem>-manifest.txt`
+Work Product Manifest File.
 
 ![oasis-pub-check output](assets/gate.png?v=170)
 
@@ -71,7 +73,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: OASIS-Docs/publication-assurance@v1   # for production, pin to a full commit SHA
         with:
           target: ${{ inputs.target }}
@@ -79,12 +81,11 @@ jobs:
 
 Inputs: `target` (required), `args` (e.g. `--json`), `python-version`,
 `install-poppler`, `report-dir` (default `pubcheck-report`; writes
-`pubcheck-report.txt`/`.json` there, `''` to disable), `write-summary`
-(default `true`; a GitHub Step Summary with the verdict and full findings
-list, no need to open raw logs), `summary-title` (label the summary heading
-when calling the action more than once, e.g. in a matrix). The last three
-are purely additive: `target`/`args`/`python-version`/`install-poppler` and
-the exit-code gate contract are unchanged. See
+`pubcheck-report.txt` and `pubcheck-report.json` there, `''` to disable),
+`write-summary` (default `true`; writes a GitHub Step Summary carrying the
+verdict and the full findings list, so nobody has to open the raw log), and
+`summary-title` (labels that summary heading when the action is called more
+than once, in a matrix for example). See
 [`examples/consumer-workflow-matrix.yml`](examples/consumer-workflow-matrix.yml)
 for a multi-package caller that uploads the reports as a downloadable
 artifact. To also run it automatically on every push, set
@@ -92,7 +93,7 @@ artifact. To also run it automatically on every push, set
 
 ---
 
-## The guides you'll actually open
+## The documents
 
 | File | Open it when |
 |---|---|
@@ -131,16 +132,17 @@ UBL, Electronic Court Filing, STIX, OSLC, Virtio, DPS, ACAL, and OpenDocument,
 in every authoring format those TCs use. Each check is sourced from written
 OASIS policy (the TC Process, Naming Directives v1.7, and the TC Handbook) or a
 correction round in that work, and is calibrated against a regression corpus of
-submissions in their original received form (including one known-bad release
-candidate whose 13 blockers it reproduces exactly).
+submissions in their original received form, and against a known-bad release
+candidate whose blocker set TC Administration had already established by hand.
 
 ## Where the criteria come from
 
 ![How a criterion is sourced from policy](assets/authority.png?v=170)
 
 Every acceptance criterion cites the rule it enforces. 96 of the 170 checks
-trace to a verbatim clause in the governing corpus (25 pages, snapshotted and
-hashed); the rest are operational rules from correction rounds. The full
+trace to a verbatim clause in the governing corpus, 25 source pages snapshotted
+and hashed on 21 July 2026, of which 19 are cited; the rest are operational
+rules from correction rounds. The full
 criterion-to-clause map, with the exact quoted text and its source, is
 [`AUTHORITIES.md`](pub-check/AUTHORITIES.md).
 
@@ -148,8 +150,7 @@ criterion-to-clause map, with the exact quoted text and its source, is
 
 ![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=170)
 
-The two layers share one engine. Your TC runs oasis-pub-check in its own CI to
-check all 170 conditions, each reported as the value the tool pulled from the
+Your TC runs oasis-pub-check in its own CI to check all 170 conditions, each reported as the value the tool pulled from the
 package set against the value it was compared to, in full. TC Administration
 re-runs the identical code at intake (checklist step 4b) and wraps it with the
 15 mandatory audit gates only a human or a live check can do: byte identity
@@ -194,28 +195,36 @@ publication-assurance/
 │   ├── AUTHORITIES.md               #   the criterion-to-clause map (verbatim OASIS policy)
 │   ├── render_checks_md.py          #   the generator (keeps CHECKS.md in sync)
 │   ├── manifest-schema.json         #   provenance manifest contract
+│   ├── authorities.yaml             #   the authority map as data (source of the 96 figure)
+│   ├── render_summary.py            #   the Step Summary renderer the Action calls
+│   ├── rules/                       #   oasis.rules.yaml, the criteria as data for nide
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
 ├── examples/                        # Worked example + the regression corpus
 │   ├── consumer-workflow.yml        #   the drop-in TC workflow (copy this)
+│   ├── consumer-workflow-matrix.yml #   a multi-package caller that uploads the reports
 │   ├── eox-core-v1.0-csd01/         #   the Validation Report from a publication
 │   ├── csaf/                        #   archived CSAF work products (v2.0 lineage, v2.1 csd01)
 │   └── csaf-cvrf/                   #   archived CSAF-CVRF v1.2 work products
 ├── tests/                           # The criteria's own regression suite (pytest)
 │   ├── conftest.py                  #   loads the checker by path, copies corpus fixtures
+│   ├── test_advertised_counts.py    #   the counts in the docs and diagrams vs the registry
+│   ├── test_cli_smoke.py            #   the CLI contract: exit codes, --json, --list-checks
 │   ├── test_delivery_items.py       #   delivery-item selection on a deployed tree
 │   ├── test_manifest_emitter.py     #   Work Product Manifest File emitter
-│   ├── test_cli_smoke.py            #   the CLI contract: exit codes, --json, --list-checks
+│   ├── test_markdown_renders.py     #   the shipped markdown renders as prose, not as HTML
+│   ├── test_stage_uri_live.py       #   the live-URI probe: what blocks, what stays INFO
 │   └── fixtures/                    #   hand-built defect trees (the corpus supplies the rest)
 ├── TRANSFORMS.md                    # The pipeline, command by command (canonical criteria)
-├── assets/                          # The diagrams (PNG)
+├── assets/                          # The diagrams (SVG sources and rendered PNGs)
 ├── .github/
 │   ├── src/                         # Pipeline source (pandoc + BeautifulSoup post-processing,
 │   │                                #   HTML preprocessor, wkhtmltopdf renderer)
 │   ├── scripts/                     # Shell entry points used by the workflows
 │   ├── styles/                      # OASIS markdown-styles CSS lineage (v1.1 → v1.8.1)
 │   └── workflows/                   # ci (this repo's own test suite), step_1 (MD→HTML),
-│                                    #   step_2 (HTML→PDF), step_3 (zip), pub-check (the gate)
+│                                    #   step_2 (HTML→PDF), step_3 (zip), pub-check (the
+│                                    #   gate), make-manifest (the release manifests)
 ├── LICENSE                          # Apache-2.0 (software tier)
 └── NOTICE                           # The three-tier IP statement
 ```
@@ -224,10 +233,10 @@ publication-assurance/
 
 ## Running the tests
 
-The gate grades other people's publications, so a defect in it mis-grades work
-silently. `tests/` is the regression net: a fixture per fixed defect, plus smoke
-coverage over the CLI contract that `gate.py`, the composite action and the
-publication runbook depend on.
+A defect in the gate mis-grades somebody's publication, so `tests/` is the
+regression net: a fixture per fixed defect, plus smoke coverage over the CLI
+contract that `gate.py`, the composite action and the publication runbook
+depend on.
 
 The checker itself is stdlib-only. `pytest` is the one development dependency
 and is not on the system Python, so use a venv:
@@ -241,9 +250,8 @@ pytest tests/test_delivery_items.py::test_index_html_is_never_selected_as_the_de
 ```
 
 The suite runs on every push and pull request
-([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). A red run blocks:
-there is no inherited-baseline argument for the acceptance criteria's own
-tests.
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), and a red run
+blocks.
 
 Fixtures come from the archived CSAF corpus under `examples/` wherever a
 realistic package is needed. `tests/conftest.py` copies a corpus stage

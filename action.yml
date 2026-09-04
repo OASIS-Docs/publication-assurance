@@ -81,7 +81,7 @@ inputs:
 
 outputs:
   exit-code:
-    description: "Exit code from the primary oasis_pub_check.py invocation (with the caller's own `args`). 0 = publishable, 1 = blockers present. This is what fails the step."
+    description: "Exit code from the primary oasis_pub_check.py invocation (with the caller's own `args`). 0 = publishable, 1 = blockers present, 2 = the target could not be read (usually a wrong `target:` path). This is what fails the step."
     value: ${{ steps.pubcheck.outputs.exit_code }}
   blockers:
     description: "Number of BLOCKER-severity findings."
