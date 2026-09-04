@@ -12,7 +12,7 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776ab">
   <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/gate_dependencies-stdlib_only-2f9e44">
   <img alt="Checks: 170 individual, 58 classes" src="https://img.shields.io/badge/checks-170_individual_%C2%B7_58_classes-f08c00">
-  <img alt="Regression corpus: 13 packages" src="https://img.shields.io/badge/regression_corpus-13_packages-6741d9">
+  <img alt="Regression corpus: 12 packages" src="https://img.shields.io/badge/regression_corpus-12_packages-6741d9">
 </p>
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
@@ -79,12 +79,11 @@ jobs:
 
 Inputs: `target` (required), `args` (e.g. `--json`), `python-version`,
 `install-poppler`, `report-dir` (default `pubcheck-report`; writes
-`pubcheck-report.txt`/`.json` there, `''` to disable), `write-summary`
-(default `true`; a GitHub Step Summary with the verdict and full findings
-list, no need to open raw logs), `summary-title` (label the summary heading
-when calling the action more than once, e.g. in a matrix). The last three
-are purely additive: `target`/`args`/`python-version`/`install-poppler` and
-the exit-code gate contract are unchanged. See
+`pubcheck-report.txt` and `pubcheck-report.json` there, `''` to disable),
+`write-summary` (default `true`; writes a GitHub Step Summary carrying the
+verdict and the full findings list, so nobody has to open the raw log), and
+`summary-title` (labels that summary heading when the action is called more
+than once, in a matrix for example). See
 [`examples/consumer-workflow-matrix.yml`](examples/consumer-workflow-matrix.yml)
 for a multi-package caller that uploads the reports as a downloadable
 artifact. To also run it automatically on every push, set
@@ -92,7 +91,7 @@ artifact. To also run it automatically on every push, set
 
 ---
 
-## The guides you'll actually open
+## The documents
 
 | File | Open it when |
 |---|---|
@@ -194,6 +193,7 @@ publication-assurance/
 │   ├── AUTHORITIES.md               #   the criterion-to-clause map (verbatim OASIS policy)
 │   ├── render_checks_md.py          #   the generator (keeps CHECKS.md in sync)
 │   ├── manifest-schema.json         #   provenance manifest contract
+│   ├── rules/                       #   oasis.rules.yaml, the criteria as data for nide
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
 ├── examples/                        # Worked example + the regression corpus
@@ -203,9 +203,12 @@ publication-assurance/
 │   └── csaf-cvrf/                   #   archived CSAF-CVRF v1.2 work products
 ├── tests/                           # The criteria's own regression suite (pytest)
 │   ├── conftest.py                  #   loads the checker by path, copies corpus fixtures
+│   ├── test_advertised_counts.py    #   the counts in the docs and diagrams vs the registry
+│   ├── test_cli_smoke.py            #   the CLI contract: exit codes, --json, --list-checks
 │   ├── test_delivery_items.py       #   delivery-item selection on a deployed tree
 │   ├── test_manifest_emitter.py     #   Work Product Manifest File emitter
-│   ├── test_cli_smoke.py            #   the CLI contract: exit codes, --json, --list-checks
+│   ├── test_markdown_renders.py     #   the shipped markdown renders as prose, not as HTML
+│   ├── test_stage_uri_live.py       #   the live-URI probe: what blocks, what stays INFO
 │   └── fixtures/                    #   hand-built defect trees (the corpus supplies the rest)
 ├── TRANSFORMS.md                    # The pipeline, command by command (canonical criteria)
 ├── assets/                          # The diagrams (PNG)
@@ -241,9 +244,8 @@ pytest tests/test_delivery_items.py::test_index_html_is_never_selected_as_the_de
 ```
 
 The suite runs on every push and pull request
-([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). A red run blocks:
-there is no inherited-baseline argument for the acceptance criteria's own
-tests.
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), and a red run
+blocks.
 
 Fixtures come from the archived CSAF corpus under `examples/` wherever a
 realistic package is needed. `tests/conftest.py` copies a corpus stage

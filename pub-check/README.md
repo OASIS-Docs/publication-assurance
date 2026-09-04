@@ -97,16 +97,15 @@ checks in the same set.
 
 Calibration:
 
-- a 13-package regression corpus of submissions as received, across
-  multiple authoring tracks
+- a regression corpus of 12 archived CSAF and CSAF-CVRF packages as
+  received, across multiple authoring tracks
 - one release candidate whose 13 blockers match the manual intake review
 - a 12-month retrospective over the year's intake, as received, which
   surfaced live defects on docs.oasis-open.org; those became checks too
 
-New failure modes found in later correction rounds become new acceptance
-criteria, and the catalog and advertised counts regenerate from the code
-(`--list-checks` asserts them), so the criteria in force are always exactly
-the ones the tool runs.
+New failure modes from later correction rounds become new acceptance
+criteria. The catalog and the advertised counts regenerate from the code, so
+the criteria in force are the ones the tool runs.
 
 ## The checks
 
@@ -206,14 +205,13 @@ pub-check:
 
 ## Scope and track detection
 
-The gate measures the output. Every publication is conformant HTML and PDF,
-with the authoritative source alongside, at the canonical URLs. The output
-contract is the same regardless of input format. oasis-pub-check validates
-that output. The full output suite (HTML checks: title,
-anchors, residue, image policy, asset refs, rendered front-matter blocks;
-PDF checks: source sync, cover assertions, fonts; package checks: naming,
-versioning, stage, collision, hygiene, symlinks, schemas, manifest) runs on
-EVERY package regardless of how it was authored. Source-format checks are
+The gate measures the output, which is the same contract for every TC:
+conformant HTML and PDF at the canonical URLs, with the authoritative source
+alongside. The full output suite runs on every package, whatever it was
+authored in. That is the HTML checks (title, anchors, residue, image policy,
+asset refs, rendered front-matter blocks), the PDF checks (source sync, cover
+assertions, fonts), and the package checks (naming, versioning, stage,
+collision, hygiene, symlinks, schemas, manifest). Source-format checks are
 add-ons applied to whatever the package carries:
 
 - Markdown source present: the markdown add-ons (front-matter cross-check,
@@ -237,13 +235,13 @@ add-ons applied to whatever the package carries:
   the full output and package suites still run; a warning asks for the
   authoritative source to travel with the renderings.
 
-Other authoring formats exist in the published corpus: DocBook/XML (UBL,
-Electronic Court Filing; the XML is often the authoritative artifact), LaTeX
-(Virtio), and more. Packages in those formats receive the format-agnostic
-checks (stage naming, version-naming, revision collision, case, hygiene,
-symlinks, dead-lists, link and packaging checks); dedicated track awareness
-for them is roadmap, calibrated against the published corpus the same way
-the first tracks were.
+Other authoring formats exist in the published corpus: DocBook/XML (UBL and
+Electronic Court Filing, where the XML is often the authoritative artifact),
+LaTeX (Virtio), and others. Packages in those formats get the
+format-agnostic checks: stage naming, version-naming, revision collision,
+case, hygiene, symlinks, dead-lists, and the link and packaging checks.
+Add-ons of their own are planned, calibrated against the published corpus
+the same way the first ones were.
 
 Repackaging or re-rendering is never suggested cross-track; render class is
 judged against the TC's own publication precedent.

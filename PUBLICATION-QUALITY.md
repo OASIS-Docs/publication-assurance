@@ -11,7 +11,7 @@ licensed under the Apache License 2.0 (see LICENSE at the repository root).
 Author: Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-# Publication quality: how OASIS validates and audits your specification
+# Publication quality: how OASIS validates and audits a specification
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
@@ -27,16 +27,18 @@ There are two layers of quality control, and you own the first one.
 ## The two layers
 
 **Layer 1 is validation: the acceptance criteria, run as code.** A single
-Python file, [`pub-check/oasis_pub_check.py`](pub-check/),
-runs the acceptance checks (a set that grows; `--list-checks` reports the live
-count, and [CHECKS.md](pub-check/CHECKS.md) is the generated inventory)
-against your package: the files you are about to submit, exactly as you
-would submit them. Every
-condition is reported; one that does not apply to your package's track, or
-whose prerequisite is absent, reports NA with the reason. It needs no
-configuration because every expectation is derived from the package itself:
-its own front matter, its own CSS, its own schema `$id`s, its own directory
-path. It sees only the package and never touches the live site.
+Python file, [`pub-check/oasis_pub_check.py`](pub-check/), runs the
+acceptance checks against your package: the files you are about to submit,
+exactly as you would submit them. The set grows, so `--list-checks` reports
+the live count and [CHECKS.md](pub-check/CHECKS.md) is the generated
+inventory. Every condition is reported; one that does not apply to your
+package's source format, or whose prerequisite is absent, reports NA with the
+reason. It needs no configuration, because every expectation is derived from
+the package itself: its own front matter, its own CSS, its own schema
+`$id`s, its own directory path. It reads your files and writes nothing back.
+Four checks do reach the live site, to see whether the stage you are
+submitting is already published and whether the URLs on your cover retrieve;
+`PUB_CHECK_OFFLINE=1` turns those off and the rest of the run is unaffected.
 
 You run this layer. Put it in your repository's CI, or run it by hand before
 the TC votes. A package that exits 0 is publication-clean: the vote happens
@@ -77,8 +79,9 @@ way:
   directories
 
 The gate is the accumulated record of those correction rounds, plus the
-publication pipeline's own lint registry, calibrated against a 13-package
-regression corpus of submissions in their original received form.
+publication pipeline's own lint registry, calibrated against a regression
+corpus of 12 archived CSAF and CSAF-CVRF packages in their original received
+form.
 
 The checks group into six areas:
 
@@ -109,15 +112,14 @@ document. It is generated from the
 tool's own condition registry, so it cannot drift from the implementation;
 `--list-checks` asserts the counts from the code every time it runs.
 
-The gate is track-aware: the output contract is the same regardless of
-input format. Markdown-authored packages get the
-markdown checks; DOCX-native packages (KMIP and PKCS#11 style) skip those
-and gain Word render-fidelity checks instead; ODT-authored packages carry
-the `.odt` as the authoritative source (the OpenDocument TC publishes from
-the format it defines); packages authored in other formats (DocBook/XML,
-LaTeX) receive the full format-agnostic output and package suites. The bar
-is always the output: conformant HTML and PDF, with the
-authoritative source alongside, at the canonical URLs.
+The bar is the output, whatever your TC authors in: conformant HTML and
+PDF at the canonical URLs, with the authoritative source alongside. Each
+source format then brings its own add-ons. A markdown package gets the
+markdown checks. A DOCX-native package (KMIP and PKCS#11 style) skips those
+and gets the Word render-fidelity checks instead. An ODT package carries the
+`.odt` as its authoritative source, which is how the OpenDocument TC
+publishes. A package authored in DocBook/XML or LaTeX runs the
+format-agnostic output and package suites.
 
 ## Layer 2: the 15 audit gates
 
@@ -147,7 +149,7 @@ gates, in the order they appear in every audit record:
 Gates that do not apply to a given stage (a news post for an early-stage
 draft, for example) are recorded NA with a stated reason.
 
-## The two reports your TC receives
+## The two reports
 
 Both layers produce a standard report. TC Administration renders both at
 intake and files them to your TCADMIN ticket and to the TC's `_audit/`
@@ -176,11 +178,9 @@ of 13 July 2026, filed on
 The release candidates of that publication show what Layer 1 catches before
 a vote. The TC's first release candidate carried 13 blockers: the same set the
 manual intake review found by hand. The third release candidate ran clean,
-was published, and its validation report shows zero blockers across all 92
-conditions of the inventory in force at that publication, with 9 warnings
-and 3 informational notes, every one triaged in
-the report header. Two rows from the observed-vs-expected table give the
-flavor:
+was published, and its validation report records zero blockers, 12 warnings
+and 9 informational notes, each triaged in the report header. Two rows from
+the observed-vs-expected table:
 
 | Check | Condition verified | Value pulled (observed) | Compared against | Result |
 |---|---|---|---|---|
@@ -223,7 +223,7 @@ sha256 and role, the source commit, the tool versions), intake verification
 of your package becomes mechanical: we can prove the files we received are
 the files your build produced.
 
-## What this changes for your TC
+## Adoption
 
 1. Add the one-command CI job, or run the tool by hand before the vote.
 2. Fix blockers before the TC votes; the vote then approves a
@@ -236,9 +236,9 @@ the files your build produced.
 Questions, false positives, or checks you think are missing:
 michael.coletta@oasis-open.org, or open an issue on
 [OASIS-Docs/publication-assurance](https://github.com/OASIS-Docs/publication-assurance).
-The check inventory grows as correction rounds surface new failure
-modes; the catalog and the advertised counts regenerate from the code, so
-the documentation keeps pace with the tool by construction.
+The check inventory grows as correction rounds surface new failure modes.
+The catalog and the advertised counts regenerate from the code, so the
+documentation keeps pace with the tool.
 
 ---
 
