@@ -11,7 +11,7 @@ licensed under the Apache License 2.0 (see LICENSE at the repository root).
 Author: Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-# oasis-pub-check: run the OASIS publication acceptance criteria before you submit
+# oasis-pub-check: the OASIS publication acceptance criteria in executable form
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
@@ -20,25 +20,25 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 `oasis_pub_check.py` is the executable form of the publication acceptance
 criteria: the TC-side version of the checks OASIS TC Administration
 applies to a submitted work-product package before it goes to
-`docs.oasis-open.org`. Run it yourself before you submit, and fix anything
-it flags while the document is still in your hands.
+`docs.oasis-open.org`. Blockers are cheaper to fix before the vote than
+after publication.
 
 TC Administration runs the same gate on every submission at intake. Both
 sides run the same code, so a green run on your side predicts a green run at
 intake.
 
-The shape of the tool:
+Characteristics:
 
 - Single file, Python 3.10+, standard library only. Nothing to install.
 - No configuration. Every expectation is derived from the package itself:
   its own front matter, its own CSS, its own schema `$id`s, its own publish
   path.
-- 170 individual checks across 58 check classes.
-  `--list-checks` asserts the inventory from the code, so the advertised
-  numbers cannot drift from the implementation.
+- 170 individual checks across 58 check classes. `--list-checks` asserts
+  that inventory against the code, and every count advertised anywhere in
+  this repository comes from it.
 - It combines the intake acceptance criteria with the publication
   pipeline's lint registry (D1-D7 and the PDF assertions A1/A2), checked
-  against 12 months of submissions as received.
+  against a year of submissions as received.
 
 Three companion documents:
 
@@ -71,7 +71,9 @@ python3 oasis_pub_check.py --list-checks
 python3 oasis_pub_check.py <target> --emit-manifest
 ```
 
-Exit 0 means publishable (warnings allowed). Exit 1 means blockers.
+Exit 0 means publishable (warnings allowed). Exit 1 means blockers. Exit 2
+means the target could not be read: a wrong path, or a `.zip` that would not
+open.
 
 ## Where the checks come from
 
@@ -97,21 +99,22 @@ checks in the same set.
 
 Calibration:
 
-- a 13-package regression corpus of submissions as received, across
-  multiple authoring tracks
-- one release candidate whose 13 blockers match the manual intake review
-- a 12-month retrospective over the year's intake, as received, which
-  surfaced live defects on docs.oasis-open.org; those became checks too
+- a regression corpus of 12 archived CSAF and CSAF-CVRF packages as
+  received, across multiple authoring tracks
+- one known-bad release candidate whose blocker set matches the one TC
+  Administration had established by hand
+- a retrospective over a year of intake, as received, which surfaced live
+  defects on docs.oasis-open.org; those became checks too
 
-New failure modes found in later correction rounds become new acceptance
-criteria, and the catalog and advertised counts regenerate from the code
-(`--list-checks` asserts them), so the criteria in force are always exactly
-the ones the tool runs.
+New failure modes from later correction rounds become new acceptance
+criteria. The catalog and the advertised counts regenerate from the code, so
+the criteria in force are the ones the tool runs.
 
 ## The checks
 
-Class-level summary; the full per-condition catalog with observed-vs-expected
-detail is [CHECKS.md](CHECKS.md).
+The classes that fire most often, with their severities. The complete set of
+58 classes, one row per condition with observed-vs-expected detail, is
+[CHECKS.md](CHECKS.md).
 
 | Check | Severity | What it catches |
 |---|---|---|
@@ -122,7 +125,7 @@ detail is [CHECKS.md](CHECKS.md).
 | front-matter | BLOCKER/WARN | This-Stage URLs that do not match the version/stage path or point at files not in the package; Latest-Stage URLs that carry a stage segment; URLs declaring a different version (stale-draft tell). |
 | residue | BLOCKER/WARN | `TODO(...)`, `tbd` placeholder sections; `Will be filled in ...` (warn at CSD, must clear before CS). |
 | html-residue | BLOCKER | Absorbed from publisher-toolkit lint_html.py: duplicate title `<h1>` (D1, double title on the PDF cover), stale pandoc `title-block-header` (D2), leaked `/home/runner` CI paths (D3). The shared workflows produce these; the gate catches them at intake too. |
-| fence-collapse | BLOCKER | From publisher-toolkit preprocess_md.py (D6): an opening code fence with trailing text in its info string collapses the whole block to inline code under pandoc. Calibration: fires exactly 28 times on one as-submitted source, matching that incident's manual count. |
+| fence-collapse | BLOCKER | From publisher-toolkit preprocess_md.py (D6): an opening code fence with trailing text in its info string collapses the whole block to inline code under pandoc. |
 | image-policy | BLOCKER/WARN | From publisher-toolkit inline_images.py (D7): SVGs carrying `<script>`, `on*=` handlers, or external refs (active content, refused on the host); empty/absolute/traversal `img src`; `srcset`/`<picture>` (pipeline refuses); the 2MB/5MB inlining caps as warnings. |
 | pdf-cover | BLOCKER | From publisher-toolkit step_2 assertions: A1 title appearing more than once on the PDF cover page (stale header residue baked into the render); A2 `/home/runner` CI paths in the PDF text. Needs `pdftotext`; silent skip without it. |
 | html-title | BLOCKER | Working residue in the HTML `<title>` (`- tmp`, `draft`). |
@@ -152,8 +155,9 @@ detail is [CHECKS.md](CHECKS.md).
 | pdf-fonts | WARN/INFO | PDF embedded fonts vs the font families the package's own CSS declares (the CSS is the typography authority for a publication). Divergence is a non-blocking finding. Needs poppler's `pdffonts`; skips gracefully without it or when the package declares no local font authority. |
 
 Residue, key-word and link checks ignore fenced code blocks and `<pre>/<code>`
-content, so schemas and examples containing `tbd` or bare URLs do not
-false-positive (relevant for CSAF- and SARIF-sized documents).
+content, so schemas and examples containing `tbd` or bare URLs are not
+flagged. That matters most for specifications carrying large embedded code
+samples.
 
 ## The manifest contract
 
@@ -164,8 +168,7 @@ same command on either side of the gate (`--emit-manifest`):
   intake.
 - `<stem>-manifest.txt`: the Work Product Manifest File, the
   human-readable staff record published beside the release: bibliographic
-  block, ZIP archive listing, and SHA-256 digests. This revives a
-  long-standing OASIS Staff practice; the
+  block, ZIP archive listing, and SHA-256 digests. The
   [OpenDocument releases](https://docs.oasis-open.org/office/OpenDocument/v1.4/csd01/OpenDocument-v1.4-csd01-manifest.txt)
   carry the precedent.
 
@@ -206,14 +209,13 @@ pub-check:
 
 ## Scope and track detection
 
-The gate measures the output. Every publication is conformant HTML and PDF,
-with the authoritative source alongside, at the canonical URLs. The output
-contract is the same regardless of input format. oasis-pub-check validates
-that output. The full output suite (HTML checks: title,
-anchors, residue, image policy, asset refs, rendered front-matter blocks;
-PDF checks: source sync, cover assertions, fonts; package checks: naming,
-versioning, stage, collision, hygiene, symlinks, schemas, manifest) runs on
-EVERY package regardless of how it was authored. Source-format checks are
+The gate measures the output, which is the same contract for every TC:
+conformant HTML and PDF at the canonical URLs, with the authoritative source
+alongside. The full output suite runs on every package, whatever it was
+authored in. That is the HTML checks (title, anchors, residue, image policy,
+asset refs, rendered front-matter blocks), the PDF checks (source sync, cover
+assertions, fonts), and the package checks (naming, versioning, stage,
+collision, hygiene, symlinks, schemas, manifest). Source-format checks are
 add-ons applied to whatever the package carries:
 
 - Markdown source present: the markdown add-ons (front-matter cross-check,
@@ -237,16 +239,16 @@ add-ons applied to whatever the package carries:
   the full output and package suites still run; a warning asks for the
   authoritative source to travel with the renderings.
 
-Other authoring formats exist in the published corpus: DocBook/XML (UBL,
-Electronic Court Filing; the XML is often the authoritative artifact), LaTeX
-(Virtio), and more. Packages in those formats receive the format-agnostic
-checks (stage naming, version-naming, revision collision, case, hygiene,
-symlinks, dead-lists, link and packaging checks); dedicated track awareness
-for them is roadmap, calibrated against the published corpus the same way
-the first tracks were.
+Other authoring formats exist in the published corpus: DocBook/XML (UBL and
+Electronic Court Filing, where the XML is often the authoritative artifact),
+LaTeX (Virtio), and others. Packages in those formats get the
+format-agnostic checks: stage naming, version-naming, revision collision,
+case, hygiene, symlinks, dead-lists, and the link and packaging checks.
+Add-ons of their own are planned, calibrated against the published corpus
+the same way the first ones were.
 
-Repackaging or re-rendering is never suggested cross-track; render class is
-judged against the TC's own publication precedent.
+The gate does not ask a TC to repackage or re-render into another track's
+format. Render class is judged against the TC's own publication precedent.
 
 ---
 

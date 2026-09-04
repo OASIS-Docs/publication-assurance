@@ -24,6 +24,175 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.3.0 - 2026-09-04
+
+Prepared for handing the criteria to the TCs. No check was added or removed
+and no finding changes severity. It is a MINOR rather than a PATCH for two
+reasons: the `applies` field in `--json` and in the catalog now says `all`
+where it said `both`, and the rendering pipeline stopped putting one TC's
+title on another TC's PDF.
+
+Contract:
+
+- **`applies: "both"` is now `applies: "all"`.** The vocabulary dated from a
+  two-track world, markdown and DOCX, and the tool has had three source
+  formats since ODT landed. "Both" was wrong on its face in a column whose
+  other values are `md`, `docx` and `odt`. The `--json` keys are unchanged
+  and the exit-code contract is unchanged; a consumer that branches on the
+  string `"both"` must read `"all"` instead. TC Administration's own report
+  renderer branches only on `md`, `docx` and `odt`, so it is unaffected.
+
+Defects in the shipped documentation:
+
+- **`CHECKS.md` was rendering a third of a paragraph at heading size.** The
+  generator escaped angle brackets in the table cells but not in the
+  class-description paragraphs, and the `title-oasis-prefix` description
+  contains `<h1>`. GitHub parses that as an opening heading tag, so
+  everything after it on the page rendered at 32 point. Tags GitHub does not
+  recognise, `<spec>` and `<name>` among them, were deleted from the page
+  instead, silently. `AUTHORITIES.md` carried the same defect in a heading
+  and inside a verbatim policy quote. Both generators now escape angle
+  brackets in prose, leaving code spans alone, and
+  `tests/test_markdown_renders.py` fails on any angle-bracketed text that
+  reaches a shipped document unescaped.
+
+- **The catalog shipped dead links.** The dual-link check was described as
+  "No dual `[url](url)` links", which markdown renders as a link to a
+  relative path named `url`. Two per row, in the rows most likely to be read
+  by somebody whose package just failed that check. The registry text now
+  puts the illustrations in backticks, and the same test file asserts that
+  every relative link in every shipped document resolves to a file.
+
+- **The regression corpus was advertised as 13 packages.** `examples/`
+  carries 12 stage packages. `tests/test_advertised_counts.py` now counts
+  them and fails on any document that says otherwise, the same way it
+  already pins the condition and class counts.
+
+- **The worked example was described with the wrong figures.** The TC guide
+  said the eox-core CSD01 validation report showed zero blockers "across all
+  92 conditions", with 9 warnings and 3 informational notes. The report
+  itself records 169 conditions across 57 classes, 12 warnings and 9
+  informational notes. The count claim is gone (the report is dated evidence
+  and its inventory is not today's), and the warning and informational
+  figures now match the report.
+
+- **A count claim can hide from the count test by being wrapped.** That 92
+  sat in `PUBLICATION-QUALITY.md` through a green suite because the line
+  broke between "92" and "conditions" and the patterns were single-line. The
+  claim patterns now match against whitespace-collapsed text.
+
+- **The TC guide said Layer 1 "never touches the live site".** Four checks
+  do: `revision-collision`, `stage-uri-live`, `public-review-metadata`, and
+  the previous-stage resolution inside `conformance-structure`. The guide now
+  says which, and says that `PUB_CHECK_OFFLINE=1` turns those four off. It
+  also no longer implies the tool writes nothing, since `--emit-manifest`
+  does.
+
+Defects found while checking the documentation against the code:
+
+- **The same package did not produce the same report twice.** Nine finding
+  loops iterated a `set()` directly, so under Python's per-process hash
+  randomisation the findings came out in a different order between runs of
+  identical code on identical input: six runs against one corpus package
+  produced two different reports. TC Administration files these as the record
+  of a publication, and a TC diffing two runs saw churn that meant nothing.
+  All nine are sorted now, `tests/test_output_is_deterministic.py` runs three
+  corpus packages six times each and requires one distinct output, and the
+  finding sets on four corpus packages are byte-identical to the previous
+  release once sorted.
+
+Defects the fact-check found in the pipeline and its documentation:
+
+- **Every PDF this repository's pipeline rendered carried another TC's title.**
+  `PdfRenderer.build_command` passed the literal string `Common Security
+  Advisory Framework Version 2.1` as `--header-center`, so that ran across the
+  top of every page of every PDF, for every TC, and `--footer-center` carried a
+  hardcoded `2025`. Both are now read from the document being rendered: the
+  `<title>` element (falling back to the first heading, then to an empty
+  header), and the copyright year in the document's own front matter.
+  `tests/test_pdf_command.py` pins them, and CI now installs `beautifulsoup4`
+  so those tests run rather than skip. Nothing in this repository had ever
+  exercised the pipeline, which is why nothing caught it.
+
+- **`TRANSFORMS.md` printed two commands that were not the ones the pipeline
+  runs.** The pandoc invocation, labelled "the exact pandoc invocation the
+  pipeline uses", carried `+hard_line_breaks` and `--toc` (which the pipeline
+  dropped) and lacked `-implicit_figures` and `--no-highlight` (which it
+  added). A TC copying it got a `<br/>` per source line, alt text rendered as
+  figure captions, syntax-highlighted code, and a second table of contents. The
+  wkhtmltopdf vector omitted `--load-error-handling ignore` and
+  `--load-media-error-handling ignore`, so the documented command dies on an
+  unreachable image where the pipeline continues. Both now match the code, and
+  a test asserts the documented flags against the vector the code builds.
+
+- **`TRANSFORMS.md` named a file that contains no code.** The nine
+  post-processing steps live in `HtmlConverter._post_process_html` in
+  `.github/src/pipeline/html_converter.py`; the document sent readers to
+  `step_1_markdown_to_html_converter_V3_0.py`, a forty-line CLI shim with no
+  function definitions in it. It also called six workflows three.
+
+- **The catalog's Requires column under-declared the network.** Only
+  `revision-collision` carried `requires="network"`, while `stage-uri-live` and
+  the three `public-review-metadata` conditions also issue live HTTP requests.
+  Offline, those four are skipped, and the catalog implied they had been
+  evaluated. They now declare it, so a validation report NAs them with the
+  reason instead.
+
+- **Exit code 2 was documented nowhere.** The tool returns 2 when the target
+  cannot be read, `tests/test_cli_smoke.py` pins it, and the composite action
+  re-raises it, while the README, the tool README and `action.yml` all
+  described a world with only 0 and 1. A consumer whose `target:` path was
+  wrong read the failure as blockers. All three now say what 2 means.
+
+- **`--emit-manifest` writes two files, and `--help` named one.** The README
+  said "the release manifest", singular. Both now name `manifest.json` and the
+  `<stem>-manifest.txt` Work Product Manifest File.
+
+- **The per-area totals were printed, never asserted.** The generator asserts
+  that the six areas are a partition of the registry and sum to its total, and
+  the TC guide claimed on that basis that its 39/44/17/26/23/21 could not go
+  wrong. Moving one class between areas would have left every gate green and
+  the table silently wrong. `tests/test_advertised_counts.py` now reads the six
+  figures out of the guide and compares them with the registry; the guide's
+  claim is narrowed to what the generator actually asserts.
+
+- **"25 pages, snapshotted and hashed" was true and unverifiable.** The corpus
+  holds 25 snapshotted source pages, 19 of them cited, and neither the corpus
+  nor its `MANIFEST.json` nor the crosswalk ships in this repository, so
+  `AUTHORITIES.md` pointed a TC at three paths that do not exist here. The
+  preamble now says what the corpus is, that TC Administration holds it, and
+  that `authorities.yaml` beside the file is the machine-readable half that
+  does ship.
+
+- **"13 blockers it reproduces exactly" cannot be reproduced from this
+  repository.** The release candidate is not in `examples/` and no test pins
+  the count. The claim is now stated as what it is: a known-bad release
+  candidate whose blocker set TC Administration had established by hand. The
+  same applies to the "fires exactly 28 times" calibration note, which is gone
+  from the class table.
+
+- **Smaller corrections.** The README's layout block omitted `authorities.yaml`,
+  `render_summary.py`, `consumer-workflow-matrix.yml` and the `make-manifest`
+  workflow, and described `assets/` as PNG when the SVG sources are tracked and
+  gated. The TC guide linked "a single Python file" to a directory. The README
+  snippet and the drop-in consumer workflow both handed out
+  `actions/checkout@v4` while the action's own documentation and every workflow
+  here use `v5`. The tool README described a 35-row table as the class-level
+  summary of 58 classes.
+
+Register:
+
+- Class descriptions in `CHECKS.md` described the implementation to a reader
+  who does not have it open: a helper shared with another check, an
+  extraction that is "percent-decode-aware", a fallback taken "rather than
+  skipping a real violation". Ten of them are rewritten to say what the check
+  requires of a package and what happens when it is not met.
+
+- Passages across the README, the TC guide and the tool README that defended
+  a choice nobody had questioned, or narrated the author's own diligence, are
+  cut or restated as plain description. The layout listing in the README was
+  four test files behind.
+
 ## v1.2.0 - 2026-09-04
 
 A minor release: one new check class, so the gate got stricter.
@@ -313,7 +482,7 @@ Examples:
   found in the Artifacts section.
 
 Validation: exercised end to end against a real (unpublished, pre-CSD02)
-package on a fork before this PR opened — step summary rendered the
+package on a fork before this PR opened: the step summary rendered the
 verdict, full findings list, report file paths, and the artifact download
 link; `pubcheck-report.txt`/`.json` uploaded as artifacts and downloaded
 back byte-identical; the job still concluded `failure` on the package's

@@ -1,17 +1,28 @@
+<!--
+Copyright (c) OASIS Open 2026. All Rights Reserved.
+
+This document may be copied, published, and distributed to others without
+restriction, provided it is reproduced verbatim and this notice is retained.
+Author: Michael Coletta, Technical Advisor to OASIS Open.
+-->
+
 # Publication quality architecture diagrams
 
-Three diagrams on the OASIS design system (Poppins, ink `#0a2540`, accent
-`#2248e5`), delivered as 2x PNGs.
+Three diagrams of how a package gets from a TC vote to a verified
+publication, for use in TC guidance and in OASIS process documentation. They
+are drawn on the OASIS design system (Poppins, ink `#0a2540`, accent
+`#2248e5`) and shipped as 2x PNGs beside their SVG sources.
 
 ## Subject
 
-How the OASIS publication quality architecture's two layers dovetail:
+How the two layers of the OASIS publication quality architecture dovetail:
 
 - Layer 1, validation (pub-check), is mechanical and tool-side.
   `oasis_pub_check.py` runs the acceptance checks (`--list-checks` reports
   the live count). The TC runs it in its own CI before submission, and TC
-  Administration re-runs the identical code at intake. It only ever sees the
-  package files. Its output is the Validation Report, which lists every
+  Administration re-runs the identical code at intake. It reads the package
+  files, and four of its checks also probe the live site. Its output is the
+  Validation Report, which lists every
   condition with the observed value the tool pulled set against the expected
   value it was compared to, shown in full (rendered landscape so the
   values stay legible).
@@ -19,7 +30,8 @@ How the OASIS publication quality architecture's two layers dovetail:
   mandatory gates run against live ground truth the tool cannot see: byte
   identity, render class vs precedent, live roster, Naming Directives, index
   chain, zip integrity, four announcement channels, ticket record, an
-  independent adversarial verifier, a literal visual eyeball. Every gate
+  independent adversarial verifier, and a visual inspection of the live
+  pages. Every gate
   needs recorded evidence, and the verdict is computed from that record.
   Its output is the Publication Audit Report.
 - The dovetail is intake checklist step 4b, which requires running
@@ -58,8 +70,8 @@ Stefan Hagen's `nide` (TC-side authoring). Two engine lanes with a shared
 seam. The rules flow one way (OASIS authors `oasis.rules.yaml`, nide pulls it
 via `extends: oasis`, both gates evaluate it), the package and its
 `nide-manifest` flow the other (nide emits, pub-check hash-verifies the
-delivered bytes). One rules file, one manifest, two gates: a green
-`nide quality` run predicts a green intake. Distinct from the two diagrams
+delivered bytes). nide and pub-check evaluate the same rules file and verify
+the same manifest. Distinct from the two diagrams
 above, which show the *internal* dovetail of validation into the human audit.
 
 ---

@@ -36,9 +36,9 @@ The [`nide`](https://codes.dilettant.life/docs/nide/) authoring engine
 rules with `nide quality` and fails the build on any BLOCKER. The two-file
 convention is nide's design: the organisation file is fetched from here and
 left unchanged locally; the spec file carries TC- and spec-specific rules on
-top. Credit where due: the rules-as-data interface and the first cut of
-this file came from [Stefan Hagen](https://github.com/sthagen)'s work bridging nide to the acceptance
-criteria in this repository.
+top. The rules-as-data interface and the first version of this file came from
+[Stefan Hagen](https://github.com/sthagen)'s work bridging nide to the
+acceptance criteria in this repository.
 
 ## Contract
 
@@ -48,16 +48,16 @@ criteria in this repository.
   this file; a retired rule is dropped and its id retired with it.
 - The severity vocabulary is `BLOCKER` and `WARN`. A BLOCKER fails the
   build (exit 1); a WARN reports and passes (unless run `--strict`).
-- This file is a subset of the gate. It carries the conditions
-  expressible in a rules engine that reads the assembled document IR. The
-  full acceptance criteria remain
+- This file is a subset of the gate. It carries the conditions expressible
+  against the assembled document as the authoring engine sees it, before
+  rendering. The full acceptance criteria remain
   [`oasis_pub_check.py`](../oasis_pub_check.py) and its generated catalog
   [`CHECKS.md`](../CHECKS.md), which also verify the rendered artifacts
   (HTML, PDF, schemas, package layout) a source-side rules engine
   cannot reach. A green `nide quality` run predicts a green gate run; the
   full gate still runs at intake.
 
-## Source-text rules live here; package rules live in pub-check
+## Rule allocation between nide and pub-check
 
 Every checkable requirement, or requirement-fragment, is assigned to exactly
 one home. If a requirement is checkable on the document **prose** as the
@@ -67,8 +67,8 @@ be checked on the **delivered package** (filenames on disk, published URIs,
 cross-file agreement, PDF fonts, the zip, multi-part layout), it stays
 exclusively in pub-check Python. A criterion that
 spans both domains contributes its safe, source-provable subset here and names
-the rest explicitly as `pub_check_only` in the authority-mapping record. Any
-nide rule added here passes on every currently-published OASIS document.
+the rest explicitly as `pub_check_only` in the authority-mapping record. A rule
+is added here only after it is evaluated against the published corpus.
 
 ## How the rules map to the acceptance criteria
 

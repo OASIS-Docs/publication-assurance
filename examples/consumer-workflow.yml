@@ -36,7 +36,7 @@ jobs:
   pub-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: OASIS-Docs/publication-assurance@v1   # for production, pin to a full commit SHA
         with:
