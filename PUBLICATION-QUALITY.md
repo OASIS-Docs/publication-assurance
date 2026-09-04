@@ -59,7 +59,7 @@ must pass before the audit closes.
 
 **The dovetail.** Step 4b of the intake checklist is: re-run oasis-pub-check, on
 our side, with the identical code, and triage every finding. Your entire
-98-check validation layer plugs into the audit as one step. Both sides run
+170-check validation layer plugs into the audit as one step. Both sides run
 the same code, so acceptance is mechanical on both ends. Your green run
 predicts our green run; TC Administration still runs its own.
 

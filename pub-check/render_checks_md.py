@@ -190,6 +190,21 @@ def main() -> None:
 
     classes = sorted({c["check"] for c in inv})
     counts = Counter(c["check"] for c in inv)
+
+    # The area partition PUBLICATION-QUALITY.md advertises, validated BEFORE
+    # anything is written: a failure here must not leave a half-correct
+    # CHECKS.md on disk for somebody to commit. An unassigned new class stops
+    # the run rather than quietly dropping out of the published area counts.
+    assigned = [c for cls in AREAS.values() for c in cls]
+    repeated = sorted(c for c, k in Counter(assigned).items() if k > 1)
+    assert not repeated, f"class in more than one area: {repeated}"
+    unassigned = sorted(set(classes) - set(assigned))
+    assert not unassigned, f"class assigned to no area: {unassigned}"
+    unknown = sorted(set(assigned) - set(classes))
+    assert not unknown, f"area names a class not in the registry: {unknown}"
+    area_totals = {a: sum(counts[c] for c in cls) for a, cls in AREAS.items()}
+    assert sum(area_totals.values()) == len(inv), (
+        f"areas sum to {sum(area_totals.values())}, registry has {len(inv)}")
     lines = [NOTICE, INTRO.format(total=len(inv), classes=len(classes))]
 
     n = 0
@@ -219,24 +234,9 @@ def main() -> None:
     assert sections == len(classes), f"{sections} sections, {len(classes)} classes"
     print(f"wrote CHECKS.md: {rows} conditions, {sections} classes")
 
-    # The area partition PUBLICATION-QUALITY.md advertises. Assert it is total
-    # and disjoint before printing, so an unassigned new class stops the run
-    # rather than quietly dropping out of the published area counts.
-    assigned = [c for cls in AREAS.values() for c in cls]
-    dupes = {c for c in assigned if assigned.count(c) > 1}
-    assert not dupes, f"class in more than one area: {sorted(dupes)}"
-    unassigned = sorted(set(classes) - set(assigned))
-    assert not unassigned, f"class assigned to no area: {unassigned}"
-    unknown = sorted(set(assigned) - set(classes))
-    assert not unknown, f"area names a class not in the registry: {unknown}"
-    per_class = Counter(c["check"] for c in inv)
-    total = 0
-    for area, cls in AREAS.items():
-        n = sum(per_class[c] for c in cls)
-        total += n
+    for area, n in area_totals.items():
         print(f"  {area:<24} {n:>4}")
-    assert total == len(inv), f"areas sum to {total}, registry has {len(inv)}"
-    print(f"  {'TOTAL':<24} {total:>4}")
+    print(f"  {'TOTAL':<24} {sum(area_totals.values()):>4}")
 
 
 if __name__ == "__main__":
