@@ -80,6 +80,39 @@ registry and the implementation disagree in either direction.
 **The documentation set:** [Repository overview](../README.md) · [TC guide](../PUBLICATION-QUALITY.md) · [The acceptance criteria tool](README.md) · [Worked example](../examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](../TRANSFORMS.md) · [Architecture diagrams](../assets/architecture/README.md)
 """
 
+# The six areas PUBLICATION-QUALITY.md advertises, as a partition of the
+# condition registry. main() asserts every class is assigned exactly once and
+# that the areas sum to the registry total, so a new check class fails this
+# generator until it is placed in an area, the same way it fails until it has
+# a description. The per-area totals are printed on every run; that is where
+# the numbers in PUBLICATION-QUALITY.md come from.
+AREAS = {
+    "Naming and stages": [
+        "artifact-naming", "case", "extension-conformance", "extension-count",
+        "filenames", "multi-part-naming", "name-chars", "revision-collision",
+        "stage-name", "title-oasis-prefix", "title-version", "uri-chars",
+        "version-naming"],
+    "Front matter and links": [
+        "asset-refs", "dead-lists", "double-slash", "front-matter",
+        "html-anchors", "link-mismatch", "md-links", "member-uri",
+        "normdef-refs", "ns-segment", "package-refs", "previous-stage",
+        "stage-token", "stage-uri-live", "uri-alias"],
+    "Content residue": [
+        "authors", "boilerplate-dup", "content-labels", "cover-hr",
+        "fence-collapse", "html-residue", "html-title", "residue"],
+    "Rendering and sync": [
+        "date-sync", "generator", "image-policy", "logo", "pdf-cover",
+        "pdf-fonts", "pdf-sync", "template-css", "vml-fallback"],
+    "Template and policy": [
+        "comment-resolution-log", "conformance-structure",
+        "public-review-metadata", "ref-rfc", "references-split",
+        "rfc-keywords", "template"],
+    "Package hygiene": [
+        "junk-files", "manifest", "odt-integrity", "schema-id", "symlinks",
+        "xml-namespace"],
+}
+
+
 # One-line description per check class, keyed by class name. A new class
 # added to pub_check.py without a line here fails the render (KeyError),
 # which is the point: the catalog stays complete by construction.
@@ -116,6 +149,7 @@ CLASS_DESCRIPTIONS = {
     "rfc-keywords": "Normative key words require the RFC 2119 (and 8174) citations.",
     "schema-id": "Every JSON schema's $id must agree with where the file actually publishes.",
     "stage-name": "The stage token must be a current, correctly numbered stage per the Naming Directives.",
+    "stage-uri-live": "The Previous-stage and Latest-stage URIs a cover declares name files that are not in the package, so a local check can only see their shape. This class fetches them: a definitive 404 or 410 is a BLOCKER, because the cover is citing a document that was never published at that address. The usual cause is a template that hardcodes the extension while templating the stage name, so a stage that went markdown-native is still cited as .docx. Transport failures, 5xx and bot challenges are reported as INFO, so a network fault cannot manufacture a defect, and the class is a silent no-op under PUB_CHECK_OFFLINE.",
     "symlinks": "Self-referential symlinks materialize into unbounded recursion on deploy.",
     "member-uri": "No OASIS member-only (Kavi) URI may be cited in a public work product (Naming Directives v1.7 s6.6).",
     "template": "The OASIS template's required front-matter sections, in order, plus Conformance.",
@@ -184,6 +218,25 @@ def main() -> None:
     assert rows == len(inv), f"{rows} rows rendered, {len(inv)} in inventory"
     assert sections == len(classes), f"{sections} sections, {len(classes)} classes"
     print(f"wrote CHECKS.md: {rows} conditions, {sections} classes")
+
+    # The area partition PUBLICATION-QUALITY.md advertises. Assert it is total
+    # and disjoint before printing, so an unassigned new class stops the run
+    # rather than quietly dropping out of the published area counts.
+    assigned = [c for cls in AREAS.values() for c in cls]
+    dupes = {c for c in assigned if assigned.count(c) > 1}
+    assert not dupes, f"class in more than one area: {sorted(dupes)}"
+    unassigned = sorted(set(classes) - set(assigned))
+    assert not unassigned, f"class assigned to no area: {unassigned}"
+    unknown = sorted(set(assigned) - set(classes))
+    assert not unknown, f"area names a class not in the registry: {unknown}"
+    per_class = Counter(c["check"] for c in inv)
+    total = 0
+    for area, cls in AREAS.items():
+        n = sum(per_class[c] for c in cls)
+        total += n
+        print(f"  {area:<24} {n:>4}")
+    assert total == len(inv), f"areas sum to {total}, registry has {len(inv)}"
+    print(f"  {'TOTAL':<24} {total:>4}")
 
 
 if __name__ == "__main__":

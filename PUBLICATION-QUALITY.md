@@ -22,7 +22,7 @@ yourself, today.
 
 There are two layers of quality control, and you own the first one.
 
-![How the two layers dovetail](assets/architecture/validation-audit-dovetail.png?v=164)
+![How the two layers dovetail](assets/architecture/validation-audit-dovetail.png?v=170)
 
 ## The two layers
 
@@ -63,7 +63,7 @@ our side, with the identical code, and triage every finding. Your entire
 the same code, so acceptance is mechanical on both ends. Your green run
 predicts our green run; TC Administration still runs its own.
 
-![The OASIS publication quality stack](assets/architecture/two-layer-stack.png?v=164)
+![The OASIS publication quality stack](assets/architecture/two-layer-stack.png?v=170)
 
 ## Layer 1: the checks
 
@@ -82,16 +82,20 @@ regression corpus of submissions in their original received form.
 
 The checks group into six areas:
 
-![pub-check validation flow](assets/gate.png?v=164)
+![pub-check validation flow](assets/gate.png?v=170)
 
 | Area | Checks | What it protects |
 |---|---|---|
-| Naming and stages | 16 | stage tokens per the current [Naming Directives](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html), version directories, delivery filenames, live revision collisions |
-| Front matter and links | 22 | This/Latest stage URL blocks, internal anchors, cited-but-missing files, dead mail addresses, link-target mismatches |
-| Content residue | 11 | editor TODOs, placeholder sections, stale pandoc headers, working titles |
-| Rendering and sync | 24 | PDF built from the same revision as the HTML, embedded fonts vs the package's own CSS, image policy, Word render fidelity |
-| Template and policy | 9 | required front-matter sections, the [TC Process](https://www.oasis-open.org/policies-guidelines/tc-process/) Conformance requirement, RFC 2119/8174 citation |
-| Package hygiene | 16 | junk files, recursive symlinks, schema `$id` vs publish path, manifest sha256, ODT source integrity |
+| Naming and stages | 39 | stage tokens per the current [Naming Directives](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html), version directories, delivery filenames, multi-part numbering, permitted characters, the Version identifier in the title, live revision collisions |
+| Front matter and links | 44 | This/Previous/Latest stage URL blocks, whether the cited previous-stage document actually retrieves, internal anchors, cited-but-missing files, dead mail addresses, link-target mismatches, URI aliasing |
+| Content residue | 17 | editor TODOs, placeholder sections, unresolved Authors, stale pandoc headers, working titles |
+| Rendering and sync | 26 | PDF built from the same revision as the HTML, embedded fonts vs the package's own CSS, image policy, Word render fidelity |
+| Template and policy | 23 | required front-matter sections, the [TC Process](https://www.oasis-open.org/policies-guidelines/tc-process/) Conformance requirement and clause stability, RFC 2119/8174 citation, the public-review companion files |
+| Package hygiene | 21 | junk files, recursive symlinks, schema `$id` vs publish path, manifest sha256, XML namespace form, ODT container integrity |
+
+The six areas partition all 170 conditions; the totals are asserted against the
+tool's own registry by `pub-check/render_checks_md.py`, so a new check class
+cannot quietly drop out of them.
 
 Every finding carries a severity. **BLOCKER** means the package cannot
 publish until it is fixed (exit 1). **WARN** means publishable, flagged for

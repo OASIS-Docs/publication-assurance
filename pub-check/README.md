@@ -15,7 +15,7 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=98)
+![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=170)
 
 `oasis_pub_check.py` is the executable form of the publication acceptance
 criteria: the TC-side version of the checks OASIS TC Administration
@@ -33,7 +33,7 @@ The shape of the tool:
 - No configuration. Every expectation is derived from the package itself:
   its own front matter, its own CSS, its own schema `$id`s, its own publish
   path.
-- 169 individual checks across 57 check classes.
+- 170 individual checks across 58 check classes.
   `--list-checks` asserts the inventory from the code, so the advertised
   numbers cannot drift from the implementation.
 - It combines the intake acceptance criteria with the publication
@@ -135,6 +135,7 @@ detail is [CHECKS.md](CHECKS.md).
 | dead-lists | BLOCKER/WARN | Mail addresses at `lists.oasis-open.org` (mail to them fails silently; comments go through the Higher Logic comment facility now). |
 | rfc-keywords | BLOCKER/WARN | Normative key words (MUST/SHOULD/...) used without citing RFC 2119; RFC 8174 missing gets a warning. |
 | previous-stage | BLOCKER | csd02 and later must cite the previous stage's URLs; an empty or N/A Previous-Stage block on a second-or-later stage means stale front matter. |
+| stage-uri-live | BLOCKER/INFO | A Previous-stage or Latest-stage cover URI that returns a definitive 404/410 from the live site. Those blocks name files that are not in the package, so every other check can only see their shape. The usual cause is a template that hardcodes the extension while templating the stage name, so a stage that went markdown-native is still cited as `.docx`. Transport failures and non-404 errors stay INFO; `PUB_CHECK_OFFLINE=1` skips. |
 | date-sync | BLOCKER/WARN | Front-matter date in the markdown absent from the HTML (rendered from a different revision); copyright year not matching the document date year. |
 | logo | WARN | Logo not the canonical `templates/OASISLogo-v3.0.png`. |
 | manifest | BLOCKER/INFO | If `manifest.json` is present, every listed sha256 must match the file on disk. |
@@ -168,7 +169,7 @@ same command on either side of the gate (`--emit-manifest`):
   [OpenDocument releases](https://docs.oasis-open.org/office/OpenDocument/v1.4/csd01/OpenDocument-v1.4-csd01-manifest.txt)
   carry the precedent.
 
-![The verification chain](../assets/chain.png?v=98)
+![The verification chain](../assets/chain.png?v=170)
 
 If the package includes a `manifest.json` conforming to
 [`manifest-schema.json`](manifest-schema.json), the intake side can verify
