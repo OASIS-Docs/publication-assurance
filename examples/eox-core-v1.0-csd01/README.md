@@ -32,8 +32,8 @@ The publication's history shows what the gate catches: the TC's first release
 candidate carried 13 blockers, the same set the manual intake review found.
 The third release candidate ran clean and was published.
 
-This report is a record of one specific publication, carrying the
-92-condition inventory in force when it was published. The acceptance
+This report records one specific publication against the 169-condition
+inventory in force on its validation date. The acceptance
 criteria grow as correction rounds surface new failure modes (the
 current set is already larger); the criteria in force are always
 [`pub-check/CHECKS.md`](../../pub-check/CHECKS.md), generated from the code.
