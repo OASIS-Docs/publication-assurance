@@ -74,11 +74,20 @@ Generated artifacts and their CI gate:
   design. Nothing in CI ran the generator, so `CHECKS.md` simply stayed at
   169 conditions across 57 classes for twelve days while the tool ran 170
   across 58. The description is now written and the catalog regenerated.
-- **CI now regenerates `CHECKS.md` and the diagrams and diffs them.**
-  `--list-checks` proved the condition registry matched the code, so the
-  registry never drifted. Nothing proved the generated documentation matched
-  the registry, and that is where it drifted. An unregenerated catalog or a
-  stale diagram is now a red run.
+- **CI now regenerates `CHECKS.md` and diffs it, and the suite asserts every
+  advertised count.** `--list-checks` proved the condition registry matched
+  the code, so the registry never drifted. Nothing proved the generated
+  documentation matched the registry, and that is where it drifted. An
+  unregenerated catalog is now a red run.
+  `tests/test_advertised_counts.py` closes the rest: it reads the committed
+  documentation, the diagram sources and the README badge, and fails on any
+  count that disagrees with the registry. Run against the previous commit it
+  fails on seven of the eight artifacts it covers, which is the whole defect
+  this release fixes. The diagrams are deliberately checked by reading them
+  rather than by regenerating them: `assets/build.py` is a gitignored local
+  authoring helper, so a CI step that ran it could only ever fail. `CHANGELOG.md`
+  and `examples/` are excluded, because a historical entry and a dated
+  validation report are supposed to keep the counts they were written with.
 - **The six advertised areas are a machine-checked partition.**
   `render_checks_md.py` carries the class-to-area map, asserts every class
   is assigned exactly once and that the areas sum to the registry total,

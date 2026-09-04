@@ -60,10 +60,12 @@ jobs:
           python3 pub-check/render_checks_md.py
           git diff --exit-code -- pub-check/CHECKS.md
 
-      # The diagrams carry the advertised counts and are rendered from the same
-      # --list-checks output, so they drift the same way. rsvg-convert is not
-      # installed here: regenerate the SVG sources only and diff those.
-      - name: Check the diagrams carry the current counts
-        run: |
-          python3 assets/build.py
-          git diff --exit-code -- assets
+      # The diagrams carry the advertised counts too, and drifted the same way.
+      # They are NOT checked by regenerating them: assets/build.py is a local
+      # authoring helper, gitignored and not in the repository, so a step that
+      # ran it could only ever fail here. tests/test_advertised_counts.py reads
+      # the committed SVG sources instead and asserts the counts they carry
+      # against the registry, which is the invariant that actually matters and
+      # is testable everywhere. The PNGs are rendered from those sources by
+      # rsvg-convert, whose output is not byte-stable across versions, so they
+      # are regenerated and eyeballed at release time rather than diffed here.
