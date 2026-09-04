@@ -17,8 +17,8 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 This is the guide for TC editors and chairs. It explains what happens to a
 work-product package between "the TC is ready to vote" and "the publication
-is live and verified on docs.oasis-open.org", and what your TC can run
-itself, today.
+is live and verified on docs.oasis-open.org", and what your TC can run for
+itself before submitting.
 
 Quality control runs in two layers. Your TC runs the first; TC
 Administration runs the second.
