@@ -7,9 +7,9 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-This catalog records, for the acceptance-criteria checks that trace to **written OASIS policy**, exactly which policy each one answers to: the governing document, the section, and the verbatim clause. Of the 165 individual check conditions, **93 are grounded in written policy** and appear below; the remaining 72 are operational quality rules earned from a year of real publications, with no single written clause behind them, and are listed as such in the crosswalk (not here).
+This catalog records, for the acceptance-criteria checks that trace to **written OASIS policy**, exactly which policy each one answers to: the governing document, the section, and the verbatim clause. Of the 170 individual check conditions, **96 are grounded in written policy** and appear below as 93 catalog entries: three check signatures each cover two conditions, the markdown-source and HTML-render forms of one rule. The remaining 74 are operational quality rules earned from a year of real publications, with no single written clause behind them, and are listed as such in the crosswalk (not here).
 
-Corpus snapshot **2026-07-21**. Every quote below is a verbatim substring of the snapshotted source; document digests are in `corpus/MANIFEST.json`. The governing documents are the OASIS TC Process, the Committee Operations Process, the Naming Directives v1.7, and the TC Handbook.
+Corpus snapshot **2026-07-21**. Every quote below is a verbatim substring of the snapshotted source; document digests are in `corpus/MANIFEST.json`. The crosswalk was last extended against that corpus on 27 July 2026; conditions added to the registry after that date sit in the ungrounded set until it is re-run. The governing documents are the OASIS TC Process, the Committee Operations Process, the Naming Directives v1.7, and the TC Handbook.
 
 The check name and signature match the tool's own catalog (`CHECKS.md`); the `AC-*` ids are the policy-derived acceptance criteria in `criteria.yaml`.
 

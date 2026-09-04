@@ -24,6 +24,108 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.2.0 - 2026-09-04
+
+A minor release: one new check class, so the gate got stricter.
+**169 -> 170 checks, 57 -> 58 classes.** The exit-code gate contract, the
+`--json` shape and every existing rule id are unchanged, so a consumer
+pinned to v1.1.x sees no behaviour change other than the new condition.
+
+The release also corrects the drift in this repository's own documentation
+and puts a CI gate in front of it.
+
+Criteria:
+
+- **`stage-uri-live` (BLOCKER/INFO, markdown track).** `check_front_matter`
+  validated the *shape* of the Previous-stage and Latest-stage URI blocks
+  and validated This-stage URIs against the package's own file list.
+  Nothing confirmed a Previous- or Latest-stage URI actually resolves.
+  Those two blocks name files that are not in the package, so shape is all
+  a local check can see, and a citation pointing at a file that was never
+  published passed every gate silently. Found on OData Vocabularies v4.0
+  csd03, published and under public review: the cover cited csd02 as
+  `.docx` (404, because csd02 went markdown-native) and a version-root
+  `.docx` that resolved to the December 2016 csprd01 document. The TC's
+  template hardcodes the extension while templating the stage name, so the
+  defect recurs at every stage. Only a definitive 404 or 410 raises a
+  BLOCKER; timeouts, DNS failures, 5xx and bot-challenge responses are
+  reported as INFO so a network fault cannot manufacture a publication
+  defect, and the whole check is a silent no-op under `PUB_CHECK_OFFLINE`.
+  The Previous-stage block had been excluded deliberately, on the grounds
+  that it cites an immutable prior artifact the TC cannot rename. That
+  reasoning holds for renames; it does not hold for a citation pointing at
+  a file that does not exist.
+
+- **`stage-uri-live` shipped without a regression fixture.** v1.1.8
+  established one fixture per fixed defect; the check added on 31 August had
+  none, so a release promoting it to a MINOR version would have advertised an
+  untested gate. `tests/test_stage_uri_live.py` adds eight, stubbing
+  `urlopen` to pin the distinction the class rests on: 404 and 410 block, a
+  transport failure and a 5xx stay INFO, `PUB_CHECK_OFFLINE` short-circuits
+  before the first request, and an off-site URI is never probed. Each was
+  demonstrated failing against a deliberate mutation of the check before it
+  was accepted. The suite goes from 17 tests to 25.
+
+Generated artifacts and their CI gate:
+
+- **`render_checks_md.py` had been failing since 31 August.** The
+  `stage-uri-live` commit added a check class without a line in
+  `CLASS_DESCRIPTIONS`, which the generator treats as a hard error by
+  design. Nothing in CI ran the generator, so `CHECKS.md` simply stayed at
+  169 conditions across 57 classes for twelve days while the tool ran 170
+  across 58. The description is now written and the catalog regenerated.
+- **CI now regenerates `CHECKS.md` and the diagrams and diffs them.**
+  `--list-checks` proved the condition registry matched the code, so the
+  registry never drifted. Nothing proved the generated documentation matched
+  the registry, and that is where it drifted. An unregenerated catalog or a
+  stale diagram is now a red run.
+- **The six advertised areas are a machine-checked partition.**
+  `render_checks_md.py` carries the class-to-area map, asserts every class
+  is assigned exactly once and that the areas sum to the registry total,
+  and prints the per-area figures. A new class fails the generator until it
+  is placed, the same way it fails until it has a description.
+- **Diagrams regenerated.** `assets/build.py` already derives the advertised
+  counts from `--list-checks`, so the eight SVGs and their PNGs pick up
+  170/58 on rebuild. The image cache-busting query strings had fallen out of
+  step with each other (`?v=169` in the README, `?v=164` in the TC guide,
+  `?v=98` in the tool README), which would have served the old
+  diagrams from cache to readers of the TC guide and the tool README. All
+  three are now `?v=170`.
+
+Documentation corrections:
+
+- **The TC-facing area table never matched a released count.** The six
+  per-area figures in `PUBLICATION-QUALITY.md` summed to 98, which predates
+  v1.0.0's 165, while the tool now runs 170. They read 39 / 44 / 17 / 26 /
+  23 / 21, and the area descriptions name what the areas actually contain.
+- **`AUTHORITIES.md` stated the wrong totals** (issue #2). Its preamble
+  said 165 conditions with 93 grounded and 72 not, which was the v1.0.0
+  registry, and it kept saying so through the v1.1.1 crosswalk extension.
+  Measured against the registry: 170 conditions, of which **96 are grounded
+  in written policy**, appearing as 93 catalog entries because three check
+  signatures each cover two conditions (the markdown-source and HTML-render
+  forms of one rule), and 74 are ungrounded operational rules. The preamble
+  now also records that the crosswalk was last extended on 27 July 2026, so
+  a reader can tell that conditions added since then are ungrounded for want
+  of a re-run rather than by any judgement about them.
+- **The README no longer calls `pub-check/README.md` "the full table of
+  what it checks".** That file describes itself, correctly, as a
+  class-level summary and covers 35 of the 58 classes; `CHECKS.md` is the
+  complete catalog. `stage-uri-live` is added to the summary table.
+- Check counts corrected in the README prose, the README badge, the
+  repository-structure listing, and the tool README.
+
+Releases:
+
+- **v1.1.6, v1.1.7 and v1.1.8 were tagged and pushed but never published as
+  GitHub Releases**, so the repository's Releases page showed v1.1.5 from
+  10 August as the latest while the code was three releases ahead. All
+  three are published from their CHANGELOG entries alongside v1.2.0.
+- **The floating `v1` tag was four commits stale**, pointing at the v1.1.5
+  commit. A consumer following the documented
+  `uses: OASIS-Docs/publication-assurance@v1` pin was running code from
+  before v1.1.6. `v1` now tracks v1.2.0.
+
 ## v1.1.8 - 2026-08-19
 
 A patch release: no executable check changed, no check threshold moved, and the

@@ -4,14 +4,14 @@ SPDX-License-Identifier: Apache-2.0
 Authored by Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-![OASIS Publication Assurance](assets/hero.png?v=169)
+![OASIS Publication Assurance](assets/hero.png?v=170)
 
 <p align="center">
   <a href="LICENSE"><img alt="Code: Apache-2.0" src="https://img.shields.io/badge/code-Apache--2.0-2c4a8a"></a>
   <a href="NOTICE"><img alt="Criteria prose: OASIS verbatim-only" src="https://img.shields.io/badge/criteria_prose-OASIS_verbatim--only-446CAA"></a>
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776ab">
   <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/gate_dependencies-stdlib_only-2f9e44">
-  <img alt="Checks: 169 individual, 57 classes" src="https://img.shields.io/badge/checks-169_individual_%C2%B7_57_classes-f08c00">
+  <img alt="Checks: 170 individual, 58 classes" src="https://img.shields.io/badge/checks-170_individual_%C2%B7_58_classes-f08c00">
   <img alt="Regression corpus: 13 packages" src="https://img.shields.io/badge/regression_corpus-13_packages-6741d9">
 </p>
 
@@ -41,7 +41,7 @@ python3 publication-assurance/pub-check/oasis_pub_check.py <package>
 Add `--json` for machine-readable output, or `--emit-manifest` to also
 write the release manifest.
 
-![oasis-pub-check output](assets/gate.png?v=169)
+![oasis-pub-check output](assets/gate.png?v=170)
 
 ### 2. In your TC repo on GitHub
 
@@ -97,7 +97,7 @@ artifact. To also run it automatically on every push, set
 | File | Open it when |
 |---|---|
 | **[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit gates, a worked example. **Start here.** |
-| **[pub-check/README.md](pub-check/README.md)** | The full table of what it checks, with severities and the regression corpus. |
+| **[pub-check/README.md](pub-check/README.md)** | The class-level summary of what it checks, with severities and the regression corpus. |
 | **[pub-check/CHECKS.md](pub-check/CHECKS.md)** | A check fired and you want the exact one. Full catalog, generated from the code. |
 | **[TRANSFORMS.md](TRANSFORMS.md)** | Building from Markdown and want the pipeline command by command. |
 | **[pub-check/AUTHORITIES.md](pub-check/AUTHORITIES.md)** | The OASIS rule behind a check, quoted verbatim with its source. The criterion-to-clause map. |
@@ -107,7 +107,7 @@ artifact. To also run it automatically on every push, set
 
 ## Publication acceptance test cases: an overview
 
-The 169 individual checks (57 check classes; `--list-checks` asserts the
+The 170 individual checks (58 check classes; `--list-checks` asserts the
 inventory from the code) cover six areas:
 
 - **Naming and stages**: stage tokens, version directories, filename
@@ -136,9 +136,9 @@ candidate whose 13 blockers it reproduces exactly).
 
 ## Where the criteria come from
 
-![How a criterion is sourced from policy](assets/authority.png?v=169)
+![How a criterion is sourced from policy](assets/authority.png?v=170)
 
-Every acceptance criterion cites the rule it enforces. 93 of the 169 checks
+Every acceptance criterion cites the rule it enforces. 96 of the 170 checks
 trace to a verbatim clause in the governing corpus (25 pages, snapshotted and
 hashed); the rest are operational rules from correction rounds. The full
 criterion-to-clause map, with the exact quoted text and its source, is
@@ -146,10 +146,10 @@ criterion-to-clause map, with the exact quoted text and its source, is
 
 ## Where the gate sits: validation and audit
 
-![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=169)
+![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=170)
 
 The two layers share one engine. Your TC runs oasis-pub-check in its own CI to
-check all 169 conditions, each reported as the value the tool pulled from the
+check all 170 conditions, each reported as the value the tool pulled from the
 package set against the value it was compared to, in full. TC Administration
 re-runs the identical code at intake (checklist step 4b) and wraps it with the
 15 mandatory audit gates only a human or a live check can do: byte identity
@@ -177,7 +177,7 @@ emits a `nide-manifest` that pub-check hash-verifies at intake. A green
 manifest lets intake confirm the published bytes match the build the TC
 approved.
 
-![How pub-check dovetails with nide](assets/architecture/nide-bridge.png?v=169)
+![How pub-check dovetails with nide](assets/architecture/nide-bridge.png?v=170)
 
 ## Repository structure
 
@@ -189,7 +189,7 @@ publication-assurance/
 ├── CHANGELOG.md                     # Versioned audit trail: which issue drove which criteria
 ├── action.yml                       # The drop-in GitHub Action a TC calls in one step
 ├── pub-check/                       # The acceptance criteria
-│   ├── oasis_pub_check.py           #   169 individual checks in 57 classes, stdlib only
+│   ├── oasis_pub_check.py           #   170 individual checks in 58 classes, stdlib only
 │   ├── CHECKS.md                    #   the acceptance criteria catalog, generated from the code
 │   ├── AUTHORITIES.md               #   the criterion-to-clause map (verbatim OASIS policy)
 │   ├── render_checks_md.py          #   the generator (keeps CHECKS.md in sync)

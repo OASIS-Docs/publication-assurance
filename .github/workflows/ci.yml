@@ -48,3 +48,22 @@ jobs:
       # the code. Run it as its own step so drift is legible in the log.
       - name: Check the condition registry is in sync with the code
         run: python3 pub-check/oasis_pub_check.py --list-checks
+
+      # --list-checks proves the registry matches the code. Nothing proved the
+      # GENERATED documentation matches the registry, and that is exactly where
+      # it drifted: stage-uri-live landed on 31 August and CHECKS.md sat at the
+      # previous count for twelve days, because the generator had been failing
+      # that whole time on a missing class description and nothing ran it.
+      # Regenerating and diffing makes an unregenerated catalog a red run.
+      - name: Check the generated catalog matches the registry
+        run: |
+          python3 pub-check/render_checks_md.py
+          git diff --exit-code -- pub-check/CHECKS.md
+
+      # The diagrams carry the advertised counts and are rendered from the same
+      # --list-checks output, so they drift the same way. rsvg-convert is not
+      # installed here: regenerate the SVG sources only and diff those.
+      - name: Check the diagrams carry the current counts
+        run: |
+          python3 assets/build.py
+          git diff --exit-code -- assets
