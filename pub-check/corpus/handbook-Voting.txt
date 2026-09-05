@@ -1,0 +1,96 @@
+Voting & ballots | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Reference › Voting & ballots
+Reference · TC voting
+Voting & ballots
+Most decisions a Technical Committee (TC) makes are settled by a vote. This page sets out the rules that govern every TC ballot: which majority is the default, who is entitled to vote, how electronic ballots are run, and how a Special Majority Vote is administered. The governing rules live in TC Process §1.11 and the OASIS Defined Terms .
+The default vote: Simple Majority Vote
+Unless the TC Process specifies otherwise for a particular action, a TC vote passes by Simple Majority Vote . TC Process §1.11
+A Simple Majority Vote is a vote in which the number of "yes" votes cast is greater than the number of "no" votes cast. Abstentions are not counted. OASIS Defined Terms
+Higher thresholds apply where the TC Process names them. The two that recur in the work-product lifecycle are the Full Majority Vote (more than 50% of all eligible voters vote "yes") and the Special Majority Vote (at least 2/3 vote "yes" and no more than 1/4 vote "no"). OASIS Defined Terms The table below compares all three.
+Vote types at a glance
+Comparison of the three TC vote types and their passing thresholds
+Vote type Passes when Where defined
+Simple Majority Vote
+More "yes" votes than "no" votes. Abstentions are not counted. This is the default for any action the TC Process does not assign a higher threshold.
+OASIS Defined Terms
+Full Majority Vote
+More than 50% (more than half) of the eligible voters vote "yes", whether present or not. Abstentions are not counted.
+OASIS Defined Terms
+Special Majority Vote
+At least 2/3 (two thirds) of the eligible voters vote "yes" and no more than 1/4 (one fourth) vote "no". These numbers are based on the total number of eligible voters. Abstentions are not counted.
+OASIS Defined Terms
+Thresholds are counted against eligible voters , not against the number present. For the Full Majority Vote , a Voting Member who does not vote has the same effect as a "no", because the threshold (more than half of all eligible voters) is counted against the full roster. The Special Majority Vote works differently: it has two prongs (at least 2/3 of eligible voters must vote Yes and no more than 1/4 may vote No), so a non-vote is not equivalent to a No on the second prong, where only an actual No vote counts toward the 1/4 limit.
+Who may vote
+Policy requirement
+Every Voting Member of a TC has a single vote . Organizations do not vote in TCs : voting is by the individual Voting Member, not by their company. TC Process §1.11
+Eligibility is fixed when the ballot opens. A Member of a TC must have voting rights at the time a ballot is opened in order to vote on that ballot. Gaining voting rights after the ballot opens does not let a Member vote on it. TC Process §1.11
+No proxies. Proxies shall not be allowed in TC voting. A Voting Member cannot delegate or transfer their vote to anyone else. TC Process §1.11
+For how voting rights are gained, lost, and regained, see Gain voting rights and Lose / regain voting rights .
+Electronic ballots
+TCs may conduct electronic ballots. The rules differ depending on whether the ballot is held during a meeting or outside of one. TC Process §1.11
+Rules for electronic ballots conducted during a meeting versus outside of a meeting
+Ballot setting Mechanism Minimum open period
+During a meeting
+Any tool available to the TC, including email. The results must be recorded in the minutes.
+No minimum open period applies to in-meeting electronic ballots.
+Outside of a meeting
+Either the TC's general mail list or the publicly archived electronic voting functionality provided by OASIS.
+Must remain open for a minimum of 7 days .
+Source for both rows: TC Process §1.11 . The 7-day floor applies only to outside-of-meeting electronic ballots; in-meeting ballots carry no such minimum.
+Policy requirement
+Any Work Product Ballot conducted as an electronic ballot must permit each voter to choose "yes", "no", or "abstain" . TC Process §1.11
+Changing a vote
+While a ballot is open, eligible voters may change their vote up until the end of the voting period . Once the ballot closes, votes are final. TC Process §1.11
+Special Majority Vote administration
+Some actions require a Special Majority Vote: approving a Committee Specification, submitting a Candidate OASIS Standard, and clarifying or rechartering a TC. Those ballots are not run by the TC itself.
+Policy requirement
+All TC ballots requiring a Special Majority Vote must be conducted by the TC Administrator . The TC Chair shall request that the TC Administrator hold the Special Majority Vote, and the TC Administrator shall set up and conduct the ballot . TC Process §1.11 OASIS Defined Terms
+A Special Majority Vote is therefore conducted by the OASIS TC Administrator, with the thresholds counted against the total number of eligible voters as shown in the comparison table above. OASIS Defined Terms
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §1.11 ) and the OASIS Defined Terms effective 1 December 2020 (Simple, Full, and Special Majority Vote definitions). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

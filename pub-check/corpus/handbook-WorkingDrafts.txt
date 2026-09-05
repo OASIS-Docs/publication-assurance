@@ -1,0 +1,84 @@
+Working Drafts | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Work product lifecycle › Working Drafts
+Work product lifecycle · pre-approval stage
+Working Drafts
+A Working Draft is an editor-controlled document in active development. It has no formal status under the TC Process: editors may create, revise, and circulate Working Drafts entirely without TC ballots. The TC ballot process begins only when the TC approves the document as a Committee Specification Draft (CSD) or Committee Note Draft (CND).
+What changed since the 2010 handbook
+The core Working Draft concept is unchanged. Two things are new since 2010:
+The Document Life Cycle Best Practices (effective August 22, 2024) formalised a pre-CSD naming convention and clarified that Working Drafts are numbered sequentially (WD01, WD02, …). These conventions did not appear in the 2010 handbook.
+An optional Standing Rule (Standing Rule 1) now allows editors to publish additional CSD or CND revisions without a new approval ballot, but only if the TC has explicitly adopted that standing rule. The 2010 handbook had no equivalent provision.
+Where Working Drafts sit in the lifecycle
+Working Draft wd
+Editor-controlled. No TC Process status, no ballot required to publish or revise. Document Life Cycle Best Practices
+Committee Specification Draft csd Full Majority Vote
+The TC approves a Working Draft as a CSD by Full Majority Vote . This is the first formal TC Process status on the Standards Track. TC Process §2.5
+Committee Note Draft cnd Full Majority Vote
+On the Non-Standards Track, the TC approves a Working Draft as a CND by Full Majority Vote . TC Process §2.4
+Editor control and TC Process status
+Working Drafts are entirely at the editors' discretion. Editors may:
+create a new Working Draft at any time;
+publish a new revision without a TC ballot;
+change the content, scope, or structure without a TC motion.
+A Working Draft has no status under the TC Process. It is not a Work Product in the TC Process sense; it does not carry a stage abbreviation recognized by the Naming Directives . Document Life Cycle Best Practices
+Common misconception
+Once a work product is approved as a Committee Specification Draft (CSD), Committee Note Draft (CND), or any higher Work Product stage, it does not return to Working Draft status. Working Draft is a pre-approval development stage only.
+This follows from the structure of the lifecycle: each Standards Track progression must begin with step 1 and no step may be skipped TC Process §2.4.1 , and all revision after the first CSD happens within the CSD stage. The TC may revise and re-approve a CSD any number of times as a CSD TC Process §2.5 , re-running public review by re-approving the revision as a CSD TC Process §2.6 rather than dropping back to Working Draft. The TC Process defines no mechanism to return an approved CSD or CS to Working Draft. TC Process §2.7
+Numbering and naming
+Working Drafts are numbered sequentially: WD01, WD02, WD03, and so on. The Document Life Cycle Best Practices recommend that the first release start at WD01; subsequent revisions increment the counter. Document Life Cycle Best Practices
+Before a Working Draft is approved as a CSD, the recommended pre-CSD filename pattern is:
+doc-name-pre-csd ## - yyyy-mm-dd
+where ## is a two-digit sequential counter. For example: emix-v1.0-pre-csd01-2024-03-15 . This is a best-practice naming convention; it is not a stage abbreviation recognized by the Naming Directives. Document Life Cycle Best Practices
+Standing Rule 1: optional streamlined workflow
+Optional standing rule
+Standing Rule 1 allows editors to publish additional CSD or CND revisions without a new TC approval ballot, but only if the TC has explicitly adopted this standing rule by Full Majority Vote. If your TC has not adopted Standing Rule 1, each new CSD or CND revision requires a new Full Majority Vote ballot. Never assume this rule is in effect. Document Life Cycle Best Practices - Standing Rules
+Standing Rule 1 is one of three optional standing rules described in the Document Life Cycle Best Practices. TCs adopt standing rules by Full Majority Vote; they may not address IPR, quorum, membership, voting, or participation via standing rules. Committee Operations Process
+Relationship to the first CSD ballot
+When the TC is ready to give a Working Draft formal status, it votes by Full Majority Vote to approve the document as CSD01 (or the first CSD revision in sequence). That vote, not the act of circulating a Working Draft, is the first formal step in the TC Process lifecycle. TC Process §2.5
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §2.4 –2.7) and the Document Life Cycle Best Practices effective 22 August 2024. Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

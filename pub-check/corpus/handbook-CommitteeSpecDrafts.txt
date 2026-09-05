@@ -1,0 +1,105 @@
+Committee Specification Drafts | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Work product lifecycle › Committee Spec Drafts
+Standards Track · draft stage
+Committee Specification Drafts
+A Committee Specification Draft (CSD) is the first official work product milestone on the Standards Track. The Technical Committee (TC) approves it by Full Majority Vote , and may re-approve additional revisions under the same procedure. A CSD is the prerequisite for opening a public review that can lead to a Committee Specification.
+Common misconception
+Once a TC approves its first CSD , the work product does not go back to the Working Draft stage. Working Draft is the pre-approval drafting state only; after the first CSD, every further iteration stays within the CSD stage.
+The TC may revise a CSD and re-approve it any number of times as a CSD TC Process §2.5 , and re-runs a public review by re-approving the revision as a CSD and resubmitting it to public review TC Process §2.6 , never by reverting to a Working Draft. Because the Standards Track is forward-only and no step may be skipped TC Process §2.4.1 , the same one-way rule holds after CS01 as well. TC Process §2.7
+What changed since the 2010 handbook
+Two substantive changes affect this stage since the 2010 edition:
+Stage abbreviation "csprd" removed. The 2010 handbook referenced a "Committee Specification Public Review Draft (CSPRD)" as a distinct named stage. Naming Directives v1.7 (effective 2 January 2024 ) removed this abbreviation. A document that goes to public review remains a CSD in its filename and URI; there is no separate csprd stage. Any filename or URI using csprd is now out of conformance.
+Submission mechanism updated. Requests to TC Administration are now submitted through the OASIS Support Request system on the Higher Logic member platform, replacing the older Kavi-based form workflow.
+Where this sits in the lifecycle
+Working Draft wd
+Editor-controlled; no TC Process approval status. Any number of Working Drafts may be produced before the first CSD ballot. Document Life Cycle Best Practices
+Committee Specification Draft csd Full Majority Vote
+TC approves a CSD by Full Majority Vote. Multiple numbered revisions (csd01, csd02, …) are allowed; each requires its own approval. TC Process §2.5
+Public Review Full Majority Vote to open
+The TC votes by Full Majority Vote to submit the CSD for a public review of at least 30 days (first review) or at least 15 days (any subsequent review of the same work product). The CSD retains its csd designation during review. TC Process §2.6
+Committee Specification cs Special Majority Vote
+After a successful public review and resolution of all comments, the TC may approve a Committee Specification by Special Majority Vote. TC Process §2.7
+What a Full Majority Vote requires
+Policy requirement
+A Full Majority Vote means more than 50% of all eligible Voting Members vote Yes, whether present at the meeting or not. Abstentions are not counted. A voter who is absent or who does not cast a vote simply leaves fewer Yes votes available to clear the more-than-50% bar. OASIS Defined Terms: Full Majority Vote
+Because a Full Majority Vote counts absent Voting Members in the denominator, a TC with a large Voting Member roster that experiences low attendance may find it difficult to reach the threshold. TCs should be mindful of their roster size when scheduling CSD approval ballots.
+Approving and re-approving CSDs
+A TC may approve a CSD multiple times. Each approval produces a new, sequentially numbered revision (csd01, csd02, csd03, …). TC Process §2.5 A separate Full Majority Vote is required for each revision unless the TC has adopted Standing Rule 1 (see below).
+There is no upper limit on the number of CSD revisions a TC may approve before proceeding to a Committee Specification. Work products do not return to Working Draft status once approved as a CSD; all further revision happens within the CSD stage. TC Process §2.5
+Submitting a CSD for publication
+After the TC approves a CSD by Full Majority Vote, the editors submit the package to OASIS TC Administration via a support request through the Higher Logic member platform. Staff publish the CSD to the OASIS Library at a URI following the pattern:
+https://docs.oasis-open.org/[tc-shortname]/[WP-abbrev]/[version]/csd[NN]/
+The stage abbreviation in all filenames and URIs is csd . The obsolete abbreviation csprd must not appear in any new submission. Naming Directives v1.7 §Stage abbreviations
+Standing Rule 1: optional editorial shortcut
+Optional standing rule
+Only if the TC has adopted Standing Rule 1 may editors publish additional CSD revisions without holding a new Full Majority Vote approval ballot for each one. This standing rule must be explicitly adopted by the TC by Full Majority Vote before editors may rely on it. A TC that has not adopted Standing Rule 1 must ballot every CSD revision. Document Life Cycle Best Practices: Standing Rules
+Standing rules address internal TC workflow efficiency only. They may not alter any IPR, quorum, membership, voting, or participation requirement set by OASIS policy.
+Naming and URIs at the csd stage
+Filename and URI patterns for Committee Specification Drafts
+Element
+Pattern
+Example
+Filename
+[WP-abbrev]-[version]-csd[NN].[ext]
+emix-v1.0-csd01.html
+Published URI
+https://docs.oasis-open.org/[tc]/[WP]/[version]/csd[NN]/[filename].[ext]
+https://docs.oasis-open.org/emergency/cap/v1.2/csd01/cap-v1.2-csd01.html
+Stage abbreviation
+csd
+Never csprd (removed in v1.7)
+See Naming & URIs for the full naming rules, the three required cover-page URIs, and version identifier formats. Naming Directives v1.7
+Quality requirements at the csd stage
+Policy requirement
+A Standards Track work product that is approved at the Committee Specification Public Review Draft , Committee Specification, or OASIS Standard level must include a separate section listing a set of numbered conformance clauses. TC Process §2.2.6
+The trigger is therefore the public-review stage (the Committee Specification Public Review Draft level), not the initial §2.5 CSD-approval ballot . A CSD approved only for internal development need not yet carry the conformance section; the obligation attaches when that CSD is submitted for public review. TC Administration checks for a conformance clause section before publishing a CSD that is submitted for public review.
+Note: the csprd abbreviation itself is obsolete (removed in Naming Directives v1.7), but "Committee Specification Public Review Draft" is the live §2.2.6 stage name and is the trigger text.
+Editors should use the OASIS work product template customized for the specific work product. Templates are provided on a per-work-product basis after the TC submits a Work Product Registration and Template Request to TC Administration.
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §2.5 ), the OASIS Defined Terms effective 1 December 2020 (Full Majority Vote), the Document Life Cycle Best Practices version 2024.08.22 (Standing Rules), and Naming Directives v1.7 effective 2 January 2024 (stage abbreviations). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

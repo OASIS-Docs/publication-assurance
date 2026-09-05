@@ -1,0 +1,112 @@
+GitHub Repositories | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Reference › GitHub repositories
+GitHub Repositories for TC Members
+Technical Committees may request OASIS-managed GitHub repositories to support their chartered deliverables. Assets developed in those repositories are automatically (inherently) part of official TC work. GitHub Repositories for OASIS TC Members' Chartered Work, Section II, item 4 Routine substantive contributions are expected only from sponsoring TC member participants; all contributions through the GitHub channel, whether substantive and expected or not, are governed by the OASIS Feedback License . GitHub Repositories for OASIS TC Members' Chartered Work, Section II, item 1
+What changed since the 2010 handbook
+GitHub repositories for TC chartered work did not exist in the 2010 handbook. OASIS introduced this capability when the GitHub Repositories for OASIS TC Members' Chartered Work policy took effect on 1 August 2016 . If your reference material predates that date, it has no coverage of this topic. GitHub Repositories for OASIS TC Members' Chartered Work (eff. 2016-08-01)
+What the repositories are for
+A TC may request one or more OASIS-managed GitHub repositories to support "distinct development projects" that further the TC's chartered deliverables. Typical uses include source code, issues tracking, project boards, and a wiki instance. GitHub Repositories for OASIS TC Members' Chartered Work
+OASIS defines two distinct categories of GitHub repositories: OASIS TC Open (Source) Repositories and Repositories for TC Members' Chartered Work . This page covers the latter only. Chartered-work repositories exist to support TC deliverables and carry the IPR obligations of the TC's chosen mode. GitHub Repositories for OASIS TC Members' Chartered Work
+How GitHub assets become part of official TC work
+Assets developed in an OASIS-managed repository are automatically (inherently) part of official TC work , eligible for incorporation into any TC Work Product. No separate TC resolution is needed to make a repository asset "official"; that status attaches by virtue of the asset being in the repository. GitHub Repositories for OASIS TC Members' Chartered Work
+Who may make substantive contributions
+The policy states that routine substantive contributions are expected only from sponsoring TC Member participants . This aligns with the TC Process requirement that substantive technical contributions to TC deliverables come from individuals who have accepted the relevant IPR obligations. GitHub Repositories for OASIS TC Members' Chartered Work For IPR obligations that apply to TC Members, see IPR & contributions .
+Policy requirement
+Input licensing for the GitHub channel is governed by OASIS policies: the OASIS Feedback License together with the TC's IPR mode and the required copyright notices (Section II, items 1 and 5). Formal Contributions made directly to the TC through its general email list or document repository carry the TC's IPR mode obligations in the usual way. Only sponsoring TC Member participants are expected to make routine substantive contributions. GitHub Repositories for OASIS TC Members' Chartered Work, Section II, items 1 and 5
+How the public may participate
+Members of the public may open issues and provide comments using a TC repository's GitHub Issues tracking facility. Pull requests from non-members may also be submitted. All such content is governed by the terms of the OASIS Feedback License . GitHub Repositories for OASIS TC Members' Chartered Work
+Comparison of participant roles in OASIS-managed GitHub repositories
+Participant
+What they may do
+IPR framework
+TC Member participants
+Substantive contributions and reviews via pull requests. A regular TC Member is a GitHub "contributor," not a collaborator with write access; direct commits, merges, and editorial decisions on the repository require being a Maintainer (Committer) with write access.
+GitHub-channel input is governed by OASIS policies: the Feedback License plus the TC's IPR mode and copyright notices (item 5). Formal Contributions via the TC email list or document repository carry the TC's IPR mode (RAND, RF on RAND Terms, RF on Limited Terms, or Non-Assertion)
+General public
+Open issues and leave comments (via GitHub Issues); submit pull requests
+OASIS Feedback License
+Sources: participant roles and Feedback License, GitHub Repositories for OASIS TC Members' Chartered Work (eff. 2016-08-01) ; four IPR modes, OASIS IPR Policy (2013) , see also IPR & contributions .
+From public feedback to TC resolution: the workflow
+Public feedback submitted to an oasis-tcs repository through GitHub Issues, Comments, or Pull Requests is equivalent to submission via the TC comment list under the GitHub policy. GitHub Repositories for OASIS TC Members' Chartered Work, Section II, item 3 The matrix below shows how a piece of feedback travels from arrival to formal disposition, who may act at each step, and the governing rule.
+Workflow matrix from public feedback through issue triage, pull-request merge, and TC resolution, showing the actor and governing rule at each step
+Step
+Who may act
+What happens
+Governing rule
+1. Public feedback arrives
+Anyone (including non-members)
+Anyone may comment, open issues, and submit pull requests against an oasis-tcs repository. All such input is governed by the OASIS Feedback License.
+GitHub Repositories for OASIS TC Members' Chartered Work, Section II, item 1
+2. Feedback counts as a TC comment
+(Automatic, by policy)
+GitHub Issues, Comments, and Pull Requests on an oasis-tcs repository are equivalent to submission via the TC comment list, so this channel satisfies the public-comment route.
+GitHub Repositories for OASIS TC Members' Chartered Work, Section II, item 3
+3. Substantive TC contribution
+Sponsoring TC Member participants (expected); a formal Contribution must reach the TC
+Routine substantive contributions are expected only from sponsoring TC Member participants. To make a formal Contribution, the material must be sent to the TC's general email list or document repository; a URL or other reference to the document is not sufficient.
+GitHub Repositories for OASIS TC Members' Chartered Work, Section II, item 1 ; TC Process §1.15
+4. Issue triage
+A Maintainer (Committer)
+Assigning and closing issues, associating milestones, and similar triage require direct write access, which only Maintainers hold. A regular TC Member is a GitHub "contributor," not a collaborator with write access.
+GitHub Repositories for OASIS TC Members' Chartered Work, Maintainers
+5. Pull-request merge
+A Maintainer (Committer)
+Merging and closing pull requests, resolving merge conflicts, and creating releases require direct write access; only a Maintainer may merge a PR.
+GitHub Repositories for OASIS TC Members' Chartered Work, Maintainers
+6. TC resolution
+The Technical Committee
+During a public review, the TC must acknowledge each comment, track the comments received, and post the disposition of each comment. The customary record of that work is the comment resolution log.
+TC Process §2.6 ; comment resolution log
+The equivalence of the GitHub channel to the TC comment list (item 3) is what makes GitHub Issues an acceptable public-comment route alongside the TC's comment facility. TC Process §1.7
+Relationship to TC transparency requirements
+The TC Process requires that all official TC resources (including documents, discussions, and archives) reside on OASIS-designated facilities and that archives remain publicly visible. TC Process §1.7 OASIS-managed GitHub repositories satisfy this requirement for the assets they host. Conducting substantive TC business in a private or non-OASIS repository would not.
+Best practice
+When a TC uses GitHub repositories, its web page and meeting minutes should link to them so that Members and observers can readily find the canonical location of in-progress work. Keeping repository names aligned with TC Work Product names reduces confusion during publication.
+Sources & provenance
+This page reflects the GitHub Repositories for OASIS TC Members' Chartered Work policy, approved 29 July 2016 and effective 1 August 2016, and the OASIS TC Process effective 1 December 2020 ( §1.7 , §1.15 , and §2.6 ). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

@@ -38,11 +38,13 @@ jobs:
       # The checker is stdlib-only. beautifulsoup4 is not its dependency: it
       # belongs to the document pipeline under .github/src/, which
       # tests/test_pdf_command.py exercises to pin the wkhtmltopdf argument
-      # vector. Without it that file skips, and a skipped test proves nothing.
+      # vector. PyYAML reads the shipped criteria and authority map for
+      # tests/test_authorities.py. Both are imported hard rather than skipped:
+      # a skipped authority check proves nothing.
       - name: Install test dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install pytest beautifulsoup4
+          python3 -m pip install pytest beautifulsoup4 PyYAML
 
       - name: Run pytest
         run: pytest tests/ -v
@@ -62,7 +64,7 @@ jobs:
       - name: Check the generated catalog matches the registry
         run: |
           python3 pub-check/render_checks_md.py
-          git diff --exit-code -- pub-check/CHECKS.md
+          git diff --exit-code -- pub-check/CHECKS.md pub-check/README.md
 
       # The diagrams carry the advertised counts too, and drifted the same way.
       # They are NOT checked by regenerating them: assets/build.py is a local

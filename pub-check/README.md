@@ -112,47 +112,74 @@ the criteria in force are the ones the tool runs.
 
 ## The checks
 
-The classes that fire most often, with their severities. The complete set of
-58 classes, one row per condition with observed-vs-expected detail, is
-[CHECKS.md](CHECKS.md).
+Every check class the tool runs, with the number of individual conditions in it
+and the severity it can reach. The full per-condition catalog, with the value
+pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 
-| Check | Severity | What it catches |
-|---|---|---|
-| version-naming | BLOCKER/WARN | Version directory not vN.N; a delivery filename embedding a DIFFERENT version than the publish path (stale-rename tell); stem missing the version segment. |
-| revision-collision | WARN/INFO | The submission's stage already published live for this version (a new submission must increment the revision; one publication sat wrongly at csd01 for two years), plus an INFO list of the version's live stages. Network-derived; PUB_CHECK_OFFLINE=1 skips. |
-| stage-name | BLOCKER | Retired/invalid stage tokens (`csprd`, `cos`, `csdpr`, ...). A document in public review keeps its stage name. |
-| filenames | BLOCKER | Delivery items not named `<base>-<stage>.md/.html/.pdf`; `draft`/`tmp`/`rc` tokens in delivered filenames. |
-| front-matter | BLOCKER/WARN | This-Stage URLs that do not match the version/stage path or point at files not in the package; Latest-Stage URLs that carry a stage segment; URLs declaring a different version (stale-draft tell). |
-| residue | BLOCKER/WARN | `TODO(...)`, `tbd` placeholder sections; `Will be filled in ...` (warn at CSD, must clear before CS). |
-| html-residue | BLOCKER | Absorbed from publisher-toolkit lint_html.py: duplicate title `<h1>` (D1, double title on the PDF cover), stale pandoc `title-block-header` (D2), leaked `/home/runner` CI paths (D3). The shared workflows produce these; the gate catches them at intake too. |
-| fence-collapse | BLOCKER | From publisher-toolkit preprocess_md.py (D6): an opening code fence with trailing text in its info string collapses the whole block to inline code under pandoc. |
-| image-policy | BLOCKER/WARN | From publisher-toolkit inline_images.py (D7): SVGs carrying `<script>`, `on*=` handlers, or external refs (active content, refused on the host); empty/absolute/traversal `img src`; `srcset`/`<picture>` (pipeline refuses); the 2MB/5MB inlining caps as warnings. |
-| pdf-cover | BLOCKER | From publisher-toolkit step_2 assertions: A1 title appearing more than once on the PDF cover page (stale header residue baked into the render); A2 `/home/runner` CI paths in the PDF text. Needs `pdftotext`; silent skip without it. |
-| html-title | BLOCKER | Working residue in the HTML `<title>` (`- tmp`, `draft`). |
-| html-anchors | BLOCKER | Internal `#fragment` links with no matching anchor. |
-| md-links | BLOCKER/WARN | Bare URL running into `.\` with no space (pandoc autolink pulls the period and backslash into the href); `[url](url)` dual links. |
-| schema-id | BLOCKER | JSON schema `$id` that disagrees with the file's publish path (implementers get a 404). |
-| pdf-sync | BLOCKER | PDF front matter missing the canonical this-stage URL or citing a different version: the PDF was rendered from an older draft. Unreadable PDF is a blocker. Needs `pdftotext` on PATH; warns if absent. |
-| junk-files | BLOCKER | `.DS_Store`, `__MACOSX/`, `Thumbs.db`, editor backups, `.git/` inside the package. |
-| case | BLOCKER/WARN | Mixed-case filenames or mixed-case `docs.oasis-open.org` paths: the publication host is case-sensitive and canonical paths are lowercase, so lowercase citations 404. |
-| dead-lists | BLOCKER/WARN | Mail addresses at `lists.oasis-open.org` (mail to them fails silently; comments go through the Higher Logic comment facility now). |
-| rfc-keywords | BLOCKER/WARN | Normative key words (MUST/SHOULD/...) used without citing RFC 2119; RFC 8174 missing gets a warning. |
-| previous-stage | BLOCKER | csd02 and later must cite the previous stage's URLs; an empty or N/A Previous-Stage block on a second-or-later stage means stale front matter. |
-| stage-uri-live | BLOCKER/INFO | A Previous-stage or Latest-stage cover URI that returns a definitive 404/410 from the live site. Those blocks name files that are not in the package, so every other check can only see their shape. The usual cause is a template that hardcodes the extension while templating the stage name, so a stage that went markdown-native is still cited as `.docx`. Transport failures and non-404 errors stay INFO; `PUB_CHECK_OFFLINE=1` skips. |
-| date-sync | BLOCKER/WARN | Front-matter date in the markdown absent from the HTML (rendered from a different revision); copyright year not matching the document date year. |
-| logo | WARN | Logo not the canonical `templates/OASISLogo-v3.0.png`. |
-| manifest | BLOCKER/INFO | If `manifest.json` is present, every listed sha256 must match the file on disk. |
-| template | BLOCKER/WARN | Required front-matter sections present (This/Previous/Latest stage, TC, Chairs, Editors, Abstract) and in template order; Conformance section present (TC Process requirement). |
-| template-css | BLOCKER/WARN/INFO | HTML must carry a stylesheet; canonical is the markdown-styles CSS. A spec that carries its own CSS is noted; a non-template font family is flagged. |
-| package-refs | BLOCKER | Files the document cites under its own stage path that are not in the package (they 404 on publication). |
-| link-mismatch | BLOCKER | Visible URL and link target disagree (classic rename artifact). |
-| double-slash | BLOCKER | `//` inside a relative path; the CDN 404s it. |
-| cover-hr | WARN | Horizontal rule between logo and title (renders as a blank first PDF page in the OASIS HTML-to-PDF path). |
-| symlinks | BLOCKER | A symlink pointing at its own ancestor: deploys materialize symlinks (`rsync -L`, `s3 sync --follow-symlinks`), so it expands into unbounded directory recursion on the CDN origin (KMIP csd01 produced 41 nested levels from one `x -> .`). |
-| generator | BLOCKER | DOCX-native only: HTML `Generator` meta is not Microsoft Word. A LibreOffice/other render differs in kind from the TC's precedent and must be re-done before publication. |
-| vml-fallback | BLOCKER | DOCX-native only: a `v:imagedata` with no paired `<![if !vml]><img>` fallback. VML-only images are invisible in every modern browser (the cover-logo class, published live twice). |
-| asset-refs | BLOCKER | DOCX-native only: a relative `src`/`href` the HTML references (`.fld/` images, siblings) that is not in the package; it 404s on publication. Image refs escape link-only sweeps. |
-| pdf-fonts | WARN/INFO | PDF embedded fonts vs the font families the package's own CSS declares (the CSS is the typography authority for a publication). Divergence is a non-blocking finding. Needs poppler's `pdffonts`; skips gracefully without it or when the package declares no local font authority. |
+<!-- BEGIN generated class table: render_checks_md.py -->
+
+| Check | Conditions | Severity | What it catches |
+|---|---|---|---|
+| artifact-naming | 1 | WARN | Non-document-identifier artifacts (schemas, images, WSDLs, codelists) should keep stable filenames across releases, not embed a stage/revision token. |
+| asset-refs | 1 | BLOCKER | Relative files the HTML references must be included in the package. |
+| authors | 4 | BLOCKER/WARN | A Technical Report/Technical Report Draft must name one or more Authors on the cover page, distinct from a Committee Note's Editors listing. |
+| boilerplate-dup | 1 | WARN | The template's comments/status boilerplate paragraph appears exactly once. |
+| case | 3 | BLOCKER/WARN | The publication host is case-sensitive; canonical paths are lowercase. |
+| comment-resolution-log | 2 | BLOCKER/WARN | A comment-resolution log accompanying a CSD or CND public review must carry the exact basename the Naming Directives prescribe (BLOCKER if it is misnamed). Where the package itself shows the review concluded and no log-named file is present, the absence is flagged for confirmation (WARN). A near-miss is matched across hyphen and underscore word-joiners only, so a file that merely shares a word or two is not read as a misnamed log. |
+| conformance-structure | 9 | BLOCKER/WARN | Standards Track Conformance section structure: the section sits at top level rather than inside an Annex or subsection, each profile scope carries individually and uniquely numbered clauses, and from CS to OS the clause-number set is preserved exactly, with wording-only changes flagged for manual review. |
+| content-labels | 1 | WARN | An Examples or Sample heading should carry an explicit non-normative or informative content-type label (WARN). Appendix and Annex headings get the same structural test, recorded as an advisory note that does not score. |
+| cover-hr | 1 | WARN | A horizontal rule above the title opens the OASIS-rendered PDF with a blank page. |
+| date-sync | 2 | BLOCKER/WARN | The markdown, HTML, and copyright dates must describe the same revision. |
+| dead-lists | 3 | BLOCKER/WARN | Mail addresses at lists.oasis-open.org fail silently; comments go through Higher Logic. |
+| double-slash | 1 | BLOCKER | A double slash inside a relative path 404s on the CDN. |
+| extension-conformance | 1 | WARN | Principal and Multi-Part named-part filename extensions should match a common OASIS publication rendering format, not an invented or proprietary token. |
+| extension-count | 4 | BLOCKER/WARN | A delivery item must carry exactly one file extension after its document-identifier stem: BLOCKER, relaxed to WARN at wd stage (Naming Directives v1.7 s4/s9). Compound archive extensions (`tar.gz`, `tar.bz2`, `tar.xz`) count as one. Every other file in the package gets the same double-extension and missing-extension test as a non-blocking advisory. |
+| fence-collapse | 1 | BLOCKER | An opening code fence with trailing text collapses the whole block under pandoc. |
+| filenames | 6 | BLOCKER/WARN | Delivery items are named for the published stage, one basename, all formats present. |
+| front-matter | 12 | BLOCKER/WARN | The This/Latest stage URL blocks must match the package's actual publish path. |
+| generator | 1 | BLOCKER | DOCX-native renders must come from Microsoft Word, matching the TC's precedent. |
+| html-anchors | 2 | BLOCKER/WARN | Every internal fragment link must resolve to an anchor in the document. |
+| html-residue | 3 | BLOCKER | Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths. |
+| html-title | 2 | BLOCKER/WARN | The HTML title element must be an actual document title with no working residue. |
+| image-policy | 10 | BLOCKER/WARN | Images must be self-contained, inert, and within the pipeline's size caps. |
+| junk-files | 2 | BLOCKER | OS and editor junk must not be in the package. |
+| link-mismatch | 2 | BLOCKER | A visible URL and its link target must agree. |
+| logo | 1 | WARN | The cover logo should be the canonical OASIS template logo. |
+| manifest | 3 | BLOCKER | A packaged manifest.json must verify against the files on disk. |
+| md-links | 2 | BLOCKER/WARN | Markdown link forms that render wrong under pandoc autolinking. |
+| member-uri | 1 | BLOCKER | No OASIS member-only (Kavi) URI may be cited in a public work product (Naming Directives v1.7 s6.6). |
+| multi-part-naming | 8 | BLOCKER | Multi-Part Work Product filenames must share one work-product abbreviation and version id (AC-NAMING-19) and, in a multi-part package, carry a well-formed, contiguously numbered `-partN-name` segment (AC-NAMING-20; Naming Directives v1.7 s4/s6.1). Scoped to Standards Track CSD/CS/OS and Non-Standards Track CND/CN stage directories. |
+| name-chars | 4 | BLOCKER | Every filename and directory name must stay within the sixty-four permitted characters. UNDERSCORE is a BLOCKER in an identifying (document-URI) name and a WARN elsewhere. An empty identifying name is a BLOCKER. |
+| normdef-refs | 2 | BLOCKER/WARN | Every packaged normative schema/grammar/code file (Standards Track) must be referenced from the Work Product (TC Process 2.2.5). |
+| ns-segment | 2 | BLOCKER/WARN | This/Latest-stage cover URIs must not reuse the reserved /ns/ path segment (namespace identifiers only); Previous-stage hits are WARN (inherited, immutable citation). |
+| odt-integrity | 6 | BLOCKER | The ODT source must be a valid, macro-free OpenDocument container. |
+| package-refs | 1 | BLOCKER | Files the document cites under its own stage path must be included in the package. |
+| pdf-cover | 2 | BLOCKER | The rendered PDF cover must carry the title exactly once and no CI paths. |
+| pdf-fonts | 2 | WARN | PDF embedded fonts are compared against the package's own CSS as typography authority. |
+| pdf-sync | 5 | BLOCKER/WARN | The PDF must be readable and rendered from the same revision as the rest of the package. |
+| previous-stage | 2 | BLOCKER | Second and later stages must cite the previous stage's URLs. |
+| public-review-metadata | 3 | BLOCKER/WARN | Post-publication audit: a csd/cnd stage directory that underwent a TC public review must carry the [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html companion file Project Administration is obligated to publish alongside it (Naming Directives v1.7 s5.2 / TC Handbook Naming). |
+| ref-rfc | 2 | WARN | An [RFCnnnn] references entry's label, body text, and URL must cite the same RFC number. |
+| references-split | 2 | WARN | On a Standards Track work product, Normative and Informative References should be separately labeled, with no reference ID listed under both (handbook-WPQualityChecklist.txt, WARN). |
+| residue | 4 | BLOCKER/WARN | Editor placeholders (TODO, tbd, 'Will be filled in') must not be present. |
+| revision-collision | 1 | WARN | A new submission must not collide with a stage already live for the version. |
+| rfc-keywords | 2 | BLOCKER/WARN | Normative key words require the RFC 2119 (and 8174) citations. |
+| schema-id | 4 | BLOCKER/WARN | Every JSON schema's $id must agree with where the file actually publishes. |
+| stage-name | 3 | BLOCKER | The stage token must be a current, correctly numbered stage per the Naming Directives. |
+| stage-token | 3 | BLOCKER/WARN | On a second or later stage, the Previous-stage cover URI should carry the document's own csd or cnd stage token; a retired or mismatched token is a WARN, with a caveat for pre-v1.7 legacy paths. A Latest-stage cover URI filename must carry no stage-abbreviation or revision token (BLOCKER). |
+| stage-uri-live | 1 | BLOCKER | The Previous-stage and Latest-stage URIs on the cover name files that are not in the package, so every other check can see only their shape. This class fetches them. A 404 or 410 is a BLOCKER: the cover cites a document that was never published at that address, usually because the template hardcodes the extension while templating the stage name, so a stage that went markdown-native is still cited as `.docx`. Transport failures, 5xx responses and bot challenges are recorded as INFO. `PUB_CHECK_OFFLINE` turns the class off. |
+| symlinks | 1 | BLOCKER | Self-referential symlinks materialize into unbounded recursion on deploy. |
+| template | 3 | BLOCKER/WARN | The OASIS template's required front-matter sections, in order, plus Conformance. |
+| template-css | 2 | BLOCKER/WARN | The HTML must carry a stylesheet; the canonical CSS is the default expectation. |
+| title-oasis-prefix | 1 | BLOCKER/WARN | A Work Product title should not begin with 'OASIS' unless Project Administration recommends it for a special case (Naming Directives v1.7 s7). BLOCKER on Standards Track, WARN on Non-Standards Track. The title is the cover `<h1>` that matches the HTML `<title>`; where the only difference is a trailing brand suffix on the `<title>`, the single `<h1>` is taken as the title. Where the stage prefix does not identify the track (`wd` sits on both), the finding and the observed evidence say which track was assumed. |
+| title-version | 3 | BLOCKER/WARN | The cover-page title must carry the package's own Version identifier, composed for a Standards Track Work Product as `<name> Version <number>` (Naming Directives 5.1 / Section 7). |
+| uri-alias | 9 | BLOCKER/WARN | No unauthorized URI aliasing within a stage/revision package: META-refresh, byte-identical duplicate files, or a redirect/URL-shortening domain citing a canonical OASIS resource (Naming Directives v1.7 s6.5). |
+| uri-chars | 1 | BLOCKER | No underscore may appear in a document (cover-page) URI (Naming Directives v1.7 s3). |
+| version-naming | 3 | BLOCKER/WARN | The version directory and delivery filenames must agree on one vN.N(.N) version. |
+| vml-fallback | 1 | BLOCKER | VML-only images in Word HTML renders are invisible in every modern browser. |
+| xml-namespace | 5 | BLOCKER/WARN | Every namespace a packaged .xsd/.wsdl/.rng declares as its own must be a docs.oasis-open.org/[tc-shortname]/ns/xxxx URI (consistent scheme) or an allowlisted urn:. |
+
+<!-- END generated class table -->
 
 Residue, key-word and link checks ignore fenced code blocks and `<pre>/<code>`
 content, so schemas and examples containing `tbd` or bare URLs are not

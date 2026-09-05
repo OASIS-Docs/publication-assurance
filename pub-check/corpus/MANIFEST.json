@@ -1,0 +1,180 @@
+{
+  "snapshot_date": "2026-07-21",
+  "documents": {
+    "tc-process.html": {
+      "url": "https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/",
+      "sha256": "17d2a9c60522068695338c22828c6a853fb74495e724bd0396e5181d3c92add3",
+      "bytes": 201569,
+      "text_file": "tc-process.txt",
+      "text_chars": 57569
+    },
+    "committee-operations-process.html": {
+      "url": "https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/",
+      "sha256": "0447c9cb21e744b760cbaa9f6bbe691c5ce1b9f325cfe9c49fd90f3a473ff2c2",
+      "bytes": 164622,
+      "text_file": "committee-operations-process.txt",
+      "text_chars": 28677
+    },
+    "naming-directives.html": {
+      "url": "https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html",
+      "sha256": "3663ee35355e7c4e6abb159dc64bcf4a58b80ddaa805b4d70716770dbf39a40d",
+      "bytes": 72382,
+      "text_file": "naming-directives.txt",
+      "text_chars": 47605
+    },
+    "handbook-WorkProductLifecycle.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/WorkProductLifecycle.html",
+      "sha256": "99cbf50f8ee5be37931100ea9baa823500657d1feb6e6f3290ee1812cb44e8ee",
+      "bytes": 58830,
+      "text_file": "handbook-WorkProductLifecycle.txt",
+      "text_chars": 18753
+    },
+    "handbook-WorkingDrafts.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/WorkingDrafts.html",
+      "sha256": "eaba457a915f914f87bc4c3960179147c4b92befe94c133de19d7a2f848bf447",
+      "bytes": 14413,
+      "text_file": "handbook-WorkingDrafts.txt",
+      "text_chars": 5930
+    },
+    "handbook-CommitteeSpecDrafts.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/CommitteeSpecDrafts.html",
+      "sha256": "3ddf9234472276dca1b43b8503044392b02e2231933c349034a1eb9612cae642",
+      "bytes": 18238,
+      "text_file": "handbook-CommitteeSpecDrafts.txt",
+      "text_chars": 8319
+    },
+    "handbook-PublicReviews.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/PublicReviews.html",
+      "sha256": "4577e58d9723501e2e140647385d700da5402fd033ec65470a01381c18787add",
+      "bytes": 22178,
+      "text_file": "handbook-PublicReviews.txt",
+      "text_chars": 10234
+    },
+    "handbook-CommitteeSpecs.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/CommitteeSpecs.html",
+      "sha256": "a2c16bff1587d073c0f89df91feb3126fe177ea7b129b08a719946db2ff9c26f",
+      "bytes": 17146,
+      "text_file": "handbook-CommitteeSpecs.txt",
+      "text_chars": 7651
+    },
+    "handbook-OASISStandard.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/OASISStandard.html",
+      "sha256": "3ae2fb663359d30f7fa5ad2f19251d3897f7918ab7286f8cc688ef8b729eadbf",
+      "bytes": 19555,
+      "text_file": "handbook-OASISStandard.txt",
+      "text_chars": 8682
+    },
+    "handbook-CommitteeNoteDrafts.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/CommitteeNoteDrafts.html",
+      "sha256": "374b6f61a552d226a7f7c61566e7975c31329d16108e80e53d5463a1750c5241",
+      "bytes": 19152,
+      "text_file": "handbook-CommitteeNoteDrafts.txt",
+      "text_chars": 7484
+    },
+    "handbook-CommitteeNotes.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/CommitteeNotes.html",
+      "sha256": "89bbf1c5a9daad13f7e79021c017ec4d97cc1d0fbebc5e89a55889fa6f465f06",
+      "bytes": 18335,
+      "text_file": "handbook-CommitteeNotes.txt",
+      "text_chars": 7569
+    },
+    "handbook-TechnicalReports.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/TechnicalReports.html",
+      "sha256": "524ebfd60c4512bcc7299d70ed53d6317f04af9b4475c311847d4283bb13f8e4",
+      "bytes": 16271,
+      "text_file": "handbook-TechnicalReports.txt",
+      "text_chars": 6695
+    },
+    "handbook-Maintenance.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/Maintenance.html",
+      "sha256": "054654a61634052da1a5c2fb01ce675be4264f947a66e95c5851ba582c860173",
+      "bytes": 15661,
+      "text_file": "handbook-Maintenance.txt",
+      "text_chars": 6286
+    },
+    "handbook-Voting.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/Voting.html",
+      "sha256": "da357a456bd538e9ed785541dae6dedc8379dbaf6bbcd78af4c6953b542c099a",
+      "bytes": 15851,
+      "text_file": "handbook-Voting.txt",
+      "text_chars": 6351
+    },
+    "handbook-Quorum.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/Quorum.html",
+      "sha256": "788c86de78fedf305cd4fe820f100d0d837f3989e7e4e898fb4590d14c9b6066",
+      "bytes": 17462,
+      "text_file": "handbook-Quorum.txt",
+      "text_chars": 7639
+    },
+    "handbook-TCLifecycle.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/TCLifecycle.html",
+      "sha256": "49d793200792d242c84a74bbf866c3e59f839d43cc80825db86dc04d8fd5fe9d",
+      "bytes": 26283,
+      "text_file": "handbook-TCLifecycle.txt",
+      "text_chars": 11580
+    },
+    "handbook-WPQualityRequirements.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html",
+      "sha256": "3825118e5d488636fa5db5b5d76ac8cf483b6fb39a1a5ad606b446dfc6191a51",
+      "bytes": 20450,
+      "text_file": "handbook-WPQualityRequirements.txt",
+      "text_chars": 10865
+    },
+    "handbook-WPQualityChecklist.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html",
+      "sha256": "e341b1dd0f776b30cdd8afa49afc3c7e2745ebd337b07dfc9bd18a715c662507",
+      "bytes": 18012,
+      "text_file": "handbook-WPQualityChecklist.txt",
+      "text_chars": 8640
+    },
+    "handbook-Naming.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/Naming.html",
+      "sha256": "f014fc4b3b5f8a0649f15b0d90643417238904d117ad2f3e404ab26f98a0aeaf",
+      "bytes": 18218,
+      "text_file": "handbook-Naming.txt",
+      "text_chars": 8629
+    },
+    "handbook-Conformance.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/Conformance.html",
+      "sha256": "93a0abac1a065912d3b6b8ab9616e6c2be977ff3d6201147956d33c8114ee423",
+      "bytes": 21527,
+      "text_file": "handbook-Conformance.txt",
+      "text_chars": 11002
+    },
+    "handbook-Templates.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/Templates.html",
+      "sha256": "6f54cf2b7e9e179ea6d4be5e1df764af70b050a832d3e8cc31980c007c3e3529",
+      "bytes": 13238,
+      "text_file": "handbook-Templates.txt",
+      "text_chars": 5763
+    },
+    "handbook-IPR.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/IPR.html",
+      "sha256": "4adaa542b8d633cc486231ed0fb81a413f32db68ec2fdf9d2c6f3656ddf8f565",
+      "bytes": 20424,
+      "text_file": "handbook-IPR.txt",
+      "text_chars": 10239
+    },
+    "handbook-GitHub.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/GitHub.html",
+      "sha256": "470b4ac80965fc204eaace36486261a917e3abf12ef3500894d4741f725113f6",
+      "bytes": 19834,
+      "text_file": "handbook-GitHub.txt",
+      "text_chars": 9450
+    },
+    "handbook-Sources.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Reference/Sources.html",
+      "sha256": "be26d37ddab7d74e62b127517ac7b6d3de782d1da90098b9fdc003ac7df0c81e",
+      "bytes": 9936,
+      "text_file": "handbook-Sources.txt",
+      "text_chars": 2959
+    },
+    "handbook-Glossary.html": {
+      "url": "https://docs.oasis-open.org/TChandbook/Concepts/Glossary.html",
+      "sha256": "1bb40c30ae5b427eb4c24e8766bc1e77a92ea239635f901d42e73fda52b39a84",
+      "bytes": 35483,
+      "text_file": "handbook-Glossary.txt",
+      "text_chars": 18029
+    }
+  }
+}

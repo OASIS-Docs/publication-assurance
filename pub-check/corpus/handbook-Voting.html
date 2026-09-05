@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voting &amp; ballots | OASIS TC Handbook</title>
+<meta name="description" content="How Technical Committees vote: the default Simple Majority Vote, who may vote, no proxies, eligibility fixed at ballot open, electronic ballots, the 7-day minimum, vote changes, and Special Majority Vote administration.">
+<link rel="canonical" href="https://docs.oasis-open.org/TChandbook/Reference/Voting.html">
+<meta property="og:site_name" content="OASIS TC Handbook">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Voting &amp; ballots">
+<meta property="og:description" content="How Technical Committees vote: the default Simple Majority Vote, who may vote, no proxies, eligibility fixed at ballot open, electronic ballots, the 7-day minimum, vote changes, and Special Majority Vote administration.">
+<meta property="og:url" content="https://docs.oasis-open.org/TChandbook/Reference/Voting.html">
+<meta property="og:image" content="https://docs.oasis-open.org/TChandbook/assets/oasis-logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/handbook.css?v=8e22b804">
+<link rel="icon" href="../assets/oasis-logo.png">
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="brand" href="../TChandbookIndex.html">
+      <img src="../assets/oasis-logo.png" alt="OASIS Open">
+      <span class="brand__pipe"></span>
+      <span class="brand__title">TC Handbook</span>
+    </a>
+    <nav class="masthead__nav">
+      <a href="../TChandbookIndex.html">Handbook</a>
+      <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process</a>
+      <a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives</a>
+      <a href="https://www.oasis-open.org/member-resources/">Member Resources</a>
+      <a href="https://www.oasis-open.org/">OASIS-Open.org</a>
+    </nav>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" aria-label="Handbook sections">
+    <div class="sidebar__group">
+<div class="sidebar__title">Getting started</div>
+<a href="../TChandbookIndex.html">Welcome</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">How do I…?</div>
+<a href="../Tasks/GainVotingRights.html">Gain voting rights</a>
+<a href="../Tasks/LoseVotingRights.html">Lose / regain voting rights</a>
+<a href="../Tasks/PersistentNonVoting.html">Become Persistent Non-Voting</a>
+<a href="../Tasks/ObserverToMember.html">Observer → Member</a>
+<a href="../Tasks/LeaveOfAbsence.html">Take a leave of absence</a>
+<a href="../Tasks/SendingEmail.html">Mailing lists &amp; email</a>
+<a href="../Tasks/UpdateWebPage.html">Update the TC web page</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Work product lifecycle</div>
+<a href="../Reference/WorkProductLifecycle.html">Lifecycle overview</a>
+<a href="../Reference/WorkingDrafts.html">Working Drafts</a>
+<a href="../Reference/CommitteeSpecDrafts.html">Committee Spec Drafts</a>
+<a href="../Reference/PublicReviews.html">Public Review</a>
+<a href="../Reference/CommitteeSpecs.html">Committee Specifications</a>
+<a href="../Reference/OASISStandard.html">OASIS Standard</a>
+<a href="../Reference/CommitteeNoteDrafts.html">Committee Note Drafts</a>
+<a href="../Reference/CommitteeNotes.html">Committee Notes</a>
+<a href="../Reference/TechnicalReports.html">Technical Reports</a>
+<a href="../Reference/Maintenance.html">Approved Errata</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quorum, voting &amp; meetings</div>
+<a href="../Reference/Voting.html" class="is-active" aria-current="page">Voting &amp; ballots</a>
+<a href="../Reference/Quorum.html">Quorum &amp; meetings</a>
+<a href="../Reference/TCLifecycle.html">Maintaining or closing a TC</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quality &amp; naming</div>
+<a href="../Reference/WPQualityRequirements.html">Work product requirements</a>
+<a href="../Reference/WPQualityChecklist.html">Quality checklist</a>
+<a href="../Reference/Naming.html">Naming &amp; URIs</a>
+<a href="../Reference/Conformance.html">Conformance clauses</a>
+<a href="../Reference/Templates.html">Templates</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Reference</div>
+<a href="../Concepts/Glossary.html">Glossary</a>
+<a href="../Reference/IPR.html">IPR policy</a>
+<a href="../Reference/GitHub.html">GitHub repositories</a>
+<a href="../Reference/Sources.html">Policy source registry</a>
+</div>
+  </aside>
+  <main class="content" id="content">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../TChandbookIndex.html">Handbook</a> <span>›</span> Reference <span>›</span> Voting &amp; ballots</nav>
+    <span class="badge">Reference · TC voting</span>
+<h1 class="page-title">Voting &amp; ballots</h1>
+<p class="lede">Most decisions a Technical Committee (TC) makes are settled by a vote. This page sets out the rules that govern <em>every</em> TC ballot: which majority is the default, who is entitled to vote, how electronic ballots are run, and how a Special Majority Vote is administered. The governing rules live in <strong><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></strong> and the <strong><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></strong>.</p>
+
+<h2>The default vote: Simple Majority Vote</h2>
+<p>Unless the TC Process specifies otherwise for a particular action, a TC vote passes by <strong>Simple Majority Vote</strong>. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></span></p>
+<p>A Simple Majority Vote is a vote in which the number of "yes" votes cast is greater than the number of "no" votes cast. <strong>Abstentions are not counted.</strong> <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></span></p>
+<p>Higher thresholds apply where the TC Process names them. The two that recur in the work-product lifecycle are the <strong>Full Majority Vote</strong> (more than 50% of all eligible voters vote "yes") and the <strong>Special Majority Vote</strong> (at least 2/3 vote "yes" and no more than 1/4 vote "no"). <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></span> The table below compares all three.</p>
+
+<h3>Vote types at a glance</h3>
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">Comparison of the three TC vote types and their passing thresholds</caption>
+  <thead>
+    <tr><th scope="col">Vote type</th><th scope="col">Passes when</th><th scope="col">Where defined</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Simple Majority Vote</th>
+      <td>More "yes" votes than "no" votes. Abstentions are not counted. This is the default for any action the TC Process does not assign a higher threshold.</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></span></td>
+    </tr>
+    <tr>
+      <th scope="row">Full Majority Vote</th>
+      <td><strong>More than 50% (more than half)</strong> of the eligible voters vote "yes", whether present or not. Abstentions are not counted.</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></span></td>
+    </tr>
+    <tr>
+      <th scope="row">Special Majority Vote</th>
+      <td><strong>At least 2/3 (two thirds)</strong> of the eligible voters vote "yes" <em>and</em> <strong>no more than 1/4 (one fourth)</strong> vote "no". These numbers are based on the total number of eligible voters. Abstentions are not counted.</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p style="font-size:13px;color:var(--muted)">Thresholds are counted against <strong>eligible voters</strong>, not against the number present. For the <strong>Full Majority Vote</strong>, a Voting Member who does not vote has the same effect as a "no", because the threshold (more than half of all eligible voters) is counted against the full roster. The <strong>Special Majority Vote</strong> works differently: it has two prongs (at least 2/3 of eligible voters must vote Yes <em>and</em> no more than 1/4 may vote No), so a non-vote is not equivalent to a No on the second prong, where only an actual No vote counts toward the 1/4 limit.</p>
+
+<h2>Who may vote</h2>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>Every Voting Member of a TC has a <strong>single vote</strong>. <strong>Organizations do not vote in TCs</strong>: voting is by the individual Voting Member, not by their company. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></span></p>
+</div>
+<ul>
+  <li><strong>Eligibility is fixed when the ballot opens.</strong> A Member of a TC must have voting rights <em>at the time a ballot is opened</em> in order to vote on that ballot. Gaining voting rights after the ballot opens does not let a Member vote on it. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></span></li>
+  <li><strong>No proxies.</strong> Proxies shall not be allowed in TC voting. A Voting Member cannot delegate or transfer their vote to anyone else. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></span></li>
+</ul>
+<p>For how voting rights are gained, lost, and regained, see <a href="../Tasks/GainVotingRights.html">Gain voting rights</a> and <a href="../Tasks/LoseVotingRights.html">Lose / regain voting rights</a>.</p>
+
+<h2>Electronic ballots</h2>
+<p>TCs may conduct electronic ballots. The rules differ depending on whether the ballot is held during a meeting or outside of one. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></span></p>
+
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">Rules for electronic ballots conducted during a meeting versus outside of a meeting</caption>
+  <thead>
+    <tr><th scope="col">Ballot setting</th><th scope="col">Mechanism</th><th scope="col">Minimum open period</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">During a meeting</th>
+      <td>Any tool available to the TC, including email. The results must be recorded in the minutes.</td>
+      <td><strong>No minimum</strong> open period applies to in-meeting electronic ballots.</td>
+    </tr>
+    <tr>
+      <th scope="row">Outside of a meeting</th>
+      <td>Either the TC's general mail list <em>or</em> the publicly archived electronic voting functionality provided by OASIS.</td>
+      <td>Must remain open for a <strong>minimum of 7 days</strong>.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p style="font-size:13px;color:var(--muted)">Source for both rows: <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></span>. The 7-day floor applies <strong>only</strong> to outside-of-meeting electronic ballots; in-meeting ballots carry no such minimum.</p>
+
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>Any <strong>Work Product Ballot</strong> conducted as an electronic ballot must permit each voter to choose <strong>"yes", "no", or "abstain"</strong>. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></span></p>
+</div>
+
+<h3>Changing a vote</h3>
+<p>While a ballot is open, eligible voters may <strong>change their vote up until the end of the voting period</strong>. Once the ballot closes, votes are final. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></span></p>
+
+<h2>Special Majority Vote administration</h2>
+<p>Some actions require a Special Majority Vote: approving a Committee Specification, submitting a Candidate OASIS Standard, and clarifying or rechartering a TC. Those ballots are not run by the TC itself.</p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>All TC ballots requiring a Special Majority Vote must be conducted <strong>by the TC Administrator</strong>. The <strong>TC Chair shall request</strong> that the TC Administrator hold the Special Majority Vote, and the <strong>TC Administrator shall set up and conduct the ballot</strong>. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">TC Process §1.11</a></span> <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></span></p>
+</div>
+<p>A Special Majority Vote is therefore conducted by the OASIS TC Administrator, with the thresholds counted against the total number of eligible voters as shown in the comparison table above. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></span></p>
+
+<footer class="provenance"><div class="provenance__label">Sources &amp; provenance</div>
+  <p>This page reflects the <strong><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a></strong> effective 1 December 2020 (<a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.11">§1.11</a>) and the <strong><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></strong> effective 1 December 2020 (Simple, Full, and Special Majority Vote definitions). Content last verified against these sources on <strong>4 June 2026</strong>. The governing rules are the OASIS policies themselves; see the <a href="../Reference/Sources.html">policy source registry</a>.</p>
+</footer>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div>OASIS TC Handbook · maintained by the OASIS Open staff. Questions: <a href="/cdn-cgi/l/email-protection#4b3f28662a2f2622250b242a38223866243b2e256524392c"><span class="__cf_email__" data-cfemail="acd8cf81cdc8c1c5c2ecc3cddfc5df81c3dcc9c282c3decb">[email&#160;protected]</span></a></div>
+    <div>The authoritative rules are the <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a> and related policies. This handbook is practical guidance, current as of 4 June 2026.</div>
+    <div class="site-footer__legal">Copyright © OASIS Open. All rights reserved. · <a href="https://www.oasis-open.org/policies-guidelines/">Policies &amp; Guidelines</a></div>
+  </div>
+</footer>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

@@ -200,3 +200,26 @@ def test_the_tc_guide_area_table_matches_the_registry():
 
 def test_the_area_totals_sum_to_the_registry():
     assert sum(_area_totals().values()) == TOTAL
+
+
+def test_the_class_table_covers_every_class_and_matches_the_registry():
+    """It was hand-maintained and covered 35 of 58 classes without saying so,
+    omitting six BLOCKER classes a first submission is most likely to trip on.
+    It is generated now; this is what keeps it generated."""
+    import re as _re
+    text = (REPO_ROOT / "pub-check" / "README.md").read_text(encoding="utf-8")
+    begin = text.index("<!-- BEGIN generated class table")
+    end = text.index("<!-- END generated class table")
+    rows = [ln for ln in text[begin:end].splitlines()
+            if ln.startswith("| ") and not ln.startswith("| Check") and not ln.startswith("|---")]
+    listed = {ln.split("|")[1].strip(): int(ln.split("|")[2]) for ln in rows}
+
+    from collections import Counter
+    counts = Counter(c["check"] for c in INVENTORY)
+    assert set(listed) == set(counts), (
+        f"class table and registry disagree; only in the table: "
+        f"{sorted(set(listed) - set(counts))}; missing from the table: "
+        f"{sorted(set(counts) - set(listed))}. Re-run pub-check/render_checks_md.py.")
+    wrong = {c: (listed[c], counts[c]) for c in counts if listed[c] != counts[c]}
+    assert not wrong, f"per-class condition counts disagree (table, registry): {wrong}"
+    assert sum(listed.values()) == TOTAL

@@ -1,0 +1,93 @@
+Committee Specifications | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Work product lifecycle › Committee Specifications
+Standards Track · approval milestone
+Committee Specifications
+A Committee Specification (CS) is the highest level of approval a Technical Committee can grant to its own work product. It requires a Special Majority Vote of the TC and may only be held after a successful public review in which all comments have been resolved .
+Common misconception
+After a TC approves CS01 (its first Committee Specification), the work product does not return to the Working Draft stage. To make substantive changes, the TC revises and re-approves at the CSD stage and runs a new public review; it does not drop back to a Working Draft.
+The Standards Track is forward-only and no step may be skipped TC Process §2.4.1 ; revision is done by re-approving a CSD any number of times TC Process §2.5 and re-running public review on that CSD TC Process §2.6 . The TC Process defines no path that returns an approved CS to Working Draft. TC Process §2.7
+What changed since the 2010 handbook
+Two important corrections from the old handbook:
+No CSPRD stage. The old handbook described a distinct "Committee Specification Public Review Draft (CSPRD)" stage and file-naming designation. That stage abbreviation was removed in Naming Directives v1.7 (effective 2 January 2024). A document sent to public review is still a Committee Specification Draft (CSD); no separate stage name or abbreviation is applied to the public-review copy.
+Statements of Use are NOT required here. The old handbook placed the three-Statements-of-Use requirement at the Committee Specification stage. Under the current TC Process, Statements of Use are required only when the TC submits a CS as a Candidate OASIS Standard ( TC Process §2.8.1 ). A CS may be approved by the TC without any Statements of Use.
+Where this sits in the lifecycle
+Committee Specification Draft csd Full Majority Vote
+The TC approves a Working Draft as a Committee Specification Draft by Full Majority Vote. TC Process §2.5
+Public Review of the CSD Full Majority Vote to open
+The TC opens a public review by Full Majority Vote. The first public review must run for at least 30 days ; any subsequent public review of the same work product must run for at least 15 days . All comments received are formally tracked and must be resolved. TC Process §2.6
+Committee Specification cs Special Majority Vote
+The TC approves the CS by Special Majority Vote, only after a successful public review and resolution of all comments. TC Process §2.7
+Candidate OASIS Standard (optional next step) Special Majority Vote
+If the TC later seeks to elevate the CS to an OASIS Standard, it submits the CS as a Candidate by Special Majority Vote; at that point three Statements of Use are required. TC Process §2.8.1
+The approval vote
+Policy requirement
+A Committee Specification may be approved only after all of the following preconditions are satisfied:
+A public review has been conducted and has closed successfully.
+All comments received during the public review have been resolved to the TC's satisfaction.
+The TC holds a Special Majority Vote conducted by electronic ballot by the TC Administrator. TC Process §2.7
+Special Majority Vote: what the threshold means
+A Special Majority Vote passes only when at least 2/3 of eligible Voting Members vote Yes AND no more than 1/4 vote No . Abstentions and non-votes are not counted as Yes or No but they are included in the fixed denominator: the "eligible voters" figure is the total roster of Voting Members, whether they participate or not. The vote is always conducted by electronic ballot administered by the TC Administrator; it cannot be taken in a meeting by a show of hands. Defined Terms: Special Majority Vote
+Resolving all comments before the ballot
+The TC Process requires that all comments from the public review be resolved before the CS approval ballot opens. TC Process §2.7 In practice, the TC Chair and editor maintain a Comment Resolution Log documenting the disposition of every comment (accepted, rejected with rationale, or incorporated). The ballot announcement should reference this log.
+Statements of Use: do not confuse the stages
+Policy requirement
+Three Statements of Use (at least one from an OASIS Organizational Member) are required when the TC submits a Committee Specification as a Candidate OASIS Standard . TC Process §2.8.1 They are not a precondition for approving a Committee Specification itself.
+A TC may approve a Committee Specification without any Statements of Use. Gathering Statements of Use is a separate activity that the TC pursues if it intends to advance the CS toward an OASIS Standard; the requirement applies at the COS submission ballot, not at the CS approval ballot.
+Naming and URIs after approval
+Once approved, the work product carries the stage abbreviation cs followed by a revision number: for example, myspec-v1.0-cs01.html . Naming Directives v1.7
+The abbreviation csprd is obsolete and must not be used . It was removed in Naming Directives v1.7 (effective 2 January 2024). A document undergoing public review is still named as a CSD (e.g., csd02 ).
+A CS may be approved at revision 01 (first CS) or higher if the TC voted to re-approve after substantive changes. Each re-approval requires a new Special Majority Vote ballot.
+Published resources in the OASIS Library must not be deleted or altered after publication; only "latest stage" aliases may be updated. Naming Directives v1.7
+What comes next
+Once a CS is approved, the TC has three options:
+Stop here. Many specifications are published as Committee Specifications and remain at that level permanently. A CS is a complete, published, citable OASIS work product.
+Advance to OASIS Standard. The TC may vote (by Special Majority Vote) to submit the CS as a Candidate OASIS Standard, triggering the 60-day public review and Call for Consent process. See Approving an OASIS Standard .
+Revise and re-approve. If substantive changes are required, the TC re-approves the revision at the CSD stage (not by reverting to a Working Draft), conducts a new (or additional) public review, and holds a new Special Majority Vote. TC Process §2.5
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §2.6 and §2.7 ), the OASIS Defined Terms effective 1 December 2020 (Special Majority Vote definition), and Naming Directives v1.7 (2 January 2024). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

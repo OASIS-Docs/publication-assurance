@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorum &amp; meetings | OASIS TC Handbook</title>
+<meta name="description" content="What Quorum is, what a non-quorate Technical Committee meeting may and may not do, the minutes and attendance rules, how Persistent Non-Voting Members affect Quorum, and how meeting attendance drives voting rights.">
+<link rel="canonical" href="https://docs.oasis-open.org/TChandbook/Reference/Quorum.html">
+<meta property="og:site_name" content="OASIS TC Handbook">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Quorum &amp; meetings">
+<meta property="og:description" content="What Quorum is, what a non-quorate Technical Committee meeting may and may not do, the minutes and attendance rules, how Persistent Non-Voting Members affect Quorum, and how meeting attendance drives voting rights.">
+<meta property="og:url" content="https://docs.oasis-open.org/TChandbook/Reference/Quorum.html">
+<meta property="og:image" content="https://docs.oasis-open.org/TChandbook/assets/oasis-logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/handbook.css?v=8e22b804">
+<link rel="icon" href="../assets/oasis-logo.png">
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="brand" href="../TChandbookIndex.html">
+      <img src="../assets/oasis-logo.png" alt="OASIS Open">
+      <span class="brand__pipe"></span>
+      <span class="brand__title">TC Handbook</span>
+    </a>
+    <nav class="masthead__nav">
+      <a href="../TChandbookIndex.html">Handbook</a>
+      <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process</a>
+      <a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives</a>
+      <a href="https://www.oasis-open.org/member-resources/">Member Resources</a>
+      <a href="https://www.oasis-open.org/">OASIS-Open.org</a>
+    </nav>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" aria-label="Handbook sections">
+    <div class="sidebar__group">
+<div class="sidebar__title">Getting started</div>
+<a href="../TChandbookIndex.html">Welcome</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">How do I…?</div>
+<a href="../Tasks/GainVotingRights.html">Gain voting rights</a>
+<a href="../Tasks/LoseVotingRights.html">Lose / regain voting rights</a>
+<a href="../Tasks/PersistentNonVoting.html">Become Persistent Non-Voting</a>
+<a href="../Tasks/ObserverToMember.html">Observer → Member</a>
+<a href="../Tasks/LeaveOfAbsence.html">Take a leave of absence</a>
+<a href="../Tasks/SendingEmail.html">Mailing lists &amp; email</a>
+<a href="../Tasks/UpdateWebPage.html">Update the TC web page</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Work product lifecycle</div>
+<a href="../Reference/WorkProductLifecycle.html">Lifecycle overview</a>
+<a href="../Reference/WorkingDrafts.html">Working Drafts</a>
+<a href="../Reference/CommitteeSpecDrafts.html">Committee Spec Drafts</a>
+<a href="../Reference/PublicReviews.html">Public Review</a>
+<a href="../Reference/CommitteeSpecs.html">Committee Specifications</a>
+<a href="../Reference/OASISStandard.html">OASIS Standard</a>
+<a href="../Reference/CommitteeNoteDrafts.html">Committee Note Drafts</a>
+<a href="../Reference/CommitteeNotes.html">Committee Notes</a>
+<a href="../Reference/TechnicalReports.html">Technical Reports</a>
+<a href="../Reference/Maintenance.html">Approved Errata</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quorum, voting &amp; meetings</div>
+<a href="../Reference/Voting.html">Voting &amp; ballots</a>
+<a href="../Reference/Quorum.html" class="is-active" aria-current="page">Quorum &amp; meetings</a>
+<a href="../Reference/TCLifecycle.html">Maintaining or closing a TC</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quality &amp; naming</div>
+<a href="../Reference/WPQualityRequirements.html">Work product requirements</a>
+<a href="../Reference/WPQualityChecklist.html">Quality checklist</a>
+<a href="../Reference/Naming.html">Naming &amp; URIs</a>
+<a href="../Reference/Conformance.html">Conformance clauses</a>
+<a href="../Reference/Templates.html">Templates</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Reference</div>
+<a href="../Concepts/Glossary.html">Glossary</a>
+<a href="../Reference/IPR.html">IPR policy</a>
+<a href="../Reference/GitHub.html">GitHub repositories</a>
+<a href="../Reference/Sources.html">Policy source registry</a>
+</div>
+  </aside>
+  <main class="content" id="content">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../TChandbookIndex.html">Handbook</a> <span>›</span> Quorum, voting &amp; meetings <span>›</span> Quorum &amp; meetings</nav>
+    <span class="badge badge--track">Committee operations</span>
+<h1 class="page-title">Quorum &amp; meetings</h1>
+<p class="lede">Quorum is the number of Voting Members who must be present in a Technical Committee (TC) meeting before the committee can make decisions. A meeting can still happen without it, but only certain things are allowed. This page sets out the Quorum threshold, what a non-quorate meeting may do, the minutes and attendance rules, and how attendance feeds back into who holds voting rights.</p>
+
+<div class="callout callout--change">
+  <div class="callout__label">What changed since the 2010 handbook</div>
+  <p>The 2010 handbook covered this only indirectly, through a single "Frequent Absences and Quorum" how-to that told members to switch to <strong>Persistent Non-Voting Member</strong> status so erratic attendance would not affect Quorum. That advice is still valid, but the underlying rules are now stated explicitly in policy: the <strong><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process</a></strong> (effective 22 August 2024) sets out what a non-quorate meeting may do and the requirement to record individual attendance in the minutes.</p>
+</div>
+
+<h2>What Quorum means</h2>
+<p>Quorum is the number of Voting Members who must be <strong>present</strong> in a meeting so that Resolutions and decisions may be made. The Quorum for an OASIS committee meeting is <strong>a simple majority (more than half) of the Voting Members</strong>. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms (Quorum)</a></span></p>
+<p>A meeting at which Quorum is present is a <strong>Quorate Meeting</strong>. Quorum is calculated against the count of Voting Members only; non-voting Members and the public are not part of the calculation. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms (Quorum)</a></span></p>
+
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>Quorum is <strong>more than half</strong> of the Voting Members, not "half" and not "at least half." A committee of 9 Voting Members reaches Quorum with <strong>5</strong> present; a committee of 10 needs <strong>6</strong>. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms (Quorum)</a></span></p>
+</div>
+
+<h2>What a non-quorate meeting may do</h2>
+<p>A meeting can still take place when Quorum is not reached, but its powers are limited. Without a Quorum present, <strong>discussions may take place</strong> at a meeting but <strong>no Resolutions may be approved</strong>. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">Committee Operations Process §1.7</a></span></p>
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">What a Technical Committee meeting may and may not do depending on whether Quorum is present</caption>
+  <thead>
+    <tr><th scope="col">Activity</th><th scope="col">Quorate Meeting</th><th scope="col">Non-quorate meeting</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Hold discussion</th>
+      <td>Yes</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <th scope="row">Approve a Resolution / make a decision</th>
+      <td>Yes</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <th scope="row">Count toward attendance for voting-rights tracking</th>
+      <td>Yes: attendance is recorded in the minutes</td>
+      <td>Yes: attendance is recorded in the minutes</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p style="font-size:13px;color:var(--muted)">Source for the non-quorate limit: <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">Committee Operations Process §1.7</a></span>. The attendance-recording requirement is below.</p>
+
+<h2>Minutes and attendance</h2>
+<p>Two separate rules govern the written record of a meeting.</p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p><strong>Individual attendance must be recorded in the meeting minutes.</strong> <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">Committee Operations Process §1.7</a></span> Separately, the <strong>permanent minutes of each TC meeting, including a record of all decisions, shall be posted to the TC's general email list</strong>. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.7">TC Process §1.7</a></span></p>
+</div>
+<p>The attendance record is not just bookkeeping. Because voting rights are gained and lost by meeting attendance "as recorded in the minutes," the minutes are the authoritative record that determines who is a Voting Member at any given time. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">TC Process §1.4.4</a></span></p>
+
+<h2>Persistent Non-Voting Members and Quorum</h2>
+<p>A Member or Voting Member who wants to keep participating but not be counted for Quorum can change role to <strong>Persistent Non-Voting Member</strong>. A Persistent Non-Voting Member retains participation rights but <strong>is not eligible to vote and does not count towards Quorum</strong>, and does not make or second motions. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">TC Process §1.4.3</a></span></p>
+<p>The change is self-declared: send e-mail to <strong>both the Chair and the TC mailing list</strong> informing them of the change. It takes effect on the date of the notice or a future date stated in the e-mail (it cannot be retroactive). <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">TC Process §1.4.3</a></span></p>
+<div class="callout callout--practice">
+  <div class="callout__label">OASIS staff practice</div>
+  <p>This is the practical fix for erratic attendance. Removing yourself from the Quorum count means the committee does not lose its ability to make Resolutions on days you cannot attend, and you stop bouncing between Voting Member and Member as you miss and re-attend meetings. To return, e-mail the Chair and the TC list of your intent to become a Voting Member again, then follow the regain procedure in <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">TC Process §1.4.4</a></span> as if you had lost voting rights through non-attendance.</p>
+</div>
+
+<h2>How attendance drives voting rights</h2>
+<p>Meeting attendance, captured in the minutes, is what gains and loses voting rights. This is the chain that makes Quorum and attendance matter beyond a single meeting.</p>
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">How meeting attendance changes a member's voting status</caption>
+  <thead>
+    <tr><th scope="col">Event</th><th scope="col">Effect on voting rights</th><th scope="col">Source</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Attend two consecutive Meetings</th>
+      <td>A Member who lacks voting rights <strong>gains</strong> them at the close of the second consecutive Meeting attended. If fewer than two Meetings are called within 60 days of joining, rights are gained at the close of the 60th day, provided the Member attended any meeting in that window.</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">TC Process §1.4.4</a></span></td>
+    </tr>
+    <tr>
+      <th scope="row">Absent from two consecutive Meetings</th>
+      <td>A Voting Member who is absent from two consecutive Meetings (as recorded in the minutes) <strong>loses</strong> voting rights at the end of the second Meeting missed. There is no warning step.</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">TC Process §1.4.4</a></span></td>
+    </tr>
+    <tr>
+      <th scope="row">Regaining lost rights</th>
+      <td>A Member who lost voting rights may regain them by (a) declaring to the Chair their desire to regain voting rights and then (b) requesting the Chair make them a Voting Member at or after the close of the 60th day from that declaration.</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">TC Process §1.4.4</a></span></td>
+    </tr>
+    <tr>
+      <th scope="row">Leave of Absence</th>
+      <td>A Voting Member may request <strong>one</strong> Leave of Absence per calendar year, <strong>not to exceed 45 days</strong>, by e-mailing the TC mailing list before the Leave starts. During the Leave there are no voting rights or participation obligations; rights resume immediately when the Leave ends or upon any TC activity by the Member.</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.6">TC Process §1.6</a></span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p>Quorum is measured against the number of Voting Members, so these attendance rules also change the Quorum threshold itself: as members gain or lose voting rights, the "more than half" target moves with the size of the Voting Member roster. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms (Quorum)</a></span></p>
+
+<footer class="provenance"><div class="provenance__label">Sources &amp; provenance</div>
+  <p>This page reflects the <strong><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></strong> effective 1 December 2020 (Quorum, Quorate Meeting, Voting Member), the <strong><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process</a></strong> effective 22 August 2024 (<a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.7">§1.7</a> Meetings: the non-quorate limit and the attendance-in-minutes rule), and the <strong><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a></strong> effective 1 December 2020 (<a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">§1.4.3</a> Persistent Non-Voting Member, <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">§1.4.4</a> gaining and losing voting rights, <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.6">§1.6</a> Leave of Absence, <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.7">§1.7</a> posting permanent minutes). It modernizes the legacy "Frequent Absences and Quorum" page. Content last verified against these sources on <strong>4 June 2026</strong>. The governing rules are the OASIS policies themselves; see the <a href="../Reference/Sources.html">policy source registry</a>.</p>
+</footer>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div>OASIS TC Handbook · maintained by the OASIS Open staff. Questions: <a href="/cdn-cgi/l/email-protection#8afee9a7ebeee7e3e4cae5ebf9e3f9a7e5faefe4a4e5f8ed"><span class="__cf_email__" data-cfemail="2054430d41444d494e604f415349530d4f50454e0e4f5247">[email&#160;protected]</span></a></div>
+    <div>The authoritative rules are the <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a> and related policies. This handbook is practical guidance, current as of 4 June 2026.</div>
+    <div class="site-footer__legal">Copyright © OASIS Open. All rights reserved. · <a href="https://www.oasis-open.org/policies-guidelines/">Policies &amp; Guidelines</a></div>
+  </div>
+</footer>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

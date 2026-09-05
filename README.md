@@ -139,12 +139,19 @@ candidate whose blocker set TC Administration had already established by hand.
 
 ![How a criterion is sourced from policy](assets/authority.png?v=170)
 
-Every acceptance criterion cites the rule it enforces. 96 of the 170 checks
-trace to a verbatim clause in the governing corpus, 25 source pages snapshotted
-and hashed on 21 July 2026, of which 19 are cited; the rest are operational
-rules from correction rounds. The full
-criterion-to-clause map, with the exact quoted text and its source, is
-[`AUTHORITIES.md`](pub-check/AUTHORITIES.md).
+Every acceptance criterion cites the rule it enforces. 97 of the 170 checks
+trace to a verbatim clause in the governing corpus; the rest are operational
+rules from correction rounds. The full criterion-to-clause map, with the exact
+quoted text and its source, is [`AUTHORITIES.md`](pub-check/AUTHORITIES.md).
+
+**The evidence ships with it.** The corpus itself is
+[`pub-check/corpus/`](pub-check/corpus/): 25 source pages fetched on 21 July
+2026, each with its sha256 in `MANIFEST.json`, alongside the condition-to-criterion
+map (`crosswalk.json`) and the criteria (`criteria.yaml`). You do not have to
+take the catalog's word for any of it, and neither does CI:
+`tests/test_authorities.py` checks every digest against its file, every quote as
+a verbatim substring of the page it cites, and every crosswalk entry against the
+tool's own registry, on every run.
 
 ## Where the gate sits: validation and audit
 
@@ -195,7 +202,10 @@ publication-assurance/
 │   ├── AUTHORITIES.md               #   the criterion-to-clause map (verbatim OASIS policy)
 │   ├── render_checks_md.py          #   the generator (keeps CHECKS.md in sync)
 │   ├── manifest-schema.json         #   provenance manifest contract
-│   ├── authorities.yaml             #   the authority map as data (source of the 96 figure)
+│   ├── authorities.yaml             #   the authority map as data (source of the 97 figure)
+│   ├── crosswalk.json               #   condition -> acceptance criterion, both directions checked
+│   ├── criteria.yaml                #   the acceptance criteria themselves, with their quotes
+│   ├── corpus/                      #   the 25 snapshotted policy pages + MANIFEST.json (sha256)
 │   ├── render_summary.py            #   the Step Summary renderer the Action calls
 │   ├── rules/                       #   oasis.rules.yaml, the criteria as data for nide
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
@@ -209,10 +219,13 @@ publication-assurance/
 ├── tests/                           # The criteria's own regression suite (pytest)
 │   ├── conftest.py                  #   loads the checker by path, copies corpus fixtures
 │   ├── test_advertised_counts.py    #   the counts in the docs and diagrams vs the registry
+│   ├── test_authorities.py          #   corpus digests, verbatim quotes, crosswalk vs registry
 │   ├── test_cli_smoke.py            #   the CLI contract: exit codes, --json, --list-checks
 │   ├── test_delivery_items.py       #   delivery-item selection on a deployed tree
 │   ├── test_manifest_emitter.py     #   Work Product Manifest File emitter
 │   ├── test_markdown_renders.py     #   the shipped markdown renders as prose, not as HTML
+│   ├── test_output_is_deterministic.py #  the same package gives the same report every run
+│   ├── test_pdf_command.py          #   the wkhtmltopdf argument vector, token for token
 │   ├── test_stage_uri_live.py       #   the live-URI probe: what blocks, what stays INFO
 │   └── fixtures/                    #   hand-built defect trees (the corpus supplies the rest)
 ├── TRANSFORMS.md                    # The pipeline, command by command (canonical criteria)
@@ -238,12 +251,12 @@ regression net: a fixture per fixed defect, plus smoke coverage over the CLI
 contract that `gate.py`, the composite action and the publication runbook
 depend on.
 
-The checker itself is stdlib-only. `pytest` is the one development dependency
-and is not on the system Python, so use a venv:
+The checker itself is stdlib-only. The tests need three packages the checker
+does not, and none is on the system Python, so use a venv:
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install pytest
+pip install pytest beautifulsoup4 PyYAML   # bs4: the pipeline; PyYAML: the criteria
 pytest tests/ -v                                    # the full suite
 pytest tests/test_delivery_items.py -v              # one file
 pytest tests/test_delivery_items.py::test_index_html_is_never_selected_as_the_delivery_item

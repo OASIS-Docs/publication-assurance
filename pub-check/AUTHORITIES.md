@@ -7,11 +7,11 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-This catalog records, for the acceptance-criteria checks that trace to **written OASIS policy**, exactly which policy each one answers to: the governing document, the section, and the verbatim clause. Of the 170 individual check conditions, **96 are grounded in written policy** and appear below as 93 catalog entries: three check signatures each cover two conditions, the markdown-source and HTML-render forms of one rule. The remaining 74 are operational quality rules earned from a year of real publications, with no single written clause behind them, and are not listed here.
+This catalog records, for the acceptance-criteria checks that trace to **written OASIS policy**, exactly which policy each one answers to: the governing document, the section, and the verbatim clause. Of the 170 individual check conditions, **97 are grounded in written policy**, appearing below as 94 catalog entries because 3 check signatures each cover more than one condition (the markdown-source and HTML-render forms of one rule). The remaining 73 are operational quality rules earned from real publications, with no single written clause behind them; `crosswalk.json` lists them as such.
 
-Corpus snapshot **2026-07-21**: 25 source pages fetched, hashed and kept as text, 19 of which are cited below. Every quote is a verbatim substring of its snapshotted source. The corpus, its digests and the criterion-to-clause crosswalk are held by TC Administration and are not distributed with this repository; the machine-readable half of the map that is, is `authorities.yaml` beside this file. The crosswalk was last extended against that corpus on 27 July 2026, so a condition added to the registry after that date is ungrounded for want of a re-run rather than by any judgement about it. The governing documents are the OASIS TC Process, the Committee Operations Process, the Naming Directives v1.7, and the TC Handbook.
+**Everything this catalog rests on ships with it, so every quote below can be checked without trusting this file.** The snapshotted policy corpus is in `corpus/` (25 source pages fetched on 2026-07-21, each with its sha256 in `corpus/MANIFEST.json`), the condition-to-criterion map is `crosswalk.json`, and the criteria themselves are `criteria.yaml`. `tests/test_authorities.py` verifies all three on every CI run: every digest against the file it names, every quote as a verbatim substring of its source, and every crosswalk entry against the tool's own registry. The live documents at the URLs below remain authoritative; these are dated snapshots of them.
 
-The check name and signature match the tool's own catalog (`CHECKS.md`); the `AC-*` ids are the policy-derived acceptance criteria in TC Administration's `criteria.yaml`.
+The check name and signature match the tool's own catalog (`CHECKS.md`); the `AC-*` ids are the policy-derived acceptance criteria in `criteria.yaml`.
 
 ## artifact-naming
 
@@ -865,6 +865,23 @@ Acceptance criteria: AC-NAMING-02
 
 Acceptance criteria: AC-FRONTMATTER-04
 
+- **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Latest stage) (BLOCKER)
+  > This is the only URI that may be updated (overwritten) when a newer version is published.
+- **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Three required cover-page URIs (Policy requirement) (BLOCKER)
+  > Latest stage : an alias URI that always points to the most current publication of this work product, regardless of stage or revision. Unlike the "This stage" URI, the latest-stage alias is overwritten with each new publication (it is the only URI that may be updated after a document is published).
+- **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.2 Required Document URIs (BLOCKER)
+  > This locator URI does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename.
+
+## stage-uri-live
+
+### stage-uri-live: URI returns HTTP
+
+Acceptance criteria: AC-FRONTMATTER-03, AC-FRONTMATTER-04
+
+- **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Previous stage) (BLOCKER)
+  > The immediately preceding published instance of this Work Product (e.g., prior CSD revision or CS). Write "N/A" if this is the first published version.
+- **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.2 Required Document URIs (BLOCKER)
+  > If the current publication is the very first instance, the text "N/A" is used.
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Latest stage) (BLOCKER)
   > This is the only URI that may be updated (overwritten) when a newer version is published.
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Three required cover-page URIs (Policy requirement) (BLOCKER)
