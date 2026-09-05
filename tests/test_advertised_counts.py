@@ -99,7 +99,11 @@ def test_documentation_advertises_the_current_condition_count(rel):
     wrong = [n for n in _claims(text, CONDITION_CLAIMS) if n != TOTAL]
     assert not wrong, (
         f"{rel} advertises {sorted(set(wrong))} conditions; the tool runs {TOTAL}. "
-        f"Regenerate or correct it.")
+        f"Regenerate or correct it. If the number is a legitimate subset rather "
+        f"than a total (\"73 conditions are operational rules\"), rephrase so the "
+        f"figure is not immediately followed by the noun: the patterns cannot tell "
+        f"a subset from a stale total, and loosening them would let a stale total "
+        f"through.")
 
 
 @pytest.mark.parametrize("rel", DOCS)
