@@ -1,0 +1,204 @@
+OASIS Committee Operations Process - OASIS Open
+Skip to content
+Member and Community Login
+Member Login tips
+OASIS Open
+Menu
+About
+Careers
+Organization
+Members
+Board of Directors
+Board Annual Election and Special Election Process
+Board Committee Charters
+Board Meeting Minutes
+Staff
+Distinguished Contributors
+Open Projects Advisory Council
+Liaisons
+Policies & Guidelines
+Annual Reports
+Projects & Committees
+View All Projects & Committees
+Technical Committee Program
+Open Projects Program
+Managed Open Projects
+Technical Advisory Groups to ISO
+Standards
+View Standards & Releases
+Open Cup
+Get involved
+Get Involved
+Join a Technical Committee
+Join an Open Project
+News & Events
+News & Blogs
+Events Calendar
+Search
+Search OASIS Open site
+Cancel
+OASIS Committee Operations Process
+This version of the OASIS Committee Operations Process was approved by the OASIS Board of Directors on 22 August 2024 and became effective immediately. The change was announced to OASIS members here .
+Table of Contents
+1. Committees 1.1 Purpose of Committees 1.2 Committee Formation 1.3 Committee Membership and Participation 1.3.1 Technical Committees 1.3.2 Open Projects and Project Governing Board 1.3.3 Member Sections 1.4 Chairs 1.5 Committee Visibility and Transparency 1.5.1 Mail Lists 1.5.2 Web Pages 1.5.3 Announcements 1.6 Operations and Standing Rules 1.7 Meetings 1.8 Voting 1.9 Closing a Committee
+1. Committees
+1.1 Purpose of Committees
+Work at OASIS is done primarily through its committees. An OASIS committee is a group of Eligible Persons comprised of at least Minimum Membership , formed and conducted according to the provisions of this Committee Process, any other applicable policy document such as the OASIS TC Process for Technical Committees, the OASIS Open Project Rules , the OASIS Member Section Policy , or Roberts Rules of Order Newly Revised .
+Each current version of the OASIS Committee Process applies to previously established committees upon its adoption.
+Participation in the work of committees is open to any interested person subject to any specific requirements for the type of committee.
+Defined terms in this document have the meaning provided in OASIS Defined Terms . Other OASIS policies may also apply depending on the type of committee. The complete set of OASIS policy documents can be found at https://www.oasis-open.org/policies-guidelines .
+1.2 Committee Formation
+The detailed requirements for starting a committee vary depending on the type of committee. In general, however, beginning a committee requires:
+1.2.1 At least Minimum Membership of Eligible Persons committed to participating in the work,
+1.2.2 A charter or equivalent founding document submitted to OASIS describing what the committee intends to do and other conditions pertinent to its operation, and
+1.2.3 A sequence of steps followed by OASIS staff to publicize the committee, encourage others to join and participate, and set up its required infrastructure support.
+For the specific requirements to start an OASIS Technical Committee, see the OASIS TC Process Section 1.2 TC Formation . For the specific requirements to start an OASIS Open Project, see the OASIS Open Project Rules . For the specific requirements to start an OASIS Member Section, see section 4 Creating a Member Section in the Member Section Policy .
+1.3 Committee Membership and Participation
+The work of a committee is conducted by Members who voluntarily contribute in one or more defined roles. The rules for joining the committee, the specific activities members can perform, the commitments they make, and requirements they must fulfill in order to participate vary depending on the type of committee. The roles for each type of committee are summarized in this section.
+A committee Member is considered to have resigned from a committee upon sending notice of their resignation to the committees general email list. For some committees, formal resignation may have bearing upon ongoing commitments the member may have made upon joining the committee.
+Persons who lose Eligible Person status shall have their committee membership terminated. Persons who lose Eligible Person status for reasons including, but not limited to, change of employment shall have up to 14 days of membership as an OASIS Individual Member in which to re-establish eligibility and continue participating in the committee. A Member shall lose membership on the 15th day after losing Eligible Person status if it is not re-established.
+Termination of membership in an OASIS committee shall automatically end all rights and privileges of participation including any voting rights in that committee.
+1.3.1 Technical Committees
+Membership, participation requirements, voting rights and other aspects of participating in an OASIS Technical Committee (TC) are explained in the OASIS TC Process beginning at section Section 1.4 TC Membership and Participation .
+TCs operate with four types of role: Observer , Member , Voting Member , or Persistent Non-Voting Members . The following table summarizes these roles.
+Observer
+Member
+Persistent Non-Voting Member
+Voting Member
+Can attend meetings YES YES YES YES Can participate in meetings NO YES YES YES Receives email from TC list YES YES YES YES Can send email to TC list NO YES YES YES Can contribute documents, etc. NO YES YES YES Can use JIRA, Wiki, etc. NO YES YES YES Can gain voting rights NO YES NO (must first become a Member) N/A Can lose voting rights NO NO NO YES Has voting rights NO NO NO YES Counts towards quorum NO NO NO YES Can make & second motions NO NO NO YES Is publicly listed on TC roster, minutes, etc NO YES YES YES Is obligated by TC IPR Mode NO YES YES YES
+1.3.2 Open Projects and Project Governing Board
+Membership, participation requirements, voting rights and other aspects of participating in an OASIS Open Project and its Project Governing Board (PGB) are explained in the OASIS Open Project Rules beginning at Section 4 Participants and Contributors .
+Open Projects operate with five types of role: Participant, Contributor, Maintainer, PGB Member, and Chair. The following table summarizes these roles (scroll inside table to see all columns).
+Participant
+Contributor
+Maintainer
+Technical Steering Committee (TSC)
+Project Governing Board (PGB)
+PGB Chair Functions           May provide comments and bug reports YES YES YES YES YES YES May submit pull requests NO YES YES YES YES YES Act on / authorize pull requests NO NO YES May direct Maintainer to do so for TSC repos May direct Maintainer to do so NO Appoint and supervise Maintainer(s) NO NO NO YES YES N/A Authorize creation of repositories NO NO NO YES (if authorized by Standing Rule per OP Rules Sec 8.1.) YES (if authorized by Standing Rule per OP Rules Sec 8.1.) N/A Directly create additional repositories NO NO YES (if authorized by Standing Rule per OP Rules Sec 8.1) YES (if authorized by Standing Rule per OP Rules Sec 8.1) YES N/A Select applicable licenses for repositories NO NO NO NO YES N/A Approve releases NO NO NO NO (but recommends approval to PGB) YES N/A Approve submissions of qualifying releases for Project Specification approvals NO NO NO YES N/A Approve external submissions of its OASIS Standards (if any) to de jure standards bodies NO NO NO NO (but recommends approval to PGB) YES N/A Elect PGB Chair NO NO NO NO YES N/A Elect TSC Chair NO NO NO YES (if allowed by Standing Rule) YES if not delegated to TSC by Standing Rule N/A Call and preside over any meetings NO NO NO NO NO YES Requirements           Must be Project Sponsor NO NO NO NO YES YES (rep or employee of Sponsor) Must sign Contributor License Agreement (CLA) NO YES YES YES YES YES
+1.3.3 Member Sections
+An OASIS Member Section is a group within the consortium that advances the interests of a specific community or technology. The rules governing the formation, structure, and activities of a Member Section are explained in the Member Section Policy .
+1.4 Chairs
+Each committee must have one or more Chairs. Only Members of the committee are eligible to be one of the Chairs. During the first meeting of the committee the members will elect either one Chair or two Chairs by a Full Majority Vote of the committee. If at any point the committee does not have at least one Chair then all activities, with the exception of selecting a new Chair, shall be suspended until a new Chair is elected. If a committee does not have a Chair for 120 days, the OASIS TC Administrator may close the committee.
+The responsibilities of a Chair are as described in Roberts Rules of Order Newly Revised save for any specific responsibilities detailed in OASIS policy and rules documents.
+The committee may elect additional Chair(s) by a Full Majority Vote. In the event that the Chair position is so shared, each Chair is equally responsible for the Chair duties and responsibilities. Throughout this Committee Process, whenever a notification to the Chair is required, it must be made to all Chairs.
+A committee Chair may be removed by action of the Board of Directors or at any time by a Special Majority Vote of the TC. A PGB Chair may be removed at any time by a Full Majority Vote of the PGB. In the event that a committee has more than one Chair, each Chair may be removed individually or all Chairs may be removed by a single action.
+A vacancy in chairing a committee shall be deemed to exist when (i) one or more of the Chairs has been removed, (ii) one or more of the Chairs has resigned the position, or (iii) one or more of the Chairs ceases to be a Member of the committee. Increasing the number of Chairs in a committee or deciding to backfill a vacant Chair position is at the sole discretion of the existing or remaining Chair(s).
+Every two years a Committee must re-appoint its Chair(s). A call for candidates must be requested through the committee’s general email list inviting all candidates to be posted to that list. Committee Members shall have 7 days after being notified to propose either themselves or someone else as a candidate. Individuals proposed by someone else shall have 3 additional days to accept the nomination. All Committee Members are eligible to apply including current and past Chairs; meaning there are no term limits. After the 7 to 10 day candidacy period, if seats are contested, a ballot must be run to select the Chair(s). Here is an example message that the existing Chair(s) could send to the TC.
+Per section 1.4 of the TC Process [1] we are required every two years or at the time of a charter verification to re-appoint our TC Chairs. The nomination period is now open and will close [DATE and TIME]. If you are going to nominate someone else, please check with them first to make sure they are able and willing to serve. If only [NUMBER OF EXISTING CHAIRS] names are submitted, then those individuals will become the TC Chair(s) starting on [DATE]. If more than [NUMBER OF EXISTING CHAIRS] names are submitted, the current Chairs will run a full majority ballot in the following weeks via the official OASIS voting system.
+[1] – https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/#chairs
+If no candidates come forward, the work of the Committee must stop until a Chair can be found.
+For TCs, the timing of the process to re-appoint Chairs should coincide with the TC Vitality check (Section 1.10 of the OASIS TC Process) such that every four years the TC Charter and its Chairs are reviewed.
+Any provisions in the rules and policies applicable to a specific type of committee (such as Leaves of Absence for TCs) shall apply to the Chair(s) of the committee in the same manner as they do to other committee Members.
+1.5 Committee Visibility and Transparency
+The official copies of all resources of a committee and any associated subcommittees, including web pages, documents, email lists and any other records of discussions, must be located only on facilities designated by OASIS. Committees may not conduct official business or technical discussions, store documents, or host web pages on servers or systems not designated by OASIS. All web pages, documents, ballot results and email archives of all committees and subcommittees shall be publicly visible.
+1.5.1 Mail Lists
+Each committee shall be provided upon formation with a general discussion email list and a means to collect public comments.
+All committee email lists shall be archived for the duration of the corporation, and all committee email archives shall be publicly visible.
+For committees that hold meetings, the minutes of each meeting including a record of all decisions made shall be posted to that committee’s general email list.
+The purpose of the committee’s public comment facility is to receive comments from the public. Comments shall be publicly archived.
+1.5.2 Web Pages
+OASIS shall provide each committee with a publicly accessible web page. The committee may keep the following information current on its web page: the committee name, charter, any standing rules and other adopted procedures, meeting schedules, anticipated deliverables and delivery dates, lists of members, the name and email address of the Chair or co-Chairs as well as other positions such as secretaries, editors, maintainers, etc., any subcommittees, links to the various works of the committee, and links to any IPR declarations made to the committee.
+1.5.3 Announcements
+OASIS shall maintain a publicly archived list for announcements from OASIS regarding its committees. Any Eligible Person shall be able to subscribe to this list. Every important change in committee status shall be posted to the announcement list. Such changes shall include but not be limited to: committee or project formation; committee charter revisions; start of public reviews; approval of work products such as Committee Specifications and Project Specifications; submission of specifications as a candidate for OASIS Standard ; and approval or rejection of a proposed OASIS Standard .
+1.6 Operations and Standing Rules
+Except where otherwise indicated by the rules and policies applicable to a specific type of committee, the operation of committees shall be governed by Robert’s Rules of Order Newly Revised, insofar as such rules are not inconsistent with or in conflict with this Committee Process, the OASIS Bylaws , other Board-approved policies, or with provisions of law. The duration of a committee shall be considered a single session. Formal actions of committees shall be governed by the same rules regardless of the language in which the work is taking place.
+Standing rules may be adopted, amended, or rescinded by Full Majority Vote of a committee regarding processes and operations over which it has authority. The committee may not adopt standing rules or other Resolutions related to IPR, quorum requirements, membership, voting, participation, or that otherwise conflict with or supersede any OASIS Board-approved policy. Standing rules, and any amendments to them, must be communicated to the OASIS TC Administrator or Open Project Administrator as applicable, who may rescind them if they are in conflict with OASIS policy, and, in order to be enforceable, must be posted conspicuously on the committee’s web page or official published governance information.
+1.7 Meetings
+Committee meetings must be properly called and scheduled in advance using the OASIS collaborative tools. Meetings scheduled or conducted in such a manner as to exclude the participation of any Member are subject to appeal. Meetings may be conducted face-to-face or via telephone conference or other electronic media that allow participation of all Members of the committee. In order to enable the openness of committee proceedings, meetings should be scheduled and conducted so as to permit the presence of as many participants as is logistically feasible. Meeting minutes must be recorded and posted to the committee’s general email list; minutes are not required to record discussions in detail, but should at a minimum note attendance and any actions taken.
+Individual attendance must be recorded in the meeting minutes. Without a Quorum present discussions may take place at a meeting but no Resolutions may be approved. If the committee operates according to Roberts Rules , then those present ata meeting without quorum may act as a “Committee of the Whole” as defined in Robert’s Rules of Order Newly Revised, and make a report to the entire committee. However, the foregoing rule does not prohibit the discussion of and initiation of calls for consensus addressed to committee members asynchronously. For committees that maintain voting rights, meetings without Quorum shall still count towards attendance for purposes of Members gaining, maintaining, or losing voting rights.
+1.8 Voting
+When a committee uses a vote as part of their Resolution or decision making process, all votes require a Simple Majority Vote to pass except as noted elsewhere in this document or in the rules applicable to the type of committee. Any votes requiring a Special Majority Vote for approval must be conducted by the OASIS TC Administrator .
+Some types of committees require members to obtain voting rights before being eligible to vote on ballots. The rules governing obtaining and maintaining voting rights are described in the relevant rules document for those types of committees. Committees may not adopt rules governing voting or voting rights or the rights of members that conflict with or supersede any OASIS Board-approved policy.
+For committees using voting rights, a Member must have voting rights at the time a ballot is opened in order to vote on that ballot. Proxies shall not be allowed in committee voting.
+Committees may conduct electronic ballots. An electronic ballot may be conducted during a meeting using any tool available to the TC including email and the results must be recorded in the minutes. Electronic ballots outside of a meeting shall be made either by using the committee’s general mail list or the publicly archived electronic voting functionality provided by OASIS and must remain open for a minimum of 7 days. Eligible voters must be able to change their vote up until the end of the voting period.
+1.9 Closing a Committee
+Unless otherwise provided in the rules and policies applicable to a specific type of committee, a committee may be closed by Full Majority Vote of that committee, by Resolution of the OASIS Board of Directors, or by the OASIS TC Administrator , OP Administrator , or Member Section Administrator as applicable.
+The relevant Administrator may close a committee that is unable to fill its Chair position for 120 days.
+Unless otherwise provided in the rules and policies applicable to a specific type of committee, the relevant Administrator may close a committee whose membership falls below the Minimum Membership necessary or that fails to show activity or progress towards achieving its purpose for an extended period of time.
+Historical revisions of this policy
+Approved 06/14/2022
+OASIS Committee Operations Process
+Approved 07/22/2020
+OASIS Committee Operations Process (22 July 2020)
+Approved 05/22/2018
+OASIS Committee Operations Process (22 May 2018)
+Approved 11/03/2017
+OASIS Committee Operations Process (03 Nov. 2017)
+The work of OASIS is supported by organizations from around the world. Members include:
+View all our members
+About
+Careers
+Organization
+Members
+Board of Directors
+Staff
+Distinguished Contributors
+Open Projects Advisory Council
+Liaisons
+Policies & Guidelines
+Annual Reports
+Projects & Committees
+View All Projects & Committees
+Technical Committee Program
+Open Projects Program
+Technical Advisory Groups to ISO
+Standards
+View Standards & Releases
+Open Cup
+Get involved
+Get Involved
+Join a Technical Committee
+Join an Open Project
+News & Events
+News & Blogs
+Events Calendar
+Useful links
+Member Resources
+Order OASIS Gear
+Browse the archive
+Contact us
+Like us on Facebook
+Follow us on Twitter
+Connect with us on LinkedIn
+Follow us on Youtube
+Copyright © 2024 OASIS®. All Rights Reserved. OASIS trademark, licensing,  privacy  and  other policies  apply.
+The advent of online banking didn’t just make financial transactions easier and more convenient for people everywhere. More importantly, it helped democratize the international banking system, ensuring that more people in more place had virtually instant access to banking services. This, in turn, has supported wealth creation, creating a more equitable world.
+Online banking was made possible thanks to the SAML and SSO open standards developed by OASIS Open. A complex system like international online banking – involving a multiplicity of stakeholders, regulations, digital interfaces and security – requires the fair, transparent standards developed by not-for-profit organizations like ours.
+Creating standards for foundational systems that radically improve our world like these is OASIS Open’s proud heritage, and our continuing mission today and tomorrow.
+×
+In the past, sudden tsunamis, tornadoes and flash floods took communities by surprise – resulting in devastating cost to human life, and destruction to property and infrastructure. Today, communities everywhere are able to mitigate the destruction caused by natural disasters, thanks to early warning systems made possible by OASIS Open. Disseminated simultaneously over multiple communication outlets, these alerts warn communities of impending danger. So people have time to react, and get out of harm’s way.
+Systems like these are enabled thanks to the open software and standards Open Oasis makes possible. Partnering with government, community and private industry players, OASIS Open helps to foster a common language and means of operation that allows such transformational systems to be put into place.
+These complex and valuable infrastructures – over multiple channels and geographies – would simply not function without the work of organizations like OASIS Open.
+The fair, transparent development of open standards and software is transforming the world, for the better. As one of the most respected, non-profit standards bodies in the world, we are a cornerstone in the development and implementation of social innovations like the early warning systems for tsunamis, floods and tornadoes that save lives and communities.
+×
+Secure Quick Response (QR) codes have become ubiquitous. By simply pointing our smartphones, we are able to safely gather information quickly and seamlessly. QR Codes themselves are easily available, ensuring a true democratization of efficiency. Today QR Codes have become an $8.7 billion industry – and none of it would have happened without the work of OASIS Open.
+OASIS Open is an established non-profit organization where individuals, organizations and governments come together to solve some of the world’s biggest technical challenges through the development of open code and open standards. QR codes are only one of these open, fair, and transparent standards, which are transforming our world in a positive way, every day.
+×
+Our digital ecosystem is one of the greatest tools ever devised by humankind.
+However, the presence of online predators presents a continuing challenge to parents and children everywhere. Preventing online exploitation and the sexual abuse of children all over the world is a serious challenge – and one that can be overcome thanks to the work of OASIS Open.
+The Virtual Global Taskforce (VGT) has recommended the worldwide adoption of the OData standard developed by OASIS Open to enable much-needed compatibility among international law inforcement tools that help manage illicit images and video regardless of vendor. The result is an online environment in which young surfers are less likely to be exposed to inappropriate content.
+Complex and valuable infrastructures like the Internet, which function over multiple channels and geographies require the standard-setting work of organizations like OASIS Open, so that the tools we develop truly result in improvements – rather than increased danger – for all.
+×
+Information belongs to all of us. Indeed, access to information is seen as a necessity for effective participation in public life. OASIS Open makes that access possible.
+The SAML standard developed by OASIS Open allows access to information to be enjoyed by all in Europe, where all citizens are legally entitled to it. As this complex web of information is gathered and stored by a multiplicity of players over a wide variety of channels in the private and public spheres, its management would simply not be possible without the standards set by organizations like ours.
+As one of the most respected, non-profit standards bodies in the world, we can be counted on to develop far-reaching solutions that allow access to information to be an everyday reality.
+×
+E-invoicing has changed the way the world does business, creating a global $11 billion market that has benefited the environment by signficantly reducing waste. It is now used in over 190 countries the world over – and it was made possible thanks to the UBL standard developed by OASIS Open.
+UBL is just one of the open, fair, and transparent standards developed by our not-for-profit organization. Every day we create protocols and software that allow complex systems to be integrated across multiple geographies and a complex web of regulations and private and public stakeholders.
+So that, among other things, we can grow business, greener.
+×
+During the darkest days of the COVID-19 pandemic, time was of the essence in treating those hit hardest by the virus. Pin-pointing hospital bed availability within hours was a matter of life and death – and it was made possible thanks to the Florida Emergency Support System (ESS) developed with OASIS Open.
+Work on the ESS began in 2017, when a number of nursing home residents died during power outages caused b Hurricane Irma. An application called RESTier was developed, powered by OData, to help collect vital information about healthcare facilities. This data was integrated into the ESS, which was activated for 24 months straight, handling tens of millions of records without a single documented outage.
+Partnering with government, community and private industry players. OASIS Open helps to foster a common language and means of operation that allows transformational systems like the ESS to be put into place.
+Every day, the world is being transformed for the better thanks to the fair, transparent open standards and software fostered by OASIS Open.
+×
+Protecting and enhancing biodiversity is key to creating a future in which our planet and everything living on it thrive. A crucial first step in realizing that goal is collecting and managing a potentially-bewildering and constantly evolving set of data from various sources.
+That step is made possible by the OData standard developed by OASIS Open. This open interface allows organizations and individuals to directly integrate biodiversity data into their software systems. It was adapted early in its development and implementation by the NSW Office of the Environment to follow, store and make available over 7 million species sightings to track biodiversity over their Open Data Bionet Web Services. With this data on hand, the NSW’s Office of Environment and Heritage was able to improve it environmental decision-making and engagement with our natural ecosystem.
+Today the NSW can constantly improve its environmental decision making by continually integrating up-to-date, consistent and reliable biodiversity data. And, in so doing, protect our precious natural heritage.
+Cases like these demonstrate how transformational, positive change is being enabled by the work of OASIS Open.
+×
+Since the Amber Alert Emergency response system was established in 1996, 1,127 children abducted around the world have been successfully recovered. Amber Alerts are broadcast simultaneiously over television and radio stations, text messages, e-mail, electronic traffic-condition signs, commercial bill-boards, and more.
+The operations of this complex and valuable system – over multiple channels and geographies – would not have been possible without the standards developed and put into place by OASIS Open.
+As one of the most respected, non-profit standards bodies in the world, we offer partners the ability to develop and implement social innovations like the Amber Alert system that transform society for the betterment of all.
+We do it by fostering and enabling the fair, transparent development of open software and standards, through the power of global collaboration and community. The result: foundational changes that make a lasting impact on human lives.
+×

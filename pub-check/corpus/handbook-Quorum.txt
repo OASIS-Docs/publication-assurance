@@ -1,0 +1,101 @@
+Quorum & meetings | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Quorum, voting & meetings › Quorum & meetings
+Committee operations
+Quorum & meetings
+Quorum is the number of Voting Members who must be present in a Technical Committee (TC) meeting before the committee can make decisions. A meeting can still happen without it, but only certain things are allowed. This page sets out the Quorum threshold, what a non-quorate meeting may do, the minutes and attendance rules, and how attendance feeds back into who holds voting rights.
+What changed since the 2010 handbook
+The 2010 handbook covered this only indirectly, through a single "Frequent Absences and Quorum" how-to that told members to switch to Persistent Non-Voting Member status so erratic attendance would not affect Quorum. That advice is still valid, but the underlying rules are now stated explicitly in policy: the OASIS Committee Operations Process (effective 22 August 2024) sets out what a non-quorate meeting may do and the requirement to record individual attendance in the minutes.
+What Quorum means
+Quorum is the number of Voting Members who must be present in a meeting so that Resolutions and decisions may be made. The Quorum for an OASIS committee meeting is a simple majority (more than half) of the Voting Members . OASIS Defined Terms (Quorum)
+A meeting at which Quorum is present is a Quorate Meeting . Quorum is calculated against the count of Voting Members only; non-voting Members and the public are not part of the calculation. OASIS Defined Terms (Quorum)
+Policy requirement
+Quorum is more than half of the Voting Members, not "half" and not "at least half." A committee of 9 Voting Members reaches Quorum with 5 present; a committee of 10 needs 6 . OASIS Defined Terms (Quorum)
+What a non-quorate meeting may do
+A meeting can still take place when Quorum is not reached, but its powers are limited. Without a Quorum present, discussions may take place at a meeting but no Resolutions may be approved . Committee Operations Process §1.7
+What a Technical Committee meeting may and may not do depending on whether Quorum is present
+Activity Quorate Meeting Non-quorate meeting
+Hold discussion
+Yes
+Yes
+Approve a Resolution / make a decision
+Yes
+No
+Count toward attendance for voting-rights tracking
+Yes: attendance is recorded in the minutes
+Yes: attendance is recorded in the minutes
+Source for the non-quorate limit: Committee Operations Process §1.7 . The attendance-recording requirement is below.
+Minutes and attendance
+Two separate rules govern the written record of a meeting.
+Policy requirement
+Individual attendance must be recorded in the meeting minutes. Committee Operations Process §1.7 Separately, the permanent minutes of each TC meeting, including a record of all decisions, shall be posted to the TC's general email list . TC Process §1.7
+The attendance record is not just bookkeeping. Because voting rights are gained and lost by meeting attendance "as recorded in the minutes," the minutes are the authoritative record that determines who is a Voting Member at any given time. TC Process §1.4.4
+Persistent Non-Voting Members and Quorum
+A Member or Voting Member who wants to keep participating but not be counted for Quorum can change role to Persistent Non-Voting Member . A Persistent Non-Voting Member retains participation rights but is not eligible to vote and does not count towards Quorum , and does not make or second motions. TC Process §1.4.3
+The change is self-declared: send e-mail to both the Chair and the TC mailing list informing them of the change. It takes effect on the date of the notice or a future date stated in the e-mail (it cannot be retroactive). TC Process §1.4.3
+OASIS staff practice
+This is the practical fix for erratic attendance. Removing yourself from the Quorum count means the committee does not lose its ability to make Resolutions on days you cannot attend, and you stop bouncing between Voting Member and Member as you miss and re-attend meetings. To return, e-mail the Chair and the TC list of your intent to become a Voting Member again, then follow the regain procedure in TC Process §1.4.4 as if you had lost voting rights through non-attendance.
+How attendance drives voting rights
+Meeting attendance, captured in the minutes, is what gains and loses voting rights. This is the chain that makes Quorum and attendance matter beyond a single meeting.
+How meeting attendance changes a member's voting status
+Event Effect on voting rights Source
+Attend two consecutive Meetings
+A Member who lacks voting rights gains them at the close of the second consecutive Meeting attended. If fewer than two Meetings are called within 60 days of joining, rights are gained at the close of the 60th day, provided the Member attended any meeting in that window.
+TC Process §1.4.4
+Absent from two consecutive Meetings
+A Voting Member who is absent from two consecutive Meetings (as recorded in the minutes) loses voting rights at the end of the second Meeting missed. There is no warning step.
+TC Process §1.4.4
+Regaining lost rights
+A Member who lost voting rights may regain them by (a) declaring to the Chair their desire to regain voting rights and then (b) requesting the Chair make them a Voting Member at or after the close of the 60th day from that declaration.
+TC Process §1.4.4
+Leave of Absence
+A Voting Member may request one Leave of Absence per calendar year, not to exceed 45 days , by e-mailing the TC mailing list before the Leave starts. During the Leave there are no voting rights or participation obligations; rights resume immediately when the Leave ends or upon any TC activity by the Member.
+TC Process §1.6
+Quorum is measured against the number of Voting Members, so these attendance rules also change the Quorum threshold itself: as members gain or lose voting rights, the "more than half" target moves with the size of the Voting Member roster. OASIS Defined Terms (Quorum)
+Sources & provenance
+This page reflects the OASIS Defined Terms effective 1 December 2020 (Quorum, Quorate Meeting, Voting Member), the OASIS Committee Operations Process effective 22 August 2024 ( §1.7 Meetings: the non-quorate limit and the attendance-in-minutes rule), and the OASIS TC Process effective 1 December 2020 ( §1.4.3 Persistent Non-Voting Member, §1.4.4 gaining and losing voting rights, §1.6 Leave of Absence, §1.7 posting permanent minutes). It modernizes the legacy "Frequent Absences and Quorum" page. Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

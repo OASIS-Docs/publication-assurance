@@ -114,6 +114,14 @@ and what it compares that value against, is
 tool's own condition registry, and `--list-checks` reports the counts from
 the code.
 
+97 of the 170 conditions trace to a verbatim clause of written OASIS policy.
+[`pub-check/AUTHORITIES.md`](pub-check/AUTHORITIES.md) gives the clause for
+each, and the corpus those clauses were quoted from ships beside it in
+[`pub-check/corpus/`](pub-check/corpus/), hashed, so your TC can check any of
+them. The other 73 are operational rules from correction rounds, with no
+single written clause behind them; `pub-check/crosswalk.json` says which are
+which.
+
 The bar is the output, whatever your TC authors in: conformant HTML and
 PDF at the canonical URLs, with the authoritative source alongside. Each
 source format then brings its own add-ons. A markdown package gets the

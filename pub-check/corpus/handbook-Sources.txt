@@ -1,0 +1,65 @@
+Policy source registry | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Reference › Policy source registry
+Provenance
+Policy source registry
+Every authoritative OASIS policy this handbook draws on, with its authority level and effective date. When this handbook and a policy ever disagree, the policy governs.
+Authoritative OASIS policy sources used by this handbook
+Source Authority Effective
+OASIS Member Resources Best current practice ongoing
+OASIS TC Handbook: Public Reviews Defines the comment resolution log and its required columns (anchor #commentResolutionLog). No canonical blank template exists at a fixed OASIS URL (verified 2026-06-05 by raw-HTML grep); the log is a per-spec deliverable named <spec>-<stage>-comment-resolution-log.{xls,pdf,md}. Live example: https://docs.oasis-open.org/etmf/etmf/v1.0/csprd01/etmf-v1.0-csprd01-comment-resolution-log.xls Best current practice ongoing
+OASIS Committee Operations Process Normative policy 2024-08-22
+Document Life Cycle Best Practices Best current practice 2024-08-22
+Kavi-to-Higher-Logic Transition (OASIS member platform) Best current practice 2024-03-04
+OASIS Naming Directives v1.7 v1.7 removed obsolete stage abbreviations csprd, cnprd, cos. Directive 2024-01-02
+OASIS TC Process URL slug reads 2017-05-26 but content is the version effective 1 December 2020. Normative policy 2020-12-01
+OASIS Defined Terms URL slug reads 2018-05-22 but content is the version effective 1 December 2020. Glossary 2020-12-01
+Guidelines to Writing Conformance Clauses Following the guidelines is recommended; the requirement to include a conformance section is in TC Process §2.2.6 . Recommended (TAB-approved) 2017-04-07
+GitHub Repositories for OASIS TC Members' Chartered Work Normative policy 2016-08-01
+OASIS IPR Policy Normative policy 2013-07-31
+As of This registry reflects sources reviewed on 4 June 2026. Links point to each policy’s latest published location.
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

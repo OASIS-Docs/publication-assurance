@@ -1,0 +1,134 @@
+Naming & URIs | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Quality & naming › Naming & URIs
+Quality & naming
+Naming & URIs
+Every published OASIS work product must follow the OASIS Naming Directives v1.7 : a binding directive governing which characters are allowed, how filenames and URIs are constructed, which stage abbreviations are current, and what three URIs must appear on every cover page. Getting naming right before first publication matters because published resources may not be altered or deleted after the fact.
+What changed since the 2010 handbook
+Naming Directives v1.7 , effective 2 January 2024 , made two substantive changes:
+The stage abbreviations csprd , cnprd , and cos were removed . They are obsolete and must not appear in new filenames or URIs. Documents going to public review continue to use their existing stage name ( csd or cnd ); there is no distinct "public review draft" stage designator any longer.
+A public-review metadata filename pattern was added: work products undergoing public review now require a companion metadata file named with the -public-review-metadata suffix (see below ).
+If your reference material still refers to csprd , cnprd , or cos as current stage names, it is out of date. Naming Directives v1.7 §Stage abbreviations
+Allowed characters
+OASIS work-product names and URIs are constructed from a restricted character set. Naming Directives v1.7
+Policy requirement
+Only alphanumerics ( A–Z , a–z , 0–9 ), hyphens ( - ), and periods ( . ) are permitted in document URIs. Underscores ( _ ) may appear in generated filenames but must not appear in document URIs. No leading, trailing, or consecutive punctuation characters are allowed.
+Current stage abbreviations
+The binding list of stage abbreviations appears in the Naming Directives. Use exactly the abbreviations below, no others. Naming Directives v1.7 §Stage abbreviations
+Current and obsolete stage abbreviations for OASIS work products
+Abbreviation
+Stage name
+Track
+Notes
+csd
+Committee Specification Draft
+Standards Track
+Carries a revision number: csd01 , csd02 , etc.
+cs
+Committee Specification
+Standards Track
+Carries a revision number: cs01 , cs02 , etc.
+os
+OASIS Standard
+Standards Track
+Never carries a revision number. Only one OASIS Standard per version.
+errata
+Approved Errata
+Standards Track
+Carries a revision number: errata01 , etc.
+cnd
+Committee Note Draft
+Non-Standards Track
+Carries a revision number: cnd01 , cnd02 , etc.
+cn
+Committee Note
+Non-Standards Track
+Carries a revision number: cn01 , cn02 , etc.
+Historical note
+The following abbreviations were used before Naming Directives v1.7 (January 2, 2024) and are now obsolete and removed : csprd (Committee Specification Public Review Draft), cnprd (Committee Note Public Review Draft), cos (Candidate OASIS Standard as a named stage). They must not appear in any new or revised work-product filenames or URIs. Documents published before v1.7 that used these abbreviations retain them in their permanent URIs (persistence rules prevent changing them), but any continuation of work uses the current abbreviations. Naming Directives v1.7 §Stage abbreviations
+Filename pattern
+The standard filename pattern for single-part work products is: Naming Directives v1.7
+[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber].[ext]
+Where:
+[WP-abbrev] : the work product abbreviation registered with OASIS (alphanumeric and hyphen only).
+[version-id] : the version identifier in #.# , #.## , #.#.# , or ##.# form (e.g., v1.0 , v1.01 , v1.2.1 , v10.1 ). The version identifier should also appear in the work product's title.
+[stage-abbrev][revisionNumber] : one of the current stage abbreviations above, followed immediately by a two-digit revision number (e.g., csd01 , cs02 ). For os , omit the revision number entirely.
+[ext] : the file extension ( html , pdf , docx , etc.).
+Example: emix-v1.0-csd01.html
+Multi-part work products
+For work products published in multiple parts, insert a part identifier between the stage designator and the extension: Naming Directives v1.7
+[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-[partNumber]-[partName].[ext]
+Public-review metadata filename (new in v1.7)
+Work products undergoing public review must include a companion metadata file. The filename pattern is: Naming Directives v1.7
+[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html
+Example: emix-v1.0-csd01-public-review-metadata.html
+This file provides a publication history of the work product and documents the occurrence of the public review. Project Administration publishes it when the TC resolves to initiate a public review.
+URI pattern
+Published documents are assigned permanent URIs under docs.oasis-open.org . The pattern is: Naming Directives v1.7
+https://docs.oasis-open.org/[tc-shortname]/[WP-abbrev]/[version-id]/[stage-abbrev][revisionNumber]/[doc-id].[ext]
+Example: https://docs.oasis-open.org/emergency/cap/v1.2/cs01/CAP-v1.2-cs01.html
+Three required cover-page URIs
+Every published work product must carry exactly three version URIs on its cover page. Naming Directives v1.7
+Policy requirement
+This stage : the permanent, immutable URI for this specific stage and revision. This URI points to this document and no other; it is never reused or updated after publication.
+Previous stage : the "This stage" URI of the immediately preceding approved stage of the same work product, or "N/A" if there is no prior stage.
+Latest stage : an alias URI that always points to the most current publication of this work product, regardless of stage or revision. Unlike the "This stage" URI, the latest-stage alias is overwritten with each new publication (it is the only URI that may be updated after a document is published).
+Using a consistent "Latest stage" URI in citations and links means downstream readers are always directed to the most current version without the author having to update every reference.
+XML namespace rule ( /ns/ )
+When a work product defines XML namespaces, those namespaces must be placed under the /ns/ path segment: Naming Directives v1.7
+http://docs.oasis-open.org/[tc-shortname]/ns/…
+https://docs.oasis-open.org/[tc-shortname]/ns/…
+Policy requirement
+The /ns/ path element is reserved for non-information resources only : it is for namespace identifiers, not for retrievable documents. Do not use /ns/ in the URI of a document you intend to publish as a retrievable resource.
+Persistence
+OASIS Library resources are permanent. Naming Directives v1.7
+Policy requirement
+Published resources in the OASIS Library must not be deleted or altered after publication. The only exception is the "Latest stage" alias URI, which is designed to be overwritten each time a newer stage is published. All other published URIs, "This stage" and "Previous stage", are permanent and immutable once assigned.
+This persistence rule is why getting naming correct before first publication is critical: a document published with an incorrect filename or URI retains that URI forever, and the only remedy is to publish a correction under a new stage/revision designator.
+Sources & provenance
+This page reflects OASIS Naming Directives v1.7 , effective 2 January 2024, which is the binding directive for all published OASIS work products. The stage abbreviations, URI patterns, and persistence rules stated here are drawn verbatim from that source; see the naming_stages fact entry in this handbook's fact registry. Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

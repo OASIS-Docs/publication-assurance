@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maintaining or closing a TC | OASIS TC Handbook</title>
+<meta name="description" content="How a Technical Committee stays alive or winds down: the four-year vitality vote, charter clarification, rechartering, closure triggers, the no-chair suspension rule, and the two-year Chair re-appointment cadence.">
+<link rel="canonical" href="https://docs.oasis-open.org/TChandbook/Reference/TCLifecycle.html">
+<meta property="og:site_name" content="OASIS TC Handbook">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Maintaining or closing a TC">
+<meta property="og:description" content="How a Technical Committee stays alive or winds down: the four-year vitality vote, charter clarification, rechartering, closure triggers, the no-chair suspension rule, and the two-year Chair re-appointment cadence.">
+<meta property="og:url" content="https://docs.oasis-open.org/TChandbook/Reference/TCLifecycle.html">
+<meta property="og:image" content="https://docs.oasis-open.org/TChandbook/assets/oasis-logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/handbook.css?v=8e22b804">
+<link rel="icon" href="../assets/oasis-logo.png">
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="brand" href="../TChandbookIndex.html">
+      <img src="../assets/oasis-logo.png" alt="OASIS Open">
+      <span class="brand__pipe"></span>
+      <span class="brand__title">TC Handbook</span>
+    </a>
+    <nav class="masthead__nav">
+      <a href="../TChandbookIndex.html">Handbook</a>
+      <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process</a>
+      <a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives</a>
+      <a href="https://www.oasis-open.org/member-resources/">Member Resources</a>
+      <a href="https://www.oasis-open.org/">OASIS-Open.org</a>
+    </nav>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" aria-label="Handbook sections">
+    <div class="sidebar__group">
+<div class="sidebar__title">Getting started</div>
+<a href="../TChandbookIndex.html">Welcome</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">How do I…?</div>
+<a href="../Tasks/GainVotingRights.html">Gain voting rights</a>
+<a href="../Tasks/LoseVotingRights.html">Lose / regain voting rights</a>
+<a href="../Tasks/PersistentNonVoting.html">Become Persistent Non-Voting</a>
+<a href="../Tasks/ObserverToMember.html">Observer → Member</a>
+<a href="../Tasks/LeaveOfAbsence.html">Take a leave of absence</a>
+<a href="../Tasks/SendingEmail.html">Mailing lists &amp; email</a>
+<a href="../Tasks/UpdateWebPage.html">Update the TC web page</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Work product lifecycle</div>
+<a href="../Reference/WorkProductLifecycle.html">Lifecycle overview</a>
+<a href="../Reference/WorkingDrafts.html">Working Drafts</a>
+<a href="../Reference/CommitteeSpecDrafts.html">Committee Spec Drafts</a>
+<a href="../Reference/PublicReviews.html">Public Review</a>
+<a href="../Reference/CommitteeSpecs.html">Committee Specifications</a>
+<a href="../Reference/OASISStandard.html">OASIS Standard</a>
+<a href="../Reference/CommitteeNoteDrafts.html">Committee Note Drafts</a>
+<a href="../Reference/CommitteeNotes.html">Committee Notes</a>
+<a href="../Reference/TechnicalReports.html">Technical Reports</a>
+<a href="../Reference/Maintenance.html">Approved Errata</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quorum, voting &amp; meetings</div>
+<a href="../Reference/Voting.html">Voting &amp; ballots</a>
+<a href="../Reference/Quorum.html">Quorum &amp; meetings</a>
+<a href="../Reference/TCLifecycle.html" class="is-active" aria-current="page">Maintaining or closing a TC</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quality &amp; naming</div>
+<a href="../Reference/WPQualityRequirements.html">Work product requirements</a>
+<a href="../Reference/WPQualityChecklist.html">Quality checklist</a>
+<a href="../Reference/Naming.html">Naming &amp; URIs</a>
+<a href="../Reference/Conformance.html">Conformance clauses</a>
+<a href="../Reference/Templates.html">Templates</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Reference</div>
+<a href="../Concepts/Glossary.html">Glossary</a>
+<a href="../Reference/IPR.html">IPR policy</a>
+<a href="../Reference/GitHub.html">GitHub repositories</a>
+<a href="../Reference/Sources.html">Policy source registry</a>
+</div>
+  </aside>
+  <main class="content" id="content">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../TChandbookIndex.html">Handbook</a> <span>›</span> Quorum, voting &amp; meetings <span>›</span> Maintaining or closing a TC</nav>
+    <span class="badge">TC governance</span>
+<h1 class="page-title">Maintaining or closing a Technical Committee</h1>
+<p class="lede">A Technical Committee (TC) is not a one-time setup. The OASIS rules build in recurring checkpoints that keep a TC alive and on-scope, plus the conditions under which it must wind down. Two policies govern this: the <strong><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a></strong> for charter and vitality, and the <strong><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process</a></strong> for Chairs and committee closure. This page separates the <em>normative rule</em> (with its section citation and vote type) from the <em>how-to</em> a Chair or TC Administrator follows in practice.</p>
+
+<h2>The recurring checkpoints at a glance</h2>
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">Recurring governance checkpoints for a Technical Committee and their governing rule</caption>
+  <thead>
+    <tr><th scope="col">Checkpoint</th><th scope="col">How often</th><th scope="col">Vote</th><th scope="col">Rule</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">TC Vitality review</th>
+      <td>Every <strong>4 years</strong></td>
+      <td>Full Majority Vote</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process §1.10</a></span></td>
+    </tr>
+    <tr>
+      <th scope="row">Chair re-appointment</th>
+      <td>Every <strong>2 years</strong></td>
+      <td>Full Majority Vote</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></td>
+    </tr>
+    <tr>
+      <th scope="row">Charter clarification</th>
+      <td>As needed (narrow only)</td>
+      <td>Special Majority Vote</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.8">TC Process §1.8</a></span></td>
+    </tr>
+    <tr>
+      <th scope="row">Rechartering</th>
+      <td>As needed (expand scope)</td>
+      <td>Special Majority Vote</td>
+      <td><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.9">TC Process §1.9</a></span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2>The four-year vitality vote</h2>
+<p>Every <strong>4 years</strong>, measured from the date of the TC's first meeting (or the first meeting after a recharter), the TC must decide its own future by <strong>Full Majority Vote</strong>. The choice is one of four explicit actions. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process §1.10</a></span></p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>At the four-year mark the TC must vote, by <strong>Full Majority Vote</strong>, to do one of the following:</p>
+  <ul style="margin:8px 0 0 0">
+    <li><strong>Continue</strong> with its current Charter;</li>
+    <li><strong>Continue with a charter clarification</strong> (the §1.8 process below);</li>
+    <li><strong>Recharter</strong> (the §1.9 process below); or</li>
+    <li><strong>Close</strong> the TC.</li>
+  </ul>
+  <p><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process §1.10</a></span></p>
+</div>
+<p>A Full Majority Vote means more than 50% of all eligible voters vote Yes, whether present or not. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms (Full Majority Vote)</a></span></p>
+<div class="callout callout--practice">
+  <div class="callout__label">Best practice</div>
+  <p>When it reviews its Charter at the vitality checkpoint, a TC <strong>should</strong> consider new milestones and deliverables that fall within its scope, and if it decides to continue it <strong>should</strong> re-appoint its Chair(s) at the same time. Both of these are stated as "should," not "shall," in the policy; they are recommended, not mandatory. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process §1.10</a></span></p>
+</div>
+
+<h2>Clarifying the Charter (narrowing only)</h2>
+<p>A charter <em>clarification</em> is a tightly limited change. A TC may clarify its Charter <strong>only</strong> to remove ambiguity or to <strong>narrow</strong> the scope of the topic defined by the Charter. Deliverables may be added only if they fall within the existing topic scope. Clarification is <strong>not</strong> the route for expanding scope; that is rechartering. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.8">TC Process §1.8</a></span></p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>Approval of a charter clarification requires a <strong>Special Majority Vote</strong> of the TC. The clarified Charter does <strong>not</strong> take effect until it is both approved by the TC and announced by the TC Administrator. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.8">TC Process §1.8</a></span></p>
+</div>
+<p>A Special Majority Vote requires <strong>at least 2/3</strong> of eligible voters to vote Yes <strong>and no more than 1/4</strong> to vote No; it is conducted by electronic ballot run by the TC Administrator. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms (Special Majority Vote)</a></span></p>
+<div class="callout callout--practice">
+  <div class="callout__label">OASIS staff practice</div>
+  <p>The TC Administrator screens the clarification before it goes to ballot. No later than <strong>7 days</strong> after receiving the request to start the Special Majority Vote, the TC Administrator must either open the ballot or reply to the TC with the reason it will not be opened. In practice the Chair sends the proposed clarified Charter text to the TC Administrator and waits for the ballot to be set up rather than opening it directly. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.8">TC Process §1.8</a></span></p>
+</div>
+
+<h2>Rechartering (expanding scope)</h2>
+<p>To <strong>expand</strong> the scope of a TC, the TC must be <em>rechartered</em>. Rechartering is the heavier process: it resets the roster and restarts membership clocks. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.9">TC Process §1.9</a></span></p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>Approval of rechartering requires a <strong>Special Majority Vote</strong> of the TC. Rechartering <strong>shall not change</strong> the TC name nor the IPR Mode of the TC; a different name or IPR Mode requires forming a new TC instead. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.9">TC Process §1.9</a></span></p>
+</div>
+<p>Several consequences follow once rechartering is approved:</p>
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">Consequences of rechartering a Technical Committee under <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.9">TC Process §1.9</a></caption>
+  <thead>
+    <tr><th scope="col">Item</th><th scope="col">Rule</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Re-contribution</th>
+      <td>Contributions made under the prior Charter <strong>must be re-contributed</strong> to be used under the revised Charter.</td>
+    </tr>
+    <tr>
+      <th scope="row">First meeting timing</th>
+      <td>The first meeting under the revised Charter must be held <strong>no less than 7 days</strong> after the close of the ballot that approved rechartering.</td>
+    </tr>
+    <tr>
+      <th scope="row">Roster reset</th>
+      <td><strong>7 days before</strong> the first meeting, all work of the TC stops and all Members and TC officers are removed from the roster; Members re-join under the new-TC procedures.</td>
+    </tr>
+    <tr>
+      <th scope="row">Participation Obligation clock</th>
+      <td>The time period for determining Members' Participation Obligation <strong>restarts</strong> at the first meeting under the revised Charter.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p style="font-size:13px;color:var(--muted)">Source for all four consequences: <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.9">TC Process §1.9</a></span>.</p>
+<div class="callout callout--practice">
+  <div class="callout__label">OASIS staff practice</div>
+  <p>The recharter proposal is made by Resolution to the TC Administrator and must include all the §1.2 TC Formation items, including item 2(b) (the date, time and location of the first meeting under the revised charter) and excluding items 2(d) and 2(e) (the list of co-proposers and the Primary Representatives' Statements of Support). A recharter <strong>cannot</strong> change the TC's name or IPR Mode; changing either requires forming a new TC. The first meeting under the revised charter must be at least 7 days after the rechartering ballot closes, and the TC Administrator announces the recharter within 7 days of receiving a complete proposal. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.9">TC Process §1.9</a></span></p>
+</div>
+
+<h2>Chairs: the two-year re-appointment cadence</h2>
+<p>Every committee, including every TC, must have one or more Chairs. Only Members are eligible, and Chairs are elected by <strong>Full Majority Vote</strong> of the committee. This rule lives in the <strong><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">Committee Operations Process</a></strong>, not the TC Process. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p><strong>Every two years</strong> a Committee must <strong>re-appoint</strong> its Chair(s) by <strong>Full Majority Vote</strong>. There are <strong>no term limits</strong>; a current or past Chair may stand again. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></p>
+</div>
+<p>The re-appointment runs as a short, scheduled process:</p>
+<div class="stage-strip">
+  <div class="stage">
+    <div class="stage__head"><span class="stage__name">Call for candidates</span></div>
+    <div class="stage__body">A call for Chair candidates is posted to the committee's general email list. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></div>
+  </div>
+  <div class="stage">
+    <div class="stage__head"><span class="stage__name">Nomination window</span> <span class="stage__abbr">7 days</span></div>
+    <div class="stage__body">Members have <strong>7 days</strong> after being notified to propose candidates. A nominee proposed by someone else has <strong>3 additional days</strong> to accept. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></div>
+  </div>
+  <div class="stage">
+    <div class="stage__head"><span class="stage__name">Ballot if contested</span> <span class="badge badge--vote">Full Majority Vote</span></div>
+    <div class="stage__body">If more candidates come forward than seats, the committee runs a ballot. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></div>
+  </div>
+</div>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>If <strong>no candidates</strong> come forward, the work of the Committee <strong>must stop</strong> until a Chair can be found. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></p>
+</div>
+<div class="callout callout--practice">
+  <div class="callout__label">Best practice</div>
+  <p>For a TC, the timing of Chair re-appointment <strong>should</strong> coincide with the four-year TC Vitality check, so that every four years the Charter and the Chair(s) are reviewed together. This alignment is recommended ("should"), not mandatory. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></p></div>
+
+<h2>When a TC has no Chair</h2>
+<p>Losing the Chair is not just an administrative gap; it suspends the committee.</p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>If at any point the committee does not have at least one Chair, <strong>all activities (with the sole exception of selecting a new Chair) are suspended</strong> until a new Chair is elected. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></p>
+</div>
+<p>If the vacancy is not filled, it can ultimately end the TC. If a committee has no Chair for <strong>120 days</strong>, the OASIS TC Administrator <strong>may</strong> close the committee. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></p>
+<div class="callout callout--practice">
+  <div class="callout__label">How the two policies fit together</div>
+  <p>The TC Process and the Committee Operations Process describe the no-Chair closure from two angles. The <strong><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.13">TC Process §1.13</a></strong> states that the TC Administrator <strong>must</strong> close a TC that "fails to elect a Chair for the period provided in" the Committee Operations Process. The <strong>Committee Operations Process §1.4</strong> supplies that period (<strong>120 days</strong>) and frames the closure as one the Administrator <strong>may</strong> make. The handbook reads the TC-specific §1.13 obligation as controlling for TCs; this reconciliation is the handbook's interpretation, not a quoted line in either policy. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.13">TC Process §1.13</a></span> <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.4</a></span></p>
+</div>
+
+<h2>Closing a TC</h2>
+<p>A TC can close at its own choice (the "close" option of the vitality vote, or any time by Full Majority Vote), or the TC Administrator can close it when one of the trigger conditions is met. The TC Process distinguishes triggers where closure is <strong>mandatory</strong> from triggers where it is <strong>discretionary</strong>. The exact word ("must" versus "may") matters, so the two are kept separate below.</p>
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">Triggers under which the TC Administrator must or may close a Technical Committee</caption>
+  <thead>
+    <tr><th scope="col">Obligation</th><th scope="col">Trigger</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Must close</th>
+      <td>The TC has <strong>completed the deliverables listed in its Charter</strong> and does not add new deliverables; <strong>or</strong> the TC <strong>fails to elect a Chair</strong> for the period provided in the Committee Operations Process.</td>
+    </tr>
+    <tr>
+      <th scope="row">May close</th>
+      <td>The TC <strong>fails to hold at least one Quorate Meeting</strong> or conduct any Work Product Ballot during any <strong>six-month period</strong>; <strong>or</strong> it misses its chartered schedule; <strong>or</strong> it fails to show progress toward its chartered purpose.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p style="font-size:13px;color:var(--muted)">Source for both rows: <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.13">TC Process §1.13</a></span>.</p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>Separately, the Committee Operations Process sets out who may close a committee and on what general grounds: a committee <strong>may be closed by a Full Majority Vote</strong> of that committee, by Resolution of the OASIS Board of Directors, or by the relevant Administrator. The Administrator <strong>may</strong> also close a committee whose membership falls below the <strong>Minimum Membership</strong> necessary, that is unable to fill its Chair position for <strong>120 days</strong>, or that fails to show activity or progress for an extended period. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process §1.9</a></span></p>
+</div>
+
+<h2>Related reading</h2>
+<ul>
+  <li><a href="../Reference/Voting.html">Voting &amp; ballots</a>: how Full Majority and Special Majority Votes are run and counted.</li>
+  <li><a href="../Reference/Quorum.html">Quorum &amp; meetings</a>: what makes a meeting Quorate, which feeds the six-month closure trigger.</li>
+</ul>
+
+<footer class="provenance"><div class="provenance__label">Sources &amp; provenance</div>
+  <p>Sources: <strong><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a></strong> effective 1 December 2020: <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.8">§1.8</a> (charter clarification), <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.9">§1.9</a> (rechartering), §1.10 (TC Vitality / four-year review), <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.13">§1.13</a> (closing a TC); <strong><a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">OASIS Committee Operations Process</a></strong> effective 22 August 2024: <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">§1.4</a> (Chairs, two-year re-appointment, no-Chair suspension, 120-day closure) and <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.9">§1.9</a> (closing a committee); <strong><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms</a></strong> effective 1 December 2020 (Full Majority Vote, Special Majority Vote). The no-Chair "must close" (<a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.13">TC Process §1.13</a>) versus "may close after 120 days" (<a href="https://www.oasis-open.org/policies-guidelines/oasis-committee-operations-process/">Committee Operations Process</a> <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s1.4">§1.4</a>) reconciliation is the handbook's interpretation and is flagged as such above. Content last verified against these sources on <strong>4 June 2026</strong>. The governing rules are the OASIS policies themselves; see the <a href="../Reference/Sources.html">policy source registry</a>.</p>
+</footer>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div>OASIS TC Handbook · maintained by the OASIS Open staff. Questions: <a href="/cdn-cgi/l/email-protection#2b5f48064a4f4642456b444a58425806445b4e450544594c"><span class="__cf_email__" data-cfemail="b6c2d59bd7d2dbdfd8f6d9d7c5dfc59bd9c6d3d898d9c4d1">[email&#160;protected]</span></a></div>
+    <div>The authoritative rules are the <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a> and related policies. This handbook is practical guidance, current as of 4 June 2026.</div>
+    <div class="site-footer__legal">Copyright © OASIS Open. All rights reserved. · <a href="https://www.oasis-open.org/policies-guidelines/">Policies &amp; Guidelines</a></div>
+  </div>
+</footer>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

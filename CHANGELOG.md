@@ -24,6 +24,61 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.4.0 - 2026-09-05
+
+The evidence behind the acceptance criteria now ships with them, and the
+crosswalk that had fallen behind the registry is caught up and gated. No check
+was added, removed, or changed severity; the `--json` shape is unchanged.
+
+Authority:
+
+- **The policy corpus ships.** `AUTHORITIES.md` quoted OASIS policy at 94 check
+  signatures and pointed at a `corpus/MANIFEST.json` that was not in the
+  repository, so a TC could not verify a single quote. `pub-check/corpus/` now
+  carries all 25 snapshotted source pages, their plain-text extractions and the
+  manifest with a sha256 per page, alongside `crosswalk.json` (condition to
+  acceptance criterion) and `criteria.yaml` (the criteria and their quotes).
+  The live documents at the recorded URLs remain authoritative; these are dated
+  snapshots of them, which is what makes a quote checkable.
+
+- **`tests/test_authorities.py` checks all of it on every run.** Every digest
+  against the file it names, every quote as a verbatim substring of the page it
+  cites (278 citations), every referenced criterion against `criteria.yaml`, and
+  the crosswalk against the tool's own registry in both directions. Corrupting
+  one digest and one quote were each demonstrated to turn the suite red.
+
+- **The crosswalk was a condition behind, and could not be re-run.**
+  `extend_crosswalk.py` read its delta from a `/tmp` file written during the
+  27-July session, so after that file was gone the script could only fail, and
+  `stage-uri-live` sat uncited from 31 August. `sync_crosswalk.py` computes the
+  delta from the live registry instead, so it can be run after any change to the
+  checks, and the new test fails if it has not been. `stage-uri-live` maps to
+  AC-FRONTMATTER-03 and AC-FRONTMATTER-04, which already require the
+  Previous-stage and Latest-stage URIs to point at the preceding published
+  instance and at the persistent version root; the check is the live-retrieval
+  half of both, so no new criterion was written.
+
+- **96 of 170 becomes 97 of 170.** `gen_authorities.py` was also reporting
+  signature counts where the documentation quoted condition counts, and the
+  reconciliation between them (three signatures cover two conditions each) was a
+  hand-edit that would have gone stale. The generator computes both now, from
+  the tool.
+
+Documentation:
+
+- **The class-level table covered 35 of the 58 classes and did not say so.**
+  Twenty-three were missing, including six BLOCKER classes a first submission is
+  most likely to trip on: `title-oasis-prefix`, `title-version`, `name-chars`,
+  `uri-chars`, `multi-part-naming` and `member-uri`. It is generated from the
+  registry now, with a per-class condition count, and CI regenerates and diffs
+  it the way it already did for `CHECKS.md`. Deleting one row turns the suite
+  red.
+
+- The repository layout listing gained the four files it omitted, and the
+  documented test dependencies are now the three that are actually needed
+  (`pytest`, `beautifulsoup4`, `PyYAML`). PyYAML is imported hard rather than
+  skipped: a skipped authority check proves nothing.
+
 ## v1.3.0 - 2026-09-05
 
 Prepared for handing the criteria to the TCs. No check was added or removed

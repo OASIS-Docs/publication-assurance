@@ -1,0 +1,108 @@
+Approved Errata & Maintenance | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Work product lifecycle › Approved Errata & Maintenance
+Standards Track · post-approval maintenance
+Approved Errata & Maintenance
+An OASIS Standard is a permanent, immutable record: published resources must not be altered after publication. When a correction is genuinely needed, the Technical Committee (TC) follows the formal Approved Errata process. This process ensures corrections are non-material, publicly reviewed, and confirmed by TC vote. A separate Maintenance Activity rule limits active correction work to one TC at a time per OASIS Standard.
+What changed since the 2010 handbook
+The 2010 handbook directed users to report errors to the TC Administrator and treated post-submission corrections as prohibited. That model is replaced. The TC Process effective 1 December 2020 establishes a formal Approved Errata track (§2.9) that allows a TC to issue corrections to an OASIS Standard through a defined, transparent process: a Committee Specification Draft approval, a non-materiality confirmation, a public review, and a final confirming vote. If your reference material still describes corrections as off-limits or says "report to TC Administrator," it is out of date.
+Approved Errata
+Approved Errata are corrections to an OASIS Standard . They may address errors, ambiguities, or inconsistencies but may not introduce substantive new content. A public review and three TC ballots are required: the TC votes to adopt the corrections as a CSD, to confirm they are non-material, and (after public review) to approve them as Approved Errata. TC Process §2.9
+Policy requirement
+The Approved Errata process may run at most once per 6-month period per OASIS Standard. TC Process §2.9
+The four-step process
+Step 1: Approve the errata as a Committee Specification Draft csd Full Majority Vote
+The TC votes by Full Majority Vote to approve the set of corrections as a Committee Specification Draft (CSD). This is the same ballot type used for any CSD approval. TC Process §2.9 TC Process §2.5
+Step 2: Confirm corrections are non-material Full Majority Vote
+The TC votes by Full Majority Vote to confirm that the corrections are non-material. TC Process §2.9
+Step 3: Public review
+A public review of at least 15 days is conducted on the errata CSD. This gives the community an opportunity to identify any corrections that may in fact be material. TC Process §2.9
+Step 4: Confirm as Approved Errata errata Full Majority Vote
+After the public review closes, the TC votes by Full Majority Vote to confirm the errata CSD as Approved Errata . On a successful vote, the document is published at the errata stage. TC Process §2.9
+Vote type: Full Majority Vote at every step
+Every TC ballot in the Approved Errata process is a Full Majority Vote : more than 50% of all eligible Voting Members must vote Yes, whether or not they are present. Defined Terms, Full Majority Vote This is the same standard used for CSD approval and differs from the Special Majority Vote required for Committee Specification or Candidate OASIS Standard submission.
+Naming and stage abbreviation
+Documents published through the Approved Errata process use the errata stage abbreviation in their filenames and URIs. This is one of the four current Standards Track stage abbreviations: csd , cs , os , errata . Naming Directives v1.7 The OASIS Standard itself (at the os stage) is never altered; the errata document is a companion publication.
+Summary table
+Steps in the Approved Errata process, with vote type and day-window at each step
+Step
+Action
+Actor
+Vote type
+Time window
+1
+Approve errata corrections as a CSD
+TC
+Full Majority Vote
+N/A
+2
+Confirm corrections are non-material
+TC
+Full Majority Vote
+N/A
+3
+Public review of errata CSD
+TC Administrator
+(no vote)
+at least 15 days
+4
+Confirm as Approved Errata
+TC
+Full Majority Vote
+N/A
+Source: TC Process §2.9 (effective 1 December 2020). Frequency cap: at most once per 6-month period per OASIS Standard.
+Maintenance Activity
+The TC Process (§1.14) places a constraint on how many TCs may perform Maintenance Activity on a given OASIS Standard simultaneously. TC Process §1.14
+Policy requirement
+At any given time, only one TC may perform Maintenance Activity on a given OASIS Standard . TC Process §1.14
+In practice, maintenance of an OASIS Standard is typically performed by the TC that originally developed it. TC Process §1.14
+Relationship to the Approved Errata process
+Maintenance Activity and Approved Errata are complementary. The Maintenance Activity rule governs which TC has authority to make corrections; the Approved Errata process (§2.9) governs how those corrections are formally approved and published. A TC performing Maintenance Activity on an OASIS Standard uses the Approved Errata track when it is ready to publish a set of corrections.
+See also: Approving an OASIS Standard for the full lifecycle path that precedes this stage.
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §1.14 , §2.9 ) and Naming Directives v1.7 (2 January 2024). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

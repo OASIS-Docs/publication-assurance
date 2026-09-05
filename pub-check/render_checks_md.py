@@ -178,6 +178,46 @@ CLASS_DESCRIPTIONS = {
 }
 
 
+README = HERE / "README.md"
+TABLE_BEGIN = "<!-- BEGIN generated class table: render_checks_md.py -->"
+TABLE_END = "<!-- END generated class table -->"
+
+
+def class_table(inv, counts) -> str:
+    """The class-level summary in README.md, built from the registry.
+
+    It was hand-maintained and covered 35 of the 58 classes, silently: a reader
+    took it for the class list, and six BLOCKER classes a first submission is
+    most likely to trip on were not in it. Severity is the blocking severity the
+    AST carries for that class; INFO-only notes are described in CHECKS.md.
+    """
+    sev_by_class = {}
+    for c in inv:
+        sev_by_class.setdefault(c["check"], set()).add(c["severity"])
+    rows = [
+        "| Check | Conditions | Severity | What it catches |",
+        "|---|---|---|---|",
+    ]
+    for cls in sorted(sev_by_class):
+        s = sev_by_class[cls]
+        severity = "BLOCKER/WARN" if (len(s) > 1 or "BLOCKER/WARN" in s) else next(iter(s))
+        rows.append(f"| {cls} | {counts[cls]} | {severity} | "
+                    f"{esc_prose(CLASS_DESCRIPTIONS[cls])} |")
+    return "\n".join(rows)
+
+
+def write_class_table(inv, counts) -> bool:
+    """Replace the marked block in README.md. Returns True if it changed."""
+    text = README.read_text()
+    start = text.index(TABLE_BEGIN) + len(TABLE_BEGIN)
+    end = text.index(TABLE_END)
+    new = text[:start] + "\n\n" + class_table(inv, counts) + "\n\n" + text[end:]
+    if new == text:
+        return False
+    README.write_text(new)
+    return True
+
+
 def esc(s: str) -> str:
     """Escape a registry string for a markdown table cell."""
     return s.replace("|", "\\|").replace("<", "&lt;").replace(">", "&gt;")
@@ -249,6 +289,10 @@ def main() -> None:
     assert rows == len(inv), f"{rows} rows rendered, {len(inv)} in inventory"
     assert sections == len(classes), f"{sections} sections, {len(classes)} classes"
     print(f"wrote CHECKS.md: {rows} conditions, {sections} classes")
+
+    changed = write_class_table(inv, counts)
+    print(f"README.md class table: {len(classes)} classes, "
+          f"{'rewritten' if changed else 'already current'}")
 
     for area, n in area_totals.items():
         print(f"  {area:<24} {n:>4}")

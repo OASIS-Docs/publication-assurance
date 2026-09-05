@@ -1,0 +1,125 @@
+Public Review | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Work product lifecycle › Public Review
+Work product lifecycle · public review
+Public Review
+A public review invites comments from anyone (inside or outside OASIS) on a draft work product. It is a required step before a Technical Committee (TC) can approve a Committee Specification (Standards Track) and an optional but common step before a Committee Note (Non-Standards Track).
+What changed since the 2010 handbook
+Two significant changes affect public reviews since the 2010 handbook:
+Stage names removed. The 2010 handbook described a distinct "Committee Specification Public Review Draft (CSPRD)" and "Committee Note Public Review Draft (CNPRD)" stage with its own abbreviated filename and URI label. Naming Directives v1.7 (effective 2 January 2024) removed csprd and cnprd entirely. A document going to public review retains its current stage name: a CSD remains a CSD; a CND remains a CND. Do not use csprd or cnprd in any filename, URI, or cover page. Naming Directives v1.7 §Stage abbreviations
+Material vs. non-material change now governs whether a new review is required. The current TC Process formalizes the distinction and requires the TC to assess whether changes made in response to public review comments are Material. If Material changes are made, the TC must conduct a new public review before approving a Committee Specification. Non-material changes do not trigger a new review. This distinction was not explicitly stated in the 2010 handbook. TC Process §2.6
+Where this sits in the lifecycle
+Committee Specification Draft csd Full Majority Vote
+The TC approves a Committee Specification Draft (CSD) by Full Majority Vote before it can enter public review. TC Process §2.5
+Public Review opened Full Majority Vote
+The TC votes by Full Majority Vote to submit the CSD (or CND) to OASIS for public review. The document retains its csd or cnd stage label; no separate stage abbreviation is used. TC Process §2.6
+Review period runs
+First review: a minimum of 30 days. Any subsequent review of the same work product: a minimum of 15 days. TC Process §2.6
+TC resolves comments
+The TC must acknowledge the receipt of each comment, track the comments received, and post the disposition of each comment to its primary and comment email lists after the end of the review period. The TC then determines whether any resulting changes are Material (requiring a new review) or non-material. TC Process §2.6
+Committee Specification cs Special Majority Vote
+Only after a successful public review and resolution of all comments may the TC approve a Committee Specification by Special Majority Vote. TC Process §2.7
+Opening a public review
+Policy requirement
+A public review must be opened by a Full Majority Vote of the TC: more than 50% of all eligible Voting Members must vote Yes (whether present at the meeting or not). TC Process §2.6
+Once the TC votes, it submits the work product to OASIS staff through the TC Administration support system. Staff announce the review, publish the document on the OASIS website, and open the comment facility for the required duration.
+Minimum review durations
+Minimum public review durations for first and subsequent reviews of the same work product
+Review
+Minimum duration
+Source
+First public review of the work product
+A minimum of 30 days
+TC Process §2.6
+Any subsequent review of the same work product
+A minimum of 15 days
+TC Process §2.6
+These are minimum floors set by policy. Nothing prevents the TC from requesting a longer review window, for example when a document is technically complex or when stakeholder availability is limited.
+How comments are submitted
+Policy requirement
+TC members must submit comments via the TC general email list. Non-TC-members must use the TC's archived public comment facility; comments submitted through any other means shall not be accepted. TC Process §2.6
+The public comment facility is managed by OASIS. Comments submitted through it become part of the public record and are associated with the specific review period. A submitter's name and organization are included.
+Resolving comments
+After the review closes, the TC must acknowledge the receipt of each comment, track the comments received, and post the disposition of each comment to its primary and comment email lists after the end of the review period. TC Process §2.6
+The comment resolution log
+The normative obligation above (track each comment, post its disposition) is what the TC Process requires. How a TC records that work is a matter of best practice. The customary form is a comment resolution log : a per-spec deliverable that records, for each comment received during a public review, the four pieces of information below. TC Process §2.6
+OASIS staff practice
+A comment resolution log records, for each comment:
+a link to the original message in the TC comment list or TC email list archives;
+the name of the submitter;
+a summary of the comment; and
+the disposition of the comment (how the TC resolved it).
+The log is a per-spec deliverable, conventionally named <spec>-<stage>-comment-resolution-log.{xls,pdf,md} and published alongside the work product. OASIS does not publish a single canonical blank template at a fixed URL; teams reuse the structure of an existing published log. Live examples (these are real per-spec logs, not an official OASIS blank template):
+Spreadsheet form: etmf-v1.0-csprd01-comment-resolution-log.xls (closest to a reusable structure)
+Markdown form: csaf-v2.0-csd02-comment-resolution-log.md
+The required columns are defined on this Handbook page. OASIS TC Handbook: Public Reviews, Comment Resolution Log
+Material versus non-material changes
+After addressing comments, the TC must determine whether any resulting changes to the work product are Material . The TC Process defines this distinction and uses it to determine whether a new public review is required before the TC may proceed to a Committee Specification approval ballot. TC Process §2.6
+Effect of material versus non-material changes on whether a new public review is required
+Type of change made after review
+New public review required?
+Non-material changes only
+No. The TC may proceed to a Committee Specification ballot.
+Material changes
+Yes. A new public review must be held (a minimum of 15 days, being a subsequent review). TC Process §2.6
+Public review for Committee Notes
+Policy requirement
+Public review is not required for Committee Notes. A TC may choose to hold a public review of a Committee Note Draft (CND) before approving a Committee Note, but is not obligated to do so. TC Process §2.4
+Optional standing rule
+If a TC has adopted Standing Rule 2 , Chairs may open a new public review with each CND release without a separate motion. This standing rule applies only if the TC has formally adopted it by Full Majority Vote. Note: Standing Rule 2 does not eliminate the Full Majority Vote requirement for the first public review of any work product; the first public review must still pass an actual Full Majority Vote even when SR2 is in effect. Document Life Cycle Best Practices §Standing Rules
+When a TC does elect to hold a public review for a Committee Note, the same minimum durations apply: a minimum of 30 days for the first review, a minimum of 15 days for subsequent reviews of the same work product. TC Process §2.6
+Naming during public review
+Policy requirement
+Do not use csprd or cnprd in filenames, URIs, or cover pages. These stage abbreviations were removed in Naming Directives v1.7 (effective 2 January 2024). A document in public review retains its current approved stage abbreviation: csd (Standards Track) or cnd (Non-Standards Track). Naming Directives v1.7 §Stage abbreviations
+For example, a CSD at revision 01 going through public review is filed and referenced as my-spec-v1.0-csd01 , not as my-spec-v1.0-csprd01 . The three required cover page URIs ("This stage", "Previous stage", and "Latest stage") should all reflect the csd stage abbreviation. See the Naming & URIs page for the full filename and URI patterns.
+Optional Standing Rules that affect public reviews
+The Document Life Cycle Best Practices document defines three optional Standing Rules a TC may adopt by Full Majority Vote. Two relate directly to public reviews:
+Standing Rule 2: If adopted, Chairs may open a new public review with each CSD/CND release without a separate motion. This rule is only in effect if the TC has formally adopted it. Document Life Cycle Best Practices §Standing Rules
+Standing Rule 3: If adopted, Chairs and editors may make purely editorial changes during publication without TC approval. This does not bypass the public review vote requirement; it only covers the editorial cleanup during preparation for submission. Document Life Cycle Best Practices §Standing Rules
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §2.6 and §2.7 ), the Naming Directives v1.7 (effective 2 January 2024), and the Document Life Cycle Best Practices (version 2024.08.22). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines
