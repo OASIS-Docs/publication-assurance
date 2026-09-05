@@ -1,0 +1,111 @@
+Conformance Clauses | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Quality & naming › Conformance clauses
+Standards Track · quality requirement
+Conformance Clauses
+Any Standards Track work product submitted for public review, approved as a Committee Specification, or approved as an OASIS Standard must contain a separate, numbered conformance clause section with individually numbered conformance clauses. The Guidelines to Writing Conformance Clauses (approved by the OASIS Technical Advisory Board, effective 7 April 2017) is the TAB-approved guidance document for how to write them; following the Guidelines is recommended but not required. TC Process §2.2.6 Conformance Guidelines (2017)
+What changed since the 2010 handbook
+Conformance clauses became a mandatory requirement for Standards Track work products before the 2010 handbook was published, but the requirement may not have been prominent in older guidance. The current TC Process (effective 1 December 2020) makes this explicit at section 2.2.6: a separate numbered conformance clause section is required for any Standards Track Work Product submitted for public review or approved as a CS or OASIS Standard. The requirement formally attaches when the work product is submitted for public review (the Committee Specification Public Review Draft stage), not at an earlier internal CSD approval ballot. Treating conformance clauses as optional for Standards Track work products is incorrect. TC Process §2.2.6
+When conformance clauses are required
+Policy requirement
+A Standards Track work product must include a conformance clause section before it can be submitted for public review (the Committee Specification Public Review Draft stage), approved as a Committee Specification (CS) , or approved as an OASIS Standard (OS) . The requirement formally attaches when the work product is submitted for public review, not at an earlier internal CSD approval ballot. A work product that lacks a conformance clause section is not eligible for public review or these approvals. TC Process §2.2.6
+Non-Standards Track work products (Committee Notes, Technical Reports) are not required to include conformance clauses, though TCs may choose to include them.
+Where conformance clauses appear in the lifecycle
+Working Draft wd
+Conformance clauses are not yet required but editors should draft them early. The conformance clause section must be present before the work product is submitted for public review. Conformance Guidelines (2017)
+Committee Specification Draft csd Full Majority Vote
+Internal CSD approval does not yet require conformance clauses. The conformance clause requirement in TC Process §2.2.6 attaches when the CSD is submitted for public review (the Committee Specification Public Review Draft stage). Editors should ensure the section is complete and ready before initiating a public review ballot. TC Process §2.2.6 TC Process §2.5
+Committee Specification cs Special Majority Vote
+Conformance clauses must be present and complete. The Statements of Use submitted before a Candidate OASIS Standard ballot must identify which conformance clauses were implemented and state whether interoperability was demonstrated. TC Process §2.8.1 OASIS Defined Terms (Statement of Use)
+OASIS Standard os
+Conformance clauses are preserved unchanged from the approved Committee Specification. Amendments to a published OASIS Standard follow the Approved Errata process. TC Process §2.9
+Required structure of the conformance section
+Policy requirement
+The conformance section must be:
+A separate, top-level numbered section of the work product (not a subsection buried elsewhere).
+Populated with individually numbered conformance clauses (e.g., Clause 1, Clause 2, …) so that implementers and Statements of Use can cite specific clauses by number.
+TC Process §2.2.6 Conformance Guidelines (2017)
+The section title is typically "Conformance" and is placed near the end of the document, after the normative body and before any annexes. Work product templates provided by OASIS TC Administration include a placeholder conformance section; editors must populate it with substantive clauses before the work product is submitted for public review.
+Conformance targets
+A conformance target is a specific entity type that a work product places requirements on. Conformance clauses are written with respect to conformance targets. Per the Guidelines, the umbrella term is implementation , meaning any concrete realization of a specification. An implementation may take the form of:
+an artifact such as a protocol, document, process definition, or service interface;
+a processor that interprets such an artifact;
+a performance that involves the interpretation of such an artifact; or
+a combination of the above.
+The Guidelines recommend defining conformance targets explicitly in the conformance section so that implementers know what kind of entity they are building conformant to the specification. Conformance Guidelines (2017)
+A single specification may define multiple conformance profiles or levels (for example, a "Core" profile and an "Extended" profile), each with its own numbered clauses. Every profile must be numbered separately so that Statements of Use can identify which profile was implemented. Conformance Guidelines (2017)
+Normative versus non-normative content
+The Guidelines draw a strict line between normative and non-normative content:
+Normative versus non-normative content in OASIS specifications
+Type
+Role
+Examples
+Normative
+Establishes binding requirements for conformance; uses the key words MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY, OPTIONAL (as defined in RFC 2119 / BCP 14 when incorporated by reference).
+Conformance clauses; mandatory element definitions; protocol requirements.
+Non-normative
+Provides explanatory, illustrative, or informative content; does not create binding obligations for conformance. Should be clearly labelled.
+Examples, use-case scenarios, implementation notes, appendices marked "Non-normative".
+When a specification incorporates RFC 2119 (or its successor BCP 14) for normative keywords, the Guidelines recommend stating that in the conformance section or in the introductory section on conventions. Appendices and examples that are not part of the conformance requirements should be marked "Non-normative". Conformance Guidelines (2017)
+The 10 core rules
+The Guidelines to Writing Conformance Clauses enumerate 10 core rules for effective conformance clauses. They are reproduced here in summary form; editors should read the full document before drafting. Conformance Guidelines (2017)
+Identify conformance targets in each clause. Each conformance clause must clearly identify its conformance target, i.e., the type of implementations it applies to.
+Define conformance targets before using them. The different conformance targets must be clearly defined prior to their association with conformance clauses.
+One target type per clause. Each conformance clause must concern only one type of conformance target, or conformance target types that are clearly related.
+Number clauses within named profiles. Conformance clauses must be numbered within a conformance section and associated with a named conformance profile or level.
+Refer precisely to normative body content. A conformance clause must refer precisely and unambiguously to normative statements and content in the specification's main body.
+Do not introduce new normative statements. A conformance clause must not introduce new normative statements that could instead have been part of the specification's main body.
+Do not refer to non-normative content. A conformance clause must not refer to content in the specification's main body that was qualified as non-normative.
+Optional features may be raised to recommended or mandatory. A conformance clause may refer to a normative statement of optional nature and make it recommended or mandatory, but cannot do the reverse.
+Add practical restrictions on fulfillment. A conformance clause may add practical restrictions about how the conformance target is supposed to fulfill a normative requirement or function.
+Set a higher bar for interoperability. When writing conformance clauses about implementations that interoperate with each other, place a higher bar on the ability of the conformance target to process what other implementations produce.
+Relationship to Statements of Use
+The numbered conformance clauses in a Committee Specification play a direct role in the OASIS Standard approval process. When a TC submits a Committee Specification as a Candidate OASIS Standard, it must provide three Statements of Use, at least one from an OASIS Organizational Member. Each Statement of Use must state that the party has successfully used or implemented the specification in accordance with all or some of its conformance clauses, identify which clauses apply, and state whether interoperability was demonstrated. TC Process §2.8.1 OASIS Defined Terms (Statement of Use)
+Poorly numbered or ambiguous conformance clauses make it difficult for implementers to provide accurate Statements of Use, which can delay or prevent the TC from meeting the precondition for a Candidate OASIS Standard submission. Editors should ensure each clause has a stable, unique number before the work product is submitted for public review.
+Sources & provenance
+This page reflects the Guidelines to Writing Conformance Clauses (TAB-approved recommended guidance, effective 7 April 2017; following the Guidelines is recommended but not required) and the OASIS TC Process effective 1 December 2020 ( §2.2.6 , §2.5 , §2.7 , §2.8.1 , §2.9 ). Content last verified against these sources on 4 June 2026 . The 10 core rules summarized above are derived directly from the Guidelines; the mandatory obligation to include a conformance section comes from TC Process §2.2.6 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

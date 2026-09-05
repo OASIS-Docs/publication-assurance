@@ -1,0 +1,116 @@
+Work Product Requirements | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Quality & naming › Work product requirements
+Quality & naming · All tracks
+Work Product Requirements
+Every OASIS Work Product, regardless of track or stage, must meet baseline quality and structural requirements before it can be approved. Standards Track Work Products carry additional obligations: a Standards Track designation on the cover page and machine-readable definitions in separate files, both of which apply from the first approval ballot onward; and mandatory conformance clauses, which attach at the Committee Specification Public Review Draft stage (when a draft is submitted for public review) and at the Committee Specification (CS) and OASIS Standard (OS) stages, not at an earlier internal CSD approval ballot.
+What changed since the 2010 handbook
+Conformance clauses are now explicitly mandatory for Standards Track Work Products approved at the Committee Specification Public Review Draft level (the public-review stage), the Committee Specification (CS) level, or the OASIS Standard (OS) level. The requirement attaches when a draft is submitted for public review, not at the earlier internal CSD approval ballot. While the requirement predates the 2010 handbook, it may not have been clearly labelled as mandatory there.
+Machine-readable (normative computer language) definitions must be delivered in separate plain-text files for Standards Track Work Products. This is a structural requirement, not a style suggestion.
+Authoring templates are now customized per work product. Static generic downloads (Word/OpenDocument) are no longer the primary delivery mechanism. TCs request a template through the OASIS Support Request system; OASIS TC Administration returns a template pre-populated with that Work Product's registered metadata.
+The obsolete stage abbreviations csprd and cnprd were removed in Naming Directives v1.7 (effective 2 January 2024). Documents under public review remain named as CSD or CND. References to those old designations in older guidance should be disregarded. Naming Directives v1.7 §Stage abbreviations
+Cover-page metadata and the three required URIs
+Every Work Product must display its persistent URIs on the cover page. OASIS Naming Directives v1.7 requires exactly three URI fields, each serving a distinct and permanent role. Naming Directives v1.7
+The three required cover-page URIs for every OASIS Work Product
+URI field
+What it points to
+Mutability
+This stage
+The exact published artifact at this version and stage (e.g., …/csd01/… ). Unique; never reused for a different document.
+Permanent: never deleted or redirected after publication.
+Previous stage
+The immediately preceding published instance of this Work Product (e.g., prior CSD revision or CS). Write "N/A" if this is the first published version.
+Permanent: points to the prior artifact, which also remains unchanged.
+Latest stage
+A persistent alias that always resolves to the most recently published version, omitting the stage and revision elements from the path.
+This is the only URI that may be updated (overwritten) when a newer version is published.
+Policy requirement
+All three URI fields must appear on the cover page. Published resources in the OASIS Library must not be deleted or altered; only the "latest stage" alias may be overwritten. Naming Directives v1.7
+In addition to the URIs, every Work Product cover page must clearly state whether it is a Standards Track Work Product or Non-Standards Track Work Product . This designation is required regardless of stage. TC Process §2.2.7
+File naming and URI pattern
+Filenames and URIs follow a structured pattern defined in the Naming Directives. Allowed characters are alphanumerics, periods, and hyphens; underscores may appear in generated filenames but not in document URIs. Naming Directives v1.7
+Current stage abbreviations for the two tracks are:
+Standards Track: csd , cs , os , errata (the os stage never carries a revision number).
+Non-Standards Track: cnd , cn .
+The abbreviations csprd , cnprd , and cos are obsolete and removed as of Naming Directives v1.7.
+Naming Directives v1.7 §Stage abbreviations
+File formats and document repository
+Editable formats of all versions of TC documents must be delivered to the TC's document repository. Approved OASIS deliverables must be published in three formats: an editable source format, HTML or XHTML, and PDF, with one designated as the authoritative version. TC Process §2.2.2
+Policy requirement
+All Work Products must use the OASIS file naming scheme and must include the OASIS copyright notice. Work Products may not incorporate trademarks outside OASIS ownership. TC Process §2.2.1
+Conformance clauses (Standards Track, mandatory)
+Conformance clauses define the conditions an implementation must satisfy in order to claim conformance to a specification. For Standards Track Work Products, they are a structural requirement, not optional guidance.
+Policy requirement
+A Standards Track Work Product that is approved by the Technical Committee (TC) at the Committee Specification Public Review Draft , Committee Specification , or OASIS Standard level must include a separate numbered section listing a set of numbered conformance clauses to which any implementation must adhere in order to claim conformance (or conformance to any optional portion thereof). The trigger is the Committee Specification Public Review Draft stage, i.e. when a draft is submitted for public review, not the earlier internal CSD approval ballot. TC Process §2.2.6
+The requirement predates the 2010 handbook. Non-Standards Track Work Products (Committee Notes, Technical Reports) are not subject to this requirement, though they may include conformance language voluntarily.
+Writing conformance clauses
+OASIS publishes detailed guidelines on drafting conformance clauses, including how to define conformance targets, distinguish normative from non-normative content, and number clauses unambiguously. Guidelines to Writing Conformance Clauses (2017)
+Key principles from those guidelines:
+Each clause should address a single conformance target type.
+Clauses must reference normative content precisely; they should not introduce new normative statements better placed in the specification body.
+Clause numbering must be unique and stable across revisions.
+Conformance targets must be clearly identified (e.g., "A conforming implementation shall…").
+Best practice
+Draft conformance clauses early, ideally in the first Working Draft, so that the specification body is written to support them from the start. Retrofitting conformance clauses into a nearly-complete specification is significantly harder and often reveals gaps in normative coverage.
+Machine-readable definitions (Standards Track, mandatory)
+When a Standards Track Work Product includes normative computer language definitions (schemas, grammars, WSDL, ontologies, or similar machine-processable artifacts), those definitions have two additional requirements.
+Policy requirement
+All normative computer language definitions in a Standards Track Work Product must be well-formed and valid, and must also be provided in separate plain-text files . The specification must clearly reference those separate files. TC Process §2.2.5
+This requirement applies to any machine-readable artifact that carries normative weight: embedding schema content only within a document body, without a standalone plain-text file, does not satisfy §2.2.5. Non-Standards Track Work Products are not subject to this requirement.
+Allowed changes during publication
+After a Work Product has been approved at any Standards Track or Non-Standards Track level, only non-material changes may be made during the publication process. Any such changes must be coordinated with the TC Administrator, and a summary must be sent to the TC mailing list. TC Process §2.2.4
+A Material change is one that could affect the meaning or interoperability of the specification. When in doubt, treat the change as material and hold a new ballot before publication.
+Authoring templates
+OASIS provides authoring templates for Work Products. Since the introduction of the template-request workflow, templates are customized per work product rather than distributed as generic static downloads.
+OASIS staff practice
+To obtain an authoring template, a TC editor submits a Work Product Registration and Template Request through the OASIS Support Request system. OASIS TC Administration returns a template pre-populated with the registered Work Product's metadata (name, version, TC short name, and stage). Generic Word and OpenDocument templates are no longer the primary delivery mechanism, though DocBook XML and XHTML generic templates remain available from docs.oasis-open.org/templates/ . OASIS Member Resources (Editors section)
+The template request workflow is an administrative step, not a TC Process ballot requirement. It does not change the approval path for the Work Product itself.
+Multi-part work products
+A Work Product may be composed of any number of files of different types. A multi-part Work Product must have a single Work Product name and version number across all parts, and the entire Work Product receives unified approval through a single ballot regardless of the number of constituent files. TC Process §2.2.3
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §2.2.1 –2.2.7), Naming Directives v1.7 effective 2 January 2024, and the Guidelines to Writing Conformance Clauses (2017, approved by the OASIS Technical Advisory Board). Template workflow guidance reflects current OASIS Member Resources (Editors section). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

@@ -1,0 +1,98 @@
+Work Product Quality Checklist | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Quality & naming › Quality checklist
+Quality & naming · Editorial tools
+Work Product Quality Checklist
+OASIS maintains two separate checklists for editors: an editorial quality verification checklist and a document submission checklist . Both live in the Member Resources Editors section and represent staff-verified best practice for ensuring a work product is ready for a ballot or submission step.
+What changed since the 2010 handbook
+The 2010 handbook provided a single combined quality checklist page. The current Member Resources site splits this into two distinct checklists, one focused on editorial quality (is the document internally correct and complete?) and one focused on submission mechanics (have all the administrative steps been completed for a ballot or publication submission?). Both are maintained by OASIS staff and kept aligned with the current TC Process and Naming Directives v1.7 . The 2010 checklist also predated the formal conformance-clause requirement for Standards Track work products, which became mandatory at the Committee Specification Public Review Draft, Committee Specification (CS), and OASIS Standard level. TC Process §2.2.6
+Which checklist, and when
+Summary of the two editor checklists and when each is used
+Checklist
+Purpose
+Typical timing
+Editorial quality verification checklist
+Confirms the document itself is structurally and editorially complete, cover page, URI block, version information, conformance clauses, normative references, IPR notice, and formatting.
+Before requesting a ballot to approve a Committee Specification Draft (CSD) or Committee Specification (CS), and before any public review submission.
+Document submission checklist
+Confirms all administrative steps have been taken, OASIS Support Request submitted, templates registered, document uploaded to the correct OASIS repository, and approvals obtained from TC Administration.
+When submitting a document for publication or initiating a ballot through the OASIS Support Request Forms system.
+OASIS staff practice
+Both checklists are maintained by OASIS TC Administration staff and are updated when policy or tooling changes. TC editors should retrieve the current versions directly from Member Resources rather than relying on a saved local copy. OASIS Member Resources
+Editorial quality verification checklist, key areas
+The editorial quality verification checklist covers the following areas. Retrieve the current, staff-maintained version from the Member Resources Editors section ; the list below is illustrative of scope, not a substitute for the live checklist.
+Cover page completeness: work product title, version identifier, stage abbreviation, and the three required URIs (This stage, Previous stage, Latest stage), all conforming to the current Naming Directives. Naming Directives v1.7
+Stage abbreviation: must use a current stage abbreviation, for Standards Track: csd , cs , os , or errata ; for Non-Standards Track: cnd or cn . The obsolete designations csprd , cnprd , and cos were removed in Naming Directives v1.7 (effective 2 January 2024) and must not appear in any current work product. Naming Directives v1.7
+IPR notice: correct IPR mode statement and copyright notice for the TC's chosen IPR mode. IPR Policy
+Conformance clauses (Standards Track): any Standards Track Work Product must include a separate numbered conformance clause section with individually numbered clauses before it can be submitted for public review, approved as a Committee Specification (CS), or approved as an OASIS Standard. TC Process §2.2.6
+Normative vs. informative content: sections marked consistently; normative references listed separately from informative references.
+Machine-readable definitions (Standards Track): any machine-readable content (schemas, grammars, code) must be provided as separate plain-text files alongside the specification document. TC Process §2.2.5
+Document consistency: section numbers, cross-references, defined term capitalization, and table of contents are current and internally consistent.
+Keyword guidelines: RFC 2119 / BCP 14 keywords (MUST, SHALL, SHOULD, MAY, etc.) used consistently and declared in a keywords section where employed. OASIS Member Resources, Keyword guidelines
+Document submission checklist, key areas
+The document submission checklist covers administrative and process steps. Retrieve the current version from the Member Resources Editors section .
+Work product registration: a Work Product Registration and Template Request has been submitted to OASIS TC Administration, and a customized template has been received and used.
+TC ballot completed: the applicable TC vote has been held and recorded, a Full Majority Vote for a Committee Specification Draft (CSD) TC Process §2.5 , or a Special Majority Vote for a Committee Specification (CS) TC Process §2.7 . The vote type must match the stage.
+Support Request submitted: submission request filed through the OASIS Support Request Forms system (not by direct email to TC Administration). The current platform is Higher Logic ; Kavi submission forms are no longer used.
+Document uploaded: the final approved version uploaded to the designated OASIS document repository before the support request is filed.
+Public review prerequisites (if applicable): for a public review submission, the Full Majority Vote to open review has been held and the minimum review period is correctly stated, at least 30 days for a first public review, or at least 15 days for any subsequent public review of the same work product. TC Process §2.6
+Comment resolution (for CS ballot or OASIS Standard submission): all comments received during the most recent public review have been resolved by the TC before the CS approval ballot is opened. TC Process §2.7
+Statements of Use (for submission as a candidate for OASIS Standard only): three Statements of Use referencing the Committee Specification, with at least one from an OASIS Organizational Member, must be in hand before the TC votes to submit the Committee Specification as a candidate for OASIS Standard. That vote requires a Special Majority Vote. TC Process §2.8.1
+Where to find the checklists
+Policy requirement
+Editors must ensure all Work Products meet the quality requirements of the TC Process before submitting for approval. The two OASIS-maintained checklists are the staff-verified tool for confirming compliance. TC Process §2.2
+Both checklists are in the Editors section of OASIS Member Resources . The Editors section also contains:
+Editor's Manual (four parts covering role, editorial workflows, specification structure and naming, and work product development)
+Template request forms for new work products
+DocBook templates and stylesheets; DITA stylesheets
+Keyword guidelines
+Conformance clause writing guidelines
+Testing and testability guidelines
+These resources are maintained by OASIS staff and are not part of the normative TC Process; they represent best practice and operational guidance for editors.
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §2.2 , §2.5 , §2.6 , §2.7 , §2.8.1 ), Naming Directives v1.7 (2 January 2024), and the OASIS Member Resources Editors section (ongoing). The two checklists (editorial quality verification checklist and document submission checklist) are staff-maintained resources at oasis-open.org/member-resources/ . Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

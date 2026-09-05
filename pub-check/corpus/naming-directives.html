@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>namingDirectives-v1.7</title>
+  <link rel="stylesheet" href="https://docs.oasis-open.org/templates/css/markdown-styles-v1.7.3a.css" />
+</head>
+<body>
+<p><img src="https://docs.oasis-open.org/templates/OASISLogo-v3.0.png"
+alt="OASIS Logo" /></p>
+<hr />
+<h1 id="oasis-naming-directives">OASIS Naming Directives</h1>
+<p>Date: January 02, 2024<br />
+Version: 1.7<br />
+This version: <a
+href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives-v1.7.html">https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives-v1.7.html</a><br />
+Previous version: <a
+href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives-v1.6.html">https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives-v1.6.html</a><br />
+Latest version: <a
+href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html</a></p>
+<hr />
+<h3 id="contents"><a href="#contents">Contents</a></h3>
+<ul>
+<li><p><a href="#introduction">1 Introduction</a></p></li>
+<li><p><a href="#definitions">2 Definitions</a></p></li>
+<li><p><a href="#nameCharacters">3 Name Characters for Files and
+Directories</a></p></li>
+<li><p><a href="#nameConstruction">4 Name Construction Rules for Files
+and Directories</a></p></li>
+<li><p><a href="#versioning">5 Identifiers for Version, Stage, and
+Revision</a></p>
+<ul>
+<li><a href="#Version">5.1 Version</a></li>
+<li><a href="#stage">5.2 Stage</a></li>
+<li><a href="#revision">5.3 Revision</a></li>
+</ul></li>
+<li><p><a href="#URIs-Resources">6 Rules for URIs and Resources</a></p>
+<ul>
+<li><a href="#paths">6.1 Path Components in Document URIs</a></li>
+<li><a href="#specURIs">6.2 Required Document URIs</a></li>
+<li><a href="#resourcePermanence">6.3 Resource Permanence</a></li>
+<li><a href="#URI-persistence">6.4 URI Persistence</a></li>
+<li><a href="#URI-aliases">6.5 URI Aliases</a></li>
+<li><a href="#appropriateURIs">6.6 Using Appropriate URI
+References</a></li>
+</ul></li>
+<li><p><a href="#WorkProduct-Title">7 Work Product Title/Name and
+Acronym</a></p></li>
+<li><p><a href="#xml-namespaces">8 XML Namespace Identifiers and
+Namespace Documents</a></p></li>
+<li><p><a href="#notes">9 Notes</a></p></li>
+<li><p><a href="#revisionHistory">10 Revision History</a></p></li>
+</ul>
+<hr />
+<p><a name="introduction" href="#introduction">#introduction</a></p>
+<h3 id="1-introduction">1 Introduction</h3>
+<p>This document specifies rules for proper naming, identification, and
+usage of URI references for documents produced by OASIS Technical
+Committees (TCs) and Open Projects (OPs). The <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS
+Technical Committee Process</a> provides the broader framework for these
+rules. The principal goal is to support usability of OASIS Work Products
+by following predictable/uniform conventions for naming and linking that
+respect evolving Internet/Web Architecture best-practice. Please consult
+with Project Administration if you have any questions.</p>
+<p>The rules apply to both TCs and OPs, although "TC" is generally used
+in this document.</p>
+<hr />
+<p><a name="definitions" href="#definitions">#definitions</a></p>
+<h3 id="2-definitions">2 Definitions</h3>
+<p><em><a name="dfn-documentIdentifier">document identifier</em> — an
+identifier string that corresponds to a <a
+href="#stage-specific-filename">stage-specific filename</a> published on
+a Work Product's prose document cover page <a href="#specURIs">document
+URI</a>, <em>minus</em> the .ext portion of the filename; a document
+identifier is also used as a visible metadata element in a page
+footer</p>
+<p><em><a name="dfn-OASIS-Library">OASIS Library</em> — official OASIS
+repository for most approved TC work, located at the URI <a
+href="https://docs.oasis-open.org/"><span>https://docs.oasis-open.org</span></a></p>
+<p><em><a name="dfn-stage">stage</em> — a <a href="#stage">stage</a>,
+also called an <em>approval stage</em>, is a track-specific named level
+of maturity for Work Products</p>
+<p><em><a name="dfn-TC-Repository">TC document repository</em> — a
+specific <a href="#tc-document-repository">document repository</a>
+assigned to each TC and required as an upload location for
+contributions, drafts, and Work Products queued for approval.</p>
+<p><em><a name="dfn-Version">Version</em> — (capitalized) a <a
+href="#Version">major numbered edition</a> of a Work Product developed
+through a continuous process of authoring, publication, review, and
+editorial revision, where the approved publication instances correspond
+to development <a href="#stage">stages</a> belonging to one
+"Version".</p>
+<hr />
+<p><a name="nameCharacters" href="#nameCharacters">#nameCharacters</a></p>
+<h3 id="3-name-characters-for-files-and-directories">3 Name Characters
+for Files and Directories</h3>
+<p><a name="nameCharactersAllowed">For any filename or directory/folder
+name, TCs must use only the sixty-four characters from among
+alphanumerics [A-Za-z0-9] and the two punctuation characters: "."
+(PERIOD), and "-" (HYPHEN)" — that is, any upper-case character,
+lower-case character, Arabic numeral/digit, FULL STOP [decimal 46], and
+HYPHEN-MINUS [decimal 45].</p>
+<p><a name="characterRestrictionScope">These name character restrictions
+must be adhered to for all files/directories associated with approved
+Work Products and any candidates for TC approval. The rules should be
+followed in all other contexts where OASIS <a
+href="#scopeApplicability">tools and publication venues</a> support the
+constraints.</p>
+<p><a name="underscoreException">The UNDERSCORE character ("_") may be
+used in filenames and directory names where an application (unavoidably)
+generates this character, but in general, use of HYPHEN to mark juncture
+is preferable; the UNDERSCORE character may be visually confused with
+SPACE or an underline-effect in some predictable publication contexts.
+An UNDERSCORE must never be used in a filename or directory name that is
+used in a <a href="#specURIs">document URI</a> — that is, a primary URI
+reference published as a document cover page URI (<em>i.e.</em> as <a
+href="#specURIs">required</a> for identification of a Work Product as a
+whole or for identification of a separately-titled prose Part in a
+Multi-Part Work Product).</p>
+<hr />
+<p><a name="nameConstruction" href="#nameConstruction">#nameConstruction</a></p>
+<h3 id="4-name-construction-rules-for-files-and-directories">4 Name
+Construction Rules for Files and Directories</h3>
+<p><em><a name="nameConstructionGloss">Name construction</em> rules
+define how characters may be used to compose names for files and
+directories, <em>i.e.</em>, prescription for the lexical and syntactic
+structure of names, given the <a
+href="#nameCharactersAllowed">restricted character inventory</a>.
+Motivations for these constraints include concerns for fidelity of
+interchange across different file systems, minimizing the risks of
+common text-processing errors, usability (visual clarity), and other
+interoperability considerations.</p>
+<p><strong><a name="nameConstructionConstraints">Constraints:</strong></p>
+<ol type="1">
+<li><p><a name="mixedCaseAllowed">TCs may use mixed case (upper case
+characters mixed with lower case characters) in filenames and directory
+names, including <a
+href="https://xml.coverpages.org/camelCase.html">camel case</a>. TCs
+should understand that OASIS web servers will respect case-sensitivity,
+with no accommodation for case-folding.</p></li>
+<li><p><a name="trademarksDisallowed">Filenames and directory names must
+not contain the trademarked names of products, companies, or other
+corporate entities where the mark is not owned by OASIS.</p></li>
+<li><p><a name="punctuationStartEndDisallowed">Filenames and directory
+names must neither begin nor end with a punctuation character (period or
+hyphen). Similarly, the <a href="#dfn-documentIdentifier">document
+identifier</a> portion of a filename must not end with a punctuation
+character.</p></li>
+<li><p><a name="multiplePunctuationDisallowed">Filenames and directory
+names must not contain multiple (2+) consecutive punctuation
+characters</p></li>
+<li><p>A filename identifying a specific published instance (stage) of a
+Work Product, used in a required <a href="#specURIs">cover page URI</a>,
+must have the following structure unless it is a filename associated
+with a <a href="#filenameSyntaxMP">Multi-Part</a> or Errata Work
+Product:</p>
+<p><strong><a name="filenameSyntax">[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber].[ext]</strong></p>
+<p>Example: <strong>emix-v1.0-csd01.doc</strong></p>
+<p><a name="filenameSyntaxTokens">Where:</p>
+<ul>
+<li><em><a name="token-WP-abbrev">[WP-abbrev]</em> is a short identifier
+component for the Work Product, selected by the TC in consultation with
+Project Administration, used in constructing a filename and
+path/directory hierarchy</li>
+<li><em><a name="token-version-id">[version-id]</em> is a versioning
+identifier component composed of the single character "v" (lower case),
+followed by a numeric string matching the rules for <a
+href="#Version">Version</a> (<em>e.g.</em>, v2.0)</li>
+<li><em><a name="token-stage-abbrev">[stage-abbrev]</em> is a <a
+href="#stage">stage</a> abbreviation in lower case characters
+(<em>e.g.</em>: csd, cnd, cs, cn, os)</li>
+<li><em><a name="token-revisionNumber">[revisionNumber]</em> is a
+two-digit number as prescribed <a href="#revision">below</a></li>
+<li><em><a name="token-ext">[ext]</em> is a file extension.
+[<strong>Examples:</strong> "doc" and "xml" in
+emix-v1.0-csd01.<strong>doc</strong> and
+xrd-v1.1-cs01.<strong>xml</strong>]</li>
+<li><a name="token-namedTokens">the names of tokens in <a
+href="#filenameSyntax">the grammar rule</a> above (and their constrained
+values) are intended to be identical (names and meaning) to named tokens
+in the grammar rule for <a href="#URI-Syntax">document URIs</a></li>
+</ul></li>
+<li><p><a name="filenameExtension">A single file(name) extension must be
+used in each filename except for a <a
+href="#extensionlessFilenames">recognized set</a> of extensionless
+filenames in common use. File extensions should conform to industry best
+practice — matching well-known IANA <a
+href="http://www.iana.org/assignments/media-types/">MIME Media
+Types</a>.</p></li>
+<li><p><a name="duplicateNamesDisallowed">A directory must not contain
+two or more names (filenames or directory names) that differ ONLY in
+case. For example, a directory must not contain two directories FOO and
+Foo, nor two files with filenames BAR.txt and bar.txt.</p></li>
+<li><p><a name="specialMeaningFilenames">Except as approved by <a href="/cdn-cgi/l/email-protection#a8d8dac7c2cdcbdc85c9ccc5c1c6e8c7c9dbc1db85c7d8cdc686c7dacf">Project Administration</a>,
+filenames having special meaning for operating systems or for OASIS
+server software must not be used in any Work Product. For example, the
+following are forbidden: <em>index.html</em>, <em>index.htm</em>, *.cgi,
+and .htaccess.</p></li>
+<li><p><a name="filenameSyntaxMP">The filename for a distinct
+separately-titled prose part of a Multi-Part Work Product must
+(typically) have the following structure unless otherwise approved by
+Project Administration; this pattern simply adds the tokens
+<strong>[partNumber]-[partName]</strong> preceding the file
+extension.</p>
+<p><strong><a name="filenameSyntaxMultiPart">[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-[partNumber]-[partName].[ext]</strong></p>
+<p>Example:  <strong>saml-v2.1-csd01-part1-overview.html</strong></p>
+<p><a name="filenameSyntaxTokensMP">Where:</p>
+<ul>
+<li><em><a name="token-partNumber">[partNumber]</em> is composed of
+literal "part" concatenated with an Arabic number, beginning with the
+number "1" (for Part 1) and increasing monotonically (2, 3, 4, ...) for
+other parts</li>
+<li><em><a name="token-partName">[partName]</em> is a short descriptive
+string identifying the part by subject</li>
+<li><em><a name="token-partNameP1">[partName]</em> for "Part 1" should
+be "overview" or "intro" or similar identifier to signify that Part 1 of
+the Multi-Part Work Product provides an overview or introduction to the
+work as a whole</li>
+<li><a name="tokensDefinedSP">other tokens in the grammar pseudo-syntax
+are defined <a href="#filenameSyntaxTokens">above</a></li>
+</ul></li>
+</ol>
+<p><strong><a name="nameConstructionGeneralApplicability">Applicability:</strong></p>
+<p>The name construction rules enumerated above for filenames and
+directory names must be followed for files/directories associated with
+all Work Products. They should be followed in all other contexts where
+OASIS tools and publication venues support these constraints in
+principled ways consistent with the publication goals.</p>
+<p>Whereas filenames and <a href="#paths">paths/URIs</a> used in
+identification of Work Products as a whole or (Multi-Part) named parts
+have prescribed construction patterns, most other Work Product filenames
+and directory names are unconstrained other than for <a
+href="#nameCharacters">name character conformance</a>. Thus, filenames
+for images and machine-readable <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#wpComponentsCompLang">computer
+language definitions</a> (<em>e.g.</em>,DTDs, schemas, WSDLs, XML/JSON
+artifacts...) are generally subject to no special rules. On the other
+hand, filenames should be constructed in such manner that they are
+optimally suited for the Work Product revision process — as a
+specification progresses through successive stages of review and
+approval. In particular, it is considered inadvisable to incorporate
+instance-specific <em>[<a href="#stage">stage</a>][<a
+href="#revision">revision</a>]</em> data for any release in filenames
+other than in the document identifier files, as required; thus
+mySchema.xsd but NOT mySchema-csd02.xsd. Rather: TCs are advised to use
+named subdirectories for storing images, schemas, WSDLs, codelists, XML
+instances, and similar artifacts, retaining stable/identical filenames
+in each successive release.</p>
+<p>The name construction rules enumerated above cover most publication
+genres for Standards Track Work Products and for many 'Notes' in the
+Non-Standards Track. The construction rules are slightly different for
+independently titled (prose) parts in a <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#wpComponentsMultiPart">Multi-Part
+Work Product</a>, for the <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#errata">Errata</a>
+drafts and final format versions, and for some presentation (slideset,
+white paper) formats. Please consult with <a href="/cdn-cgi/l/email-protection#4232302d282721366f23262f2b2c022d23312b316f2d32272c6c2d3025">Project Administration</a>
+for additional guidance on proposed identifiers for Multi-Part Work
+Product parts, for Errata, and for presentation-ware. The Errata
+process, for example, has its own set of revisions and approvals in a
+progression, with required directories /errata01/ (perhaps: /errata02/
+and /errata03/) and instance variants for the required
+"list-of-corrections" format and optional
+"complete-incorporating-errata" format <a
+href="https://www.oasis-open.org/committees/document.php?document_id=71341&amp;wg_abbrev=tca">guidelines
+in draft</a>. The filename construction rules typically applicable to a
+"part" in a Multi-Part Work Product with separately-titled parts are
+presented <a href="#filenameSyntaxMP">above</a>.</p>
+<hr />
+<p><a name="versioning" href="#versioning">#versioning</a></p>
+<h3 id="5-identifiers-for-version-stage-and-revision">5. Identifiers for
+Version, Stage, and Revision</h3>
+<p><a name="versioningIdentifierElements">Filenames and directory names
+must be used with other naming components to create prescribed URI
+references (<em>e.g.</em>, hyperlinks) for documents and document
+portions. This section explains the required use of identifiers for <a
+href="#Version">Version</a>, <a href="#stage">stage</a>, and <a
+href="#revision">revision</a> which are relevant to <a
+href="#URIs-Resources">creation of URI references</a> for resources
+within a directory hierarchy.</p>
+<p><a name="Version" href="#Version">#Version</a></p>
+<h4 id="51-version">5.1 Version</h4>
+<p>Formally, a <em>Version</em> of a Work Product is a numeric
+identifier associated with a focused technical activity that proceeds on
+the <a href="#standards-track">Standards Track</a> or <a
+href="#non-standards-track">Non-Standards Track</a> through a number of
+development stages, often leading to the creation of an <a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dOASISstdsFinal">OASIS
+Standards Final Deliverable</a>.</p>
+<p>A Version in this formal sense must be represented textually by a
+numeric string composed of digits [0-9] and period (".") corresponding
+to any of the approved lexical models (<strong>#.#</strong>,
+<em>e.g.</em> <strong>1.0</strong>; <strong>#.##</strong>, <em>e.g.</em>
+<strong>1.01</strong>; <strong>#.#.#</strong>, <em>e.g.</em>
+<strong>1.2.1</strong>; <strong>##.#</strong>, <em>e.g.</em>
+<strong>10.1</strong>). Use of any other pattern for a Version
+identifier must be negotiated with the Project Administration.</p>
+<p>A Version identifier must be used as a discrete <a href="#paths">path
+element</a> in document URIs, and must also be used in a document's
+principal URI filenames (<em>i.e.</em>, <a
+href="#stage-specific-filename">stage-specific filenames</a> in <a
+href="#specURIs">required URIs</a> used on a cover page). A Version
+identifier must also be incorporated into a Work Product <a
+href="#workProductName">name/title</a>, where a title should be composed
+from a suitable name/identifier followed immediately (without
+punctuation) by the word "Version" and the Version number,
+<em>e.g.</em>, OpenDocument Version 1.2.</p>
+<p><a name="Version-version">Informally, OASIS policy documents sometime
+use the word "version" (lower case) in casual reference to a variant of
+any kind, in common speech: a variant file format ("the HTML version"),
+any natural successor or predecessor ("the latest version", "the
+previous version"), any comparative representation ("the diff-marked
+version") or any package type ("the compressed ZIP version"), etc. In
+this document, "Version" (upper case) always refers to the major Version
+in its formal sense, while "version" (lower case) represents generic
+usage of the word.</p>
+<p><a name="stage" href="#stage">#stage</a></p>
+<h4 id="52-stage">5.2 Stage</h4>
+<p><a name="stageIdentifiers">Each published instance (or, package
+<a name="release">"release") of a Work Product is identified by a name
+for the stage in combination with a <a href="#revision">revision
+number</a>. In the grammar rules for the construction of
+machine-readable <a href="#filenameSyntax">filenames</a> and <a
+href="#URI-Syntax">URIs</a>, a release is thus identified using a string
+matching "[stage-abbrev][revisionNumber]", where "stage-abbrev" is one
+of the following, in lower case: csd, cs, os, errata, cnd, cn.
+<strong>Note:</strong> The os stage abbreviation is never used with a
+revision number.</p>
+<p>In human-readable prose, the equivalent textual representation is
+expressed by a full stage name or stage abbreviation and a revision
+number. For example: "Committee Specification Draft 02", corresponds to
+csd02 in filenames and directory names (paths/URIs). The list of full
+stage names and abbreviation for each stage, within <a
+href="#tracks">track</a>, are presented below as they appear in
+human-readable prose context. A stage abbreviation (with a revision
+number) must be used in lower case as a discrete <a
+href="#paths">path</a> component for document identifier, document URI,
+and in principal document filenames.</p>
+<ul>
+<li><em><a name="standards-track"><a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#StdsWP">Standards
+Track Work Products</a></em>
+<ol type="1">
+<li><a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dCommitteeDraft">Committee
+Specification Draft (CSD)</a></li>
+<li><a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dCommitteeSpec">Committee
+Specification (CS)</a></li>
+<li><a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dOASISstandard">OASIS
+Standard (OS)</a></li>
+<li><a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dApprovedErrata">Approved
+Errata (Errata)</a></li>
+</ol></li>
+<li><em><a name="non-standards-track"><a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dNonStdsWP">Non-Standards
+Track Work Products</a></em>
+<ol type="1">
+<li><a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dCNdraft">Committee
+Note Draft (CND)</a></li>
+<li><a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dCommitteeNote">Committee
+Note (CN)</a></li>
+</ol></li>
+</ul>
+<p>For each stage (<em>i.e.</em>, discrete publication event of an
+instance), a resource is assigned a
+<a name="stage-specific-filename">stage-specific filename which encodes
+both the stage abbreviation and the revision number.
+<strong>Example:</strong> stage abbreviation '<strong>csd</strong>' in
+the filename xrd-v1.0-<strong>csd</strong>01.html, concatenated with the
+revision number '<strong>01</strong>', such that
+'<strong>csd01</strong>' matches [stage-abbrev][revisionNumber]. A
+stage-specific filename is used within the URI for "This stage", but not
+in the "Latest stage" URI, as described <a href="#specURIs">below</a>.
+The <a href="#dfn-documentIdentifier">document identifier</a> for any <a
+href="#release">release</a> corresponds to the stage-specific filename
+minus the filename extension (.ext).</p>
+
+<p><strong>Note:</strong>
+<a name="working-draft">Unpublished drafts are frequently referred to as
+"working drafts." These documents may use any file naming pattern preferred
+by the TC. Many TCs use a pattern similar to stage names above, with "wd"
+instead of "csd."
+
+<p><strong>Note:</strong>
+<a name="PRMetadata-comment-resolution-files">When a TC resolves via
+Work Product Ballot(s) to initiate a Public Review of a CSD or CND,
+Project Administration will publish an additional "public review
+metadata" file in the directory with the CSD or CND. This HTML file
+provides a publication history of the Work Product, and serves to
+document the occurrence of the public review. The "public review
+metadata" filename follows the pattern:</p>
+<p><strong>[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html</strong></p>
+<p>Example:
+<strong>security-playbooks-v2.0-csd05-public-review-metadata.html</strong></p>
+<p>When the TC produces the required <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#publicReview">comment
+resolution log</a> following the public review, it will also be
+published in the directory with the CSD or CND. The "comment resolution
+log" filename follows the pattern:</p>
+<p><strong>[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-comment-resolution-log.[ext]</strong></p>
+<p>Example:
+<strong>security-playbooks-v2.0-csd05-comment-resolution-log.txt</strong></p>
+<p><a name="revision" href="#revision">#revision</a></p>
+<h4 id="53-revision">5.3 Revision</h4>
+<p>The process of document revision as a technical activity takes place
+when an approved Work Product is edited and is assigned a new revision
+number. Textually, a <em>revision</em> is a two-digit number associated
+with a specific <a href="#stage">stage</a> corresponding to a published
+instance. A revision number begins with "01" and is incremented by 1 for
+each release at each maturity level (stage).</p>
+<p>A revision number is a required component within <a
+href="#stage-specific-filename">stage-specific filenames</a> used on a
+<a href="#specURIs">document cover page</a>.</p>
+<p>The OASIS Standard (OS) stage does not use a revision number, since
+any change to an OS is handled as Errata.</p>
+<p><strong>Note:</strong> Where some OASIS policies use the terms
+<em>revision</em> and <em>version</em> in a general/equivalent sense,
+this document uses <em>revision</em> as meaning the two-digit revision
+number that occurs with a <em>stage</em> (name) to identify any distinct
+<em>release</em> (e.g., csd02, cs01). Where the TC Process refers to a
+"single version number" in connection with uniform identification of
+"files" or multiple "constituent parts" in <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#wpComponentsMultiPart">Multi-Part
+Work Product</a>, this document implements the identification
+requirement in terms of the (single) <a href="#release">release</a>
+identifier [stage-abbrev][revisionNumber].</p>
+<hr />
+<p><a name="URIs-Resources" href="#URIs-Resources">#URIs-Resources</a></p>
+<h3 id="6-rules-for-uris-and-resources">6 Rules for URIs and
+Resources</h3>
+<p>This section sets out rules for construction of path elements in
+document URIs (prescribed naming patterns within URIs as strings), rules
+for persistence of URIs, for permanence of published OASIS resources,
+and appropriate selection of URI references for various usage contexts.
+TC editors need to understand these rules and the required use of
+identifier components in order to design a hierarchy of directories that
+will be used in successive stages through the progress of Work Product
+development and publication.</p>
+<p><a name="paths" href="#paths">#paths</a></p>
+<h4 id="61-path-components-in-document-uris">6.1 Path Components in
+Document URIs</h4>
+<p>URIs serving as primary identifiers (Document URIs) for Work Products
+installed in the <a href="https://docs.oasis-open.org/">OASIS
+Library</a> must conform to this pattern unless they are URI references
+associated with a <a href="#URIs-MP">Multi-Part</a> or Approved Errata
+Work Product:</p>
+<p><a name="URI-Syntax"><a
+href="https://docs.oasis-open.org/">https://docs.oasis-open.org/</a>[tc-shortname]/[WP-abbrev]/[version-id]/[stage-abbrev][revisionNumber]/[doc-id].[ext]</p>
+<p>Example: <a
+href="https://docs.oasis-open.org/emergency/cap/v1.2/cs01/CAP-v1.2-cs01.html">https://docs.oasis-open.org/emergency/cap/v1.2/cs01/CAP-v1.2-cs01.html</a></p>
+<p><a name="URI-SyntaxTokens">Where:</p>
+<ul>
+<li><em><a name="token-tc-shortname">[tc-shortname]</em> is the official
+machine-readable identifier string used in the TC's (Kavi) group name
+and in the <a href="https://docs.oasis-open.org/">OASIS Library</a> TC
+root URI, in lower case (<em>e.g.</em>: xacml, dita, amqp)</li>
+<li><em>[WP-abbrev]</em> is a short identifier component for the Work
+Product, selected by the TC in consultation with Project Administration,
+used in constructing a filename and path/directory hierarchy</li>
+<li><em>[version-id]</em> is a versioning identifier component composed
+of the single character "v" (lower case), followed by a numeric string
+matching the rules for <a href="#Version">Version</a> (<em>e.g.</em>,
+v2.0)</li>
+<li><em>[stage-abbrev]</em> is the abbreviation for the document <a
+href="#stage">stage</a></li>
+<li><em>[revisionNumber]</em> is a two-digit number for the <a
+href="#revision">revision</a> at the designated stage</li>
+<li><em><a name="token-doc-id">[doc-id]</em> is an identifier
+corresponding to the <a href="#stage-specific-filename">stage-specific
+filename</a> minus the final .ext portion</li>
+<li><em>[ext]</em> is the file extension</li>
+<li>the names of tokens in <a href="#URI-Syntax">the grammar rule
+above</a> (and their constrained values) are intended to be identical
+(names and meaning) to named tokens in the grammar rule for <a
+href="#filenameSyntax">filenames</a></li>
+</ul>
+<p>TCs may also design path components relative to a particular stage
+where additional directories are created below
+/[stage-abbrev][revisionNumber]/ <em>viz.</em>, at the same hierarchical
+level as the principal document URIs ([doc-id].[ext]). For example:</p>
+<p><a
+href="https://docs.oasis-open.org/">https://docs.oasis-open.org/</a>[tc-shortname]/[WP-abbrev]/[version-id]/[stage-abbrev][revisionNumber]/schemas/<em>.</em><br />
+<a
+href="https://docs.oasis-open.org/">https://docs.oasis-open.org/</a>[tc-shortname]/[WP-abbrev]/[version-id]/[stage-abbrev][revisionNumber]/examples/<em>.</em></p>
+<p><a name="dot-segments">For content published in the <a
+href="https://docs.oasis-open.org/">OASIS Library</a>, TCs may create
+URI references using the path segments "<strong>.</strong>" and
+"<strong>..</strong>" ("dot-segments") for relative reference within a
+path name hierarchy. However, TC Members must take responsibility for
+constructing such paths in a way that all relative references resolve
+correctly <a
+href="http://tools.ietf.org/html/rfc3986#section-3.3">according to
+rule</a>: unlike in a file system, dot-segments are only interpreted
+within the URI path hierarchy and are removed as part of the <a
+href="http://tools.ietf.org/html/rfc3986#section-5.2.4">resolution
+process</a>.</p>
+<p><strong>Applicability:</strong> The construction rules for paths
+enumerated above cover most publication genres for Standards Track Work
+Products and for many 'Notes' in the Non-Standards Track. The
+construction rules are slightly different for independently titled
+(prose) parts in a <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#wpComponentsMultiPart">Multi-Part
+Work Product</a>, for the <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#errata">Approved
+Errata</a> drafts and final format versions, and for some presentation
+(slideset, white paper) formats.</p>
+<p><strong>Please consult with <a href="/cdn-cgi/l/email-protection#2252504d484741560f43464f4b4c624d43514b510f4d52474c0c4d5045">Project Administration</a>
+for additional guidance on proposed identifiers for Multi-Part Work
+Product parts, for Approved Errata, and for
+presentation-ware.</strong></p>
+<p><a name="URIs-MP" href="#URIs-MP">#URIs-MP</a></p>
+<p><strong><a href="#URIs-MP">Multi-Part Work Products: Option
+1</a></strong></p>
+<p>URIs serving as primary identifiers for distinct separately-titled
+prose parts in a Multi-Part Work Product must (typically) have the
+following structure unless otherwise approved by Project Administration;
+this pattern simply adds one path component preceding the filename using
+<strong>[partNumber]-[partName]</strong>, as in the case of <a
+href="#filenameSyntaxMP">the filename</a> itself:</p>
+<p><a name="URI-SyntaxMP"><a
+href="https://docs.oasis-open.org/">https://docs.oasis-open.org/</a>[tc-shortname]/[WP-abbrev]/[version-id]/[stage-abbrev][revisionNumber]/[partNumber]-[partName]/[doc-id].[ext]</p>
+<p>Example: <a
+href="https://docs.oasis-open.org/cti/stix/v1.2.1/csd01/part1-overview/stix-v1.2.1-csd01-part1-overview.html">https://docs.oasis-open.org/cti/stix/v1.2.1/csd01/part1-overview/stix-v1.2.1-csd01-part1-overview.html</a></p>
+<p><a name="URI-SyntaxTokensMP">Where:</p>
+<ul>
+<li><em>[partNumber]</em> is composed of literal "part" concatenated
+with an Arabic number, beginning with the number "1" (for Part 1) and
+increasing monotonically (2, 3, 4, ...) for other parts. If more than
+nine parts are involved, begin numbering with "01", etc.</li>
+<li><em>[partName]</em> is a short descriptive string identifying the
+part by subject</li>
+<li><em>[partName]</em> for "Part 1" should be "overview" or "intro" or
+similar identifier to signify that Part 1 of the Multi-Part Work Product
+provides an overview or introduction to the work as a whole</li>
+<li>other tokens in the grammar pseudo-syntax are defined <a
+href="#URI-SyntaxTokens">above</a></li>
+</ul>
+<p><strong>Multi-Part Work Products: Option 2</strong></p>
+<p>The OSLC Open Project pioneered the use of an alternative multi-part
+URI scheme, in which the separate Part directories are not used, and the
+file names of the individual Parts do not contain Version and stage
+components, so that they remain invariant across stages. Note the three
+different Part names within the same /os/ directory in this
+example:<br />
+<a
+href="https://docs.oasis-open.org/oslc-promcode/promcode/v1.0/os/promcode-spec.html">https://docs.oasis-open.org/oslc-promcode/promcode/v1.0/os/promcode-spec.html</a><br />
+<a
+href="https://docs.oasis-open.org/oslc-promcode/promcode/v1.0/os/promcode-shapes.html">https://docs.oasis-open.org/oslc-promcode/promcode/v1.0/os/promcode-shapes.html</a><br />
+<a
+href="https://docs.oasis-open.org/oslc-promcode/promcode/v1.0/os/promcode-vocab.html">https://docs.oasis-open.org/oslc-promcode/promcode/v1.0/os/promcode-vocab.html</a></p>
+<p>This structure is simpler than the one described in <a
+href="#URIs-MP">Option 1</a> above. It is particularly well suited to
+Work Products which expect to use cross-references between the separate
+Parts.</p>
+<p><strong>Please consult with <a href="/cdn-cgi/l/email-protection#69191b06030c0a1d44080d0400072906081a001a4406190c0747061b0e">Project Administration</a>
+for additional guidance on proposed identifiers for Multi-Part Work
+Products.</strong></p>
+<p><a name="specURIs" href="#specURIs">#specURIs</a></p>
+<h4 id="62-required-document-uris">6.2 Required Document URIs</h4>
+<p><a name="sdo-conventions-latest">Following a convention commonly used
+in other standards organizations, OASIS requires that Work Products
+present three general kinds of URIs as display metadata, <a
+href="#coverPageExampleURIs">illustrated</a> below: <em>This stage</em>,
+<em>Previous stage</em> (when applicable), and <em>Latest stage</em>. A
+TC may optionally use the term "version" instead of "stage", although
+this is discouraged due to the obvious conflict with the required
+component "Version."</p>
+<ul>
+<li><p>Label: <strong><a name="this-version"><a name="this-stage">This
+stage</strong>. <a name="def-thisVersion"><a name="def-thisStage">A URI
+specific to the Work Product current at the time of publication; it is
+persistent, permanently assigned to one particular specification
+instance, and is never re-used.</p></li>
+<li><p>Label:
+<strong><a name="previous-version"><a name="previous-stage">Previous
+stage</strong>.
+<a name="def-previousVersion"><a name="def-previousStage">A URI used as
+applicable to reference the <em>previous</em> published instance of a
+work; it corresponds to the <em>This stage</em> URI of the most recent
+ancestor of any given instance. If the current publication is the
+very first instance, the text "N/A" is used.</p></li>
+<li><p>Label:
+<strong><a name="latest-version"><a name="latest-stage">Latest
+stage</strong>. <a name="def-latestVersion"><a name="def-latestStage">A
+bookmarkable generic URI serving as a URI alias which is always
+associated with the latest/now-current specification instance, thus
+having a changing referent. It serves to identify and directly locate
+each successive published instance of a developing specification,
+through time. This locator URI does not contain the <a
+href="#paths">path component</a> [stage-abbrev][revisionNumber] or stage
+identifier in the filename.</p></li>
+</ul>
+<p><strong><a name="coverPageExampleURIs">Document Cover Page URIs
+(Hypothetical Example)</strong></p>
+<p><strong>This stage:</strong><br />
+      <a
+href="https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd03/ourSpec-v2.0-csd03.html">https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd03/ourSpec-v2.0-csd03.html</a><br />
+      <a
+href="https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd03/ourSpec-v2.0-csd03.pdf">https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd03/ourSpec-v2.0-csd03.pdf</a><br />
+      <a
+href="https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd03/ourSpec-v2.0-csd03.docx">https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd03/ourSpec-v2.0-csd03.docx</a></p>
+<p><strong>Previous stage:</strong><br />
+      <a
+href="https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd02/ourSpec-v2.0-csd02.html">https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd02/ourSpec-v2.0-csd02.html</a><br />
+      <a
+href="https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd02/ourSpec-v2.0-csd02.pdf">https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd02/ourSpec-v2.0-csd02.pdf</a><br />
+      <a
+href="https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd02/ourSpec-v2.0-csd02.docx">https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/csd02/ourSpec-v2.0-csd02.docx</a></p>
+<p><strong>Latest stage:</strong><br />
+      <a
+href="https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/ourSpec-v2.0.html">https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/ourSpec-v2.0.html</a><br />
+      <a
+href="https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/ourSpec-v2.0.pdf">https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/ourSpec-v2.0.pdf</a><br />
+      <a
+href="https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/ourSpec-v2.0.docx">https://docs.oasis-open.org/exampleTC/ourSpec/v2.0/ourSpec-v2.0.docx</a></p>
+<p><a name="resourcePermanence" href="#resourcePermanence">#resourcePermanence</a></p>
+<h4 id="63-resource-permanence">6.3 Resource Permanence</h4>
+<p>As part of the OASIS institutional commitment to transparency,
+openness, accountability, and public auditability, resources published
+in the <a href="https://docs.oasis-open.org/">OASIS Library</a>, <a
+href="#tc-document-repository">TC Document Repository</a>, and other
+venues must not be deleted or otherwise altered. Resources may be
+revised, but all revisions are retained. With the exception of resources
+identified by "latest stage" URI aliases, content instantiated as
+regular files and directories must not be over-written, replaced,
+renamed, or removed. TC Members are expected to follow this rule even in
+cases where a collaboration tool (by some means) might allow resource
+deletion or silent alteration.</p>
+<p><a name="URI-persistence" href="#URI-persistence">#URI-persistence</a></p>
+<h4 id="64-uri-persistence">6.4 URI Persistence</h4>
+<p>Corollary to <a href="#resourcePermanence">Resource Permanence</a>,
+URIs for published OASIS resources must be persistent. All resources and
+the Uniform Resource Identifiers (URIs) which establish mappings from
+identifiers to resources are permanent. This rule also applies to any
+secondary resource identified by a fragment identifier. Assignment of
+URIs to resources is thus considered to be inviolate other than for URI
+aliases intentionally and recognizably associated with variable content.
+For all other URIs, no action which severs the relationship between a
+URI and the resource may be undertaken.</p>
+<p><a name="URI-aliases" href="#URI-aliases">#URI-aliases</a></p>
+<h4 id="65-uri-aliases">6.5 URI Aliases</h4>
+<p>TCs must not use URI aliasing by any means, including, for example,
+unauthorized: (a) use of META-refresh elements, (b) preparing files with
+identical content under two different filenames within a given published
+instance, or (c) constructing URIs for canonical OASIS resources by
+using redirects supported by services on other Internet domains (e.g.,
+<a href="https://tinyurl.com/">http://tinyurl.com/</a>, <a
+href="http://purl.oclc.org/">http://purl.oclc.org/</a>, <a
+href="http://bit.ly/">http://bit.ly/</a>).</p>
+<p><a name="appropriateURIs" href="#appropriateURIs">#appropriateURIs</a></p>
+<h4 id="66-using-appropriate-uri-references">6.6 Using Appropriate URI
+References</h4>
+<p>This subsection explains how to select appropriate URI references for
+documents so that all users will be able to access the resources online
+and will be directed to the appropriate representation for a published
+instance of a work.</p>
+<p><a name="useCases" href="#useCases">#useCases</a> <strong>URI
+references for different use cases</strong></p>
+<p>TC editors and others should select the best URI reference suitable
+to the readers' needs — recognizing that all email messages and
+JIRA/SVN/Wiki text will have multiple audiences:</p>
+<ul>
+<li>Select the URI for the <a href="#this-stage">current published
+document stage</a> if you want the reader to examine something specific
+in that particular published instance; select the URI for the <a
+href="#latest-stage">latest</a> instance if you want the reader to
+access the very most recent publication (now or in the future), but be
+sure to characterize the URI as a "latest stage" resource locator</li>
+<li>Select the URI for the document directory in the <a
+href="https://docs.oasis-open.org/">OASIS Library</a> if you want the
+reader to scan the entire hierarchy of files/directories for a
+particular release, or for the Work Product at root level. Example, the
+<a href="https://docs.oasis-open.org/emix/emix/v1.0/csd04/">csd04
+directory</a> for EMIX Committee Specification Draft 04.</li>
+<li>Select the URI for the ZIP package corresponding to a published
+release if you think the most appropriate use (<em>e.g.</em>, testing)
+will be for the reader to download the package and install the files for
+local use. Example: the ZIP file <a
+href="https://docs.oasis-open.org/regrep/regrep-core/v4.0/cs01/regrep-core-v4.0-cs01.zip">regrep-core-v4.0-cs01.zip</a>
+corresponding to the release of OASIS ebXML RegRep Version 4.0, <a
+href="https://docs.oasis-open.org/regrep/regrep-core/v4.0/cs01/">Committee
+Specification 01</a>.</li>
+<li>From the three available <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#wpComponentsFileFormats">file
+formats</a> (HTML /XHTML, PDF, editable source), select the URI for the
+format most suitable to the reader's needs in a particular citation
+context; HTML may provide the most usable format for Web-based
+navigation and hyperlinking, while PDF may be useful for a
+single-disk-file representation, and editable source if the user wishes
+to select+copy+paste for excerpting, annotation, or creating a
+derivative work.</li>
+</ul>
+<p><a name="accessibleURIs" href="#accessibleURIs">#accessibleURIs</a>
+<strong>Publicly Accessible URIs</strong></p>
+<p><a name="publicVisibility">In support of the <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#visibility">OASIS
+TC Process rules</a> for transparent public access/visibility of all TC
+resources, TC Members must be careful to select <a
+href="#memberOnlyURIs">an appropriate form</a> of a URI reference to
+ensure that a cited resource is publicly accessible from that URI
+reference. The <em>OASIS member-only</em> (private, password-protected)
+URI references created by OASIS [Kavi] tools must not be cited in TC
+mailing list messages, Wiki pages, TC public web pages, JIRA tickets,
+specifications, meeting minutes, or in any TC "documents" that are or
+may become public.</p>
+<p>In some cases, the mechanical transform from a member-only (private)
+URI to the correct public URI can be made by replacing the substring
+'apps/org/workgroup/{tc-shortname}/' with 'committees'. Alternately, TC
+members may select the public-access URIs using select/copy+paste of
+relevant URI references from the public-access indexes as presented on
+the TC public home page, "Related links" display (Documents, Email
+Archives, Comments Archive, Ballots, Schedule). For Group ballots (<a
+href="#dual-URIs-TC-individual-ballot">specific ballots</a> and <a
+href="#dual-URIs-ballot-listing">ballot listings</a>), publishing both
+the member-only and public-access ballot URI is best, since they are
+useful for different purposes. Here are URI examples for documents,
+email messages, ballots, and calendar entries, together with
+document/email archive URIs for the TC public-access indexes:</p>
+<p><em><a name="dual-URIs-document">Document</em></p>
+<ul>
+<li>Private: <a
+href="https://www.oasis-open.org/apps/org/workgroup/ubl/download.php/34151/ndr-prd1-comments.txt"><span>https://www.oasis-open.org/apps/org/workgroup/ubl/download.php/34151/ndr-prd1-comments.txt</span></a></li>
+<li>Public: <a
+href="https://www.oasis-open.org/committees/download.php/34151/ndr-prd1-comments.txt"><span>https://www.oasis-open.org/committees/download.php/34151/ndr-prd1-comments.txt</span></a></li>
+<li>Index: <a
+href="https://www.oasis-open.org/committees/documents.php?wg_abbrev=ubl"><span>https://www.oasis-open.org/committees/documents.php?wg_abbrev=ubl</span></a></li>
+</ul>
+<p><em><a name="dual-URIs-email">Email message</em></p>
+<ul>
+<li>Private: <a
+href="https://www.oasis-open.org/apps/org/workgroup/ws-rx/email/archives/200712/msg00000.html"><span>https://www.oasis-open.org/apps/org/workgroup/ws-rx/email/archives/200712/msg00000.html</span></a></li>
+<li>Public: <a
+href="https://lists.oasis-open.org/archives/ws-rx/200712/msg00000.html"><span>https://lists.oasis-open.org/archives/ws-rx/200712/msg00000.html</span></a></li>
+<li>Index: <a
+href="https://lists.oasis-open.org/archives/ws-rx/"><span>https://lists.oasis-open.org/archives/ws-rx/</span></a></li>
+</ul>
+<p><em><a name="dual-URIs-ballot-listing">TC ballot listing</em></p>
+<ul>
+<li>Private: <a
+href="https://www.oasis-open.org/apps/org/workgroup/kmip/ballots.php"><span>https://www.oasis-open.org/apps/org/workgroup/kmip/ballots.php</span></a></li>
+<li>Public: <a
+href="https://www.oasis-open.org/committees/ballots.php?wg_abbrev=kmip"><span>https://www.oasis-open.org/committees/ballots.php?wg_abbrev=kmip</span></a></li>
+</ul>
+<p><em><a name="dual-URIs-TC-individual-ballot">TC individual
+ballot</em></p>
+<ul>
+<li>Private: <a
+href="https://www.oasis-open.org/apps/org/workgroup/uoml-x/ballot.php?id=1500"><span>https://www.oasis-open.org/apps/org/workgroup/uoml-x/ballot.php?id=1500</span></a></li>
+<li>Public: <a
+href="https://www.oasis-open.org/committees/ballot.php?id=1500"><span>https://www.oasis-open.org/committees/ballot.php?id=1500</span></a></li>
+</ul>
+<p><em><a name="dual-URIs-calendar">TC calendar entry</em></p>
+<ul>
+<li>Private: <a
+href="https://www.oasis-open.org/apps/org/workgroup/wsfed/event.php?event_id=16996"><span>https://www.oasis-open.org/apps/org/workgroup/wsfed/event.php?event_id=16996</span></a></li>
+<li>Public: <a
+href="https://www.oasis-open.org/committees/event.php?event_id=16996"><span>https://www.oasis-open.org/committees/event.php?event_id=16996</span></a></li>
+</ul>
+<hr />
+<p><a name="WorkProduct-Title" href="#WorkProduct-Title">#WorkProduct-Title</a>
+<a name="WorkProduct-Name" href="#WorkProduct-Name">#WorkProduct-Name</a></p>
+<h3 id="7-work-product-titlename-and-acronym">7 Work Product Title/Name
+and Acronym</h3>
+<p>This section provides guidance on creating human-readable names for
+Work Products, including variations needed for the name/title of
+separately-titled prose "parts" in a Multi-Part Work Product. The
+variations for title construction are parallel to naming variations in
+Multi-Part works for <a href="#filenameSyntaxMP">filenames</a> and <a
+href="#URIs-MP">paths/URIs</a>. The rules below must be observed for all
+<a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#StdsWP">Standards
+Track Work Products</a> and should be followed for <a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dNonStdsWP">Non-Standards
+Track Work Products</a> unless there are reasonable grounds for
+alternate constructions (<em>e.g.</em>, marketing material,
+presentation-ware). Please consult with <a href="/cdn-cgi/l/email-protection#8afaf8e5e0efe9fea7ebeee7e3e4cae5ebf9e3f9a7e5faefe4a4e5f8ed">Project Administration</a>
+about any proposed deviation from the prescribed naming patterns.</p>
+<p>Terminology: A Work Product <em>title</em> is the primary
+natural-language identifier that is printed immediately below the OASIS
+logo on the cover page of a Work Product's prose documents (in HTML,
+PDF, and editable source formats); it is also presented in the "Citation
+format:" block of a cover page. The title is also sometimes called a
+Work Product <em>name</em> (<em>e.g.</em>, "a single Work Product <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#wpComponentsMultiPart">name</a>";
+"the <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#maintenanceActivity">name</a>
+of the [...] Deliverable"; "the current <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#crossRefs">name</a>").
+An acronym as a human-readable shorthand identifier may be embedded
+within a title, and may bear some similarity to the machine-readable
+"[<a href="#token-WP-abbrev">WP-Abbrev</a>]" (Work Product
+abbreviation). The "WP-Abbrev" element is used only in the construction
+of filenames and (full) URIs, and need not be string-identical to a Work
+Product acronym.</p>
+<p>Construction: The construction rules for <em>title</em> vary
+depending upon whether the work has: (a) one single prose document or
+(b) multiple prose documents, <em>viz.</em>, a Multi-Part Work Product
+with separately-titled prose parts. In the second case "(b)", a distinct
+identifier for each prose part is appended to the initial title portion
+which meets the TC Process requirement for a "single" (principal) Work
+Product <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#wpComponentsMultiPart">title/name</a>.
+The required patterns are expressed below by example, and include the
+exact/literal punctuation characters (SPACE, PERIOD, COLON) in the
+required positions.</p>
+<ol type="1">
+<li>Title for a single prose document
+<ul>
+<li>Common Alerting Protocol Version 1.2</li>
+<li>Energy Market Information Exchange (EMIX) Version 1.0</li>
+<li>Biometric Identity Assurance Services (BIAS) SOAP Profile Version
+1.0</li>
+<li>Emergency Data Exchange Language (EDXL) Distribution Element Version
+2.0</li>
+</ul></li>
+<li>Title for a separately-titled prose part [normalized]
+<ul>
+<li>Open Document Format for Office Applications (OpenDocument) Version
+1.2. Part 1: OpenDocument Schema</li>
+<li>Web Services Security Version 1.1.1. Part 4: Username Token
+Profile</li>
+<li>Production Planning and Scheduling (PPS) Version 1.0. Part 1: Core
+Elements</li>
+<li>Web Services Distributed Management Version 1.0. Part 2: Management
+Using Web Services</li>
+</ul></li>
+</ol>
+<p>Additional rules/guidance for title and acronym:</p>
+<ul>
+<li><p>All words in a title other than function words (<em>e.g.</em>,
+some prepositions, conjunctions, articles) should be
+capitalized.</p></li>
+<li><p>The title of a Work Product must not include any trademarks or
+service marks <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#wpComponentsGeneral">not
+owned by OASIS</a> unless an exception is approved by the OASIS
+Board.</p></li>
+<li><p>If a title incorporates an acronym, the acronym should appear in
+upper-case letters, should be enclosed in parentheses, and should follow
+(not precede) the acronym expansion. Example: Darwin Information Typing
+Architecture (DITA).</p></li>
+<li><p>An acronym in a title should correspond recognizably to the
+acronym expansion which immediately precedes it; however, if an acronym
+is very well known in a TC's subject matter field, it may be included in
+the title without expansion (<em>e.g.</em>, SOAP)</p></li>
+<li><p>Punctuation characters in titles other than those provided in the
+examples above should not be used, except in consultation with <a href="/cdn-cgi/l/email-protection#58282a37323d3b2c75393c3531361837392b312b7537283d3676372a3f">Project Administration</a>.
+In particular: use of "hyphen" to mark juncture between title components
+is to be avoided: by "hyphen" we mean the HYPHEN-MINUS character
+(decimal 45, U+002D) and any character that looks like HYPHEN-MINUS from
+a distance. HYPHEN-MINUS is often confused with other characters having
+similar visual appearance, some of which interfere with indexing/search,
+display, line-breaking, spell-checking, and other text processing
+functions in various contexts (<em>e.g.</em>, U+2212 minus; U+2010
+hyphen; U+00AD soft hyphen; U+2011 non-breaking hyphen; U+2043 hyphen
+bullet; U+2012 figure dash; U+2013 en dash; U+2014 em dash; U+2015
+horizontal bar; U+2E3A two-em dash; U+2E3B three-em dash; several
+hyphens-like characters in non-Latin scripts). The character
+HYPHEN-MINUS is permissible in a Work Product title when used within
+hyphenated words/terms (<em>e.g.</em>, "Event-Driven").</p></li>
+<li><p>Preferably, a title should not begin with the name "OASIS" except
+on the recommendation of Project Administration for special cases. E.g.,
+Privacy Management Reference Model and Methodology (PMRM) Version 1.0,
+NOT OASIS Privacy Management Reference Model and Methodology (PMRM)
+Version 1.0.</p></li>
+</ul>
+<hr />
+<p><a name="xml-namespaces" href="#xml-namespaces">#xml-namespaces</a></p>
+<h3 id="8-xml-namespace-identifiers-and-namespace-documents">8 XML
+Namespace Identifiers and Namespace Documents</h3>
+<p><a name="namespaceDeclaration">OASIS Work Products which formally <a
+href="http://www.w3.org/TR/2009/REC-xml-names-20091208/#dt-NSDecl">declare</a>
+one or more XML namespaces [<em>viz.</em>, namespace bindings] must
+adhere to the terms of the applicable W3C Recommendations
+(<em>e.g.</em>, <a
+href="http://www.w3.org/TR/2009/REC-xml-names-20091208/#concepts">Namespaces
+in XML 1.0</a>, <a href="http://www.w3.org/TR/REC-xml/">Extensible
+Markup Language (XML) 1.0</a>, <a
+href="http://www.w3.org/TR/2004/REC-xmlschema-0-20041028/#NS">XML
+Schema</a>) and several OASIS rules for construction of URI references
+and for use of <a name="namespace-document"><a
+href="http://www.w3.org/TR/webarch/#namespace-document">namespace
+documents</a> where applicable. XML namespace names are allocated and
+managed by individual OASIS TCs, based upon the abbreviated TC name
+(<em>tc-shortname</em>), as specified below. Each TC manages a
+collection of XML namespace names by ensuring that there are no name
+collisions and by making it clear which particular Work Product "owns"
+each TC-defined namespace name for the purpose of versioning and other
+maintenance (<em>e.g.</em>, namespace document updates).</p>
+<p>Formal declarations of XML namespaces are made using a family of
+reserved attributes (<em>e.g.</em>, xmlns attributes such as
+PrefixedAttName <strong>xmlns:[prefix]</strong>, DefaultAttName
+<strong>xmlns</strong>, and <strong>targetNamespace</strong>) in XML
+instances and schemas.</p>
+<ul>
+<li><p><a name="ns-URI-string-rules">An XML <a
+href="http://www.w3.org/TR/REC-xml-names/#iri-use">namespace name</a>
+identified by an HTTP scheme URI reference must conform to the
+pattern:</p>
+<p><strong><a href="https://docs.oasis-open.org/">http://docs.oasis-open.org/</a>[tc-shortname]/ns/xxxx</strong><br />
+or<br />
+<strong><a
+href="https://docs.oasis-open.org/">https://docs.oasis-open.org/</a>[tc-shortname]/ns/xxxx</strong></p>
+<p><em>Where</em>:</p>
+<ul>
+<li>"[tc-shortname]" is the official machine-readable identifier string
+used in the TC's (Kavi) group name and in the <a
+href="https://docs.oasis-open.org/">OASIS Library</a> TC root URI, in
+lower case (<em>e.g.</em>, bias in the namespace name <a href="https://docs.oasis-open.org/bias/ns/bias-1.0/"><span>http://docs.oasis-open.org/bias/ns/bias-1.0/</span></a>,
+owned and managed by the <a
+href="https://www.oasis-open.org/committees/bias/">OASIS Biometric
+Identity Assurance Services (BIAS) Integration TC</a>)</li>
+<li>"xxxx" is a short string identifying an XML namespace, which should
+incorporate a versioning subcomponent (<em>e.g.</em>, a string like
+201011 representing a date or v1.1 representing a Version number)</li>
+<li>"xxxx" may use any of the same <a href="#nameCharacters">sixty-four
+characters as names for files and directories/folders</a>, plus internal
+"/", provided that it terminates with the character "/", "#", or an
+alphanumeric character [A-Za-z0-9].</li>
+<li>the required substring pattern <strong>[tc-shortname]/ns/</strong>
+was applicable as of 2012-01, but some alternate patterns based upon
+earlier practice may be grandfathered, if approved by <a href="/cdn-cgi/l/email-protection#c8b8baa7a2adabbce5a9aca5a1a688a7a9bba1bbe5a7b8ada6e6a7baaf">Project
+Administration</a></li>
+</ul></li>
+<li><p><a name="ns-pathElementReserved">The pattern specified above for
+HTTP scheme URIs uses the /ns/ path element in a syntax reserved for
+identifying <a name="informationResourceUse"><a
+href="#note-informationResource">non-information resources</a> only.
+Therefore, no (file-system) regular files, directories/folders, or
+symbolic links matching information resources may make use of these URI
+strings for resource identification.</p></li>
+<li><p><a name="ns-http-https">While either "http" or "https" may be
+used in defining a namespace name, they are not interchangeable. One or
+the other must be used consistently.</p></li>
+<li><p><a name="nonInformationResources">Non-information resources using
+identifiers associated with XML namespaces may be based upon any HTTP
+scheme URI XML namespace declared by the TC (<em>i.e.</em>, identifiers
+for named properties, functions, dialects, faults, actions, or any named
+message types). Example: see the Link Relations URIs in one of the CMIS
+v1.0 <a href="https://docs.oasis-open.org/ns/cmis/link/200908/">XML
+namespace documents</a> (<em>e.g.</em>, <a href="https://docs.oasis-open.org/ns/cmis/link/200908/allowableactions"><span>http://docs.oasis-open.org/ns/cmis/link/200908/allowableactions</span></a>,
+<a href="https://docs.oasis-open.org/ns/cmis/link/200908/policies"><span>http://docs.oasis-open.org/ns/cmis/link/200908/policies</span></a>).
+Note this example is based on an obsolete pattern.</p></li>
+<li><p><a name="ns-pathIdentifiersResolve">Any HTTP scheme URI matching
+the base pattern of a declared XML namespace, when dereferenced, will
+resolve under DNS+HTTP to (fetch) the corresponding <a
+href="http://www.w3.org/TR/webarch/#namespace-document">namespace
+document</a> which documents the namespace and the specification which
+formally declares it. OASIS Project Administration maintains the
+namespace documents in consultation with TC specification
+editors.</p></li>
+<li><p><a name="urn-namespacesRestricted">URN-based XML namespaces may
+be declared by existing TCs that have already used this feature, or by
+associated Maintenance Activity TCs, where architectural considerations
+require continued use of URNs. URN-based XML namespaces must not be
+declared otherwise, since they lack a standard, ubiquitous resolution
+method using DNS[+HTTP]. In URNs, the colon (":") character is
+expected.</p></li>
+<li><p><a name="namespaceVersioningPolicy">TCs must define a <a
+href="http://www.w3.org/TR/webarch/#versioning-xmlns">namespace
+versioning policy</a> for any XML namespace declared in a specification,
+and must communicate the text expressing such policy to the TC
+Administrator for incorporation into the appropriate namespace
+document.</p></li>
+</ul>
+<hr />
+<p><a name="#notes" href="#notes">#notes</a></p>
+<h3 id="9-notes">9 Notes</h3>
+<p>This reference section is intended to provide details (exceptional
+cases, etc). For definitions that may provide useful clarification, see
+<a href="#definitions">Definitions</a>.</p>
+<p><a name="extensionlessFilenames" href="#extensionlessFilenames">#extensionlessFilenames</a></p>
+<ul>
+<li><a href="#extensionlessFilenames">Filenames without extensions</a>.
+Exceptions to the <a href="#filenameExtension">rule</a> that every
+filename much include a file extension include: CATALOG or catalog,
+README, ChangeLog. Please contact the TC Administrator if you wish to
+recommend additional filenames for consideration.</li>
+</ul>
+<p><a name="note-informationResource" href="#note-informationResource">#note-informationResource</a></p>
+<ul>
+<li><a href="#note-informationResource">Information resource and
+non-information resource</a>. The term <a
+href="http://www.w3.org/TR/webarch/#def-information-resource">(non-)information
+resource</a> (mentioned <a href="#informationResourceUse">above</a>) is
+sometimes used to distinguish [1] computer-managed (serializable,
+textual or binary) objects like document files, image files, video files
+<em>from</em> [2] physical objects like cars and human persons, or
+abstract concepts like "smooth". While the two terms are not universally
+accepted, they offer a convenient way to distinguish documents from XML
+namespaces. Since an XML namespace is an abstract space of names
+(possibly unbounded) identified by a URI reference, it is often
+considered a non-information resource.</li>
+</ul>
+<p><a name="memberOnlyURIs" href="#memberOnlyURIs">#memberOnlyURIs</a></p>
+<ul>
+<li><a href="#memberOnlyURIs">Member-only URIs vs. public URIs</a>. The
+Kavi collaboration tool [as of 2010-10] creates a private OASIS
+member-only URI for most resources, and while these private URI
+references "work" for OASIS members who are logged in, they are broken
+for all other users, and give the appearance of OASIS members creating
+private, password-protected resources that are not available to the
+public. Since that outcome frustrates/annoys users and creates a
+negative/false impression about the "openness" of OASIS, TC members are
+urged to ensure that the <a href="#accessibleURIs">public form</a> of
+any URI reference is cited in all communications and documents under
+their control.</li>
+</ul>
+<p><a name="scopeApplicability" href="#scopeApplicability">#scopeApplicability</a></p>
+<ul>
+<li><p><a href="#scopeApplicability">Scope</a>. The naming directives in
+this document (especially for <a href="#nameCharacters">name
+characters</a> and <a href="#nameConstruction">construction</a>) are
+intended to <a href="#characterRestrictionScope">apply broadly</a> to
+all official OASIS publication venues that support rule compliance,
+including <a href="https://docs.oasis-open.org/">the OASIS Library</a>,
+TC document repository, email <a
+href="https://lists.oasis-open.org/archives/#committeelists">list
+archives</a> (file attachments), Wikis, SVN (Subversion) repository
+instances, JIRA issues tracking facilities, TC/Subcommittee web sites,
+Member Section <a href="https://www.oasis-open.org/member-sections">web
+sites</a>, etc. For a partial list of URIs identifying <a
+href="https://tools.oasis-open.org/">OASIS Online Tools</a>, see:</p>
+<ul>
+<li><a name="wiki"><a href="https://wiki.oasis-open.org/">OASIS Wiki
+List</a>, and example <a href="https://wiki.oasis-open.org/xacml/">XACML
+TC Wiki</a></li>
+<li><a name="svn"><a
+href="https://tools.oasis-open.org/version-control">SVN (Subversion)
+Repositories</a>, and example <a
+href="https://tools.oasis-open.org/version-control/browse/wsvn/sca-assembly/">SCA-Assemby
+TC SVN Repository</a></li>
+<li><a name="jira"><a
+href="https://tools.oasis-open.org/issues/secure/Dashboard.jspa">JIRA
+Issues Tracker</a>, and example <a
+href="https://tools.oasis-open.org/issues/browse/OFFICE">Office/OpenDocument
+TC Issues Tracking</a></li>
+</ul></li>
+</ul>
+<p><a name="tc-document-repository" href="#tc-document-repository">#tc-document-repository</a></p>
+<ul>
+<li><p><a href="#tc-document-repository">TC document repository</a>.
+With a few approved exceptions (<em>e.g.</em>, <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#visibility">TC
+meeting permanent minutes</a> published to the general mailing list),
+the TC Process requires that work produced by TC Members must be
+uploaded to "the TC's document repository" in the appropriate folder(s).
+This fulfills the TC Process requirement "Editable formats of
+<strong>all versions of TC documents</strong> must be delivered to the
+TC's document repository" (<a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#wpComponentsFileFormats">2.18
+(4)</a>). TC Members should understand that content uploaded to the TC
+document repository and approved for official publication will be QC'd
+and then installed in the <a href="https://docs.oasis-open.org/">OASIS
+Library</a> by the TC Administrator.</p></li>
+<li><p>Each OASIS TC is assigned a "document repository" (as of 2010-10)
+through the Kavi collaboration suite. For example, in the case of the <a
+href="https://www.oasis-open.org/committees/provision/">OASIS
+Provisioning Services TC</a>, a publicly accessible link to the TC's
+document repository is: <a
+href="https://www.oasis-open.org/committees/documents.php?wg_abbrev=provision"><span>https://www.oasis-open.org/committees/documents.php?wg_abbrev=provision</span></a>.
+TC members upload files to that repository through the [Kavi] "TC
+Members Page" by navigating to the <a
+href="https://www.oasis-open.org/apps/org/workgroup/provision/documents.php">Documents</a>
+area, locating the appropriate Folder, and clicking the button for "Add
+New Document" in that Folder.</p></li>
+</ul>
+<p><a name="tracks" href="#tracks">#tracks</a></p>
+<ul>
+<li><p><a href="#tracks">Track</a>. TC members should take into account
+various options for document development and approval through a
+life-cycle suitable for any particular deliverable. A <a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/#dWorkProduct">Work
+Product</a> is classified as either a <a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/#StdsWP">Standards
+Track Work Product</a> or a <a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/#dNonStdsWP">Non-Standards
+Track Work Product</a>. Whereas Standards Track Work Products are
+typically designed for implementation, Non-Standards Track Work Products
+are typically represented by TC-approved <a
+href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22#dCommitteeNote">Committee
+Notes</a>, white papers, slide presentations, and other material used
+for educational or promotional purposes. The review and approval
+processes for Work Products in the two tracks are (almost) identical, as
+are most rules for the creation of document identifiers, required file
+formats, etc.</p></li>
+<li><p>A Standards Track Work Product, intended as an implementation
+specification, contains a required set of numbered conformance clauses
+and has Normative References. A Non-Standards Track Work Product does
+not contain normative statements that define mandatory conformance
+requirements. It may not be submitted for approval by the Consortium
+membership as an OASIS Standard, and the patent provisions of the <a
+href="https://www.oasis-open.org/policies-guidelines/ipr">OASIS IPR
+Policy</a> (under a TC's chosen <a
+href="https://www.oasis-open.org/policies-guidelines/ipr#licensing_req">IPR
+Mode</a>) do not apply.</p></li>
+</ul>
+<hr />
+<p><a name="revisionHistory" href="#revisionHistory">#revisionHistory</a></p>
+<h3 id="10-revision-history">10 Revision History</h3>
+<p>This document is revised from time to time in order to supply
+additional examples, correct typos, and improve clarity; such revisions
+do not motivate the creation of a new numbered version. Any substantive
+change that alters a rule is always noted in this section, and every
+attempt will be made to honor (= <em>grandfather</em>) naming decisions
+made by TCs that conform to rules so revised: there is no intent to
+disrupt ongoing TC technical work or to make revised rules applicable
+retrospectively to work in progress.</p>
+<ul>
+<li><p><strong>Version 1.7</strong> Date: January 02, 2024. Removed
+references to obsolete stages (csprd, cnprd, cos) and the "Working
+Draft" terminology. Added description of the public review metadata
+files and comment resolution logs. Updated links due to changes in other
+resources. Updated information on Multi-Part Work Products. Converted
+source to markdown.</p></li>
+<li><p><strong>Version 1.6</strong> Date: February 13, 2020. Maintenance
+revision to replace "This/Previous/Latest version" with current practice
+"This/Previous/Latest stage". Replaced all usage of "http:" with
+"https:". Removed no longer needed note regarding "lower-case spelling
+of version". Removed obsolete reference to WS-I.</p></li>
+<li><p><strong>Version 1.5</strong> Date: July 26, 2017. Maintenance
+revision to edit hyperlinks from this document to the refactored TC
+Process document as approved by the OASIS Board of Directors on <a
+href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26">26-May-2017</a>.</p></li>
+<li><p><strong>Version 1.4</strong> Date: September 17, 2016. Added a <a
+href="#draftAndPRDraft-single-publication-option">Note</a> for a
+non-rule change in publication practice: allowing that a Draft and a
+corresponding Public Review Draft may be published as a single instance,
+avoiding release of two instances having identical technical
+content.</p></li>
+<li><p><strong>Version 1.3</strong> Date: December 10, 2012. Additional
+rules/examples were incorporated for naming in Multi-Part Work Products
+that have two or more separately-titled prose parts: <a
+href="#filenameSyntaxMP">filename construction</a>, additional naming
+components in <a href="#URIs-MP">paths/URIs</a>, and <a
+href="#WorkProduct-Title">title/name/acronym</a> (consolidating notes
+and other content on Work Product "title" into one new section). Also
+added: miscellaneous non-rule clarifications, expanded TOC, typo
+corrections, bug-fix, examples, HTML anchors for linking, new
+https-style (SSL) URIs where relevant, updated URI references for
+post-2010-10 OASIS policies, etc.</p></li>
+<li><p><strong>Version 1.2</strong> Date: January 24, 2012. A single
+rule change was made with respect to the required pattern for <a
+href="#ns-URI-string-rules">XML namespace name construction</a>: it is
+now <strong><a href="https://docs.oasis-open.org/">http://docs.oasis-open.org/</a>[tc-shortname]/ns/xxxx</strong>,
+modulo grandfathered allowance of earlier practice, when approved by <a href="/cdn-cgi/l/email-protection#4f3f3d20252a2c3b622e2b2226210f202e3c263c62203f2a2161203d28">Project Administration</a>.
+Other changes are simply non-rule clarifications and additional
+examples.</p></li>
+<li><p><strong>Version 1.1</strong> Date: January 28, 2011. A
+one-character adjustment was made in the rule for composing <a
+href="#filenameSyntax">instance-specific filenames</a>, to reflect what
+had become common practice already in 2010: the pattern
+[WP-abbrev]-[version-id] (with HYPHEN separator) rather than
+[WP-abbrev][version-id]. Thus the revised rule requires, <em>e.g.</em>,
+OpenDocument-v1.2 rather than OpenDocumentv1.2 in the <a
+href="#stage-specific-filename">stage/instance-specific
+filename</a>.</p></li>
+<li><p><strong>Version 1.0</strong> Date: October 14, 2010. Initial
+release.</p></li>
+</ul>
+<hr />
+<p><strong>Feedback:</strong> Please send questions or comments on this
+document to <a href="/cdn-cgi/l/email-protection#2f5f5d40454a4c5b024e4b4246416f404e5c465c02405f4a4101405d48"><span><span class="__cf_email__" data-cfemail="ed9d9f8287888e99c08c89808483ad828c9e849ec0829d8883c3829f8a">[email&#160;protected]</span></span></a>;
+all email communications will be acknowledged, and will be evaluated by
+the OASIS Project Administration Team.</p>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

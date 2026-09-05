@@ -1,0 +1,120 @@
+Approving an OASIS Standard | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Work product lifecycle › OASIS Standard
+Standards Track · final stage
+Approving an OASIS Standard
+An OASIS Standard is the highest level of approval an OASIS work product can reach. Getting there has two parts: a Technical Committee first submits an approved Committee Specification as a Candidate OASIS Standard , and OASIS Organizational Members then approve it through a Call for Consent .
+What changed since the 2010 handbook
+Approval is no longer a percentage-based affirmative ballot. Since the TC Process effective 1 December 2020 , OASIS uses a Call for Consent : members are presumed to consent unless they actively object. A specification is rejected only if 15 or more eligible members file valid objections. If your reference material still describes a percentage-based affirmative/negative ballot, it is out of date.
+Where this sits in the lifecycle
+Committee Specification cs Special Majority Vote
+The TC approves a CS by Special Majority Vote, after a successful public review and resolution of all comments. TC Process §2.7
+Candidate OASIS Standard, submission Special Majority Vote
+The TC votes by Special Majority Vote to submit the CS as a candidate, and provides three Statements of Use. TC Process §2.8.1
+Candidate OASIS Standard, public review
+A public review of at least 60 days runs before the consent ballot. TC Process §2.8.2
+Call for Consent Consent of OASIS Members
+The TC Administrator runs a Call for Consent of at least 14 days among eligible OASIS Organizational Members. TC Process §2.8.3
+OASIS Standard os
+On success, the work product becomes an OASIS Standard. The os stage never carries a revision number. Naming Directives v1.7
+Before you start
+Policy requirement
+Before a Committee Specification can be submitted as a Candidate OASIS Standard, the TC must hold three Statements of Use that reference the CS, at least one of which is from an OASIS Organizational Member. The submission itself is approved by Special Majority Vote . TC Process §2.8.1
+Each Statement of Use must state that the party has successfully used or implemented the specification consistent with its conformance clauses, identify which clauses apply, and state whether interoperability was demonstrated. OASIS Defined Terms (Statement of Use)
+Statement of Use mechanics
+Beyond the implementation attestation, the OASIS Defined Terms set out specific rules for how a Statement of Use must be made, who may issue one, and how the TC accepts it.
+Mechanics of a valid Statement of Use under the OASIS Defined Terms
+Mechanic Rule
+Version and date reference
+The Statement of Use must be made to a specific version of the specification and must include the specification's approval date .
+Who may issue it
+The party may be an OASIS Member or a non-member. A non-member's Statement of Use must be submitted via the Technical Committee's (or Project Governing Board's) comment facility .
+TC acceptance
+A Statement of Use submitted to the TC must be approved by TC Resolution as an acceptable Statement of Use with respect to the specification.
+One per party
+A party can issue only one Statement of Use for a given specification.
+Organizational Member endorsement
+When issued by an OASIS Organizational Member, the Statement of Use must be endorsed by that Organizational Member's Primary Representative .
+Source for all five mechanics: OASIS Defined Terms (Statement of Use) . A TC or Project Governing Board may additionally require a Statement of Use to include hyperlinks to documents, files, or demonstration transcripts that let the committee evaluate the implementation. OASIS Defined Terms (Statement of Use)
+The Call for Consent
+Once the 60-day Candidate OASIS Standard public review closes and any comments are addressed, the TC Administrator initiates a Call for Consent of at least 14 days. Eligible OASIS Organizational Members are presumed to consent. To oppose, a member must submit a valid objection through the OASIS voting facility, stating a reason and/or a proposed remedy. TC Process §2.8.3
+How the outcome is decided
+Outcomes of the Call for Consent based on valid objections received
+Valid objections received Outcome
+None The Committee Specification becomes an OASIS Standard .
+Fewer than 15 The TC has 30 days to resolve the objections or withdraw. The TC gets only one attempt to make Material changes in response.
+15 or more The submission is rejected and does not become an OASIS Standard.
+Source for all three outcomes: TC Process §2.8.3 (effective 1 December 2020).
+Resolving objections: the disposition steps
+When fewer than 15 valid objections are received and the TC chooses to try to resolve them rather than withdraw, §2.8.3 sets out an ordered sequence. Each step has its own actor and, where a vote is required, its own vote type.
+Ordered steps to dispose of valid objections after a Call for Consent
+Step
+Action
+Actor / vote
+1. Engage objectors
+The TC interacts with each objector to discuss the objection and any proposed remedy. If an objector does not make themselves available (by meeting or written answer) within the 30-day window, the TC need take no further action on that objection. The TC is not required to make changes or to satisfy any objector.
+TC
+2. Prepare comment resolution log
+After deciding how to resolve the objections, the TC prepares a comment resolution log recording the disposition of each comment, approves it, and submits it to the OASIS TC Administrator.
+TC: Full Majority Vote
+3. Choose a disposition (second 30-day window)
+Within 30 days of submitting the log, the TC takes exactly one disposition: (a) withdraw the submission; (b) if no changes were made, ask the TC Administrator to approve the submitted CS as an OASIS Standard despite the objections; or (c) submit an amended Committee Specification.
+TC: Special Majority Vote
+4. Materiality determination (amended CS only)
+If the TC submitted an amended CS, the TC Administrator makes the final determination whether the changes are Material or Non-Material. Non-Material changes proceed to approval of the amended CS; Material changes require a second Call for Consent.
+TC Administrator
+5. Second Call for Consent (if Material)
+A second Call for Consent runs the same way as the first, with two exceptions: a valid objection from the first call that is substantively repeated is not counted as valid in the second; and if Material changes are deemed necessary to satisfy valid objections to the second call, the candidate does not become an OASIS Standard. A TC gets only one attempt during the consent process to make Material changes.
+TC Administrator runs the ballot
+Source for all disposition steps: TC Process §2.8.3 . Failure of a Call for Consent for any reason does not prevent a later version of the same specification from being submitted again. TC Process §2.8.3
+After approval
+The published OASIS Standard uses the os stage abbreviation, which never carries a revision number. Naming Directives v1.7
+Published resources in the OASIS Library must not be deleted or altered; only “latest version” aliases may be updated. Naming Directives v1.7
+Corrections after publication follow the Approved Errata process, not a re-ballot.
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §2.7 –2.9), the OASIS Defined Terms effective 1 December 2020 (Statement of Use mechanics), the OASIS IPR Policy (2013), and Naming Directives v1.7 (2 January 2024). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

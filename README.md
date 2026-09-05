@@ -139,12 +139,19 @@ candidate whose blocker set TC Administration had already established by hand.
 
 ![How a criterion is sourced from policy](assets/authority.png?v=170)
 
-Every acceptance criterion cites the rule it enforces. 96 of the 170 checks
-trace to a verbatim clause in the governing corpus, 25 source pages snapshotted
-and hashed on 21 July 2026, of which 19 are cited; the rest are operational
-rules from correction rounds. The full
-criterion-to-clause map, with the exact quoted text and its source, is
-[`AUTHORITIES.md`](pub-check/AUTHORITIES.md).
+Every acceptance criterion cites the rule it enforces. 97 of the 170 checks
+trace to a verbatim clause in the governing corpus; the rest are operational
+rules from correction rounds. The full criterion-to-clause map, with the exact
+quoted text and its source, is [`AUTHORITIES.md`](pub-check/AUTHORITIES.md).
+
+**The evidence ships with it.** The corpus itself is
+[`pub-check/corpus/`](pub-check/corpus/): 25 source pages fetched on 21 July
+2026, each with its sha256 in `MANIFEST.json`, alongside the condition-to-criterion
+map (`crosswalk.json`) and the criteria (`criteria.yaml`). You do not have to
+take the catalog's word for any of it, and neither does CI:
+`tests/test_authorities.py` checks every digest against its file, every quote as
+a verbatim substring of the page it cites, and every crosswalk entry against the
+tool's own registry, on every run.
 
 ## Where the gate sits: validation and audit
 

@@ -1,0 +1,1748 @@
+{
+ "built_from": {
+  "criteria": "criteria-vetted.json (58 vetted criteria, 2026-07-21)",
+  "registry": "registry.json (96 conditions, 35 classes; two rows carry sites:2 for the advertised 98)",
+  "codex": "codex-sweep.json (13 concerns, attached to their criteria as codex_concern)"
+ },
+ "summary": {
+  "criteria_total": 58,
+  "implemented": 9,
+  "partial": 19,
+  "missing": 30,
+  "conditions_total": 96,
+  "policy_grounded": 94,
+  "operational_extra": 72,
+  "total_conditions": 170,
+  "total_signatures": 166,
+  "policy_grounded_conditions": 97
+ },
+ "criteria": [
+  {
+   "id": "AC-CONTENT-01",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "template",
+     "sig": "No Conformance section found"
+    }
+   ],
+   "note": "Check 61 tests only that a Conformance section exists (md track); populated-vs-placeholder content and the track/stage gating (Standards Track at public-review/CS/OS) are not tested."
+  },
+  {
+   "id": "AC-CONTENT-02",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No condition scans Non-Standards Track packages for mandatory normative language outside quoted excerpts."
+  },
+  {
+   "id": "AC-CONTENT-03",
+   "coverage": "missing",
+   "checks": [],
+   "note": "Existence of a Conformance section is tested (check 61, attached to AC-CONTENT-01) but top-level placement, numbered clauses, and cross-revision numbering stability are not."
+  },
+  {
+   "id": "AC-CONTENT-04",
+   "coverage": "missing",
+   "checks": [],
+   "note": "Clause-level target identification and normative-reference precision are semantic; no condition attempts them."
+  },
+  {
+   "id": "AC-CONTENT-05",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No condition tests for a References section or normative/informative separation."
+  },
+  {
+   "id": "AC-CONTENT-06",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "html-anchors",
+     "sig": "has no matching anchor in the HTML"
+    },
+    {
+     "check": "html-anchors",
+     "sig": "no internal (fragment) links at all"
+    }
+   ],
+   "note": "Fragment-link resolution and presence of a linked TOC are tested; literal agreement of TOC entries with actual heading text/numbers is not."
+  },
+  {
+   "id": "AC-CONTENT-07",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "rfc-keywords",
+     "sig": "does not cite RFC 2119"
+    },
+    {
+     "check": "rfc-keywords",
+     "sig": "RFC 8174"
+    }
+   ],
+   "note": "md track only: RFC 2119 citation backing and RFC 8174 pairing are tested; docx track and consistency-of-usage across the body are not. Codex: authorities support SHOULD, not MUST, for consistency.",
+   "codex_concern": "The quoted authorities support declaring RFC 2119/BCP 14 usage as a recommendation/checklist item and using keywords consistently, but they do not clearly support a mandatory 'MUST use those key words consistently' requirement. The criterion should likely use SHOULD throughout or cite stronger policy text for the MUST."
+  },
+  {
+   "id": "AC-CONTENT-08",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No condition tests for 'Non-normative' labels on appendices/examples."
+  },
+  {
+   "id": "AC-FORMATS-01",
+   "coverage": "implemented",
+   "checks": [
+    {
+     "check": "filenames",
+     "sig": "No delivery items found"
+    },
+    {
+     "check": "filenames",
+     "sig": "Missing delivery format(s)"
+    },
+    {
+     "check": "front-matter",
+     "sig": "This-stage block does not list"
+    }
+   ],
+   "note": "Delivery-format completeness is mechanically enforced (items exist, required formats present, This-stage block lists md/html/pdf)."
+  },
+  {
+   "id": "AC-FORMATS-02",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "filenames",
+     "sig": "No authoritative source artifact"
+    }
+   ],
+   "note": "Presence of an authoritative source artifact is enforced, but the explicit cover-page designation of exactly one authoritative format is not verified."
+  },
+  {
+   "id": "AC-FORMATS-03",
+   "coverage": "implemented",
+   "checks": [
+    {
+     "check": "filenames",
+     "sig": "No authoritative source artifact"
+    }
+   ],
+   "note": "Editable/authoritative source must travel with the renderings in the package that goes to the repository. Codex: 'alongside the renders' framing is our packaging convention, delivery-to-repository is the policy core.",
+   "codex_concern": "The quoted text supports requiring editable formats of all versions to be delivered to the TC document repository, but it does not clearly require them to be present 'alongside the published HTML/PDF renders.'"
+  },
+  {
+   "id": "AC-FORMATS-04",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "schema-id",
+     "sig": "not valid JSON ("
+    }
+   ],
+   "note": "JSON validity (well-formed-and-valid arm, TCP-012) is tested; standalone-plain-text-file presence for inline normative definitions, and non-JSON languages, are not."
+  },
+  {
+   "id": "AC-FRONTMATTER-01",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "front-matter",
+     "sig": "No 'This stage' URL block"
+    },
+    {
+     "check": "front-matter",
+     "sig": "This-stage block does not list"
+    },
+    {
+     "check": "front-matter",
+     "sig": "No 'This version' URL block found on the HTML cover"
+    },
+    {
+     "check": "pdf-sync",
+     "sig": "does not contain the canonical this-stage base URL"
+    },
+    {
+     "check": "template",
+     "sig": "Required front-matter section missing"
+    }
+   ],
+   "note": "This-stage presence is enforced on md, HTML cover, and PDF, and the template-section gate covers front matter generally; independent presence checks for the Previous-stage and Latest-stage fields exist only conditionally (89/90 past stage 01) or as URL-format checks. Codex: 'exactly three persistent URIs' overstated given N/A Previous-stage on first publication.",
+   "codex_concern": "The criterion states that exactly three persistent URI fields must appear, but the cited Naming Directives text says 'Previous stage' applies 'when applicable,' and first publications may use 'N/A' rather than a persistent URI. The 'exactly three persistent URI fields' formulation is therefore not clearly supported."
+  },
+  {
+   "id": "AC-FRONTMATTER-02",
+   "coverage": "implemented",
+   "checks": [
+    {
+     "check": "revision-collision",
+     "sig": "is already published at"
+    },
+    {
+     "check": "front-matter",
+     "sig": "which is not a file in the package"
+    }
+   ],
+   "note": "Live-site revision collision plus This-stage-URL-points-at-shipped-file make non-reuse operationally tested (requires network)."
+  },
+  {
+   "id": "AC-FRONTMATTER-03",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "previous-stage",
+     "sig": "the Previous-Stage block is empty or N/A"
+    },
+    {
+     "check": "previous-stage",
+     "sig": "no Previous-version block with docs.oasis-open.org URLs found on the HTML cover"
+    }
+   ],
+   "note": "Presence of a Previous-stage citation past stage 01 is tested on both tracks; that it points at the immediately preceding published instance (or reads N/A on a first publication) is not verified against publication history."
+  },
+  {
+   "id": "AC-FRONTMATTER-04",
+   "coverage": "implemented",
+   "checks": [
+    {
+     "check": "front-matter",
+     "sig": "Latest-stage URL must point at the version root"
+    },
+    {
+     "check": "front-matter",
+     "sig": "Latest-stage URL not under"
+    },
+    {
+     "check": "front-matter",
+     "sig": "'Latest'-labelled URL carries the stage segment"
+    },
+    {
+     "check": "front-matter",
+     "sig": "Latest-version URL must point at the version root"
+    }
+   ],
+   "note": "Latest-stage URLs are mechanically held to the version root, under the version directory, never stage-pinned, on both tracks."
+  },
+  {
+   "id": "AC-FRONTMATTER-07",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No condition compares the stage token across the three cover URIs for internal consistency during public review."
+  },
+  {
+   "id": "AC-FRONTMATTER-08",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "template",
+     "sig": "Required front-matter section missing"
+    }
+   ],
+   "note": "Track designation lives in the required template front-matter sections (md only); no direct text check for 'Standards Track Work Product' / 'Non-Standards Track Work Product' on either cover."
+  },
+  {
+   "id": "AC-FRONTMATTER-10",
+   "coverage": "missing",
+   "checks": [],
+   "note": "Version is enforced in filenames/directories (version-naming class) but nothing tests the TITLE text for the Version identifier. Codex: 'Version <n>' composition is SHOULD; only incorporation is MUST.",
+   "codex_concern": "The authority supports a MUST for incorporating the Version identifier into the title, but the specific title composition using 'Version' immediately after the name is stated as SHOULD. Treating the whole criterion as BLOCKER overstates the severity for the SHOULD portion."
+  },
+  {
+   "id": "AC-FRONTMATTER-12",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No condition tests the title's leading word."
+  },
+  {
+   "id": "AC-FRONTMATTER-13",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No condition tests hyphen use inside the title; flagged not machine-testable."
+  },
+  {
+   "id": "AC-FRONTMATTER-14",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No condition tests acronym placement/case in the title."
+  },
+  {
+   "id": "AC-FRONTMATTER-15",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No trademark screen on the title; flagged not machine-testable."
+  },
+  {
+   "id": "AC-FRONTMATTER-16",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "template",
+     "sig": "Required front-matter section missing"
+    },
+    {
+     "check": "date-sync",
+     "sig": "Copyright year"
+    }
+   ],
+   "note": "The template-section gate implies the notices block and the copyright YEAR is synced to the document date, but the presence/wording of the OASIS copyright notice itself is not directly tested. Codex: policy requires the notice, not a specific front-matter position.",
+   "codex_concern": "The quoted policy requires inclusion of the OASIS copyright notice, but does not clearly require that it appear specifically in the front matter."
+  },
+  {
+   "id": "AC-FRONTMATTER-17",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No condition compares the IPR statement to the TC's recorded IPR mode."
+  },
+  {
+   "id": "AC-FRONTMATTER-18",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No condition distinguishes Technical Report Authors from Committee Note editors on the cover."
+  },
+  {
+   "id": "AC-NAMING-01",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "stage-name",
+     "sig": "uses a retired/invalid stage token"
+    }
+   ],
+   "note": "Retired tokens are caught in the stage directory name only; filenames, URIs, and cover-page text are not swept for csprd/cnprd/cos. Codex: cover-page scope for 'cos' is thinner in the authorities.",
+   "codex_concern": "The authorities clearly prohibit obsolete abbreviations in filenames and URIs, and some quotes mention cover-page use for csprd/cnprd, but they do not clearly support the full scope of 'any filename, directory name, URI, or cover-page text' for all three tokens, especially directory names and cover-page use of cos."
+  },
+  {
+   "id": "AC-NAMING-02",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "stage-name",
+     "sig": "is not a recognized stage token"
+    }
+   ],
+   "note": "Stage token is validated against the union of current tokens; track-appropriateness (csd/cs/os/errata only for Standards Track) is not gated."
+  },
+  {
+   "id": "AC-NAMING-03",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "stage-name",
+     "sig": "is not a recognized stage token"
+    }
+   ],
+   "note": "Same union-set validation; cnd/cn-only gating for Non-Standards Track packages is not enforced."
+  },
+  {
+   "id": "AC-NAMING-04",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "stage-name",
+     "sig": "is missing its two-digit number"
+    }
+   ],
+   "note": "Check 0 owns revision-suffix logic, but the registry text ('csd01, never bare csd') does not evidence the os exemption; verify the implementation exempts bare os rather than flagging it."
+  },
+  {
+   "id": "AC-NAMING-05",
+   "coverage": "implemented",
+   "checks": [
+    {
+     "check": "stage-name",
+     "sig": "is missing its two-digit number"
+    },
+    {
+     "check": "filenames",
+     "sig": "does not end in '-"
+    }
+   ],
+   "note": "Two-digit revision on the stage directory and stage suffix on delivery filenames are both mechanically enforced. Codex: policy scopes this to principal filenames/URIs, not every file in the package.",
+   "codex_concern": "The quoted text supports use of a lower-case stage abbreviation with revision number for document identifiers/URIs, principal document filenames, and cover-page stage-specific filenames, but it does not clearly support the broader requirement that every stage-specific filename and directory name in the package must end with that component."
+  },
+  {
+   "id": "AC-NAMING-06",
+   "coverage": "implemented",
+   "checks": [
+    {
+     "check": "version-naming",
+     "sig": "does not match the vN.N convention"
+    },
+    {
+     "check": "version-naming",
+     "sig": "the files were renamed"
+    },
+    {
+     "check": "version-naming",
+     "sig": "does not embed the version segment"
+    }
+   ],
+   "note": "Version directory convention, filename/directory agreement, and version embedding are all tested."
+  },
+  {
+   "id": "AC-NAMING-07",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No allowed-character (alphanumeric/period/hyphen) scan over package names; only the lowercase and junk-file checks brush against it."
+  },
+  {
+   "id": "AC-NAMING-08",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No underscore scan on document URIs."
+  },
+  {
+   "id": "AC-NAMING-09",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "junk-files",
+     "sig": "Junk file in package"
+    }
+   ],
+   "note": "Leading-dot junk files (.DS_Store etc.) are caught; the general leading/trailing/consecutive-punctuation rule is not tested."
+  },
+  {
+   "id": "AC-NAMING-10",
+   "coverage": "implemented",
+   "checks": [
+    {
+     "check": "case",
+     "sig": "Mixed-case filename"
+    }
+   ],
+   "note": "The stricter all-lowercase filename rule makes case-only-differing names impossible to pass; any AC-NAMING-10 violation trips check 75."
+  },
+  {
+   "id": "AC-NAMING-11",
+   "coverage": "implemented",
+   "checks": [
+    {
+     "check": "case",
+     "sig": "Mixed-case filename"
+    },
+    {
+     "check": "case",
+     "sig": "Mixed-case path in docs.oasis-open.org URL"
+    }
+   ],
+   "note": "Lowercase is enforced on every filename and every self-referential URL path, subsuming the stage-abbrev/tc-shortname lowercase mandate."
+  },
+  {
+   "id": "AC-NAMING-12",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No trademark screen on filenames; flagged not machine-testable."
+  },
+  {
+   "id": "AC-NAMING-13",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "junk-files",
+     "sig": "Junk file in package"
+    }
+   ],
+   "note": "OS junk/editor-backup files are caught, but the named forbidden set (index.html, index.htm, *.cgi, .htaccess) is not explicitly tested."
+  },
+  {
+   "id": "AC-NAMING-14",
+   "coverage": "implemented",
+   "checks": [
+    {
+     "check": "version-naming",
+     "sig": "the files were renamed"
+    },
+    {
+     "check": "version-naming",
+     "sig": "does not embed the version segment"
+    },
+    {
+     "check": "filenames",
+     "sig": "do not share one basename"
+    },
+    {
+     "check": "filenames",
+     "sig": "carries a working token"
+    },
+    {
+     "check": "filenames",
+     "sig": "does not end in '-"
+    }
+   ],
+   "note": "Shared basename across formats, embedded version, stage suffix, and no working tokens together enforce the single-part filename pattern. Codex: identical-stem framing is stricter than the quoted pattern text; retained as the operational reading.",
+   "codex_concern": "The quoted text supports the standard filename pattern for single-part work products, but it does not clearly support the added requirement that source/HTML/PDF delivery filenames must have an identical stem with only the extension varying."
+  },
+  {
+   "id": "AC-NAMING-16",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No single-extension check on package filenames."
+  },
+  {
+   "id": "AC-NAMING-17",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No IANA MIME-type conformance check on extensions."
+  },
+  {
+   "id": "AC-NAMING-18",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No cross-release stability check on supporting-artifact filenames (schemas/images without stage tokens)."
+  },
+  {
+   "id": "AC-NAMING-19",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No multi-part shared-name/version validation."
+  },
+  {
+   "id": "AC-NAMING-20",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No partN identifier validation. Codex: authorities allow Project Administration exceptions; keep that in any future implementation.",
+   "codex_concern": "The quoted naming-directives text says the structure is required only 'typically' and 'unless otherwise approved by Project Administration.' The criterion states an absolute MUST and does not reflect that exception."
+  },
+  {
+   "id": "AC-NAMING-21",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No check requires the -public-review-metadata.html companion file."
+  },
+  {
+   "id": "AC-NAMING-22",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No check requires a -comment-resolution-log file. Codex: authorities give the filename pattern; the MUST-include-in-package reading is ours.",
+   "codex_concern": "The quoted text clearly supports the filename pattern for a comment resolution log, but does not clearly support that every package that underwent public review MUST include such a file in the package."
+  },
+  {
+   "id": "AC-NAMING-24",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "front-matter",
+     "sig": "Stage URL is not under"
+    },
+    {
+     "check": "front-matter",
+     "sig": "This-stage URL does not contain"
+    },
+    {
+     "check": "front-matter",
+     "sig": "This-version URL does not contain"
+    }
+   ],
+   "note": "URLs are held under docs.oasis-open.org and must carry version+stage segments, but the full path-component order ([tc-shortname]/[WP-abbrev]/...) is not validated. Codex: multi-part/errata exceptions apply to the pattern.",
+   "codex_concern": "The naming-directives quote includes an exception for URI references associated with Multi-Part or Approved Errata Work Products. The criterion states the URI pattern as an unconditional MUST and omits those exceptions."
+  },
+  {
+   "id": "AC-NAMING-30",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "revision-collision",
+     "sig": "is already published at"
+    }
+   ],
+   "note": "The live-site collision check blocks re-publishing an existing stage; forward, non-skipped progression against the stage history is not otherwise validated."
+  },
+  {
+   "id": "AC-PACKAGING-05",
+   "coverage": "missing",
+   "checks": [],
+   "note": "Checks 64/95 test the reverse direction (cited files must ship); nothing verifies each shipped normative-definition file is referenced from the specification."
+  },
+  {
+   "id": "AC-PACKAGING-16",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "revision-collision",
+     "sig": "is already published at"
+    }
+   ],
+   "note": "Stage-level overwrite is blocked via the live-site collision check; per-file overwrite/rename/removal within an existing tree, and the Latest-alias exception boundary, are not tested."
+  },
+  {
+   "id": "AC-PACKAGING-17",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No META-refresh, duplicate-content, or redirect-alias detection (symlink check 83 covers only self/ancestor loops)."
+  },
+  {
+   "id": "AC-PACKAGING-18",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No scan for member-only/Kavi URIs in the text."
+  },
+  {
+   "id": "AC-PACKAGING-19",
+   "coverage": "partial",
+   "checks": [
+    {
+     "check": "front-matter",
+     "sig": "Stage URL is not under"
+    }
+   ],
+   "note": "Cover stage URLs are forced under docs.oasis-open.org; general third-party-host and access-restriction sweeps are not implemented. Codex: 'never on any third-party host' is broader than the quoted authority.",
+   "codex_concern": "The cited text requires official committee resources/copies to be on OASIS-designated facilities and prohibits committees from storing/hosting official documents on non-designated systems. It does not clearly support the broader statement that every published Work Product artifact may reside only on the OASIS Library/docs.oasis-open.org or that it can never appear on any third-party host."
+  },
+  {
+   "id": "AC-PACKAGING-20",
+   "coverage": "missing",
+   "checks": [],
+   "note": "schema-id checks cover JSON $id, not XML namespace name patterns or http/https consistency."
+  },
+  {
+   "id": "AC-PACKAGING-21",
+   "coverage": "missing",
+   "checks": [],
+   "note": "No /ns/-path retrievable-document detection."
+  },
+  {
+   "id": "AC-PACKAGING-22",
+   "coverage": "missing",
+   "checks": [],
+   "note": "The errata stage token is recognized, but sequential /errataNN/ directories and the list-of-corrections instance are not tested."
+  },
+  {
+   "id": "AC-PACKAGING-23",
+   "coverage": "missing",
+   "checks": [],
+   "note": "Manifest sha256 (check 72) proves internal integrity only; no gate compares a COS-submitted package against its submitted state."
+  }
+ ],
+ "conditions": [
+  {
+   "check": "artifact-naming",
+   "sig": "filename embeds a stage/revision token",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-31"
+   ]
+  },
+  {
+   "check": "asset-refs",
+   "sig": "which is not in the package; it 404s",
+   "status": "operational-extra"
+  },
+  {
+   "check": "authors",
+   "sig": "Authors section is empty or placeholder-only",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-18"
+   ]
+  },
+  {
+   "check": "authors",
+   "sig": "No Authors section or byline found",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-18"
+   ]
+  },
+  {
+   "check": "authors",
+   "sig": "still reads 'will be filled in' on an approved Technical Report",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-18"
+   ]
+  },
+  {
+   "check": "authors",
+   "sig": "unresolved 'will be filled in' placeholder",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-18"
+   ]
+  },
+  {
+   "check": "boilerplate-dup",
+   "sig": "status paragraph appears",
+   "status": "operational-extra"
+  },
+  {
+   "check": "case",
+   "sig": "Mixed-case filename",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-10",
+    "AC-NAMING-11"
+   ]
+  },
+  {
+   "check": "case",
+   "sig": "Mixed-case path in docs.oasis-open.org URL",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-11"
+   ]
+  },
+  {
+   "check": "comment-resolution-log",
+   "sig": "appears to have concluded",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-11"
+   ]
+  },
+  {
+   "check": "comment-resolution-log",
+   "sig": "resembling the required comment-resolution-log is present but misnamed",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-22"
+   ]
+  },
+  {
+   "check": "conformance-structure",
+   "sig": "Cannot verify CS-preservation requirement",
+   "status": "operational-extra"
+  },
+  {
+   "check": "conformance-structure",
+   "sig": "Clause number removed/renumbered",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-10"
+   ]
+  },
+  {
+   "check": "conformance-structure",
+   "sig": "Clause silently renumbered",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-10"
+   ]
+  },
+  {
+   "check": "conformance-structure",
+   "sig": "Conformance section is a buried subsection",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-03"
+   ]
+  },
+  {
+   "check": "conformance-structure",
+   "sig": "Duplicate clause number",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-10"
+   ]
+  },
+  {
+   "check": "conformance-structure",
+   "sig": "OS conformance clause numbering differs from approved CS",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-09"
+   ]
+  },
+  {
+   "check": "conformance-structure",
+   "sig": "OS conformance clause wording differs from approved CS under a stable number",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-09"
+   ]
+  },
+  {
+   "check": "conformance-structure",
+   "sig": "Stability not verified - previous stage unavailable",
+   "status": "operational-extra"
+  },
+  {
+   "check": "conformance-structure",
+   "sig": "not populated with numbered clauses",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-01"
+   ]
+  },
+  {
+   "check": "content-labels",
+   "sig": "the Handbook classifies Examples as non-normative content",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-08"
+   ]
+  },
+  {
+   "check": "cover-hr",
+   "sig": "Horizontal rule between the OASIS logo",
+   "status": "operational-extra"
+  },
+  {
+   "check": "date-sync",
+   "sig": "Copyright year",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-16"
+   ]
+  },
+  {
+   "check": "date-sync",
+   "sig": "the HTML was rendered from a different revision",
+   "status": "operational-extra"
+  },
+  {
+   "check": "dead-lists",
+   "sig": "References mailing address",
+   "status": "operational-extra"
+  },
+  {
+   "check": "dead-lists",
+   "sig": "archives",
+   "status": "operational-extra"
+  },
+  {
+   "check": "double-slash",
+   "sig": "contains a double slash",
+   "status": "operational-extra"
+  },
+  {
+   "check": "extension-conformance",
+   "sig": "is not on this check's table of common OASIS publication rendering-format extensions",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-17"
+   ]
+  },
+  {
+   "check": "extension-count",
+   "sig": "carries more than one file extension after the stem",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-16"
+   ]
+  },
+  {
+   "check": "extension-count",
+   "sig": "commonly denotes a file extension elsewhere",
+   "status": "operational-extra"
+  },
+  {
+   "check": "extension-count",
+   "sig": "has no file extension after the document-identifier stem",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-16"
+   ]
+  },
+  {
+   "check": "extension-count",
+   "sig": "outside the recognized common-use set",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-16"
+   ]
+  },
+  {
+   "check": "fence-collapse",
+   "sig": "collapses to inline code",
+   "status": "operational-extra"
+  },
+  {
+   "check": "filenames",
+   "sig": "Missing delivery format(s)",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FORMATS-01"
+   ]
+  },
+  {
+   "check": "filenames",
+   "sig": "No authoritative source artifact",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FORMATS-03",
+    "AC-FORMATS-02"
+   ]
+  },
+  {
+   "check": "filenames",
+   "sig": "No delivery items found",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FORMATS-01"
+   ]
+  },
+  {
+   "check": "filenames",
+   "sig": "carries a working token",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-14"
+   ]
+  },
+  {
+   "check": "filenames",
+   "sig": "do not share one basename",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-14"
+   ]
+  },
+  {
+   "check": "filenames",
+   "sig": "does not end in '-",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-05",
+    "AC-NAMING-14"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "'Latest'-labelled URL carries the stage segment",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-04"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "Latest-stage URL must point at the version root",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-04"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "Latest-stage URL not under",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-04"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "Latest-version URL must point at the version root",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-04"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "No 'This stage' URL block",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-01"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "No 'This version' URL block found on the HTML cover",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-01"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "Stage URL is not under",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-24",
+    "AC-PACKAGING-19"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "This-stage URL does not contain",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-24"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "This-stage block does not list",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FORMATS-01",
+    "AC-FRONTMATTER-01"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "This-version URL does not contain",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-24"
+   ]
+  },
+  {
+   "check": "front-matter",
+   "sig": "confirm this is an intentional external reference",
+   "status": "operational-extra"
+  },
+  {
+   "check": "front-matter",
+   "sig": "which is not a file in the package",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-02"
+   ]
+  },
+  {
+   "check": "generator",
+   "sig": "must be produced by Microsoft Word",
+   "status": "operational-extra"
+  },
+  {
+   "check": "html-anchors",
+   "sig": "has no matching anchor in the HTML",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-06"
+   ]
+  },
+  {
+   "check": "html-anchors",
+   "sig": "no internal (fragment) links at all",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-06"
+   ]
+  },
+  {
+   "check": "html-residue",
+   "sig": "<h1> elements",
+   "status": "operational-extra"
+  },
+  {
+   "check": "html-residue",
+   "sig": "CI runner path leaked into the HTML",
+   "status": "operational-extra"
+  },
+  {
+   "check": "html-residue",
+   "sig": "title-block-header",
+   "status": "operational-extra"
+  },
+  {
+   "check": "html-title",
+   "sig": "carries working residue",
+   "status": "operational-extra"
+  },
+  {
+   "check": "html-title",
+   "sig": "looks too short",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "<img srcset> present",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "<picture> element present",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "Absolute-path <img src=",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "Cumulative image payload",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "Empty <img src>",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "Path-traversal <img src=",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "SVG contains <script>",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "inline event handlers",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "per-image refusal cap",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "references an external image/use target",
+   "status": "operational-extra"
+  },
+  {
+   "check": "junk-files",
+   "sig": "Junk file in package",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-09",
+    "AC-NAMING-13"
+   ]
+  },
+  {
+   "check": "junk-files",
+   "sig": "Working directory",
+   "status": "operational-extra"
+  },
+  {
+   "check": "link-mismatch",
+   "sig": "Visible URL and link target disagree",
+   "status": "operational-extra"
+  },
+  {
+   "check": "link-mismatch",
+   "sig": "Visible link text and href disagree in the HTML",
+   "status": "operational-extra"
+  },
+  {
+   "check": "logo",
+   "sig": "is not the canonical",
+   "status": "operational-extra"
+  },
+  {
+   "check": "manifest",
+   "sig": "manifest lists missing file",
+   "status": "operational-extra"
+  },
+  {
+   "check": "manifest",
+   "sig": "manifest.json is not valid JSON",
+   "status": "operational-extra"
+  },
+  {
+   "check": "manifest",
+   "sig": "sha256 mismatch for",
+   "status": "operational-extra"
+  },
+  {
+   "check": "md-links",
+   "sig": "Dual link",
+   "status": "operational-extra"
+  },
+  {
+   "check": "md-links",
+   "sig": "pandoc autolink pulls the",
+   "status": "operational-extra"
+  },
+  {
+   "check": "member-uri",
+   "sig": "Cites an OASIS member-only (Kavi) URI",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-18"
+   ]
+  },
+  {
+   "check": "multi-part-naming",
+   "sig": "bare canonical filename in a multi-part package",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-20"
+   ]
+  },
+  {
+   "check": "multi-part-naming",
+   "sig": "inconsistent WP-abbrev tokens",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-19"
+   ]
+  },
+  {
+   "check": "multi-part-naming",
+   "sig": "inconsistent version-id tokens",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-19"
+   ]
+  },
+  {
+   "check": "multi-part-naming",
+   "sig": "missing part identifier",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-20"
+   ]
+  },
+  {
+   "check": "multi-part-naming",
+   "sig": "part filename and containing part-directory disagree",
+   "status": "operational-extra"
+  },
+  {
+   "check": "multi-part-naming",
+   "sig": "part number reused for different parts",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-32"
+   ]
+  },
+  {
+   "check": "multi-part-naming",
+   "sig": "part numbering does not begin at 1",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-32"
+   ]
+  },
+  {
+   "check": "multi-part-naming",
+   "sig": "part numbering is not monotonically increasing / contains a gap",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-32"
+   ]
+  },
+  {
+   "check": "name-chars",
+   "sig": "an empty name cannot satisfy it",
+   "status": "operational-extra"
+  },
+  {
+   "check": "name-chars",
+   "sig": "must never be used in a filename or directory name that is used in a document URI",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-08",
+    "AC-NAMING-07"
+   ]
+  },
+  {
+   "check": "name-chars",
+   "sig": "no exception applies to an identifying package name",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-07"
+   ]
+  },
+  {
+   "check": "name-chars",
+   "sig": "no other character is permitted anywhere in the package",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-07"
+   ]
+  },
+  {
+   "check": "normdef-refs",
+   "sig": "basename-only reference cannot be unambiguously resolved",
+   "status": "operational-extra"
+  },
+  {
+   "check": "normdef-refs",
+   "sig": "normative-definition file is never referenced from the Work Product",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-05"
+   ]
+  },
+  {
+   "check": "ns-segment",
+   "sig": "cited as the immediately-preceding-stage document",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-21"
+   ]
+  },
+  {
+   "check": "ns-segment",
+   "sig": "reuses the reserved /ns/ segment",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-21"
+   ]
+  },
+  {
+   "check": "odt-integrity",
+   "sig": "carries embedded macro/script content",
+   "status": "operational-extra"
+  },
+  {
+   "check": "odt-integrity",
+   "sig": "does not open as a ZIP archive",
+   "status": "operational-extra"
+  },
+  {
+   "check": "odt-integrity",
+   "sig": "does not parse as XML",
+   "status": "operational-extra"
+  },
+  {
+   "check": "odt-integrity",
+   "sig": "has no content.xml",
+   "status": "operational-extra"
+  },
+  {
+   "check": "odt-integrity",
+   "sig": "has no mimetype member",
+   "status": "operational-extra"
+  },
+  {
+   "check": "odt-integrity",
+   "sig": "which is not an OpenDocument type",
+   "status": "operational-extra"
+  },
+  {
+   "check": "package-refs",
+   "sig": "is not in the package: it will 404",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-cover",
+   "sig": "leaked into the rendered PDF text",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-cover",
+   "sig": "times on the PDF cover page",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-fonts",
+   "sig": "not declared by the package's own CSS",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-fonts",
+   "sig": "pdffonts failed",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-sync",
+   "sig": "does not contain the canonical this-stage base URL",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-01"
+   ]
+  },
+  {
+   "check": "pdf-sync",
+   "sig": "expected only as a previous-stage reference",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-sync",
+   "sig": "pdftotext could not read the PDF",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-sync",
+   "sig": "pdftotext failed",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-sync",
+   "sig": "pdftotext not on PATH",
+   "status": "operational-extra"
+  },
+  {
+   "check": "previous-stage",
+   "sig": "no Previous-version block with docs.oasis-open.org URLs found on the HTML cover",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-03"
+   ]
+  },
+  {
+   "check": "previous-stage",
+   "sig": "the Previous-Stage block is empty or N/A",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-03"
+   ]
+  },
+  {
+   "check": "public-review-metadata",
+   "sig": "but is empty (0 bytes)",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-33"
+   ]
+  },
+  {
+   "check": "public-review-metadata",
+   "sig": "could not be fetched to confirm its content",
+   "status": "operational-extra"
+  },
+  {
+   "check": "public-review-metadata",
+   "sig": "does not carry the required companion file",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-21"
+   ]
+  },
+  {
+   "check": "ref-rfc",
+   "sig": "links an RFC URL that names",
+   "status": "operational-extra"
+  },
+  {
+   "check": "ref-rfc",
+   "sig": "says 'RFC ",
+   "status": "operational-extra"
+  },
+  {
+   "check": "references-split",
+   "sig": "is listed under both Normative References and",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-05"
+   ]
+  },
+  {
+   "check": "references-split",
+   "sig": "is not labeled Normative References / Informative References",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-05"
+   ]
+  },
+  {
+   "check": "residue",
+   "sig": "'Will be filled in",
+   "status": "operational-extra"
+  },
+  {
+   "check": "residue",
+   "sig": "'tbd' placeholder section",
+   "status": "operational-extra"
+  },
+  {
+   "check": "residue",
+   "sig": "Editor TODO left in",
+   "status": "operational-extra"
+  },
+  {
+   "check": "residue",
+   "sig": "Template instruction left in",
+   "status": "operational-extra"
+  },
+  {
+   "check": "revision-collision",
+   "sig": "is already published at",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-02",
+    "AC-PACKAGING-16",
+    "AC-NAMING-30"
+   ]
+  },
+  {
+   "check": "rfc-keywords",
+   "sig": "RFC 8174",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-07"
+   ]
+  },
+  {
+   "check": "rfc-keywords",
+   "sig": "does not cite RFC 2119",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-07"
+   ]
+  },
+  {
+   "check": "schema-id",
+   "sig": "An implementer following the $id",
+   "status": "operational-extra"
+  },
+  {
+   "check": "schema-id",
+   "sig": "a flattened path under the version",
+   "status": "operational-extra"
+  },
+  {
+   "check": "schema-id",
+   "sig": "disagrees with $id",
+   "status": "operational-extra"
+  },
+  {
+   "check": "schema-id",
+   "sig": "not valid JSON (",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FORMATS-04"
+   ]
+  },
+  {
+   "check": "stage-name",
+   "sig": "is missing its two-digit number",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-05",
+    "AC-NAMING-04"
+   ]
+  },
+  {
+   "check": "stage-name",
+   "sig": "is not a recognized stage token",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-02",
+    "AC-NAMING-03"
+   ]
+  },
+  {
+   "check": "stage-name",
+   "sig": "uses a retired/invalid stage token",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-01"
+   ]
+  },
+  {
+   "check": "stage-token",
+   "sig": "carries a retired stage token",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-01"
+   ]
+  },
+  {
+   "check": "stage-token",
+   "sig": "carries stage token '",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-02"
+   ]
+  },
+  {
+   "check": "stage-token",
+   "sig": "embeds a stage-abbreviation token",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-04"
+   ]
+  },
+  {
+   "check": "stage-uri-live",
+   "sig": "URI returns HTTP",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-03",
+    "AC-FRONTMATTER-04"
+   ]
+  },
+  {
+   "check": "symlinks",
+   "sig": "points at its own ancestor",
+   "status": "operational-extra"
+  },
+  {
+   "check": "template",
+   "sig": "No Conformance section found",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-01"
+   ]
+  },
+  {
+   "check": "template",
+   "sig": "Required front-matter section missing",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-01",
+    "AC-FRONTMATTER-08",
+    "AC-FRONTMATTER-16"
+   ]
+  },
+  {
+   "check": "template",
+   "sig": "out of template order",
+   "status": "operational-extra"
+  },
+  {
+   "check": "template-css",
+   "sig": "no stylesheet at all",
+   "status": "operational-extra"
+  },
+  {
+   "check": "template-css",
+   "sig": "the template look is Liberation",
+   "status": "operational-extra"
+  },
+  {
+   "check": "title-oasis-prefix",
+   "sig": "Work Product title begins with 'OASIS'",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-12"
+   ]
+  },
+  {
+   "check": "title-version",
+   "sig": "Version composition does not follow the required",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-10",
+    "AC-NAMING-06"
+   ]
+  },
+  {
+   "check": "title-version",
+   "sig": "cites a different Version than the package's own Version identifier",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-10"
+   ]
+  },
+  {
+   "check": "title-version",
+   "sig": "does not incorporate a Version identifier",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-FRONTMATTER-10"
+   ]
+  },
+  {
+   "check": "uri-alias",
+   "sig": "DOCX-native cover field cites a redirect",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-17"
+   ]
+  },
+  {
+   "check": "uri-alias",
+   "sig": "Previous-stage front-matter cites a redirect",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-17"
+   ]
+  },
+  {
+   "check": "uri-alias",
+   "sig": "cites oasis-open.org while linking a redirect",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-17"
+   ]
+  },
+  {
+   "check": "uri-alias",
+   "sig": "including a delivery/manifest-cited file",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-17"
+   ]
+  },
+  {
+   "check": "uri-alias",
+   "sig": "live <meta http-equiv=\"refresh\">",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-17"
+   ]
+  },
+  {
+   "check": "uri-alias",
+   "sig": "names oasis-open.org but links to a redirect",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-17"
+   ]
+  },
+  {
+   "check": "uri-alias",
+   "sig": "none of which is a delivery/manifest-cited file",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-17"
+   ]
+  },
+  {
+   "check": "uri-chars",
+   "sig": "Underscore in a document (cover-page) URI",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-08"
+   ]
+  },
+  {
+   "check": "version-naming",
+   "sig": "does not embed the version segment",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-06",
+    "AC-NAMING-14"
+   ]
+  },
+  {
+   "check": "version-naming",
+   "sig": "does not match the vN.N convention",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-06"
+   ]
+  },
+  {
+   "check": "version-naming",
+   "sig": "the files were renamed",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-NAMING-06",
+    "AC-NAMING-14"
+   ]
+  },
+  {
+   "check": "vml-fallback",
+   "sig": "browsers that ignore VML show nothing",
+   "status": "operational-extra"
+  },
+  {
+   "check": "xml-namespace",
+   "sig": "approval cannot be machine-confirmed",
+   "status": "operational-extra"
+  },
+  {
+   "check": "xml-namespace",
+   "sig": "declared under both http and https scheme",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-24"
+   ]
+  },
+  {
+   "check": "xml-namespace",
+   "sig": "does not match the required",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-20"
+   ]
+  },
+  {
+   "check": "xml-namespace",
+   "sig": "not evaluated by this check -- manual review",
+   "status": "operational-extra"
+  },
+  {
+   "check": "xml-namespace",
+   "sig": "not on the URN-grandfather allowlist",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-PACKAGING-25"
+   ]
+  }
+ ]
+}

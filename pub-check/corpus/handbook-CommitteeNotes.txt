@@ -1,0 +1,103 @@
+Committee Notes | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Work product lifecycle › Committee Notes
+Non-Standards Track · final stage
+Committee Notes
+A Committee Note (CN) is a Non-Standards Track Work Product published by a Technical Committee to convey information, guidance, or analysis that does not seek the normative status of a Committee Specification or OASIS Standard. Approval requires a Full Majority Vote of the TC. Unlike Standards Track work products, public review is not required before a CN is approved.
+What changed since the 2010 handbook
+Two things changed for Committee Notes. First, the Committee Note Public Review Draft (CNPRD) stage designation was removed. It no longer appears in filenames or URIs. Naming Directives v1.7 (effective 2 January 2024) struck cnprd from the list of valid stage abbreviations. Documents going to public review remain Committee Note Drafts (CND) throughout that review period. Second, public review is explicitly optional for Committee Notes, not required. A TC may choose to send its CND through public review, but the TC Process does not mandate it. TC Process §2.4
+Where this sits in the lifecycle
+Working Draft
+Working Drafts are editor-controlled. No TC ballot is required to publish a new Working Draft revision. Working Drafts carry no formal TC Process status and are not cited as approved Work Products.
+Committee Note Draft cnd Full Majority Vote
+The TC approves a Committee Note Draft by Full Majority Vote : more than 50% of all eligible Voting Members must vote Yes, whether present or not. TC Process §2.4
+Public review (optional)
+A TC may, at its discretion, submit a CND for public review before approving a Committee Note. If it chooses to do so, the first review runs for at least 30 days ; any subsequent review of the same work product runs for at least 15 days . The document remains designated as a CND during the review period, no separate CNPRD stage designation exists. TC Process §2.4 TC Process §2.6
+Committee Note cn Full Majority Vote
+The TC approves the Committee Note by Full Majority Vote . No public review is required before this ballot is held. TC Process §2.4
+Vote requirements
+Policy requirement
+Both the Committee Note Draft (CND) and Committee Note (CN) approvals require a Full Majority Vote : more than 50% of all eligible Voting Members must vote Yes, regardless of whether they are present at the meeting or not. Abstentions do not count. Defined Terms, Full Majority Vote TC Process §2.4
+Full Majority Vote is a higher threshold than Simple Majority Vote (where only Yes-vs.-No counts), but a lower threshold than Special Majority Vote (which requires at least 2/3 of eligible voters to vote Yes and no more than 1/4 to vote No). Committee Notes use Full Majority Vote at every stage.
+Public review: optional, not required
+Unlike Standards Track work products, where a successful public review is a precondition for Committee Specification approval, a Committee Note may be approved without any public review. TC Process §2.4
+A TC that voluntarily sends its CND to public review must open that review by Full Majority Vote . When a public review is held, the same procedures that apply to Standards Track work products under §2.6 apply: TC members must submit comments via the TC general email list; non-TC-members must use the TC's archived public comment facility. The TC must acknowledge receipt of each comment and post the disposition of each comment to its primary and comment email lists after the review period ends. (The stricter rule that all comments must be resolved before the approval ballot is a Standards Track requirement for Committee Specifications under §2.7; it does not bind Committee Note approval.) TC Process §2.4 TC Process §2.6
+Stage abbreviations and naming
+Policy requirement
+Current valid stage abbreviations for Non-Standards Track documents are cnd (Committee Note Draft) and cn (Committee Note). The abbreviation cnprd was removed in Naming Directives v1.7 . Do not use cnprd in filenames or URIs. Naming Directives v1.7
+A Committee Note Draft carries a revision number that increments with each new approved draft: cn-v1.0-cnd01 , cn-v1.0-cnd02 , and so on. Once approved as a Committee Note, the document is published with the cn stage abbreviation and also carries a revision number (e.g., cn-v1.0-cn01 , cn-v1.0-cn02 ). This differs from the os stage abbreviation for OASIS Standards, which is never used with a revision number. Naming Directives v1.7
+Optional standing rules
+The Document Life Cycle Best Practices describe three optional standing rules that a TC may adopt by Full Majority Vote to streamline its document workflow:
+Standing Rule 1 : Editors may publish additional CND revisions without a new TC approval ballot, if the TC has adopted this rule. Document Life Cycle Best Practices, Standing Rules
+Standing Rule 2 : The Chair may open a new public review with each CND release without a separate motion, if the TC has adopted this rule. Document Life Cycle Best Practices, Standing Rules
+Standing Rule 3 : The Chair and editors may make purely editorial changes during publication without returning to a TC approval ballot, if the TC has adopted this rule. Document Life Cycle Best Practices, Standing Rules
+Optional standing rule
+The standing rules above apply only if the TC has formally adopted them by Full Majority Vote. They are not available by default. A TC that has not adopted a standing rule must follow the baseline process for each step.
+Comparison with Standards Track
+Comparison of key approval requirements: Committee Note versus Committee Specification
+Requirement
+Committee Note (CN)
+Committee Specification (CS)
+Draft approval vote
+Full Majority Vote (CND) TC Process §2.4
+Full Majority Vote (CSD) TC Process §2.5
+Public review required before final approval?
+No : optional at TC's discretion
+Yes : mandatory; all comments must be resolved first
+Final approval vote
+Full Majority Vote TC Process §2.4
+Special Majority Vote TC Process §2.7
+Track
+Non-Standards Track
+Standards Track
+Stage abbreviations
+cnd , cn
+csd , cs
+Sources: TC Process §2.4 , TC Process §2.5 , TC Process §2.7 (effective 1 December 2020).
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 ( §2.4 , §2.6 ), OASIS Defined Terms effective 1 December 2020, and Naming Directives v1.7 (2 January 2024). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

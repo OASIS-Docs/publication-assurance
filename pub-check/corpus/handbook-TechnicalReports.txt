@@ -1,0 +1,102 @@
+Technical Reports | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Work product lifecycle › Technical Reports
+Non-Standards Track
+Technical Reports
+A Technical Report (TR) is a Non-Standards Track work product produced by a Technical Committee under one or more named Authors. It is approved by Full Majority Vote . A Technical Report Draft (TRD) is the in-progress form of a Technical Report before TC approval. Unlike Standards Track work products, Technical Reports are not eligible to become an OASIS Standard.
+What changed since the 2010 handbook
+Technical Reports and Technical Report Drafts are a new work product type with no equivalent in the 2010 handbook. They were introduced as defined terms in the OASIS Defined Terms effective 1 December 2020 . The 2010 handbook covered only Committee Notes on the Non-Standards Track. If your reference material makes no mention of Technical Reports, it predates this type.
+Where this sits in the lifecycle
+Working Draft
+Editors develop the work product incrementally as a Working Draft before it is designated a Technical Report Draft. Working Drafts are editor-controlled and do not require a TC ballot. A TC may also approve a work product directly as a Technical Report from Working Draft without first passing a TRD designation ballot, where no public review is needed. Document Life Cycle Best Practices
+Technical Report Draft Full Majority Vote
+The TC designates work product material as a Technical Report Draft by Full Majority Vote , meaning more than 50% of all eligible voters vote Yes, whether present or not. OASIS Defined Terms, Technical Report Draft (Def. 63)
+Public review (optional)
+Public review is optional for Technical Reports: "a public review is not required for a Technical Report." If the TC chooses to hold one, the review must be opened by the TC and comments addressed before the final approval ballot. OASIS Defined Terms, Technical Report (Def. 62)
+Technical Report Full Majority Vote
+The TC approves the work product as a Technical Report by Full Majority Vote . OASIS Defined Terms, Technical Report (Def. 62)
+Key characteristics
+Authors, not just editors
+A Technical Report has one or more named Authors . This distinguishes it from Committee Notes, which list editors. Authorship is recorded on the cover page and is part of the definition of the work product type. OASIS Defined Terms, Technical Report (Def. 62)
+Full Majority Vote threshold
+Policy requirement
+Both the TRD designation and the final TR approval require a Full Majority Vote : more than 50% of all eligible Voting Members must vote Yes, counting all eligible voters whether or not they are present at the meeting. OASIS Defined Terms, Full Majority Vote
+Public review is optional
+There is no requirement to hold a public review before approving a Technical Report: the Defined Terms state that "a public review is not required for a Technical Report." OASIS Defined Terms, Technical Report (Def. 62) Conducting a public review is at the TC's discretion and is an intrinsic feature of the work product type, not a standing rule. If the TC chooses to hold a public review, it must follow the same process as defined for a CSD, including use of the TC's public comment facility. Document Life Cycle Best Practices, Public review process
+Non-Standards Track only
+Technical Reports are Non-Standards Track work products. They are informational in nature and cannot be submitted as a candidate for an OASIS Standard. The current Non-Standards Track work product types are: Committee Note Draft (CND), Committee Note (CN), Technical Report Draft (TRD), and Technical Report (TR). OASIS Defined Terms, OASIS Non-Standards Draft Deliverable; OASIS Non-Standards Final Deliverable
+Comparison with Committee Notes
+Comparison of Technical Report and Committee Note characteristics
+Characteristic
+Technical Report (TR)
+Committee Note (CN)
+Track
+Non-Standards Track
+Non-Standards Track
+Approval vote
+Full Majority Vote
+Full Majority Vote
+Draft stage
+Technical Report Draft (TRD) OASIS Defined Terms, Technical Report Draft (Def. 63)
+Committee Note Draft (CND)
+Named contributors
+One or more Authors
+Editors
+Public review
+Optional
+Optional
+Introduced
+New in 2020 OASIS Defined Terms
+Present in 2010 handbook
+Harmonization note: TC Process text
+Historical note
+The definitive authority for Technical Reports is the OASIS Defined Terms (effective 1 December 2020) and the Document Life Cycle Best Practices (2024.08.22). These documents define the TRD and TR types, their approval votes, and their lifecycle.
+The TC Process §2.4.2 , which enumerates Non-Standards Track work product types, currently lists only Committee Notes in that section. The text of TC Process §2.4.2 has not yet been fully harmonized to incorporate TRD and TR explicitly by name. Until harmonization is complete, practitioners should rely on the Defined Terms and lifecycle best practices as the primary authority for Technical Reports, and treat TC Process §2.4.2 as providing only partial coverage of the Non-Standards Track.
+TC Process §2.4.2 OASIS Defined Terms, Technical Report
+Sources & provenance
+This page reflects the OASIS Defined Terms effective 1 December 2020 (definitions of Technical Report and Technical Report Draft) and Document Life Cycle Best Practices version 2024.08.22. The vote-type definition (Full Majority Vote) comes from the OASIS Defined Terms . The TC Process §2.4.2 text is cited for context; see the harmonization note above for the current scope of that section. Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

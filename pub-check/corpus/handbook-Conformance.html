@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conformance Clauses | OASIS TC Handbook</title>
+<meta name="description" content="How OASIS Technical Committees write conformance clauses for Standards Track work products: required structure, conformance targets, normative versus non-normative content, and the 10 core rules from the Guidelines to Writing Conformance Clauses (2017).">
+<link rel="canonical" href="https://docs.oasis-open.org/TChandbook/Reference/Conformance.html">
+<meta property="og:site_name" content="OASIS TC Handbook">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Conformance Clauses">
+<meta property="og:description" content="How OASIS Technical Committees write conformance clauses for Standards Track work products: required structure, conformance targets, normative versus non-normative content, and the 10 core rules from the Guidelines to Writing Conformance Clauses (2017).">
+<meta property="og:url" content="https://docs.oasis-open.org/TChandbook/Reference/Conformance.html">
+<meta property="og:image" content="https://docs.oasis-open.org/TChandbook/assets/oasis-logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/handbook.css?v=8e22b804">
+<link rel="icon" href="../assets/oasis-logo.png">
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="brand" href="../TChandbookIndex.html">
+      <img src="../assets/oasis-logo.png" alt="OASIS Open">
+      <span class="brand__pipe"></span>
+      <span class="brand__title">TC Handbook</span>
+    </a>
+    <nav class="masthead__nav">
+      <a href="../TChandbookIndex.html">Handbook</a>
+      <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process</a>
+      <a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives</a>
+      <a href="https://www.oasis-open.org/member-resources/">Member Resources</a>
+      <a href="https://www.oasis-open.org/">OASIS-Open.org</a>
+    </nav>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" aria-label="Handbook sections">
+    <div class="sidebar__group">
+<div class="sidebar__title">Getting started</div>
+<a href="../TChandbookIndex.html">Welcome</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">How do I…?</div>
+<a href="../Tasks/GainVotingRights.html">Gain voting rights</a>
+<a href="../Tasks/LoseVotingRights.html">Lose / regain voting rights</a>
+<a href="../Tasks/PersistentNonVoting.html">Become Persistent Non-Voting</a>
+<a href="../Tasks/ObserverToMember.html">Observer → Member</a>
+<a href="../Tasks/LeaveOfAbsence.html">Take a leave of absence</a>
+<a href="../Tasks/SendingEmail.html">Mailing lists &amp; email</a>
+<a href="../Tasks/UpdateWebPage.html">Update the TC web page</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Work product lifecycle</div>
+<a href="../Reference/WorkProductLifecycle.html">Lifecycle overview</a>
+<a href="../Reference/WorkingDrafts.html">Working Drafts</a>
+<a href="../Reference/CommitteeSpecDrafts.html">Committee Spec Drafts</a>
+<a href="../Reference/PublicReviews.html">Public Review</a>
+<a href="../Reference/CommitteeSpecs.html">Committee Specifications</a>
+<a href="../Reference/OASISStandard.html">OASIS Standard</a>
+<a href="../Reference/CommitteeNoteDrafts.html">Committee Note Drafts</a>
+<a href="../Reference/CommitteeNotes.html">Committee Notes</a>
+<a href="../Reference/TechnicalReports.html">Technical Reports</a>
+<a href="../Reference/Maintenance.html">Approved Errata</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quorum, voting &amp; meetings</div>
+<a href="../Reference/Voting.html">Voting &amp; ballots</a>
+<a href="../Reference/Quorum.html">Quorum &amp; meetings</a>
+<a href="../Reference/TCLifecycle.html">Maintaining or closing a TC</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quality &amp; naming</div>
+<a href="../Reference/WPQualityRequirements.html">Work product requirements</a>
+<a href="../Reference/WPQualityChecklist.html">Quality checklist</a>
+<a href="../Reference/Naming.html">Naming &amp; URIs</a>
+<a href="../Reference/Conformance.html" class="is-active" aria-current="page">Conformance clauses</a>
+<a href="../Reference/Templates.html">Templates</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Reference</div>
+<a href="../Concepts/Glossary.html">Glossary</a>
+<a href="../Reference/IPR.html">IPR policy</a>
+<a href="../Reference/GitHub.html">GitHub repositories</a>
+<a href="../Reference/Sources.html">Policy source registry</a>
+</div>
+  </aside>
+  <main class="content" id="content">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../TChandbookIndex.html">Handbook</a> <span>›</span> Quality &amp; naming <span>›</span> Conformance clauses</nav>
+    <span class="badge badge--track">Standards Track · quality requirement</span>
+<h1 class="page-title">Conformance Clauses</h1>
+<p class="lede">Any Standards Track work product submitted for public review, approved as a Committee Specification, or approved as an OASIS Standard must contain a separate, numbered conformance clause section with individually numbered conformance clauses. The <strong><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Guidelines to Writing Conformance Clauses</a></strong> (approved by the OASIS Technical Advisory Board, effective 7 April 2017) is the TAB-approved guidance document for how to write them; following the Guidelines is recommended but not required. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.6">TC Process §2.2.6</a></span> <span class="cite"><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Conformance Guidelines (2017)</a></span></p>
+
+<div class="callout callout--change">
+  <div class="callout__label">What changed since the 2010 handbook</div>
+  <p>Conformance clauses became a <strong>mandatory requirement</strong> for Standards Track work products before the 2010 handbook was published, but the requirement may not have been prominent in older guidance. The current TC Process (effective 1 December 2020) makes this explicit at section 2.2.6: a separate numbered conformance clause section is required for any Standards Track Work Product submitted for public review or approved as a CS or OASIS Standard. The requirement formally attaches when the work product is submitted for public review (the Committee Specification Public Review Draft stage), not at an earlier internal CSD approval ballot. Treating conformance clauses as optional for Standards Track work products is incorrect. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.6">TC Process §2.2.6</a></span></p>
+</div>
+
+<h2>When conformance clauses are required</h2>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>A Standards Track work product must include a conformance clause section before it can be submitted for public review (the Committee Specification Public Review Draft stage), approved as a <strong>Committee Specification (CS)</strong>, or approved as an <strong>OASIS Standard (OS)</strong>. The requirement formally attaches when the work product is submitted for public review, not at an earlier internal CSD approval ballot. A work product that lacks a conformance clause section is not eligible for public review or these approvals. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.6">TC Process §2.2.6</a></span></p>
+</div>
+
+<p>Non-Standards Track work products (Committee Notes, Technical Reports) are not required to include conformance clauses, though TCs may choose to include them.</p>
+
+<h2>Where conformance clauses appear in the lifecycle</h2>
+<div class="stage-strip">
+  <div class="stage">
+    <div class="stage__head"><span class="stage__name">Working Draft</span> <span class="stage__abbr">wd</span></div>
+    <div class="stage__body">Conformance clauses are not yet required but editors should draft them early. The conformance clause section must be present before the work product is submitted for public review. <span class="cite"><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Conformance Guidelines (2017)</a></span></div>
+  </div>
+  <div class="stage">
+    <div class="stage__head"><span class="stage__name">Committee Specification Draft</span> <span class="stage__abbr">csd</span> <span class="badge badge--vote">Full Majority Vote</span></div>
+    <div class="stage__body">Internal CSD approval does not yet require conformance clauses. The conformance clause requirement in <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.6">TC Process §2.2.6</a> attaches when the CSD is submitted for public review (the Committee Specification Public Review Draft stage). Editors should ensure the section is complete and ready before initiating a public review ballot. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.6">TC Process §2.2.6</a></span> <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.5">TC Process §2.5</a></span></div>
+  </div>
+  <div class="stage">
+    <div class="stage__head"><span class="stage__name">Committee Specification</span> <span class="stage__abbr">cs</span> <span class="badge badge--vote">Special Majority Vote</span></div>
+    <div class="stage__body">Conformance clauses must be present and complete. The Statements of Use submitted before a Candidate OASIS Standard ballot must identify which conformance clauses were implemented and state whether interoperability was demonstrated. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.8.1">TC Process §2.8.1</a></span> <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms (Statement of Use)</a></span></div>
+  </div>
+  <div class="stage">
+    <div class="stage__head"><span class="stage__name">OASIS Standard</span> <span class="stage__abbr">os</span></div>
+    <div class="stage__body">Conformance clauses are preserved unchanged from the approved Committee Specification. Amendments to a published OASIS Standard follow the Approved Errata process. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#errata">TC Process §2.9</a></span></div>
+  </div>
+</div>
+
+<h2>Required structure of the conformance section</h2>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>The conformance section must be:</p>
+  <ul>
+    <li>A <strong>separate, top-level numbered section</strong> of the work product (not a subsection buried elsewhere).</li>
+    <li>Populated with <strong>individually numbered conformance clauses</strong> (e.g., Clause 1, Clause 2, …) so that implementers and Statements of Use can cite specific clauses by number.</li>
+  </ul>
+  <p><span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.6">TC Process §2.2.6</a></span> <span class="cite"><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Conformance Guidelines (2017)</a></span></p>
+</div>
+
+<p>The section title is typically "Conformance" and is placed near the end of the document, after the normative body and before any annexes. Work product templates provided by OASIS TC Administration include a placeholder conformance section; editors must populate it with substantive clauses before the work product is submitted for public review.</p>
+
+<h2>Conformance targets</h2>
+<p>A conformance target is a specific entity type that a work product places requirements on. Conformance clauses are written with respect to conformance targets. Per the Guidelines, the umbrella term is <strong>implementation</strong>, meaning any concrete realization of a specification. An implementation may take the form of:</p>
+<ul>
+  <li>an <strong>artifact</strong> such as a protocol, document, process definition, or service interface;</li>
+  <li>a <strong>processor</strong> that interprets such an artifact;</li>
+  <li>a <strong>performance</strong> that involves the interpretation of such an artifact; or</li>
+  <li>a combination of the above.</li>
+</ul>
+<p>The Guidelines recommend defining conformance targets explicitly in the conformance section so that implementers know what kind of entity they are building conformant to the specification. <span class="cite"><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Conformance Guidelines (2017)</a></span></p>
+<p>A single specification may define multiple conformance profiles or levels (for example, a "Core" profile and an "Extended" profile), each with its own numbered clauses. Every profile must be numbered separately so that Statements of Use can identify which profile was implemented. <span class="cite"><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Conformance Guidelines (2017)</a></span></p>
+
+<h2>Normative versus non-normative content</h2>
+<p>The Guidelines draw a strict line between normative and non-normative content:</p>
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">Normative versus non-normative content in OASIS specifications</caption>
+  <thead>
+    <tr>
+      <th scope="col">Type</th>
+      <th scope="col">Role</th>
+      <th scope="col">Examples</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Normative</th>
+      <td>Establishes binding requirements for conformance; uses the key words MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY, OPTIONAL (as defined in RFC 2119 / BCP 14 when incorporated by reference).</td>
+      <td>Conformance clauses; mandatory element definitions; protocol requirements.</td>
+    </tr>
+    <tr>
+      <th scope="row">Non-normative</th>
+      <td>Provides explanatory, illustrative, or informative content; does not create binding obligations for conformance. Should be clearly labelled.</td>
+      <td>Examples, use-case scenarios, implementation notes, appendices marked "Non-normative".</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p>When a specification incorporates RFC 2119 (or its successor BCP 14) for normative keywords, the Guidelines recommend stating that in the conformance section or in the introductory section on conventions. Appendices and examples that are not part of the conformance requirements should be marked "Non-normative". <span class="cite"><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Conformance Guidelines (2017)</a></span></p>
+
+<h2>The 10 core rules</h2>
+<p>The Guidelines to Writing Conformance Clauses enumerate 10 core rules for effective conformance clauses. They are reproduced here in summary form; editors should read the full document before drafting. <span class="cite"><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Conformance Guidelines (2017)</a></span></p>
+<ol>
+  <li><strong>Identify conformance targets in each clause.</strong> Each conformance clause must clearly identify its conformance target, i.e., the type of implementations it applies to.</li>
+  <li><strong>Define conformance targets before using them.</strong> The different conformance targets must be clearly defined prior to their association with conformance clauses.</li>
+  <li><strong>One target type per clause.</strong> Each conformance clause must concern only one type of conformance target, or conformance target types that are clearly related.</li>
+  <li><strong>Number clauses within named profiles.</strong> Conformance clauses must be numbered within a conformance section and associated with a named conformance profile or level.</li>
+  <li><strong>Refer precisely to normative body content.</strong> A conformance clause must refer precisely and unambiguously to normative statements and content in the specification's main body.</li>
+  <li><strong>Do not introduce new normative statements.</strong> A conformance clause must not introduce new normative statements that could instead have been part of the specification's main body.</li>
+  <li><strong>Do not refer to non-normative content.</strong> A conformance clause must not refer to content in the specification's main body that was qualified as non-normative.</li>
+  <li><strong>Optional features may be raised to recommended or mandatory.</strong> A conformance clause may refer to a normative statement of optional nature and make it recommended or mandatory, but cannot do the reverse.</li>
+  <li><strong>Add practical restrictions on fulfillment.</strong> A conformance clause may add practical restrictions about how the conformance target is supposed to fulfill a normative requirement or function.</li>
+  <li><strong>Set a higher bar for interoperability.</strong> When writing conformance clauses about implementations that interoperate with each other, place a higher bar on the ability of the conformance target to process what other implementations produce.</li>
+</ol>
+
+<h2>Relationship to Statements of Use</h2>
+<p>The numbered conformance clauses in a Committee Specification play a direct role in the OASIS Standard approval process. When a TC submits a Committee Specification as a Candidate OASIS Standard, it must provide three Statements of Use, at least one from an OASIS Organizational Member. Each Statement of Use must state that the party has successfully used or implemented the specification in accordance with all or some of its conformance clauses, identify which clauses apply, and state whether interoperability was demonstrated. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.8.1">TC Process §2.8.1</a></span> <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/oasis-defined-terms-2018-05-22/">OASIS Defined Terms (Statement of Use)</a></span></p>
+<p>Poorly numbered or ambiguous conformance clauses make it difficult for implementers to provide accurate Statements of Use, which can delay or prevent the TC from meeting the precondition for a Candidate OASIS Standard submission. Editors should ensure each clause has a stable, unique number before the work product is submitted for public review.</p>
+
+<footer class="provenance"><div class="provenance__label">Sources &amp; provenance</div>
+  <p>This page reflects the <strong><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Guidelines to Writing Conformance Clauses</a></strong> (TAB-approved recommended guidance, effective 7 April 2017; following the Guidelines is recommended but not required) and the <strong><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a></strong> effective 1 December 2020 (<a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.6">§2.2.6</a>, <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.5">§2.5</a>, <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.7">§2.7</a>, <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.8.1">§2.8.1</a>, <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#errata">§2.9</a>). Content last verified against these sources on <strong>4 June 2026</strong>. The 10 core rules summarized above are derived directly from the Guidelines; the mandatory obligation to include a conformance section comes from <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.6">TC Process §2.2.6</a>. The governing rules are the OASIS policies themselves; see the <a href="../Reference/Sources.html">policy source registry</a>.</p>
+</footer>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div>OASIS TC Handbook · maintained by the OASIS Open staff. Questions: <a href="/cdn-cgi/l/email-protection#deaabdf3bfbab3b7b09eb1bfadb7adf3b1aebbb0f0b1acb9"><span class="__cf_email__" data-cfemail="b8ccdb95d9dcd5d1d6f8d7d9cbd1cb95d7c8ddd696d7cadf">[email&#160;protected]</span></a></div>
+    <div>The authoritative rules are the <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a> and related policies. This handbook is practical guidance, current as of 4 June 2026.</div>
+    <div class="site-footer__legal">Copyright © OASIS Open. All rights reserved. · <a href="https://www.oasis-open.org/policies-guidelines/">Policies &amp; Guidelines</a></div>
+  </div>
+</footer>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

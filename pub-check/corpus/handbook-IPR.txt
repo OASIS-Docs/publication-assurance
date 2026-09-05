@@ -1,0 +1,111 @@
+IPR Policy | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Reference › IPR policy
+Reference · OASIS IPR Policy
+IPR Policy
+Every OASIS Technical Committee operates under one of four Intellectual Property Rights (IPR) modes. That choice, made at charter and binding for the life of the TC, determines what licensing commitments members make when they contribute to, or participate long enough in, a Technical Committee's work.
+What changed since the 2010 handbook
+The governing IPR Policy was replaced in 2013 . Two structural changes affect how handbook guidance was previously written:
+Statements of Use moved stages. Under the 2010-era process, three Statements of Use were associated with the Committee Specification stage. Under the current TC Process (§2.8.1), Statements of Use are required only at Candidate OASIS Standard submission . A Committee Specification can be approved with zero Statements of Use.
+IPR mode is now explicitly locked at charter. The 2013 IPR Policy makes explicit that the IPR mode cannot be changed without closing the TC and filing a new charter.
+IPR Policy (2013)
+TC Process §2.8.1
+The four IPR modes
+When a TC is chartered, its proposers select one of four IPR modes. This selection governs what Essential Claims members must license when they make contributions or participate long enough to trigger the Participation Obligation. The mode cannot be changed without closing the TC and filing a new charter. IPR Policy
+Policy requirement
+The IPR mode is set at charter. If a TC wishes to change its IPR mode, it must close and a new TC must be chartered under the desired mode. IPR Policy
+Comparison of the four OASIS IPR modes and the licensing commitment each imposes on Essential Claims
+IPR mode
+Licensing commitment on Essential Claims
+RAND
+License Essential Claims on fair, reasonable, and non-discriminatory terms. Royalties are permitted.
+RF on RAND Terms
+License Essential Claims royalty-free, with the base royalty-free elements as the floor. Additional license terms that are fair, reasonable, and non-discriminatory may be negotiated between the parties beyond those base elements.
+RF on Limited Terms
+License Essential Claims royalty-free under the base royalty-free elements only. No further conditions or restrictions may be imposed beyond those base elements, except reasonable and customary terms relating to operation or maintenance of the license relationship, such as choice of law and dispute resolution.
+Non-Assertion
+Covenant not to assert Essential Claims against any party that implements the specification consistent with its conformance clauses.
+Source: IPR Policy
+Contribution Obligation
+The Contribution Obligation applies when a TC member submits material that is incorporated into an OASIS Standards Final Deliverable. At the moment of contribution, the contributor agrees to license their Essential Claims in that contributed material under the TC's chosen IPR mode. IPR Policy §9.1
+Contributions must be delivered to the TC's general email list or the TC's designated document repository, not as a link or URL to an external resource. TC Process §1.15 The submitted material must be non-confidential and carry a proper copyright identification. IPR Policy §5.1
+Policy requirement
+Material must be delivered directly to the TC's general email list or document repository. A link or URL does not constitute a Contribution. TC Process §1.15
+Feedback from non-members
+Feedback submitted by persons who are not TC members (for example, public-review comments or GitHub pull requests) is governed by the OASIS Feedback License, which requires the submitter to license on terms consistent with the TC's IPR mode. Such feedback is handled under the Feedback License rather than the full Contribution Obligation, but the licensing commitment it carries still tracks the TC's IPR mode. IPR Policy §7 & Appendix A
+Participation Obligation
+The Participation Obligation arises automatically with time and presence, without any act of contribution. After 60 or more calendar days of TC membership , a member is subject to the Participation Obligation with respect to Essential Claims in any OASIS Standards Draft Deliverable if that member was on the TC, or was represented by TC members on the TC, during the period beginning 7 calendar days after the ballot to approve that OASIS Standards Draft Deliverable has elapsed, but only where that draft is subsequently incorporated (in whole or in part) into a finally approved OASIS Standards Final Deliverable. IPR Policy §9.2 Because the obligation is defined only over OASIS Standards Draft Deliverables, Committee Notes and other Non-Standards Track drafts fall outside its scope.
+Policy requirement
+After 60 or more calendar days of TC membership, a member's Essential Claims in an OASIS Standards Draft Deliverable are subject to the Participation Obligation if that member was on the TC during the period beginning 7 calendar days after the ballot to approve that draft has elapsed, and only if that draft is subsequently incorporated into a finally approved OASIS Standards Final Deliverable. The Participation Obligation applies regardless of whether the member made a Contribution. Because it is defined only over OASIS Standards Draft Deliverables, it does not reach Committee Notes or other Non-Standards Track drafts. IPR Policy §9.2
+Disclosure of Essential Claims
+TC members who are aware of patents or patent applications with claims that may be Essential Claims against a TC deliverable must disclose that information to the TC Administrator. Disclosure is required whether or not the member intends to license or assert those claims. IPR Policy
+Statements of Use
+Three Statements of Use are required before a Committee Specification can be submitted as a Candidate OASIS Standard, with at least one Statement from an OASIS Organizational Member. TC Process §2.8.1
+Policy requirement
+The TC must hold three Statements of Use referencing the Committee Specification, at least one of which is from an OASIS Organizational Member, before the TC may vote by Special Majority Vote to submit that CS as a Candidate OASIS Standard. TC Process §2.8.1
+Each Statement of Use must attest that the party has successfully used or implemented the specification consistent with its conformance clauses, identify which conformance clauses apply, and state whether interoperability with other implementations was demonstrated. OASIS Defined Terms (Statement of Use)
+Statement of Use mechanics
+The OASIS Defined Terms also govern how a Statement of Use is made, who may issue one, and how the TC accepts it. These mechanics apply in addition to the implementation attestation above.
+Mechanics of a valid Statement of Use under the OASIS Defined Terms
+Mechanic Rule
+Version and date reference
+The Statement of Use must be made to a specific version of the specification and must include the specification's approval date .
+Who may issue it
+The party may be an OASIS Member or a non-member. A non-member's Statement of Use must be submitted via the Technical Committee's (or Project Governing Board's) comment facility .
+TC acceptance
+A Statement of Use submitted to the TC must be approved by TC Resolution as an acceptable Statement of Use with respect to the specification.
+One per party
+A party can issue only one Statement of Use for a given specification.
+Organizational Member endorsement
+When issued by an OASIS Organizational Member, the Statement of Use must be endorsed by that Organizational Member's Primary Representative .
+Source for all five mechanics: OASIS Defined Terms (Statement of Use) . A TC or Project Governing Board may additionally require a Statement of Use to include hyperlinks to documents, files, or demonstration transcripts that enable the committee's members to evaluate the implementation or usage. OASIS Defined Terms (Statement of Use)
+What a Statement of Use does not require
+A Statement of Use is not a declaration of IPR licensing. It attests implementation , not intent to license.
+A Statement of Use is not required to approve a Committee Specification. That approval requires only a Special Majority Vote of eligible Voting Members. TC Process §2.7
+Sources & provenance
+This page reflects the OASIS IPR Policy (effective 31 July 2013), the OASIS TC Process (effective 1 December 2020), and the OASIS Defined Terms (effective 1 December 2020). IPR mode descriptions, Contribution and Participation Obligations, and disclosure requirements draw on the IPR Policy . Contribution delivery rules (general email list or document repository; a URL is not sufficient) are from TC Process §1.15 . The Statement of Use content and mechanics (version and approval-date reference, non-member submission via the comment facility, acceptance by TC Resolution, one per party, and Primary-Representative endorsement for Organizational Members) draw on the OASIS Defined Terms (Statement of Use); the quantity and membership requirements (three Statements of Use, at least one from an Organizational Member) draw on TC Process §2.8.1 . Content verified against live sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines
