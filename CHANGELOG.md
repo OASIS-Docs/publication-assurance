@@ -24,7 +24,7 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
-## v1.3.0 - 2026-09-04
+## v1.3.0 - 2026-09-05
 
 Prepared for handing the criteria to the TCs. No check was added or removed
 and no finding changes severity. It is a MINOR rather than a PATCH for two
