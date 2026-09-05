@@ -1,0 +1,209 @@
+Work product lifecycle | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Work product lifecycle › Lifecycle overview
+Reference · Orientation
+Work product lifecycle
+OASIS Technical Committees produce work products on two separate tracks: a Standards Track that can culminate in an OASIS Standard, and a Non-Standards Track for Committee Notes and Technical Reports. The tracks have different stages, different vote types, and different approval paths. Not every work product reaches every stage, this page orients you to the full picture; the per-stage pages carry the detail.
+OASIS Standards Track work-product lifecycle Develop Review Approve Publish Working Draft Editor-controlled · no ballot required Full Majority Vote Committee Specification Draft csd · approved by Full Majority Vote opened by Full Majority Vote Public Review ≥ 30 days first review · ≥ 15 days subsequent all comments resolved Committee Specification cs · approved by Special Majority Vote Special Majority Vote Candidate OASIS Standard ≥ 60-day public review · 3 Statements of Use submitted to OASIS Members Call for Consent ≥ 14 days · Members presumed to consent fewer than 15 valid objections OASIS Standard os · never carries a revision number The Standards Track work-product lifecycle at a glance, from Working Draft to OASIS Standard. Vote types are shown on each transition; minimum review periods are noted at each gate.
+The lifecycle in words (text equivalent)
+The diagram shows the Standards Track work product lifecycle as a single forward-only sequence of stages. Each stage and its transition is listed here in order:
+Working Draft ( wd ): editor-controlled; no ballot required to create or revise.
+Committee Specification Draft ( csd ): approved by Full Majority Vote . TC Process §2.5
+Public Review : opened by Full Majority Vote ; at least 30 days for the first review and at least 15 days for any subsequent review; the work product undergoing review is still a CSD. The TC may not consider approval as a Committee Specification until a review cycle produces no comments that result in Material changes. TC Process §2.6
+Committee Specification ( cs ): approved by Special Majority Vote after all public-review comments are resolved. TC Process §2.7
+Candidate OASIS Standard : submitted by Special Majority Vote with three Statements of Use (at least one from an OASIS Organizational Member), then a public review of at least 60 days. TC Process §2.8.1 TC Process §2.8.2
+Call for Consent : at least 14 days among eligible OASIS Organizational Members, who are presumed to consent unless they file a valid objection. TC Process §2.8.3
+OASIS Standard ( os ): the highest level of OASIS approval; the os abbreviation never carries a revision number.
+The sequence is forward-only: no step may be skipped, and an approved work product does not return to an earlier stage (see the "Common misconception" callout below).
+The process in detail
+The summary above shows the forward sequence of stages. This state diagram shows the same process the way it actually runs day to day: each stage is an iterate-and-ballot cycle , with the gated transitions between stages and the Major-Revision loop-back from CS to CSD.
+WD Working Draft
+CSD Committee Specification Draft
+CS Committee Specification
+Authors work on the text
+Authors release a Working Draft
+TC reviews the Working Draft
+Ready for CSD approval?
+One or more TC Members propose a new work item
+Additional changes & releases
+Open Full Majority ballot
+Ready for public review?
+Ready for CS?
+Additional changes & releases
+Open Special Majority ballot
+Finished?
+Ready for OASIS Standard?
+OASIS Standard
+approved by the OASIS membership
+No
+Full Majority Vote
+≥30-day first review,
+≥15-day subsequent
+Special Majority Vote
+Yes
+Yes
+Yes
+Major
+revision
+Legend
+Process / action
+Ballot
+Release
+Decision / gate
+The same process as a state machine. Each stage (Working Draft, Committee Specification Draft, Committee Specification) is an iterate-and-ballot cycle; arrows show the flow within a stage, the gated transitions between stages (Full then Special Majority Vote), and the Major-Revision loop-back from CS to CSD. Redrawn from Appendix A of the OASIS Document Life Cycle for TCs (approved 2024-08-22). Open full size ↗
+Common misconception
+Once a TC approves its first Committee Specification Draft (and, later, after CS01 is approved), the work product does not return to the Working Draft stage. Working Draft is the pre-approval drafting state only.
+The Standards Track is forward-only: each progression must begin with step 1 and no step may be skipped, though a TC is never obliged to advance a work product to the next step. TC Process §2.4.1 All further iteration after the first CSD happens within the CSD stage: the TC may revise a CSD and re-approve it any number of times as a CSD TC Process §2.5 , and to re-run a public review the revisions are re-approved as a CSD and resubmitted to public review, never by dropping back to Working Draft. TC Process §2.6 The TC Process defines no mechanism to return an approved CSD, CS, or OASIS Standard to Working Draft.
+What changed since the 2010 handbook
+Several significant changes affect how the lifecycle works:
+CSPRD and CNPRD are gone. The 2010 handbook described "Committee Specification Public Review Draft (CSPRD)" and "Committee Note Public Review Draft (CNPRD)" as distinct named stages. Naming Directives v1.7 (effective 2 January 2024 ) formally removed these stage abbreviations. A document going to public review remains a CSD or CND in its filename and URI, there is no separate "public review draft" stage.
+OASIS Standard approval is now a Call for Consent, not a percentage ballot. The current TC Process (effective 1 December 2020 ) replaced the old 15%-affirmative / 25%-negative vote model with a consent-based mechanism: eligible OASIS Organizational Members are presumed to consent unless they actively object. The rejection threshold is now an absolute count, 15 or more valid objections, not a percentage.
+Technical Report is a new work product type. The OASIS Defined Terms (effective 1 December 2020) introduced Technical Report and Technical Report Draft as Non-Standards Track work products. These did not exist in the 2010 handbook.
+Document Life Cycle Best Practices (2024) added three optional Standing Rules that TCs may adopt to streamline balloting. These are optional, a TC must explicitly adopt them; they are not defaults.
+The two tracks at a glance
+Comparison of Standards Track and Non-Standards Track work products
+Attribute
+Standards Track
+Non-Standards Track
+Work product types
+Committee Specification (CS), OASIS Standard (OS)
+Committee Note (CN), Technical Report (TR)
+Intermediate drafts
+Working Draft (WD), Committee Specification Draft (CSD)
+Working Draft (WD), Committee Note Draft (CND), Technical Report Draft (TRD)
+Public review
+Required before CS approval TC Process §2.6
+Optional for CNs TC Process §2.4 and TRs OASIS Defined Terms (Technical Report, Def. 62)
+Final TC approval vote
+Special Majority Vote (CS) TC Process §2.7
+Full Majority Vote (CN TC Process §2.4 ; TR OASIS Defined Terms (Technical Report, Def. 62) )
+Can reach OASIS Standard?
+Yes, via Call for Consent
+No
+Current stage abbreviations
+csd , cs , os , errata Naming Directives v1.7
+cnd , cn Naming Directives v1.7
+Standards Track
+A Standards Track work product moves through the following stages. Each stage is a gate, the TC votes explicitly to advance the work product, and some stages require actions outside the TC (such as a public review or a Call for Consent among OASIS Organizational Members).
+Working Draft wd
+Editor-controlled drafts. A TC is not required to vote to create or revise a Working Draft; this is internal working material. Pre-CSD naming convention applies (e.g., doc-name-pre-csd01-yyyy-mm-dd ). No document reverts to Working Draft once the TC approves it as a Work Product. Working Drafts ›
+Committee Specification Draft csd Full Majority Vote
+The first official milestone. The TC approves a Committee Specification Draft (CSD) by Full Majority Vote : more than 50% of all eligible Voting Members must vote Yes. TC Process §2.5 The TC may approve multiple CSD revisions before submitting to public review. Committee Specification Drafts ›
+Public Review Full Majority Vote to open
+Required for Standards Track work products. The TC votes by Full Majority Vote to submit a CSD for public review. The first public review must run for at least 30 days ; any subsequent public review of the same work product must run for at least 15 days . TC Process §2.6 During review, the document is still called a CSD, there is no separate "public review draft" stage name. A Standards Track work product approved at the Committee Specification Public Review Draft , Committee Specification, or OASIS Standard level must include a separate, numbered conformance clause section; the requirement therefore attaches at this public-review stage, not at the initial §2.5 CSD-approval ballot. TC Process §2.2.6 Public Review ›
+Committee Specification cs Special Majority Vote
+The highest level a TC can approve on its own authority. The TC approves a Committee Specification (CS) by Special Majority Vote : at least 2/3 of eligible Voting Members must vote Yes AND no more than 1/4 may vote No; the ballot is conducted electronically by the TC Administrator. This vote is held only after a successful public review and resolution of all comments. TC Process §2.7 Committee Specifications ›
+Candidate OASIS Standard, submission Special Majority Vote
+To advance beyond a CS, the TC submits it as a candidate for OASIS Standard by Special Majority Vote . The TC must hold three Statements of Use referencing the CS, at least one from an OASIS Organizational Member. TC Process §2.8.1 Candidate OASIS Standards ›
+Candidate OASIS Standard, public review
+A public review of at least 60 days is conducted before the consent ballot. TC Process §2.8.2
+Call for Consent Consent of OASIS Members
+The TC Administrator runs a Call for Consent of at least 14 days among eligible OASIS Organizational Members. Members are presumed to consent unless they file a valid objection. The submission is rejected if 15 or more eligible OASIS Members submit valid objections; if fewer than 15 valid objections are received, the TC has 30 days to resolve them. TC Process §2.8.3 OASIS Standard (Call for Consent) ›
+OASIS Standard os
+The highest level of OASIS approval. The os stage abbreviation never carries a revision number. Naming Directives v1.7 After publication, corrections follow the Approved Errata process, not a re-ballot. OASIS Standard › · Approved Errata ›
+Call for Consent: objection handling in detail
+The Call for Consent is a consent mechanism, not a percentage ballot, and its objection-handling rules are precise. The following is the full sequence once a Call for Consent opens:
+What makes an objection valid. To be valid, an objection must be entered on the electronic ballot before it closes and must be accompanied by a reason for the objection and/or a proposed remedy that would satisfy the objector, provided either on the ballot or publicly to the TC's archived public comment facility, or, for a TC Member, to the TC's mailing list. TC Process §2.8.3
+Who decides validity. The TC Administrator makes the final determination as to whether objections are valid or not. TC Process §2.8.3
+No valid objections. If there are no valid objections, the Committee Specification becomes an OASIS Standard. TC Process §2.8.3
+Fewer than 15 valid objections. The TC must prepare a comment resolution log, approve it by Full Majority Vote , and submit it to the OASIS TC Administrator. TC Process §2.8.3
+The 30-day window after the log. After submitting the comment resolution log, the TC has 30 days to take one of three actions by Special Majority Vote : withdraw the submission; if no changes were made, request the TC Administrator approve the submitted CS as an OASIS Standard despite the objections; or submit an amended Committee Specification. For an amended CS with only Non-Material changes, the TC requests approval of the amended CS; if the changes are Material, a second Call for Consent is required. The TC Administrator makes the final determination of whether changes are Material. TC Process §2.8.3
+A second Call for Consent. A second Call for Consent runs the same way as the first, with two exceptions: a valid objection from the first call that is substantively repeated is not counted as valid for the second; and if Material changes prove necessary to satisfy valid objections to the second call, the candidate does not become an OASIS Standard. A TC gets only one attempt during the consent process to make Material changes. Failure of a Call for Consent does not prevent a later version of the same specification from being submitted again. TC Process §2.8.3
+For the full step-by-step procedure, see Approving an OASIS Standard .
+Non-Standards Track
+Non-Standards Track work products do not go through a Call for Consent and cannot become OASIS Standards. They are approved entirely within the TC by Full Majority Vote. Public review is optional.
+Committee Notes
+Working Draft wd
+Same editor-controlled drafting phase as the Standards Track.
+Committee Note Draft cnd Full Majority Vote
+The TC approves a Committee Note Draft (CND) by Full Majority Vote . TC Process §2.4 Committee Note Drafts ›
+Public Review (optional)
+Public review is optional for Committee Notes. If the TC elects to hold a public review, the same minimum period applies: at least 30 days for the first review; at least 15 days for subsequent reviews. TC Process §2.6 Public Review ›
+Committee Note cn Full Majority Vote
+The TC approves a Committee Note (CN) by Full Majority Vote . TC Process §2.4 Committee Notes ›
+Technical Reports
+Historical note
+Technical Report and Technical Report Draft are new Non-Standards Track work product types introduced in the OASIS Defined Terms effective 1 December 2020 . They did not exist in the 2010 handbook.
+Technical Report Draft Full Majority Vote
+The TC approves a Technical Report Draft (TRD) by Full Majority Vote . Unlike Committee Notes, a Technical Report has one or more named Authors (not just editors). OASIS Defined Terms (Technical Report, Def. 62)
+Public Review (optional)
+Before a Technical Report is approved, the TC may elect to hold one or more public reviews, but a public review is not required . This authority is governed by the OASIS Defined Terms definition of Technical Report, not by TC Process §2.6 (which governs Committee Specification Draft public review). OASIS Defined Terms (Technical Report, Def. 62)
+Technical Report Full Majority Vote
+A Technical Report is a Non-Standards Track Work Product that has been approved by a Full Majority Vote . OASIS Defined Terms (Technical Report, Def. 62)
+Key points for orientation
+Tracks are separate. A work product is created on one track and stays on that track. There is no migration from Non-Standards Track to Standards Track after creation.
+Not all stages apply to all work products. A TC may decide to publish a Committee Specification without ever seeking OASIS Standard status. The Call for Consent stages are only entered if the TC chooses to proceed.
+Stage abbreviations in names and URIs are controlled. Use only the current abbreviations ( csd , cs , os , errata for Standards Track; cnd , cn for Non-Standards Track). The abbreviations csprd , cnprd , and cos were removed in Naming Directives v1.7 and must not appear in new work product names or URIs. Naming Directives v1.7
+Public review does not create a new stage name. A CSD sent to public review is still a CSD; a CND sent to public review is still a CND. There is no "public review draft" stage name in the current Naming Directives.
+Optional standing rules may change how ballots are triggered. TCs that have adopted the Document Life Cycle Best Practices standing rules may streamline some ballot steps. These rules are optional , they must be explicitly adopted by the TC and do not apply by default. Document Life Cycle Best Practices
+Policy requirement
+A Special Majority Vote, required at the CS approval and Candidate OASIS Standard submission stages, is defined as: at least 2/3 of eligible Voting Members vote Yes AND no more than 1/4 vote No ; it must be conducted as an electronic ballot by the TC Administrator. OASIS Defined Terms
+Find the per-stage detail
+Both tracks
+Working Drafts
+Editor-controlled drafts before any TC approval ballot.
+Standards Track
+Committee Specification Drafts
+First formal milestone; Full Majority Vote; multiple CSD revisions allowed.
+Both tracks
+Public Review
+Required for Standards Track; optional for Non-Standards Track. Minimum periods, comment facility, material vs. non-material changes.
+Standards Track
+Committee Specifications
+Special Majority Vote; highest level the TC can approve on its own authority.
+Standards Track · final stage
+OASIS Standard (Call for Consent)
+Submission, 60-day public review, Call for Consent, and the 15-objection rejection threshold.
+Non-Standards Track
+Committee Notes
+Full Majority Vote; optional public review.
+Post-publication
+Approved Errata
+Formal errata process for OASIS Standards; at most once per 6-month period.
+Sources & provenance
+This page reflects the OASIS TC Process effective 1 December 2020 (§2, work product lifecycle), the OASIS Defined Terms effective 1 December 2020, the Document Life Cycle Best Practices version 2024.08.22, and Naming Directives v1.7 effective 2 January 2024. Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

@@ -1,0 +1,86 @@
+Templates | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Quality & naming › Templates
+Quality & naming
+Templates
+OASIS no longer offers generic downloadable Microsoft Word or OpenOffice templates for Standards Track or Non-Standards Track work products. Templates are now provided on a per-work-product basis: a Technical Committee (TC) requests a starter document from TC Administration and receives a customized template pre-configured for the registered work product. Generic DocBook XML and XHTML templates remain available at docs.oasis-open.org/templates/ .
+What changed since the 2010 handbook
+The 2010 handbook offered static downloadable Word/OpenOffice templates for both the Standards Track and the Non-Standards Track. Those downloads are gone. Today the templates page lists one Standards Track and three Non-Standards Track template variants (basic, white paper, and presentation), all obtained via registration request rather than direct download. The page states explicitly: "Microsoft Word and OpenOffice Writer templates are no longer available for download; instead, a Work Product Registration and Template Request must be submitted to TC Administration." The only generic templates that remain are DocBook XML and XHTML, available from the same page at docs.oasis-open.org/templates/ .
+Getting a template for a new work product
+OASIS staff practice
+Before an editor begins drafting a new work product, use the "Request a starter document/template" form in the Member Resources editors section at oasis-open.org/member-resources/ . TC Administration returns a customized template for the registered work product. Starting from a customized template avoids the most common naming and URI errors caught at document submission time.
+The request typically includes the work product's full title, abbreviation, version identifier, and TC short name, which together determine the publication URIs. The abbreviation must use only alphanumerics, hyphens, and periods, underscores may not appear in document URIs. Naming Directives v1.7
+Generic templates still available
+For TCs that prefer to work in DocBook XML or XHTML, or as a reference starting point, the following generic templates remain available at docs.oasis-open.org/templates/ :
+Generic OASIS templates available at docs.oasis-open.org/templates/
+Template
+Format(s)
+DocBook XML, Specifications
+HTML, XML, PDF
+DocBook XML, Notes
+HTML, XML, PDF
+DocBook XML, Online/Offline Publishing Environments and Methodology
+HTML, XML, PDF, ZIP
+XHTML template + CSS stylesheet + User Guide
+HTML (template + user guide), CSS (stylesheet)
+TC Public Page Template
+HTML
+These generic templates do not pre-populate work-product-specific URIs. Editors using a generic template must manually insert the three required cover-page URIs (This stage, Previous stage, Latest stage) following the Naming Directives URI pattern. Naming Directives v1.7
+Stage abbreviations in templates and filenames
+Any template, customized or generic, must use current stage abbreviations when generating filenames and URIs. The current abbreviations are:
+Standards Track: csd , cs , os , errata . The os stage never carries a revision number.
+Non-Standards Track: cnd , cn .
+The abbreviations csprd , cnprd , and cos were removed in Naming Directives v1.7 (effective 2 January 2024) and must not appear in new filenames or URIs. Naming Directives v1.7
+Historical note
+Prior to the current registration-based workflow, the old TC Handbook linked to two static template files: a "Standards Track" Word/OpenOffice template and a "Non-Standards Track" Word/OpenOffice template. Both have been retired. The Kavi-era form names (such as Committee Specification Draft Creation and Upload Request ) are also obsolete; the current entry point is the "Request a starter document/template" form in Member Resources.
+Further reading
+Naming & URIs , filename and URI conventions that customized templates are configured to enforce.
+Conformance clauses , required for all Standards Track work products approved at the Committee Specification Public Review Draft (the public-review stage), Committee Specification, or OASIS Standard level. TC Process §2.2.6
+Work product quality checklists , editorial quality verification and document submission checklists for editors.
+Sources & provenance
+This page reflects the OASIS Member Resources editors section (accessed 4 June 2026, oasis-open.org/member-resources/ ) and the template index at docs.oasis-open.org/templates/ , with naming rules drawn from OASIS Naming Directives v1.7 (effective 2 January 2024). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naming &amp; URIs | OASIS TC Handbook</title>
+<meta name="description" content="Naming Directives v1.7 rules for filename patterns, URI patterns, current stage abbreviations, required cover-page URIs, namespace conventions, and persistence obligations for published OASIS work products.">
+<link rel="canonical" href="https://docs.oasis-open.org/TChandbook/Reference/Naming.html">
+<meta property="og:site_name" content="OASIS TC Handbook">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Naming &amp; URIs">
+<meta property="og:description" content="Naming Directives v1.7 rules for filename patterns, URI patterns, current stage abbreviations, required cover-page URIs, namespace conventions, and persistence obligations for published OASIS work products.">
+<meta property="og:url" content="https://docs.oasis-open.org/TChandbook/Reference/Naming.html">
+<meta property="og:image" content="https://docs.oasis-open.org/TChandbook/assets/oasis-logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/handbook.css?v=8e22b804">
+<link rel="icon" href="../assets/oasis-logo.png">
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="brand" href="../TChandbookIndex.html">
+      <img src="../assets/oasis-logo.png" alt="OASIS Open">
+      <span class="brand__pipe"></span>
+      <span class="brand__title">TC Handbook</span>
+    </a>
+    <nav class="masthead__nav">
+      <a href="../TChandbookIndex.html">Handbook</a>
+      <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process</a>
+      <a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives</a>
+      <a href="https://www.oasis-open.org/member-resources/">Member Resources</a>
+      <a href="https://www.oasis-open.org/">OASIS-Open.org</a>
+    </nav>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" aria-label="Handbook sections">
+    <div class="sidebar__group">
+<div class="sidebar__title">Getting started</div>
+<a href="../TChandbookIndex.html">Welcome</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">How do I…?</div>
+<a href="../Tasks/GainVotingRights.html">Gain voting rights</a>
+<a href="../Tasks/LoseVotingRights.html">Lose / regain voting rights</a>
+<a href="../Tasks/PersistentNonVoting.html">Become Persistent Non-Voting</a>
+<a href="../Tasks/ObserverToMember.html">Observer → Member</a>
+<a href="../Tasks/LeaveOfAbsence.html">Take a leave of absence</a>
+<a href="../Tasks/SendingEmail.html">Mailing lists &amp; email</a>
+<a href="../Tasks/UpdateWebPage.html">Update the TC web page</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Work product lifecycle</div>
+<a href="../Reference/WorkProductLifecycle.html">Lifecycle overview</a>
+<a href="../Reference/WorkingDrafts.html">Working Drafts</a>
+<a href="../Reference/CommitteeSpecDrafts.html">Committee Spec Drafts</a>
+<a href="../Reference/PublicReviews.html">Public Review</a>
+<a href="../Reference/CommitteeSpecs.html">Committee Specifications</a>
+<a href="../Reference/OASISStandard.html">OASIS Standard</a>
+<a href="../Reference/CommitteeNoteDrafts.html">Committee Note Drafts</a>
+<a href="../Reference/CommitteeNotes.html">Committee Notes</a>
+<a href="../Reference/TechnicalReports.html">Technical Reports</a>
+<a href="../Reference/Maintenance.html">Approved Errata</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quorum, voting &amp; meetings</div>
+<a href="../Reference/Voting.html">Voting &amp; ballots</a>
+<a href="../Reference/Quorum.html">Quorum &amp; meetings</a>
+<a href="../Reference/TCLifecycle.html">Maintaining or closing a TC</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quality &amp; naming</div>
+<a href="../Reference/WPQualityRequirements.html">Work product requirements</a>
+<a href="../Reference/WPQualityChecklist.html">Quality checklist</a>
+<a href="../Reference/Naming.html" class="is-active" aria-current="page">Naming &amp; URIs</a>
+<a href="../Reference/Conformance.html">Conformance clauses</a>
+<a href="../Reference/Templates.html">Templates</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Reference</div>
+<a href="../Concepts/Glossary.html">Glossary</a>
+<a href="../Reference/IPR.html">IPR policy</a>
+<a href="../Reference/GitHub.html">GitHub repositories</a>
+<a href="../Reference/Sources.html">Policy source registry</a>
+</div>
+  </aside>
+  <main class="content" id="content">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../TChandbookIndex.html">Handbook</a> <span>›</span> Quality &amp; naming <span>›</span> Naming &amp; URIs</nav>
+    <span class="badge badge--track">Quality &amp; naming</span>
+<h1 class="page-title">Naming &amp; URIs</h1>
+<p class="lede">Every published OASIS work product must follow the <strong><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">OASIS Naming Directives v1.7</a></strong>: a binding directive governing which characters are allowed, how filenames and URIs are constructed, which stage abbreviations are current, and what three URIs must appear on every cover page. Getting naming right before first publication matters because published resources may not be altered or deleted after the fact.</p>
+
+<div class="callout callout--change">
+  <div class="callout__label">What changed since the 2010 handbook</div>
+  <p><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a>, effective <strong>2 January 2024</strong>, made two substantive changes:</p>
+  <ol>
+    <li>The stage abbreviations <code>csprd</code>, <code>cnprd</code>, and <code>cos</code> were <strong>removed</strong>. They are obsolete and must not appear in new filenames or URIs. Documents going to public review continue to use their existing stage name (<code>csd</code> or <code>cnd</code>); there is no distinct "public review draft" stage designator any longer.</li>
+    <li>A <strong>public-review metadata filename</strong> pattern was added: work products undergoing public review now require a companion metadata file named with the <code>-public-review-metadata</code> suffix (see <a href="#pr-metadata">below</a>).</li>
+  </ol>
+  <p>If your reference material still refers to <code>csprd</code>, <code>cnprd</code>, or <code>cos</code> as current stage names, it is out of date. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7 §Stage abbreviations</a></span></p>
+</div>
+
+<h2>Allowed characters</h2>
+<p>OASIS work-product names and URIs are constructed from a restricted character set. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>Only alphanumerics (<code>A–Z</code>, <code>a–z</code>, <code>0–9</code>), hyphens (<code>-</code>), and periods (<code>.</code>) are permitted in document URIs. Underscores (<code>_</code>) may appear in generated filenames but <strong>must not</strong> appear in document URIs. No leading, trailing, or consecutive punctuation characters are allowed.</p>
+</div>
+
+<h2>Current stage abbreviations</h2>
+<p>The binding list of stage abbreviations appears in the Naming Directives. Use exactly the abbreviations below, no others. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7 §Stage abbreviations</a></span></p>
+
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">Current and obsolete stage abbreviations for OASIS work products</caption>
+  <thead>
+    <tr>
+      <th scope="col">Abbreviation</th>
+      <th scope="col">Stage name</th>
+      <th scope="col">Track</th>
+      <th scope="col">Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row"><code>csd</code></th>
+      <td>Committee Specification Draft</td>
+      <td>Standards Track</td>
+      <td>Carries a revision number: <code>csd01</code>, <code>csd02</code>, etc.</td>
+    </tr>
+    <tr>
+      <th scope="row"><code>cs</code></th>
+      <td>Committee Specification</td>
+      <td>Standards Track</td>
+      <td>Carries a revision number: <code>cs01</code>, <code>cs02</code>, etc.</td>
+    </tr>
+    <tr>
+      <th scope="row"><code>os</code></th>
+      <td>OASIS Standard</td>
+      <td>Standards Track</td>
+      <td><strong>Never</strong> carries a revision number. Only one OASIS Standard per version.</td>
+    </tr>
+    <tr>
+      <th scope="row"><code>errata</code></th>
+      <td>Approved Errata</td>
+      <td>Standards Track</td>
+      <td>Carries a revision number: <code>errata01</code>, etc.</td>
+    </tr>
+    <tr>
+      <th scope="row"><code>cnd</code></th>
+      <td>Committee Note Draft</td>
+      <td>Non-Standards Track</td>
+      <td>Carries a revision number: <code>cnd01</code>, <code>cnd02</code>, etc.</td>
+    </tr>
+    <tr>
+      <th scope="row"><code>cn</code></th>
+      <td>Committee Note</td>
+      <td>Non-Standards Track</td>
+      <td>Carries a revision number: <code>cn01</code>, <code>cn02</code>, etc.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout callout--historical">
+  <div class="callout__label">Historical note</div>
+  <p>The following abbreviations were used before Naming Directives v1.7 (January 2, 2024) and are now <strong>obsolete and removed</strong>: <code>csprd</code> (Committee Specification Public Review Draft), <code>cnprd</code> (Committee Note Public Review Draft), <code>cos</code> (Candidate OASIS Standard as a named stage). They must not appear in any new or revised work-product filenames or URIs. Documents published before v1.7 that used these abbreviations retain them in their permanent URIs (persistence rules prevent changing them), but any continuation of work uses the current abbreviations. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7 §Stage abbreviations</a></span></p>
+</div>
+
+<h2>Filename pattern</h2>
+<p>The standard filename pattern for single-part work products is: <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+<pre><code>[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber].[ext]</code></pre>
+<p>Where:</p>
+<ul>
+  <li><code>[WP-abbrev]</code>: the work product abbreviation registered with OASIS (alphanumeric and hyphen only).</li>
+  <li><code>[version-id]</code>: the version identifier in <code>#.#</code>, <code>#.##</code>, <code>#.#.#</code>, or <code>##.#</code> form (e.g., <code>v1.0</code>, <code>v1.01</code>, <code>v1.2.1</code>, <code>v10.1</code>). The version identifier should also appear in the work product's title.</li>
+  <li><code>[stage-abbrev][revisionNumber]</code>: one of the current stage abbreviations above, followed immediately by a two-digit revision number (e.g., <code>csd01</code>, <code>cs02</code>). For <code>os</code>, omit the revision number entirely.</li>
+  <li><code>[ext]</code>: the file extension (<code>html</code>, <code>pdf</code>, <code>docx</code>, etc.).</li>
+</ul>
+<p><strong>Example:</strong> <code>emix-v1.0-csd01.html</code></p>
+
+<h3>Multi-part work products</h3>
+<p>For work products published in multiple parts, insert a part identifier between the stage designator and the extension: <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+<pre><code>[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-[partNumber]-[partName].[ext]</code></pre>
+
+<h2 id="pr-metadata">Public-review metadata filename (new in v1.7)</h2>
+<p>Work products undergoing public review must include a companion metadata file. The filename pattern is: <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+<pre><code>[WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html</code></pre>
+<p><strong>Example:</strong> <code>emix-v1.0-csd01-public-review-metadata.html</code></p>
+<p>This file provides a publication history of the work product and documents the occurrence of the public review. Project Administration publishes it when the TC resolves to initiate a public review.</p>
+
+<h2>URI pattern</h2>
+<p>Published documents are assigned permanent URIs under <code>docs.oasis-open.org</code>. The pattern is: <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+<pre><code>https://docs.oasis-open.org/[tc-shortname]/[WP-abbrev]/[version-id]/[stage-abbrev][revisionNumber]/[doc-id].[ext]</code></pre>
+<p><strong>Example:</strong> <code>https://docs.oasis-open.org/emergency/cap/v1.2/cs01/CAP-v1.2-cs01.html</code></p>
+
+<h2>Three required cover-page URIs</h2>
+<p>Every published work product must carry exactly three version URIs on its cover page. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <ol>
+    <li><strong>This stage</strong>: the permanent, immutable URI for this specific stage and revision. This URI points to this document and no other; it is never reused or updated after publication.</li>
+    <li><strong>Previous stage</strong>: the "This stage" URI of the immediately preceding approved stage of the same work product, or "N/A" if there is no prior stage.</li>
+    <li><strong>Latest stage</strong>: an alias URI that always points to the most current publication of this work product, regardless of stage or revision. Unlike the "This stage" URI, the latest-stage alias is <em>overwritten</em> with each new publication (it is the only URI that may be updated after a document is published).</li>
+  </ol>
+</div>
+<p>Using a consistent "Latest stage" URI in citations and links means downstream readers are always directed to the most current version without the author having to update every reference.</p>
+
+<h2>XML namespace rule (<code>/ns/</code>)</h2>
+<p>When a work product defines XML namespaces, those namespaces must be placed under the <code>/ns/</code> path segment: <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+<pre><code>http://docs.oasis-open.org/[tc-shortname]/ns/…
+https://docs.oasis-open.org/[tc-shortname]/ns/…</code></pre>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>The <code>/ns/</code> path element is <strong>reserved for non-information resources only</strong>: it is for namespace identifiers, not for retrievable documents. Do not use <code>/ns/</code> in the URI of a document you intend to publish as a retrievable resource.</p>
+</div>
+
+<h2>Persistence</h2>
+<p>OASIS Library resources are permanent. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>Published resources in the OASIS Library <strong>must not be deleted or altered</strong> after publication. The only exception is the "Latest stage" alias URI, which is designed to be overwritten each time a newer stage is published. All other published URIs, "This stage" and "Previous stage", are permanent and immutable once assigned.</p>
+</div>
+<p>This persistence rule is why getting naming correct before first publication is critical: a document published with an incorrect filename or URI retains that URI forever, and the only remedy is to publish a correction under a new stage/revision designator.</p>
+
+<footer class="provenance"><div class="provenance__label">Sources &amp; provenance</div>
+  <p>This page reflects <strong><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">OASIS Naming Directives v1.7</a></strong>, effective 2 January 2024, which is the binding directive for all published OASIS work products. The stage abbreviations, URI patterns, and persistence rules stated here are drawn verbatim from that source; see the <code>naming_stages</code> fact entry in this handbook's fact registry. Content last verified against these sources on <strong>4 June 2026</strong>. The governing rules are the OASIS policies themselves; see the <a href="../Reference/Sources.html">policy source registry</a>.</p>
+</footer>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div>OASIS TC Handbook · maintained by the OASIS Open staff. Questions: <a href="/cdn-cgi/l/email-protection#2c584f014d484145426c434d5f455f01435c494202435e4b"><span class="__cf_email__" data-cfemail="7602155b17121b1f18361917051f055b1906131858190411">[email&#160;protected]</span></a></div>
+    <div>The authoritative rules are the <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a> and related policies. This handbook is practical guidance, current as of 4 June 2026.</div>
+    <div class="site-footer__legal">Copyright © OASIS Open. All rights reserved. · <a href="https://www.oasis-open.org/policies-guidelines/">Policies &amp; Guidelines</a></div>
+  </div>
+</footer>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

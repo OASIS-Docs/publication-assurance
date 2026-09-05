@@ -1,0 +1,145 @@
+Maintaining or closing a TC | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Quorum, voting & meetings › Maintaining or closing a TC
+TC governance
+Maintaining or closing a Technical Committee
+A Technical Committee (TC) is not a one-time setup. The OASIS rules build in recurring checkpoints that keep a TC alive and on-scope, plus the conditions under which it must wind down. Two policies govern this: the OASIS TC Process for charter and vitality, and the OASIS Committee Operations Process for Chairs and committee closure. This page separates the normative rule (with its section citation and vote type) from the how-to a Chair or TC Administrator follows in practice.
+The recurring checkpoints at a glance
+Recurring governance checkpoints for a Technical Committee and their governing rule
+Checkpoint How often Vote Rule
+TC Vitality review
+Every 4 years
+Full Majority Vote
+TC Process §1.10
+Chair re-appointment
+Every 2 years
+Full Majority Vote
+OASIS Committee Operations Process §1.4
+Charter clarification
+As needed (narrow only)
+Special Majority Vote
+TC Process §1.8
+Rechartering
+As needed (expand scope)
+Special Majority Vote
+TC Process §1.9
+The four-year vitality vote
+Every 4 years , measured from the date of the TC's first meeting (or the first meeting after a recharter), the TC must decide its own future by Full Majority Vote . The choice is one of four explicit actions. TC Process §1.10
+Policy requirement
+At the four-year mark the TC must vote, by Full Majority Vote , to do one of the following:
+Continue with its current Charter;
+Continue with a charter clarification (the §1.8 process below);
+Recharter (the §1.9 process below); or
+Close the TC.
+TC Process §1.10
+A Full Majority Vote means more than 50% of all eligible voters vote Yes, whether present or not. OASIS Defined Terms (Full Majority Vote)
+Best practice
+When it reviews its Charter at the vitality checkpoint, a TC should consider new milestones and deliverables that fall within its scope, and if it decides to continue it should re-appoint its Chair(s) at the same time. Both of these are stated as "should," not "shall," in the policy; they are recommended, not mandatory. TC Process §1.10
+Clarifying the Charter (narrowing only)
+A charter clarification is a tightly limited change. A TC may clarify its Charter only to remove ambiguity or to narrow the scope of the topic defined by the Charter. Deliverables may be added only if they fall within the existing topic scope. Clarification is not the route for expanding scope; that is rechartering. TC Process §1.8
+Policy requirement
+Approval of a charter clarification requires a Special Majority Vote of the TC. The clarified Charter does not take effect until it is both approved by the TC and announced by the TC Administrator. TC Process §1.8
+A Special Majority Vote requires at least 2/3 of eligible voters to vote Yes and no more than 1/4 to vote No; it is conducted by electronic ballot run by the TC Administrator. OASIS Defined Terms (Special Majority Vote)
+OASIS staff practice
+The TC Administrator screens the clarification before it goes to ballot. No later than 7 days after receiving the request to start the Special Majority Vote, the TC Administrator must either open the ballot or reply to the TC with the reason it will not be opened. In practice the Chair sends the proposed clarified Charter text to the TC Administrator and waits for the ballot to be set up rather than opening it directly. TC Process §1.8
+Rechartering (expanding scope)
+To expand the scope of a TC, the TC must be rechartered . Rechartering is the heavier process: it resets the roster and restarts membership clocks. TC Process §1.9
+Policy requirement
+Approval of rechartering requires a Special Majority Vote of the TC. Rechartering shall not change the TC name nor the IPR Mode of the TC; a different name or IPR Mode requires forming a new TC instead. TC Process §1.9
+Several consequences follow once rechartering is approved:
+Consequences of rechartering a Technical Committee under TC Process §1.9
+Item Rule
+Re-contribution
+Contributions made under the prior Charter must be re-contributed to be used under the revised Charter.
+First meeting timing
+The first meeting under the revised Charter must be held no less than 7 days after the close of the ballot that approved rechartering.
+Roster reset
+7 days before the first meeting, all work of the TC stops and all Members and TC officers are removed from the roster; Members re-join under the new-TC procedures.
+Participation Obligation clock
+The time period for determining Members' Participation Obligation restarts at the first meeting under the revised Charter.
+Source for all four consequences: TC Process §1.9 .
+OASIS staff practice
+The recharter proposal is made by Resolution to the TC Administrator and must include all the §1.2 TC Formation items, including item 2(b) (the date, time and location of the first meeting under the revised charter) and excluding items 2(d) and 2(e) (the list of co-proposers and the Primary Representatives' Statements of Support). A recharter cannot change the TC's name or IPR Mode; changing either requires forming a new TC. The first meeting under the revised charter must be at least 7 days after the rechartering ballot closes, and the TC Administrator announces the recharter within 7 days of receiving a complete proposal. TC Process §1.9
+Chairs: the two-year re-appointment cadence
+Every committee, including every TC, must have one or more Chairs. Only Members are eligible, and Chairs are elected by Full Majority Vote of the committee. This rule lives in the Committee Operations Process , not the TC Process. OASIS Committee Operations Process §1.4
+Policy requirement
+Every two years a Committee must re-appoint its Chair(s) by Full Majority Vote . There are no term limits ; a current or past Chair may stand again. OASIS Committee Operations Process §1.4
+The re-appointment runs as a short, scheduled process:
+Call for candidates
+A call for Chair candidates is posted to the committee's general email list. OASIS Committee Operations Process §1.4
+Nomination window 7 days
+Members have 7 days after being notified to propose candidates. A nominee proposed by someone else has 3 additional days to accept. OASIS Committee Operations Process §1.4
+Ballot if contested Full Majority Vote
+If more candidates come forward than seats, the committee runs a ballot. OASIS Committee Operations Process §1.4
+Policy requirement
+If no candidates come forward, the work of the Committee must stop until a Chair can be found. OASIS Committee Operations Process §1.4
+Best practice
+For a TC, the timing of Chair re-appointment should coincide with the four-year TC Vitality check, so that every four years the Charter and the Chair(s) are reviewed together. This alignment is recommended ("should"), not mandatory. OASIS Committee Operations Process §1.4
+When a TC has no Chair
+Losing the Chair is not just an administrative gap; it suspends the committee.
+Policy requirement
+If at any point the committee does not have at least one Chair, all activities (with the sole exception of selecting a new Chair) are suspended until a new Chair is elected. OASIS Committee Operations Process §1.4
+If the vacancy is not filled, it can ultimately end the TC. If a committee has no Chair for 120 days , the OASIS TC Administrator may close the committee. OASIS Committee Operations Process §1.4
+How the two policies fit together
+The TC Process and the Committee Operations Process describe the no-Chair closure from two angles. The TC Process §1.13 states that the TC Administrator must close a TC that "fails to elect a Chair for the period provided in" the Committee Operations Process. The Committee Operations Process §1.4 supplies that period ( 120 days ) and frames the closure as one the Administrator may make. The handbook reads the TC-specific §1.13 obligation as controlling for TCs; this reconciliation is the handbook's interpretation, not a quoted line in either policy. TC Process §1.13 OASIS Committee Operations Process §1.4
+Closing a TC
+A TC can close at its own choice (the "close" option of the vitality vote, or any time by Full Majority Vote), or the TC Administrator can close it when one of the trigger conditions is met. The TC Process distinguishes triggers where closure is mandatory from triggers where it is discretionary . The exact word ("must" versus "may") matters, so the two are kept separate below.
+Triggers under which the TC Administrator must or may close a Technical Committee
+Obligation Trigger
+Must close
+The TC has completed the deliverables listed in its Charter and does not add new deliverables; or the TC fails to elect a Chair for the period provided in the Committee Operations Process.
+May close
+The TC fails to hold at least one Quorate Meeting or conduct any Work Product Ballot during any six-month period ; or it misses its chartered schedule; or it fails to show progress toward its chartered purpose.
+Source for both rows: TC Process §1.13 .
+Policy requirement
+Separately, the Committee Operations Process sets out who may close a committee and on what general grounds: a committee may be closed by a Full Majority Vote of that committee, by Resolution of the OASIS Board of Directors, or by the relevant Administrator. The Administrator may also close a committee whose membership falls below the Minimum Membership necessary, that is unable to fill its Chair position for 120 days , or that fails to show activity or progress for an extended period. OASIS Committee Operations Process §1.9
+Related reading
+Voting & ballots : how Full Majority and Special Majority Votes are run and counted.
+Quorum & meetings : what makes a meeting Quorate, which feeds the six-month closure trigger.
+Sources & provenance
+Sources: OASIS TC Process effective 1 December 2020: §1.8 (charter clarification), §1.9 (rechartering), §1.10 (TC Vitality / four-year review), §1.13 (closing a TC); OASIS Committee Operations Process effective 22 August 2024: §1.4 (Chairs, two-year re-appointment, no-Chair suspension, 120-day closure) and §1.9 (closing a committee); OASIS Defined Terms effective 1 December 2020 (Full Majority Vote, Special Majority Vote). The no-Chair "must close" ( TC Process §1.13 ) versus "may close after 120 days" ( Committee Operations Process §1.4 ) reconciliation is the handbook's interpretation and is flagged as such above. Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines

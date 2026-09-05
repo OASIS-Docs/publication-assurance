@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work Product Requirements | OASIS TC Handbook</title>
+<meta name="description" content="Required cover-page metadata and the three persistent URIs every OASIS Work Product must carry; mandatory conformance clauses for Standards Track; machine-readable definitions in separate plain-text files; and the per-work-product authoring template workflow.">
+<link rel="canonical" href="https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html">
+<meta property="og:site_name" content="OASIS TC Handbook">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Work Product Requirements">
+<meta property="og:description" content="Required cover-page metadata and the three persistent URIs every OASIS Work Product must carry; mandatory conformance clauses for Standards Track; machine-readable definitions in separate plain-text files; and the per-work-product authoring template workflow.">
+<meta property="og:url" content="https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html">
+<meta property="og:image" content="https://docs.oasis-open.org/TChandbook/assets/oasis-logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/handbook.css?v=8e22b804">
+<link rel="icon" href="../assets/oasis-logo.png">
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="brand" href="../TChandbookIndex.html">
+      <img src="../assets/oasis-logo.png" alt="OASIS Open">
+      <span class="brand__pipe"></span>
+      <span class="brand__title">TC Handbook</span>
+    </a>
+    <nav class="masthead__nav">
+      <a href="../TChandbookIndex.html">Handbook</a>
+      <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">TC Process</a>
+      <a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives</a>
+      <a href="https://www.oasis-open.org/member-resources/">Member Resources</a>
+      <a href="https://www.oasis-open.org/">OASIS-Open.org</a>
+    </nav>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" aria-label="Handbook sections">
+    <div class="sidebar__group">
+<div class="sidebar__title">Getting started</div>
+<a href="../TChandbookIndex.html">Welcome</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">How do I…?</div>
+<a href="../Tasks/GainVotingRights.html">Gain voting rights</a>
+<a href="../Tasks/LoseVotingRights.html">Lose / regain voting rights</a>
+<a href="../Tasks/PersistentNonVoting.html">Become Persistent Non-Voting</a>
+<a href="../Tasks/ObserverToMember.html">Observer → Member</a>
+<a href="../Tasks/LeaveOfAbsence.html">Take a leave of absence</a>
+<a href="../Tasks/SendingEmail.html">Mailing lists &amp; email</a>
+<a href="../Tasks/UpdateWebPage.html">Update the TC web page</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Work product lifecycle</div>
+<a href="../Reference/WorkProductLifecycle.html">Lifecycle overview</a>
+<a href="../Reference/WorkingDrafts.html">Working Drafts</a>
+<a href="../Reference/CommitteeSpecDrafts.html">Committee Spec Drafts</a>
+<a href="../Reference/PublicReviews.html">Public Review</a>
+<a href="../Reference/CommitteeSpecs.html">Committee Specifications</a>
+<a href="../Reference/OASISStandard.html">OASIS Standard</a>
+<a href="../Reference/CommitteeNoteDrafts.html">Committee Note Drafts</a>
+<a href="../Reference/CommitteeNotes.html">Committee Notes</a>
+<a href="../Reference/TechnicalReports.html">Technical Reports</a>
+<a href="../Reference/Maintenance.html">Approved Errata</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quorum, voting &amp; meetings</div>
+<a href="../Reference/Voting.html">Voting &amp; ballots</a>
+<a href="../Reference/Quorum.html">Quorum &amp; meetings</a>
+<a href="../Reference/TCLifecycle.html">Maintaining or closing a TC</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Quality &amp; naming</div>
+<a href="../Reference/WPQualityRequirements.html" class="is-active" aria-current="page">Work product requirements</a>
+<a href="../Reference/WPQualityChecklist.html">Quality checklist</a>
+<a href="../Reference/Naming.html">Naming &amp; URIs</a>
+<a href="../Reference/Conformance.html">Conformance clauses</a>
+<a href="../Reference/Templates.html">Templates</a>
+</div>
+<div class="sidebar__group">
+<div class="sidebar__title">Reference</div>
+<a href="../Concepts/Glossary.html">Glossary</a>
+<a href="../Reference/IPR.html">IPR policy</a>
+<a href="../Reference/GitHub.html">GitHub repositories</a>
+<a href="../Reference/Sources.html">Policy source registry</a>
+</div>
+  </aside>
+  <main class="content" id="content">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="../TChandbookIndex.html">Handbook</a> <span>›</span> Quality &amp; naming <span>›</span> Work product requirements</nav>
+    <span class="badge badge--track">Quality &amp; naming · All tracks</span>
+<h1 class="page-title">Work Product Requirements</h1>
+<p class="lede">Every OASIS Work Product, regardless of track or stage, must meet baseline quality and structural requirements before it can be approved. Standards Track Work Products carry additional obligations: a Standards Track designation on the cover page and machine-readable definitions in separate files, both of which apply from the first approval ballot onward; and mandatory conformance clauses, which attach at the Committee Specification Public Review Draft stage (when a draft is submitted for public review) and at the Committee Specification (CS) and OASIS Standard (OS) stages, not at an earlier internal CSD approval ballot.</p>
+
+<div class="callout callout--change">
+  <div class="callout__label">What changed since the 2010 handbook</div>
+  <ul>
+    <li><strong>Conformance clauses are now explicitly mandatory</strong> for Standards Track Work Products approved at the <strong>Committee Specification Public Review Draft</strong> level (the public-review stage), the <strong>Committee Specification (CS)</strong> level, or the <strong>OASIS Standard (OS)</strong> level. The requirement attaches when a draft is submitted for public review, not at the earlier internal CSD approval ballot. While the requirement predates the 2010 handbook, it may not have been clearly labelled as mandatory there.</li>
+    <li><strong>Machine-readable (normative computer language) definitions</strong> must be delivered in separate plain-text files for Standards Track Work Products. This is a structural requirement, not a style suggestion.</li>
+    <li><strong>Authoring templates are now customized per work product.</strong> Static generic downloads (Word/OpenDocument) are no longer the primary delivery mechanism. TCs request a template through the OASIS Support Request system; OASIS TC Administration returns a template pre-populated with that Work Product's registered metadata.</li>
+    <li>The obsolete stage abbreviations <code>csprd</code> and <code>cnprd</code> were removed in <a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a> (effective 2 January 2024). Documents under public review remain named as CSD or CND. References to those old designations in older guidance should be disregarded. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7 §Stage abbreviations</a></span></li>
+  </ul>
+</div>
+
+<h2>Cover-page metadata and the three required URIs</h2>
+<p>Every Work Product must display its persistent URIs on the cover page. <a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">OASIS Naming Directives v1.7</a> requires exactly three URI fields, each serving a distinct and permanent role. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+
+<div class="table-wrap">
+<table class="data">
+  <caption class="sr-only">The three required cover-page URIs for every OASIS Work Product</caption>
+  <thead>
+    <tr>
+      <th scope="col">URI field</th>
+      <th scope="col">What it points to</th>
+      <th scope="col">Mutability</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">This stage</th>
+      <td>The exact published artifact at this version and stage (e.g., <code>…/csd01/…</code>). Unique; never reused for a different document.</td>
+      <td>Permanent: never deleted or redirected after publication.</td>
+    </tr>
+    <tr>
+      <th scope="row">Previous stage</th>
+      <td>The immediately preceding published instance of this Work Product (e.g., prior CSD revision or CS). Write "N/A" if this is the first published version.</td>
+      <td>Permanent: points to the prior artifact, which also remains unchanged.</td>
+    </tr>
+    <tr>
+      <th scope="row">Latest stage</th>
+      <td>A persistent alias that always resolves to the most recently published version, omitting the stage and revision elements from the path.</td>
+      <td>This is the <strong>only</strong> URI that may be updated (overwritten) when a newer version is published.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>All three URI fields must appear on the cover page. Published resources in the OASIS Library must not be deleted or altered; only the "latest stage" alias may be overwritten. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+</div>
+
+<p>In addition to the URIs, every Work Product cover page must clearly state whether it is a <strong>Standards Track Work Product or Non-Standards Track Work Product</strong>. This designation is required regardless of stage. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.7">TC Process §2.2.7</a></span></p>
+
+<h3>File naming and URI pattern</h3>
+<p>Filenames and URIs follow a structured pattern defined in the Naming Directives. Allowed characters are alphanumerics, periods, and hyphens; underscores may appear in generated filenames but not in document URIs. <span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></span></p>
+
+<p>Current stage abbreviations for the two tracks are:</p>
+<ul>
+  <li><strong>Standards Track:</strong> <code>csd</code>, <code>cs</code>, <code>os</code>, <code>errata</code> (the <code>os</code> stage never carries a revision number).</li>
+  <li><strong>Non-Standards Track:</strong> <code>cnd</code>, <code>cn</code>.</li>
+  <li>The abbreviations <code>csprd</code>, <code>cnprd</code>, and <code>cos</code> are <strong>obsolete and removed</strong> as of Naming Directives v1.7.</li>
+</ul>
+<p><span class="cite"><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7 §Stage abbreviations</a></span></p>
+
+<h2>File formats and document repository</h2>
+<p>Editable formats of all versions of TC documents must be delivered to the TC's document repository. Approved OASIS deliverables must be published in three formats: an editable source format, HTML or XHTML, and PDF, with one designated as the authoritative version. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.2">TC Process §2.2.2</a></span></p>
+
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>All Work Products must use the OASIS file naming scheme and must include the OASIS copyright notice. Work Products may not incorporate trademarks outside OASIS ownership. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.1">TC Process §2.2.1</a></span></p>
+</div>
+
+<h2>Conformance clauses (Standards Track, mandatory)</h2>
+<p>Conformance clauses define the conditions an implementation must satisfy in order to claim conformance to a specification. For Standards Track Work Products, they are a structural requirement, not optional guidance.</p>
+
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>A Standards Track Work Product that is approved by the Technical Committee (TC) at the <strong>Committee Specification Public Review Draft</strong>, <strong>Committee Specification</strong>, or <strong>OASIS Standard</strong> level <strong>must include a separate numbered section</strong> listing a set of numbered conformance clauses to which any implementation must adhere in order to claim conformance (or conformance to any optional portion thereof). The trigger is the Committee Specification Public Review Draft stage, i.e. when a draft is submitted for public review, not the earlier internal CSD approval ballot. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.6">TC Process §2.2.6</a></span></p>
+</div>
+
+<p>The requirement predates the 2010 handbook. Non-Standards Track Work Products (Committee Notes, Technical Reports) are not subject to this requirement, though they may include conformance language voluntarily.</p>
+
+<h3>Writing conformance clauses</h3>
+<p>OASIS publishes detailed guidelines on drafting conformance clauses, including how to define conformance targets, distinguish normative from non-normative content, and number clauses unambiguously. <span class="cite"><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Guidelines to Writing Conformance Clauses (2017)</a></span></p>
+
+<p>Key principles from those guidelines:</p>
+<ul>
+  <li>Each clause should address a single conformance target type.</li>
+  <li>Clauses must reference normative content precisely; they should not introduce new normative statements better placed in the specification body.</li>
+  <li>Clause numbering must be unique and stable across revisions.</li>
+  <li>Conformance targets must be clearly identified (e.g., "A conforming implementation shall…").</li>
+</ul>
+
+<div class="callout callout--practice">
+  <div class="callout__label">Best practice</div>
+  <p>Draft conformance clauses early, ideally in the first Working Draft, so that the specification body is written to support them from the start. Retrofitting conformance clauses into a nearly-complete specification is significantly harder and often reveals gaps in normative coverage.</p>
+</div>
+
+<h2>Machine-readable definitions (Standards Track, mandatory)</h2>
+<p>When a Standards Track Work Product includes normative computer language definitions (schemas, grammars, WSDL, ontologies, or similar machine-processable artifacts), those definitions have two additional requirements.</p>
+
+<div class="callout callout--required">
+  <div class="callout__label">Policy requirement</div>
+  <p>All normative computer language definitions in a Standards Track Work Product must be well-formed and valid, <strong>and must also be provided in separate plain-text files</strong>. The specification must clearly reference those separate files. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.5">TC Process §2.2.5</a></span></p>
+</div>
+
+<p>This requirement applies to any machine-readable artifact that carries normative weight: embedding schema content only within a document body, without a standalone plain-text file, does not satisfy §2.2.5. Non-Standards Track Work Products are not subject to this requirement.</p>
+
+<h2>Allowed changes during publication</h2>
+<p>After a Work Product has been approved at any Standards Track or Non-Standards Track level, only <strong>non-material changes</strong> may be made during the publication process. Any such changes must be coordinated with the TC Administrator, and a summary must be sent to the TC mailing list. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.4">TC Process §2.2.4</a></span></p>
+
+<p>A Material change is one that could affect the meaning or interoperability of the specification. When in doubt, treat the change as material and hold a new ballot before publication.</p>
+
+<h2>Authoring templates</h2>
+<p>OASIS provides authoring templates for Work Products. Since the introduction of the template-request workflow, templates are customized per work product rather than distributed as generic static downloads.</p>
+
+<div class="callout callout--practice">
+  <div class="callout__label">OASIS staff practice</div>
+  <p>To obtain an authoring template, a TC editor submits a Work Product Registration and Template Request through the OASIS Support Request system. OASIS TC Administration returns a template pre-populated with the registered Work Product's metadata (name, version, TC short name, and stage). Generic Word and OpenDocument templates are no longer the primary delivery mechanism, though DocBook XML and XHTML generic templates remain available from <a href="https://docs.oasis-open.org/templates/">docs.oasis-open.org/templates/</a>. <span class="cite"><a href="https://www.oasis-open.org/member-resources/">OASIS Member Resources (Editors section)</a></span></p>
+</div>
+
+<p>The template request workflow is an administrative step, not a TC Process ballot requirement. It does not change the approval path for the Work Product itself.</p>
+
+<h2>Multi-part work products</h2>
+<p>A Work Product may be composed of any number of files of different types. A multi-part Work Product must have a single Work Product name and version number across all parts, and the entire Work Product receives unified approval through a single ballot regardless of the number of constituent files. <span class="cite"><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.3">TC Process §2.2.3</a></span></p>
+
+<footer class="provenance"><div class="provenance__label">Sources &amp; provenance</div>
+  <p>This page reflects the <strong><a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a></strong> effective 1 December 2020 (<a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/#s2.2.1">§2.2.1</a>–2.2.7), <strong><a href="https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html">Naming Directives v1.7</a></strong> effective 2 January 2024, and the <strong><a href="https://docs.oasis-open.org/templates/TCHandbook/ConformanceGuidelines.html">Guidelines to Writing Conformance Clauses</a></strong> (2017, approved by the OASIS Technical Advisory Board). Template workflow guidance reflects current <strong><a href="https://www.oasis-open.org/member-resources/">OASIS Member Resources</a></strong> (Editors section). Content last verified against these sources on <strong>4 June 2026</strong>. The governing rules are the OASIS policies themselves; see the <a href="../Reference/Sources.html">policy source registry</a>.</p>
+</footer>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div>OASIS TC Handbook · maintained by the OASIS Open staff. Questions: <a href="/cdn-cgi/l/email-protection#1e6a7d337f7a7377705e717f6d776d33716e7b7030716c79"><span class="__cf_email__" data-cfemail="86f2e5abe7e2ebefe8c6e9e7f5eff5abe9f6e3e8a8e9f4e1">[email&#160;protected]</span></a></div>
+    <div>The authoritative rules are the <a href="https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/">OASIS TC Process</a> and related policies. This handbook is practical guidance, current as of 4 June 2026.</div>
+    <div class="site-footer__legal">Copyright © OASIS Open. All rights reserved. · <a href="https://www.oasis-open.org/policies-guidelines/">Policies &amp; Guidelines</a></div>
+  </div>
+</footer>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
+</html>

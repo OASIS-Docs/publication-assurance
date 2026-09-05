@@ -1,0 +1,183 @@
+Glossary | OASIS TC Handbook
+Skip to content
+TC Handbook
+Handbook
+TC Process
+Naming Directives
+Member Resources
+OASIS-Open.org
+Getting started
+Welcome
+How do I…?
+Gain voting rights
+Lose / regain voting rights
+Become Persistent Non-Voting
+Observer → Member
+Take a leave of absence
+Mailing lists & email
+Update the TC web page
+Work product lifecycle
+Lifecycle overview
+Working Drafts
+Committee Spec Drafts
+Public Review
+Committee Specifications
+OASIS Standard
+Committee Note Drafts
+Committee Notes
+Technical Reports
+Approved Errata
+Quorum, voting & meetings
+Voting & ballots
+Quorum & meetings
+Maintaining or closing a TC
+Quality & naming
+Work product requirements
+Quality checklist
+Naming & URIs
+Conformance clauses
+Templates
+Reference
+Glossary
+IPR policy
+GitHub repositories
+Policy source registry
+Handbook › Reference › Glossary
+Glossary
+Plain-language definitions for key terms used in the OASIS Technical Committee process. Each entry is sourced to OASIS Defined Terms (effective 1 December 2020) or the OASIS TC Process (effective 1 December 2020), with a scope note indicating where the definition applies. Use the anchor links to reach a specific term directly.
+What changed since the 2010 handbook
+The 2010 handbook used Prototip JavaScript tooltips for term definitions. Those tooltips are no longer functional. This page replaces them with a single, anchored, permanently-linkable glossary.
+Two terms are new since 2010 and had no handbook coverage: Persistent Non-Voting Member (TC Process eff. 1 December 2020, §1.4.3) and Technical Report (OASIS Defined Terms eff. 1 December 2020). The OASIS Standard definition now ties to the Call for Consent model rather than the old percentage-based membership vote. The vote-type definitions are sourced to OASIS Defined Terms rather than being embedded in the TC Process body.
+Policy requirement
+All terms marked "as defined for the TC Process" carry their legal meaning from OASIS Defined Terms . Where a term is used differently in ordinary conversation, the OASIS Defined Terms definition governs for all TC Process purposes. OASIS Defined Terms
+Jump to:
+Call for Consent ·
+Committee Note ·
+Committee Specification ·
+Convener ·
+Eligible Person ·
+Full Majority Vote ·
+Material Change ·
+Member ·
+OASIS Standard ·
+Persistent Non-Voting Member ·
+Quorate Meeting ·
+Quorum ·
+Simple Majority Vote ·
+Special Majority Vote ·
+Statement of Use ·
+Subcommittee ·
+TC Administrator ·
+Technical Report ·
+Voting Member ·
+Work Product ·
+Working Draft
+Call for Consent
+The process by which a candidate for OASIS Standard is approved. Rather than an affirmative ballot, the TC Administrator opens a consent period in which each OASIS Organizational Member at the time of the call is entitled to express consent. Consent is established through the publicly archived electronic voting facility supplied by OASIS. Eligible Members are assumed to consent and must explicitly use the voting facility if they wish to record an objection. TC Process §2.8.3
+The consent period must be open for at least 14 days . Ballot results are publicly visible during the period, and eligible Members may change their opinion until it ends. TC Process §2.8.3
+Only valid objections require a response. To be valid, an objection must be entered on the electronic ballot before it closes and must be accompanied by a reason for the objection and/or a proposed remedy. The TC Administrator makes the final determination as to whether objections are valid. TC Process §2.8.3
+Policy requirement
+Outcomes at the close of the consent period: with no valid objections , the Committee Specification becomes an OASIS Standard. If 15 or more eligible OASIS Members submit valid objections, the candidate is deemed rejected and shall not progress. If valid objections amount to fewer than 15 eligible OASIS Members, the TC has 30 days to resolve the objections or withdraw. TC Process §2.8.3
+See also: OASIS Standard , Statement of Use , Special Majority Vote , Material Change .
+Committee Note (CN)
+As defined for the TC Process. A Non-Standards Track Work Product approved by Full Majority Vote of the Technical Committee. Public review is optional for a Committee Note; it is not required before the approval ballot. TC Process §2.4
+A Committee Note Draft (CND) is approved by Full Majority Vote before it is designated a Committee Note. The stage abbreviations are cnd (draft) and cn (approved). The former stage designation cnprd was removed in Naming Directives v1.7 (effective 2 January 2024) and must not be used.
+See also: Working Draft , Full Majority Vote .
+Committee Specification (CS)
+As defined for the TC Process. A Standards Track Work Product that has passed a successful public review and been approved by Special Majority Vote of the Technical Committee. All public-review comments must be resolved before the approval ballot opens. TC Process §2.7
+The stage abbreviation is cs . A Committee Specification may later be submitted as a candidate for an OASIS Standard, provided the TC gathers three Statements of Use. TC Process §2.8.1
+See also: Special Majority Vote , Statement of Use , OASIS Standard .
+Convener
+As defined for the TC Process. An Eligible Person who organizes the activities leading up to a Technical Committee's first meeting. OASIS Defined Terms The Convener chairs the first meeting through the roll-call and through the election of a Chair; the role ends once a Chair has been elected. TC Process §1.3.3
+See also: Eligible Person .
+Eligible Person
+As defined for the TC Process. One of a class of individuals that includes (a) OASIS Individual Members, (b) employees or designees of OASIS Organizational Members, and (c) such other persons as may be designated by the OASIS Board of Directors. Eligible Person status is a prerequisite for participation in a Technical Committee as a Member, Voting Member, or Persistent Non-Voting Member. OASIS Defined Terms
+See also: Member , Voting Member .
+Full Majority Vote
+As defined for the TC Process. More than 50% of all eligible voters vote Yes , whether present or not. Abstentions are not counted. The threshold is calculated against the total number of eligible voters regardless of participation; a voter who abstains or is absent simply leaves fewer Yes votes available to clear the more-than-50% bar. OASIS Defined Terms
+Actions requiring a Full Majority Vote include: approving a Committee Specification Draft (CSD) TC Process §2.5 , approving a Committee Note Draft (CND) or Committee Note (CN) TC Process §2.4 , opening a public review TC Process §2.6 , and approving Approved Errata TC Process §2.9 .
+See also: Simple Majority Vote , Special Majority Vote .
+Material Change
+As defined in the OASIS Defined Terms. Any change to the content of a Work Product that would require a compliant application or implementation to be modified or rewritten in order to remain compliant, or which adds new features or otherwise expands the scope of the work product. OASIS Defined Terms (Material Change)
+A Material Change to a document undergoing public review, or to a candidate for OASIS Standard approval, triggers a new public review cycle. A change is non-material if a compliant implementation would not need to change; examples of typically non-material changes include fixing typos, reformatting, or correcting cross-references.
+The distinction between material and non-material is formally recognized throughout the TC Process. When a TC responds to objections during a Call for Consent, it gets only one attempt to make Material changes. TC Process §2.8.3
+Member
+As defined for the TC Process. An Eligible Person who has joined a Technical Committee and may participate fully (attend, speak, email the list, make contributions) but has not yet acquired Voting Member status. A Member who attends two consecutive meetings gains Voting Member status at the close of the second meeting. TC Process §1.4.4
+An Observer is distinct: Observers may attend but may not speak, email the TC list, or make contributions. Observers must register as Members before they can participate actively. OASIS Defined Terms
+See also: Voting Member , Persistent Non-Voting Member , Eligible Person .
+OASIS Standard
+As defined for the TC Process. The highest level of approval a Standards Track Work Product can receive. A Committee Specification becomes an OASIS Standard through the Call for Consent process: eligible OASIS Organizational Members are presumed to consent unless they actively submit a valid objection. The TC must first hold three Statements of Use and vote by Special Majority Vote to submit the CS as a candidate. A public review of at least 60 days follows, then the TC Administrator opens a Call for Consent of at least 14 days . TC Process §2.8.1–2.8.3
+The stage abbreviation is os , which never carries a revision number. Naming Directives v1.7
+What changed since the 2010 handbook
+The old approval model required a percentage-based affirmative vote (15% of eligible Org Members). Since the TC Process effective 1 December 2020, approval uses a Call for Consent : consent is presumed; a specification is rejected only if 15 or more eligible OASIS Members file valid objections. References to "15% affirmative / 25% negative" thresholds are out of date. TC Process §2.8.3
+See also: Committee Specification , Statement of Use , Special Majority Vote .
+Persistent Non-Voting Member
+As defined for the TC Process. A formal participation status, self-declared by email to the Chair and the TC list, that allows full participation (attending, speaking, emailing, contributing) without counting toward Quorum and without holding Voting Member rights. A Persistent Non-Voting Member is not subject to the attendance rules that cause Voting Members to lose their voting rights. TC Process §1.4.3
+What changed since the 2010 handbook
+Persistent Non-Voting Member status did not exist in the 2010 handbook. It was introduced in the TC Process effective 1 December 2020.
+See also: Voting Member , Quorum .
+Quorate Meeting
+As defined for the TC Process. A meeting at which Quorum is present (that is, at which more than 50% of Voting Members are present). A quorate meeting may conduct official business including passing resolutions and holding votes. OASIS Defined Terms
+Even a non-quorate meeting counts for attendance-tracking purposes: attending a non-quorate meeting still contributes to gaining and maintaining Voting Member status. TC Process §1.4.4
+See also: Quorum , Voting Member .
+Quorum
+As defined for the TC Process. More than 50% of Voting Members present . A non-quorate meeting may discuss business but may not pass resolutions. Non-quorate meetings still count for attendance tracking (gaining, maintaining, or losing Voting Member status). OASIS Defined Terms
+Persistent Non-Voting Members do not count toward Quorum. TC Process §1.4.3
+See also: Quorate Meeting , Voting Member , Persistent Non-Voting Member .
+Simple Majority Vote
+As defined for the TC Process. More Yes votes than No votes ; abstentions are not counted. The denominator is only the votes cast (Yes + No), not all eligible voters. OASIS Defined Terms
+See also: Full Majority Vote , Special Majority Vote .
+Special Majority Vote
+As defined for the TC Process. At least 2/3 of eligible voters vote Yes AND no more than 1/4 vote No . A Special Majority Vote must be conducted by electronic ballot by the TC Administrator; it cannot be taken by voice vote or simple show of hands in a meeting. OASIS Defined Terms
+Actions requiring a Special Majority Vote include: approving a Committee Specification TC Process §2.7 and submitting a Committee Specification as a candidate for OASIS Standard TC Process §2.8.1 .
+Summary of the three vote types and their thresholds
+Vote type
+Threshold
+Denominator
+Conducted by
+Simple Majority Vote
+More Yes than No
+Votes cast (Yes + No only)
+TC (in-meeting or electronic)
+Full Majority Vote
+More than 50% of eligible voters vote Yes
+All eligible voters (present or absent)
+TC (in-meeting or electronic)
+Special Majority Vote
+At least 2/3 Yes AND no more than 1/4 No
+All eligible voters
+TC Administrator (electronic ballot only)
+Source for all three vote types: OASIS Defined Terms
+See also: Simple Majority Vote , Full Majority Vote .
+Statement of Use
+As defined for the TC Process. A written statement from a party declaring that it has successfully used or implemented a Committee Specification in accordance with all or some of its conformance clauses, identifying those clauses that apply, and stating whether its use included the interoperation of multiple independent implementations. The Statement of Use must be made to a specific version of the Specification and must include the Specification's approval date . OASIS Defined Terms
+The party may be an OASIS Member or a non-member. A non-member's Statement of Use must be submitted via the Technical Committee's (or Project Governing Board's) comment facility. A party can issue only one Statement of Use for a given specification. When issued by an OASIS Organizational Member, a Statement of Use must be endorsed by that Organizational Member's Primary Representative . OASIS Defined Terms
+A Statement of Use submitted to the TC must be approved by TC Resolution as an acceptable Statement of Use with respect to the Specification. A TC may require a Statement of Use to include hyperlinks to documents, files, or demonstration transcripts that let the committee's members evaluate the implementation or usage. OASIS Defined Terms
+Policy requirement
+Before a Technical Committee may resolve by Special Majority Vote to submit a Committee Specification as a candidate for OASIS Standard, three Statements of Use referencing the CS must be presented to the TC, at least one of which comes from an OASIS Organizational Member. TC Process §2.8.1
+See also: OASIS Standard , Committee Specification , Call for Consent .
+Subcommittee (SC)
+As defined for the TC Process. A subsidiary body created by TC resolution to focus on a specific area of work. Subcommittee members must first be members of the parent Technical Committee. Observers of the TC may be Observers of its Subcommittees. Subcommittee deliverables are submitted to the parent TC, not published independently. TC Process §1.12
+TC Administrator
+As defined for the TC Process. OASIS staff responsible for overseeing the administrative and procedural aspects of Technical Committee operations. The TC Administrator conducts Special Majority Vote electronic ballots, initiates the Call for Consent for OASIS Standard approval, administers public reviews, and is the point of contact for procedural questions. TC Process
+When this handbook says "the TC Administrator" it means OASIS staff in this role, not an appointed TC officer.
+Technical Report (TR)
+As defined for the TC Process. A Non-Standards Track Work Product approved by Full Majority Vote . Unlike a Committee Note, a Technical Report has one or more named Authors (not just editors). Public review is optional. A Technical Report Draft (TRD) is approved by Full Majority Vote before it is designated a Technical Report. OASIS Defined Terms
+What changed since the 2010 handbook
+The Technical Report work product type was introduced in the OASIS Defined Terms effective 1 December 2020. It has no equivalent in the 2010 handbook.
+See also: Committee Note , Full Majority Vote .
+Voting Member
+As defined for the TC Process. A Member who has gained voting rights by attending two consecutive meetings (or after 60 days if fewer than two meetings occur in that period, provided at least one was attended). Voting Members may vote in TC ballots and count toward Quorum. TC Process §1.4.4
+A Voting Member who is absent from two consecutive meetings loses voting rights at the end of the second missed meeting; there is no warning step. Lost voting rights may be regained by a two-step process: (a) declaring to the Chair the desire to regain voting rights, and then (b) separately requesting the Chair to reinstate Voting Member status at or after the close of the 60th day from that declaration. TC Process §1.4.4
+See also: Member , Quorum , Persistent Non-Voting Member .
+Work Product
+As defined for the TC Process. A package of materials being prepared under a single name and version number. Work Products may be on the Standards Track (Working Draft, Committee Specification Draft, Committee Specification, OASIS Standard), Non-Standards Track (Working Draft, Committee Note Draft, Committee Note, Technical Report Draft, Technical Report), or the Project Standards Track (for OASIS Open Projects). OASIS Defined Terms
+See also: Working Draft , Committee Specification , Committee Note , OASIS Standard .
+Working Draft (WD)
+As defined for the TC Process. An editor-controlled draft that precedes any TC Process-status Work Product. Working Drafts are numbered sequentially (WD01, WD02, etc.). No TC approval vote is required to publish a Working Draft. A Working Draft does not have official TC Process status; it becomes a Work Product only once approved as a Committee Specification Draft or Committee Note Draft. Once a document has been approved as a Work Product it does not revert to Working Draft status. Document Life Cycle Best Practices
+See also: Work Product , Committee Specification .
+Sources & provenance
+Definitions on this page are sourced to: OASIS Defined Terms (effective 1 December 2020, approved 22 July 2020), OASIS TC Process (effective 1 December 2020, approved 22 July 2020), OASIS Naming Directives v1.7 (effective 2 January 2024), and Document Life Cycle Best Practices (version 2024.08.22). Content last verified against these sources on 4 June 2026 . The governing rules are the OASIS policies themselves; see the policy source registry .
+OASIS TC Handbook · maintained by the OASIS Open staff. Questions: [email protected]
+The authoritative rules are the OASIS TC Process and related policies. This handbook is practical guidance, current as of 4 June 2026.
+Copyright © OASIS Open. All rights reserved. · Policies & Guidelines
