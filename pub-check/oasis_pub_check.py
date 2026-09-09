@@ -5732,7 +5732,13 @@ XML_NS_EXCLUDED_DIRS = {"test-cases", "examples", "samples", "third-party", "ven
 # "where architectural considerations require continued use of URNs" --
 # approved by Project Administration. Maintained externally; extend as PA
 # approves additional TCs (open question: who owns/maintains this list).
-XML_NS_URN_GRANDFATHER_TCS = frozenset({"ubl"})
+#   ubl:   pre-2012 URN user (urn:oasis:names:specification:ubl:...).
+#   xacml: pre-2012 URN user (urn:oasis:names:tc:xacml:1.0: onward, 2003).
+#   acal:  the same TC under its 19 Aug 2026 name. The urn:oasis:names:tc:acal:
+#          prefix was granted by TC Administration on 20 Oct 2025 under the
+#          XACML TC's authority (email, M. Coletta to S. Legg / B. Parducci),
+#          so ACAL, JACAL, YACAL and XACML 4.0 namespaces continue on URNs.
+XML_NS_URN_GRANDFATHER_TCS = frozenset({"ubl", "xacml", "acal"})
 
 # Naming Directives v1.2 s9: pre-2012 practice on the OLD
 # http://docs.oasis-open.org/ns/[tc-shortname]/... pattern "may be
