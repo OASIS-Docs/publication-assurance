@@ -293,7 +293,11 @@ Limits: a spec whose Previous stage convention is the prior approved stage
 (OData) needs its Previous block edited by hand, since `--previous` offers
 only this document's stage or N/A. A draft after an approved stage must be
 numbered above the highest draft its Previous stage cites, or above the
-approved stage's number when it cites none.
+approved stage's number when it cites none. Every URL under the source's stage
+path is treated as a self-reference and moved, so a history table that cites
+the source stage by URL must be checked by eye. The stale scan reads a line at
+a time and does not decode percent-encoding, so a URL wrapped exactly at a
+slash, or written as `v2.1%2Fcsd01`, is not seen.
 
 Its stage vocabulary is imported from `oasis_pub_check.py`. Stage the result
 and run the gate on it.

@@ -286,3 +286,12 @@ def test_dmlex_has_no_stale_reference():
     adv = mod.StageAdvance(dmlex())
     adv.advance(when=date(2026, 9, 24), **WD01)
     assert adv.stale == []
+
+
+# Third verification round (synthetic inputs; no real source carries them).
+
+@pytest.mark.parametrize("line", ["See /V2.0/CS01/schemas/x.json", "File csaf-v2.0-cs01_diff.pdf",
+                                  "Relative ../cs01/schemas/csaf.json"])
+def test_the_stale_scan_reads_case_underscores_and_relative_links(line):
+    src = (CSAF / "cs01/csaf-v2.0-cs01.md").read_text(encoding="utf-8") + f"\n{line}\n"
+    assert "stale" in refused(text=src, to="cs02", previous="source")
