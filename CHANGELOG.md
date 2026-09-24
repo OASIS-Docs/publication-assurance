@@ -43,8 +43,11 @@ Each version is anchored by a git tag on this repository.
   quoting, case, entities and comments are read the way a browser reads them,
   and it counts an image cap only from an unscoped `img` rule in the package's
   inline CSS or a local stylesheet the HTML links, in screen-and-print or
-  print media. Hardened by an independent verification that found fourteen
-  wrong answers in the first build; each is now a test.
+  print media, from a stylesheet inside the package, and a later rule or an
+  inline `max-width: none` that lifts the cap cancels it. Hardened by two
+  rounds of independent verification (fourteen wrong answers in the first
+  build, nine in the second); each is now a test. Known limit, on the side
+  of warning: a cap written with `calc()` or `vw` is not read.
 
 ## v1.4.2 - 2026-09-24
 
