@@ -248,3 +248,41 @@ def test_crlf_and_a_copyright_range_are_handled():
     src = dmlex().replace("Copyright © OASIS Open 2025.", "Copyright © OASIS Open 2023-2025.")
     out = cut(text=src.replace("\n", "\r\n"), **WD01)
     assert "\r\n" in out and "Copyright © OASIS Open 2023-2026." in out
+
+
+# Second verification round. The OData fixture keeps lines 1 to 99, 264 to 284
+# and 2282 to 2288 of odata-data-aggregation-ext-v4.0-cs04.md
+# (OASIS-Docs/odata 93700ed): the front matter, a command line naming the
+# source's own file, and a vocabulary URL wrapped across two lines.
+
+ODATA = FIX / "odata-data-aggregation-ext-v4.0-cs04.md"
+
+
+def test_stale_stage_references_are_refused_with_their_lines():
+    msg = refused(text=ODATA.read_text(encoding="utf-8"), to="csd05", previous="source")
+    assert "stale" in msg
+    assert "odata-data-aggregation-ext-v4.0-cs04.html" in msg      # the bare file name
+    assert "v4.0/cs04/vocabularies" in msg                         # the wrapped URL
+
+
+def test_leave_stale_writes_the_cut_and_reports_them():
+    mod = load()
+    adv = mod.StageAdvance(ODATA.read_text(encoding="utf-8"))
+    out = adv.advance(to="csd05", when=date(2026, 9, 24), previous="source", leave_stale=True)
+    assert "## Committee Specification Draft 05" in out
+    assert len(adv.stale) >= 3, adv.stale
+
+
+def test_a_draft_number_already_cited_as_previous_is_refused():
+    src = (CSAF / "cs01/csaf-v2.0-cs01.md").read_text(encoding="utf-8")
+    prev = src.split("#### Previous stage:")[1].split("####")[0]
+    src = src.replace(prev, prev.replace("/csd01/", "/csd03/").replace("-csd01.", "-csd03."), 1)
+    assert "csd03" in src.split("#### Previous stage:")[1].split("####")[0]
+    refused(text=src, to="csd02", previous="source")
+
+
+def test_dmlex_has_no_stale_reference():
+    mod = load()
+    adv = mod.StageAdvance(dmlex())
+    adv.advance(when=date(2026, 9, 24), **WD01)
+    assert adv.stale == []
