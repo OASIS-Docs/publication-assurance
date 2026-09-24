@@ -46,7 +46,13 @@ Each version is anchored by a git tag on this repository.
   source (lexidma 83827ff), cutting v1.1 wd01 reproduces the hand-cut
   edition except for its two copyright years, which the tool updates and
   the hand cut missed, and its two `.pdf.pdf` typo fixes, which are content
-  edits. Pinned by `tests/test_advance_stage.py`. No check added.
+  edits. Cutting CSAF v2.0 cs01 to cs02 reproduces the published cs02's
+  This, Previous and Latest stage blocks exactly. An independent verification
+  found a Previous stage block that dropped the `.md (Authoritative)` line, a
+  cut that reused an existing stage, and refusals of legitimate CSAF and OData
+  front matter. Each is now a test. Multi-part specs with files in a stage
+  subdirectory are refused. Pinned by `tests/test_advance_stage.py`. No check
+  added.
 - New check class `pdf-legibility` (proposal 002), two conditions: the PDF's
   body text is measured as the median word height over every portrait page
   (`pdftotext -bbox`) and compared with the body size

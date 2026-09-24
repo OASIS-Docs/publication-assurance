@@ -175,3 +175,76 @@ def test_a_dirty_source_is_refused(tmp_path):
 def test_the_date_is_required():
     with pytest.raises(SystemExit):
         load().main([str(FIX / "dmlex-v1.0-os.md"), "--to", "csd01"])
+
+
+# Counterexamples from the independent verification of this change.
+
+CSAF = REPO_ROOT / "examples/csaf/v2.0"
+
+
+def test_the_previous_stage_keeps_the_authoritative_md_line():
+    """CSAF v2.0 cs02's own Previous stage lists cs01's .md (Authoritative) first."""
+    src = (CSAF / "cs01/csaf-v2.0-cs01.md").read_text(encoding="utf-8")
+    out = cut(text=src, to="cs02", previous="source")
+    prev = out.split("#### Previous stage:")[1].split("####")[0]
+    assert "https://docs.oasis-open.org/csaf/csaf/v2.0/cs01/csaf-v2.0-cs01.md (Authoritative)" in prev
+
+
+def test_the_cut_matches_the_published_csaf_cs02_front_matter():
+    src = (CSAF / "cs01/csaf-v2.0-cs01.md").read_text(encoding="utf-8")
+    real = (CSAF / "cs02/csaf-v2.0-cs02.md").read_text(encoding="utf-8")
+    out = cut(text=src, to="cs02", previous="source")
+    for heading in ("This stage:", "Previous stage:", "Latest stage:"):
+        block = lambda t: t.split(f"#### {heading}")[1].split("####")[0].strip()
+        assert block(out) == block(real), heading
+
+
+@pytest.mark.parametrize("src_stage,to", [("cs01", "csd01"), ("cs02", "csd01"), ("csd01", "os")])
+def test_a_stage_that_exists_or_skips_cs_is_refused(src_stage, to):
+    src = dmlex().replace("/v1.0/os/", f"/v1.0/{src_stage}/").replace(
+        "dmlex-v1.0-os.", f"dmlex-v1.0-{src_stage}.").replace(
+        "## OASIS Standard\n", "## " + load().stage_label(src_stage) + "\n", 1)
+    refused(text=src, to=to, previous="source")
+
+
+def test_a_draft_after_a_cs_with_a_higher_number_is_allowed():
+    src = (CSAF / "cs01/csaf-v2.0-cs01.md").read_text(encoding="utf-8")
+    assert "Committee Specification Draft 02" in cut(text=src, to="csd02", previous="source")
+
+
+def test_headings_without_a_blank_line_and_a_wrapped_citation_are_read():
+    src = dmlex().replace("#### This stage:\n\n", "#### This stage:\n", 1)
+    src = src.replace(" Edited by David Filip,", "\nEdited by David Filip,", 1)
+    out = cut(text=src, **WD01)
+    assert "OASIS Working Draft 01. <https://docs.oasis-open.org/lexidma/dmlex/v1.1/wd01/" in out
+
+
+@pytest.mark.parametrize("ver", ["0.9", "1.0", "2", "1.1.1"])
+def test_a_version_that_does_not_move_forward_is_refused(ver):
+    refused(to="csd01", version=ver, previous="source")
+
+
+def test_http_self_urls_and_derived_file_names_move_with_the_stage():
+    src = (CSAF / "cs01/csaf-v2.0-cs01.md").read_text(encoding="utf-8")
+    src += ("\nSee http://docs.oasis-open.org/csaf/csaf/v2.0/cs01/schemas/x.json and "
+            "https://docs.oasis-open.org/csaf/csaf/v2.0/cs01/csaf-v2.0-cs01-DIFF.pdf\n")
+    out = cut(text=src, to="cs02", previous="source")
+    tail = out.rsplit("\nSee ", 1)[1]
+    assert "v2.0/cs02/schemas/x.json" in tail and "v2.0/cs02/csaf-v2.0-cs02-DIFF.pdf" in tail, tail
+
+
+def test_angle_bracketed_latest_urls_keep_their_brackets():
+    src = dmlex().replace(
+        "https://docs.oasis-open.org/lexidma/dmlex/v1.0/dmlex-v1.0.html \\\n"
+        "https://docs.oasis-open.org/lexidma/dmlex/v1.0/dmlex-v1.0.pdf (Authoritative)",
+        "<https://docs.oasis-open.org/lexidma/dmlex/v1.0/dmlex-v1.0.html> \\\n"
+        "<https://docs.oasis-open.org/lexidma/dmlex/v1.0/dmlex-v1.0.pdf> (Authoritative)", 1)
+    out = cut(text=src, **WD01)
+    latest = out.split("#### Latest stage:")[1].split("####")[0]
+    assert "<https://docs.oasis-open.org/lexidma/dmlex/v1.1/dmlex-v1.1.pdf> (Authoritative)" in latest, latest
+
+
+def test_crlf_and_a_copyright_range_are_handled():
+    src = dmlex().replace("Copyright © OASIS Open 2025.", "Copyright © OASIS Open 2023-2025.")
+    out = cut(text=src.replace("\n", "\r\n"), **WD01)
+    assert "\r\n" in out and "Copyright © OASIS Open 2023-2026." in out
