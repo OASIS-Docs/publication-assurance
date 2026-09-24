@@ -283,7 +283,17 @@ citation from its fields. It refuses, and writes nothing, in any of these cases:
   (multi-part specs such as OData);
 - a site is found an unexpected number of times;
 - the version changes without `--previous source|none`;
-- the target is a Working Draft without `--unpublished-ok`.
+- the target is a Working Draft without `--unpublished-ok`;
+- anything outside the Previous stage block still names the source's stage
+  (a URL wrapped across lines, the file name in a code sample, a sibling work
+  product's path). It lists each line; `--leave-stale` writes the cut anyway
+  and prints them.
+
+Limits: a spec whose Previous stage convention is the prior approved stage
+(OData) needs its Previous block edited by hand, since `--previous` offers
+only this document's stage or N/A. A draft after an approved stage must be
+numbered above the highest draft its Previous stage cites, or above the
+approved stage's number when it cites none.
 
 Its stage vocabulary is imported from `oasis_pub_check.py`. Stage the result
 and run the gate on it.
