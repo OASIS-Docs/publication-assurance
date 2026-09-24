@@ -73,7 +73,11 @@ Each version is anchored by a git tag on this repository.
   real pin, and four legitimate bodies it refused; each is now a test. `main`
   requires a pull request with both checks green. Its first live run refused
   PR #14, whose tests assert through a helper defined in their own file; a
-  call to such a helper now counts as asserting.
+  call to such a helper now counts as asserting. A verification of that
+  change found six shapes that check nothing yet counted (a bare `with`, any
+  name containing "raises", an assert under `if False`, a redefined or
+  rebound helper, a call under `contextlib.suppress`); each is now refused
+  and pinned.
 - New condition in `image-policy` (proposal 001): an `<img>` that lays out
   wider than the printable width of an A4 page (643px) is a WARN when the
   package's own CSS sets no `max-width` on images. The width is the `<img>`'s
