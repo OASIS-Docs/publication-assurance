@@ -27,8 +27,8 @@ Each version is anchored by a git tag on this repository.
 ## Unreleased
 
 - New check class `pdf-legibility` (proposal 002), two conditions: the PDF's
-  body text is measured as the median word height over every page
-  of every portrait page (`pdftotext -bbox`) and compared with the body size
+  body text is measured as the median word height over every portrait page
+  (`pdftotext -bbox`) and compared with the body size
   the package declares: a `body` rule in its own CSS (inline, or a stylesheet
   inside the package that the HTML links; em, rem and % against the root),
   or, failing that, the OASIS Markdown stylesheet it links (12pt for v1.7.2
@@ -47,6 +47,16 @@ Each version is anchored by a git tag on this repository.
   silent. Pinned by `tests/test_pdf_legibility.py`, whose fixtures are eight
   pages of the DMLex v1.0 render from v1.4.1 (8.9pt) and eleven pages of the
   v1.4.2 render (13.4pt).
+- Process (proposal 004): a pull request that changes
+  `pub-check/oasis_pub_check.py` must record an adversarial review in its body.
+  This means an `## Adversarial review` section naming a test node id that the
+  pull request adds or modifies, or `not applicable: <reason>`. The new
+  `Gate change review` workflow enforces it and re-runs when the body is
+  edited. Its rule is in `.github/scripts/check_gate_change_review.py`, the
+  section is in `.github/pull_request_template.md`, and it is pinned by
+  `tests/test_gate_change_review.py`, which replays PR #9's own range. CI now
+  checks out full history for that test. `main` requires a pull request with
+  both checks green.
 - New condition in `image-policy` (proposal 001): an `<img>` that lays out
   wider than the printable width of an A4 page (643px) is a WARN when the
   package's own CSS sets no `max-width` on images. The width is the `<img>`'s
