@@ -215,3 +215,22 @@ def test_a_test_that_asserts_through_a_helper_is_a_pin(tmp_path):
                             "tests/test_via_helper.py::test_calls_only_a_non_asserting_helper\n",
                             PR9[1], head, repo=repo)
     assert not ok
+
+
+@pytest.mark.parametrize("body", [
+    "def chk():\n    if False:\n        assert 0\n\n\ndef test_t():\n    chk()\n",
+    "import os\n\n\ndef chk():\n    with open(os.devnull):\n        pass\n\n\ndef test_t():\n    chk()\n",
+    "def chk():\n    assert 1 == 1\n\n\ndef chk():\n    pass\n\n\ndef test_t():\n    chk()\n",
+    "def chk():\n    assert 0\n\n\ndef test_t():\n    chk = lambda: None\n    chk()\n",
+    "import contextlib\n\n\ndef chk():\n    assert 0\n\n\ndef test_t():\n"
+    "    with contextlib.suppress(AssertionError):\n        chk()\n",
+    "def not_raises():\n    pass\n\n\ndef test_t():\n    not_raises()\n",
+])
+def test_shapes_that_check_nothing_are_not_pins(tmp_path, body):
+    def edit(repo):
+        _touch_checker(repo)
+        (repo / "tests/test_evasive.py").write_text(body)
+    repo, head = _synthetic(tmp_path, edit)
+    ok, _ = load().evaluate("## Adversarial review\n\ntests/test_evasive.py::test_t\n",
+                            PR9[1], head, repo=repo)
+    assert not ok, body
