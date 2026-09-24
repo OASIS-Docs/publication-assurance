@@ -118,9 +118,11 @@ own prints inside the margins instead of at its natural size.
 
 `.github/scripts/step_2_convert_html_to_pdf_V2_0.sh`, which the step 2
 workflow runs, performs both commands: `fix_html_for_pdf.py` writes a hidden
-copy (`.spec-pdf.html`) beside the source, so relative CSS and images resolve,
-and `step_2_convert_html_to_pdf.py --footer-name spec.html` renders it, so the
-footer names the published file. The copy is removed afterwards. A TC render
+copy (`.spec-pdf-<pid>-<n>.html`) beside the source, so relative CSS and images
+resolve, and `step_2_convert_html_to_pdf.py --footer-name spec.html` renders
+it, so the footer names the published file. The PDF is moved into place only
+when the render succeeds, and the copy is removed afterwards. A stage directory
+with more than one top-level HTML file is refused. A TC render
 script such as the DMLex `tools/publication-assurance/render.sh` runs command 1
 and then prints with headless Chrome.
 

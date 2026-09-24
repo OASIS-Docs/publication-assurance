@@ -34,7 +34,8 @@ log = os.environ["STUB_LOG"]
 src = args[-2]
 shutil.copy(src, log + ".input.html")
 json.dump(args, open(log, "w"))
-open(args[-1], "wb").write(b"%PDF-1.4 stub")
+open(args[-1], "wb").write(b"%PDF-1.4 partial")
+sys.exit(1 if os.environ.get("STUB_FAIL") else 0)
 """
 
 
@@ -49,10 +50,11 @@ def run(tmp_path):
     stub.write_text(STUB)
     stub.chmod(stub.stat().st_mode | stat.S_IEXEC)
     log = tmp_path / "argv.json"
-    env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}", "STUB_LOG": str(log),
-           "PYTHON": sys.executable}
+    base_env = {"PATH": f"{bin_dir}:{os.environ['PATH']}", "STUB_LOG": str(log),
+                "PYTHON": sys.executable}
 
     def go():
+        env = {**os.environ, **base_env}
         before = sorted(p.relative_to(pkg) for p in pkg.rglob("*"))
         r = subprocess.run(["bash", str(SCRIPT), str(pkg)], env=env, capture_output=True,
                            text=True, cwd=tmp_path)
@@ -70,7 +72,8 @@ def test_the_script_renders_with_the_documented_a4_argument_vector(run):
     assert r.returncode == 0, r.stdout + r.stderr
     assert argv[argv.index("--page-size") + 1] == "A4", argv
     assert argv[argv.index("--margin-left") + 1] == "20mm", argv
-    assert argv[-1] == str(pkg / "csaf-v2.1-csd01.pdf"), argv
+    assert os.path.dirname(argv[-1]) == str(pkg), argv      # rendered beside, then moved
+    assert (pkg / "csaf-v2.1-csd01.pdf").read_bytes().startswith(b"%PDF")
 
 
 def test_the_script_renders_the_preprocessed_html(run):
@@ -93,4 +96,31 @@ def test_the_script_leaves_only_the_pdf_behind(run):
     assert r.returncode == 0, r.stdout + r.stderr
     assert set(after) - set(before) == {pkg.joinpath("csaf-v2.1-csd01.pdf").relative_to(pkg)}
     r2, argv2, _, _, _ = go()                 # a second run picks the same source
-    assert argv2[-1].endswith("csaf-v2.1-csd01.pdf") and r2.returncode == 0
+    assert r2.returncode == 0 and "csaf-v2.1-csd01.html" in argv2
+
+
+# Counterexamples from the independent verification of this change.
+
+def test_a_package_file_named_like_the_intermediate_survives(run):
+    go, pkg = run
+    keep = pkg / ".csaf-v2.1-csd01-pdf.html"
+    keep.write_text("KEEPME")
+    r, _, _, _, _ = go()
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert keep.read_text() == "KEEPME"
+
+
+def test_two_html_files_are_refused_not_silently_skipped(run):
+    go, pkg = run
+    shutil.copy(pkg / "csaf-v2.1-csd01.html", pkg / "zeta.html")
+    r, _, _, _, _ = go()
+    assert r.returncode != 0 and "more than one" in r.stdout + r.stderr
+    assert not (pkg / "csaf-v2.1-csd01.pdf").exists()
+
+
+def test_a_failed_render_leaves_no_pdf(run, monkeypatch):
+    go, pkg = run
+    monkeypatch.setenv("STUB_FAIL", "1")
+    r, _, _, _, _ = go()
+    assert r.returncode != 0
+    assert not (pkg / "csaf-v2.1-csd01.pdf").exists()
