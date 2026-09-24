@@ -243,8 +243,11 @@ section in its body (the pull request template has one). An independent reviewer
 which the change hides a real defect or raises a false one. The section names
 the test that pins each counterexample (`tests/test_x.py::test_y`), and the
 pull request must add or modify each named test: a test pytest collects, that
-asserts something, and whose code changed (a comment or whitespace edit does
-not count). Node ids inside HTML comments or code fences are ignored. For a pure refactor or a
+asserts something (an `assert`, a `raise`, `pytest.raises` or `pytest.warns`,
+directly or through a helper defined in the same file), and whose code changed
+(a comment or whitespace edit does not count). The check stops a review from
+being forgotten; it cannot stop a deliberately evasive test, which is what the
+independent reviewer is for. Node ids inside HTML comments or code fences are ignored. For a pure refactor or a
 message-text change, write `not applicable: <reason>`.
 `.github/workflows/gate-change-review.yml` enforces this on every pull request
 and re-runs when the body is edited. Its rule lives in

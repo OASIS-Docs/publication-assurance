@@ -80,19 +80,45 @@ def test_source(repo: str, rev: str, path: str, name: str) -> str | None:
     if scope:
         cls = next((n for n in nodes if isinstance(n, ast.ClassDef) and n.name == scope), None)
         nodes = cls.body if cls else []
-    def asserts(fn) -> bool:
-        return any(isinstance(n, (ast.Assert, ast.Raise, ast.With)) or
-                   (isinstance(n, ast.Call) and "raises" in ast.dump(n.func))
-                   for n in ast.walk(fn))
+    def is_check(n) -> bool:
+        """An assert, a raise, or a pytest.raises / pytest.warns context."""
+        if isinstance(n, (ast.Assert, ast.Raise)):
+            return True
+        return (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                and n.func.attr in ("raises", "warns"))
 
-    # Module-level helpers that assert: a test that calls one asserts through it.
-    checking_helpers = {n.name for n in tree.body
-                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and asserts(n)}
+    def live(fn):
+        """The nodes of fn, without code under a constant-false `if`."""
+        stack = list(fn.body)
+        while stack:
+            n = stack.pop()
+            if isinstance(n, ast.If) and isinstance(n.test, ast.Constant) and not n.test.value:
+                stack.extend(n.orelse)
+                continue
+            yield n
+            stack.extend(ast.iter_child_nodes(n))
+
+    def asserts(fn) -> bool:
+        return any(is_check(n) for n in live(fn))
+
+    # Module-level helpers that assert (the last definition of each name wins):
+    # a test that calls one asserts through it, unless the test rebinds that
+    # name or runs the call under contextlib.suppress.
+    last = {}
+    for n in tree.body:
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            last[n.name] = n
+    checking_helpers = {name for name, n in last.items() if asserts(n)}
     for node in nodes:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func:
+            body = list(live(node))
+            if any(isinstance(n, ast.Call) and "suppress" in ast.dump(n.func) for n in body):
+                return None
+            rebound = {t.id for n in body if isinstance(n, ast.Assign)
+                       for t in n.targets if isinstance(t, ast.Name)}
             via_helper = any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
-                             and n.func.id in checking_helpers for n in ast.walk(node))
-            checks = asserts(node) or via_helper
+                             and n.func.id in checking_helpers - rebound for n in body)
+            checks = any(is_check(n) for n in body) or via_helper
             return ast.dump(node, include_attributes=False) if checks else None
     return None
 
