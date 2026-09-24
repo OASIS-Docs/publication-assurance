@@ -33,8 +33,8 @@ import re
 import subprocess
 import sys
 
-GATED = ("pub-check/oasis_pub_check.py",)
-NODE = re.compile(r"(tests/[\w./-]+\.py)::(test_\w+)")
+GATED = re.compile(r"^pub-check/[^/]+\.py$")   # the checker and any module beside it
+NODE = re.compile(r"(tests/[\w./-]+\.py)::((?:[A-Z]\w*::)?test_\w+)")
 
 
 def git(repo: str, *args: str) -> str:
@@ -43,18 +43,27 @@ def git(repo: str, *args: str) -> str:
 
 
 def review_section(body: str) -> str | None:
-    """The text under the '## Adversarial review' heading, up to the next
-    heading of the same or higher level; None when there is no such heading."""
-    m = re.search(r"(?im)^(#{1,3})\s*adversarial review\s*$", body or "")
+    """The text under the 'Adversarial review' heading (any level from # to
+    ####, or a bold line), up to the next heading of the same or a higher
+    level. HTML comments and fenced code are removed first, so nothing in
+    them counts. None when there is no such heading."""
+    body = re.sub(r"<!--.*?-->", "", (body or "").replace("\r\n", "\n"), flags=re.S)
+    body = re.sub(r"(?ms)^(```|~~~).*?^\1[^\n]*$", "", body)
+    m = re.search(r"(?im)^(#{1,4}|\*\*)\s*adversarial review\b[^\n]*$", body)
     if not m:
         return None
     rest = body[m.end():]
-    nxt = re.search(rf"(?m)^#{{1,{len(m.group(1))}}}\s+\S", rest)
+    level = len(m.group(1)) if m.group(1).startswith("#") else 4
+    nxt = re.search(rf"(?m)^#{{1,{level}}}\s+\S", rest)
     return (rest[:nxt.start()] if nxt else rest).strip()
 
 
 def test_source(repo: str, rev: str, path: str, name: str) -> str | None:
-    """Source text of test function `name` in `path` at `rev`, or None."""
+    """The AST of test `name` (a function, or Class::method) in `path` at
+    `rev`, dumped without positions, so a comment or whitespace edit is not a
+    change. None when the file or the test is absent, or when the test is not
+    one pytest collects: a test_*.py file and a test_* function that asserts
+    something (an assert, or a call such as pytest.raises)."""
     try:
         src = git(repo, "show", f"{rev}:{path}")
     except subprocess.CalledProcessError:
@@ -63,15 +72,27 @@ def test_source(repo: str, rev: str, path: str, name: str) -> str | None:
         tree = ast.parse(src)
     except SyntaxError:
         return None
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
-            return ast.get_source_segment(src, node)
+    if not re.fullmatch(r"test_\w+\.py", path.rsplit("/", 1)[-1]):
+        return None
+    scope, _, func = name.rpartition("::")
+    nodes = tree.body
+    if scope:
+        cls = next((n for n in nodes if isinstance(n, ast.ClassDef) and n.name == scope), None)
+        nodes = cls.body if cls else []
+    for node in nodes:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func:
+            checks = any(isinstance(n, (ast.Assert, ast.Raise, ast.With)) or
+                         (isinstance(n, ast.Call) and "raises" in ast.dump(n.func))
+                         for n in ast.walk(node))
+            return ast.dump(node, include_attributes=False) if checks else None
     return None
 
 
 def evaluate(body: str, base: str, head: str, repo: str = ".") -> tuple[bool, str]:
-    changed = set(git(repo, "diff", "--name-only", f"{base}...{head}").split())
-    gated = sorted(changed.intersection(GATED))
+    changed = set()
+    for line in git(repo, "diff", "--name-status", "-M", f"{base}...{head}").splitlines():
+        changed.update(line.split("\t")[1:])      # both sides of a rename
+    gated = sorted(p for p in changed if GATED.match(p))
     if not gated:
         return True, "This pull request does not change a gated path; no review needed."
     section = review_section(body)
@@ -79,7 +100,7 @@ def evaluate(body: str, base: str, head: str, repo: str = ".") -> tuple[bool, st
         return False, (f"This pull request changes {', '.join(gated)} and its body has no "
                        f"'## Adversarial review' section. Record the independent review: "
                        f"the counterexamples tried and the tests/...py::test_... that pins each.")
-    na = re.match(r"(?i)not applicable\s*:\s*(\S.*)", section)
+    na = re.search(r"(?im)^\s*not applicable\s*:[ \t]*(\S.*)$", section)
     if na:
         return True, f"Adversarial review marked not applicable: {na.group(1).strip()}"
     nodes = NODE.findall(section)
@@ -91,7 +112,8 @@ def evaluate(body: str, base: str, head: str, repo: str = ".") -> tuple[bool, st
     for path, name in nodes:
         after = test_source(repo, head, path, name)
         if after is None:
-            problems.append(f"{path}::{name} does not exist at the head of this pull request")
+            problems.append(f"{path}::{name} does not exist at the head of this pull request, "
+                            f"or is not a collected test that asserts something")
         elif test_source(repo, base, path, name) == after:
             problems.append(f"{path}::{name} was not added or modified by this pull request")
     if problems:

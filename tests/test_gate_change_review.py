@@ -120,3 +120,77 @@ def test_the_cli_exit_code_follows_the_verdict(tmp_path):
                        env={"PR_BODY": f"## Adversarial review\n{PINNED}", "PATH": "/usr/bin:/bin"},
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
+
+
+# Counterexamples from the independent verification of this change.
+
+def _synthetic(tmp_path, edit):
+    """A throwaway clone at PR #9's head with one extra commit made by `edit`."""
+    repo = tmp_path / "repo"
+    subprocess.run(["git", "clone", "-q", "--no-local", str(REPO_ROOT), str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "checkout", "-q", PR9[1]], check=True)
+    edit(repo)
+    g = ["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@example.org"]
+    subprocess.run(g + ["add", "-A"], check=True)
+    subprocess.run(g + ["commit", "-qm", "synthetic"], check=True)
+    head = subprocess.run(g[:3] + ["rev-parse", "HEAD"], capture_output=True, text=True,
+                          check=True).stdout.strip()
+    return str(repo), head
+
+
+def _touch_checker(repo):
+    p = repo / "pub-check/oasis_pub_check.py"
+    p.write_text(p.read_text() + "\n# change\n")
+
+
+def test_a_comment_only_edit_to_a_test_is_not_a_pin(tmp_path):
+    def edit(repo):
+        _touch_checker(repo)
+        p = repo / "tests/test_cli_smoke.py"
+        p.write_text(p.read_text().replace(
+            "def test_list_checks_reports_a_registry_in_sync_with_the_ast():\n",
+            "def test_list_checks_reports_a_registry_in_sync_with_the_ast():\n    # reviewed\n", 1))
+    repo, head = _synthetic(tmp_path, edit)
+    ok, why = load().evaluate(
+        "## Adversarial review\n\ntests/test_cli_smoke.py::"
+        "test_list_checks_reports_a_registry_in_sync_with_the_ast\n", PR9[1], head, repo=repo)
+    assert not ok and "not added or modified" in why
+
+
+def test_an_uncollected_or_empty_test_is_not_a_pin(tmp_path):
+    def edit(repo):
+        _touch_checker(repo)
+        (repo / "tests/helpers_notcollected.py").write_text("def test_x():\n    assert True\n")
+        (repo / "tests/test_empty_pin.py").write_text("def test_nothing():\n    pass\n")
+    repo, head = _synthetic(tmp_path, edit)
+    for node in ("tests/helpers_notcollected.py::test_x", "tests/test_empty_pin.py::test_nothing"):
+        ok, why = load().evaluate(f"## Adversarial review\n\n{node}\n", PR9[1], head, repo=repo)
+        assert not ok, node
+
+
+def test_a_node_id_inside_an_html_comment_or_fence_does_not_count():
+    for body in (f"## Adversarial review\n\n<!-- {PINNED} -->\n",
+                 f"## Adversarial review\n\n```\n{PINNED}\n```\n"):
+        assert not verdict(body)[0], body
+
+
+def test_a_renamed_or_new_checker_module_is_gated(tmp_path):
+    def edit(repo):
+        (repo / "pub-check/helper_rule.py").write_text("RULE = 1\n")
+    repo, head = _synthetic(tmp_path, edit)
+    ok, why = load().evaluate("Docs only.", PR9[1], head, repo=repo)
+    assert not ok and "Adversarial review" in why
+
+
+def test_the_shipped_template_with_not_applicable_passes():
+    template = (REPO_ROOT / ".github/pull_request_template.md").read_text()
+    body = template.rstrip("\n") + "\n\nnot applicable: message text only\n"
+    ok, why = verdict(body)
+    assert ok and "message text only" in why, why
+
+
+def test_heading_variants_and_class_node_ids_are_read():
+    for head in ("#### Adversarial review", "**Adversarial review**",
+                 "## Adversarial review (independent)"):
+        assert verdict(f"{head}\n\n{PINNED}\n")[0], head
+    assert load().NODE.findall("tests/x.py::TestC::test_y") == [("tests/x.py", "TestC::test_y")]
