@@ -709,10 +709,11 @@ def _caps_at_line(value: str | None) -> bool:
     """A max-width that keeps an image inside the printable width."""
     if not value:
         return False
-    m = re.fullmatch(rf"\s*({_NUM})\s*%\s*(!important)?\s*", value, re.I)
+    value = re.sub(r"!\s*important", "", value, flags=re.I)
+    m = re.fullmatch(rf"\s*({_NUM})\s*%\s*", value, re.I)
     if m:
         return float(m.group(1)) <= 100
-    px = _css_length_px(re.sub(r"!important", "", value, flags=re.I))
+    px = _css_length_px(value)
     return px is not None and px <= PRINTABLE_WIDTH_PX
 
 
@@ -744,14 +745,19 @@ class _ImgCollector(HTMLParser):
         self.styles: list[str] = []
         self._in_style = False
 
+    @staticmethod
+    def _prints(media: str | None) -> bool:
+        return not media or bool(re.search(r"\b(print|all)\b", media, re.I))
+
     def handle_starttag(self, tag, attrs):
         a = {k.lower(): (v or "") for k, v in attrs}
         if tag == "img":
             self.imgs.append(a)
-        elif tag == "link" and "stylesheet" in a.get("rel", "").lower():
+        elif tag == "link" and a.get("rel", "").lower().split() == ["stylesheet"] \
+                and self._prints(a.get("media")):
             self.css_hrefs.append(a.get("href", ""))
         elif tag == "style":
-            self._in_style = True
+            self._in_style = self._prints(a.get("media"))
 
     handle_startendtag = handle_starttag
 
@@ -768,6 +774,8 @@ def _css_rules(css: str):
     """(selector, body) for every rule that applies when printing: top-level
     rules and rules inside @media print/all. Other @media blocks are skipped."""
     css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    css = re.sub(r"\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'", '""', css)
+    css = re.sub(r"@(?:charset|import|namespace)\b[^;{}]*;", "", css, flags=re.I)
     i, n = 0, len(css)
     while i < n:
         j = css.find("{", i)
@@ -781,8 +789,8 @@ def _css_rules(css: str):
         inner = css[j + 1:k - 1]
         if sel.startswith("@"):
             q = sel.lower()
-            if q.startswith("@media") and re.search(r"\b(print|all)\b", q) \
-                    and not re.search(r"\bnot\b", q):
+            if (q.startswith("@media") and re.search(r"\b(print|all)\b", q)
+                    and not re.search(r"\bnot\b", q)) or q.startswith("@supports"):
                 yield from _css_rules(inner)
         else:
             yield sel, inner
@@ -790,23 +798,36 @@ def _css_rules(css: str):
 
 
 def _css_caps_images(stage_dir: str, styles: list[str], hrefs: list[str]) -> bool:
-    """True when the package's own CSS (an inline <style>, or a local .css the
-    HTML links) caps every img at the line width. A rule scoped by class, id,
-    attribute or a parent element caps only some images and does not count.
-    The linked OASIS stylesheets on docs.oasis-open.org set no image cap."""
+    """True when the package's own CSS (an inline <style>, or a stylesheet
+    inside the package that the HTML links for print) caps every img at the
+    line width, and no later rule lifts the cap. A rule scoped by class, id,
+    attribute or a parent element caps only some images and does not count,
+    but one that lifts the cap for some images cancels it. The linked OASIS
+    stylesheets on docs.oasis-open.org set no image cap."""
     css = " ".join(styles)
+    root = os.path.realpath(stage_dir)
     for href in hrefs:
         if re.match(r"(?i)^(https?:)?//", href):
             continue
-        p = os.path.join(stage_dir, urllib.parse.unquote(href.split("?")[0].split("#")[0]))
-        if os.path.isfile(p):
+        p = os.path.realpath(os.path.join(
+            stage_dir, urllib.parse.unquote(href.split("?")[0].split("#")[0])))
+        if p.startswith(root + os.sep) and os.path.isfile(p):
             css += " " + read_text(p)
+    capped = False
     for sel, body in _css_rules(css):
+        values = re.findall(r"(?:^|;)\s*max-width\s*:\s*([^;]+)", body.replace("\n", " "), re.I)
+        if not values:
+            continue
         for one in sel.split(","):
-            if re.fullmatch(r"\s*(?:(?:html|body)\s+)*img\s*", one, re.I) \
-                    and _caps_at_line(_style_decl(body.strip().replace("\n", " "), "max-width")):
-                return True
-    return False
+            if not re.search(r"(^|[\s>+~])img([.#\[:][^\s>+~]*)?\s*$", one.strip(), re.I):
+                continue
+            unscoped = re.fullmatch(r"\s*(?:(?:html|body)\s+)*img\s*", one, re.I)
+            for v in values:
+                if not _caps_at_line(v):
+                    capped = False
+                elif unscoped:
+                    capped = True
+    return capped
 
 
 def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
@@ -824,7 +845,10 @@ def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
     except Exception:  # noqa: BLE001  (a malformed page is judged by other checks)
         pass
     capped = _css_caps_images(stage_dir, parsed.styles, parsed.css_hrefs)
-    for attrs in ([] if capped else parsed.imgs):
+    for attrs in parsed.imgs:
+        own = _style_decl(attrs.get("style") or "", "max-width")
+        if capped and not (own and not _caps_at_line(own)):
+            continue
         src = attrs.get("src", "").strip()
         if not src or re.match(r"(?i)^(https?:|data:|//)", src):
             continue

@@ -142,3 +142,62 @@ def test_fitting_images_are_silent_in_every_spelling(tmp_path):
                 '<!-- <img src="dmlex_uml.svg"> -->',
                 '<img data-src="dmlex_uml.svg" src="OASISLogo-v3.0.png">'):
         assert wide(tmp_path, tag) == [], tag
+
+
+# Second verification round: a cap the renderer never applies must not silence
+# the check, and ordinary stylesheet syntax must not hide a real cap.
+
+def _with_link(tmp_path, css_text, link_attrs='rel="stylesheet" href="local.css"',
+               body='<img src="dmlex_uml.svg">'):
+    (tmp_path / "local.css").write_text(css_text)
+    stage_dir, html = stage(tmp_path, body)
+    html = html.replace("<head>", f"<head><link {link_attrs}>")
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.check_image_policy(stage_dir, html, f)
+    return [x for x in f.items if "wider than the printable" in x["message"]]
+
+
+def test_charset_import_and_braces_in_strings_do_not_hide_a_cap(tmp_path):
+    for css in ('@charset "UTF-8";\nimg { max-width: 100%; }',
+                "@import url(x.css);img{max-width:100%}",
+                'p::before { content: "{"; } img { max-width: 100%; }',
+                "img { max-width: 100% ! important; }",
+                "@supports (display: grid) { img { max-width: 100%; } }"):
+        assert _with_link(tmp_path, css) == [], css
+
+
+def test_a_cap_cancelled_later_does_not_count(tmp_path):
+    for css in ("img{max-width:100%} img{max-width:none}",
+                "img{max-width:100%;max-width:none}",
+                "img{max-width:100%} .x img{max-width:none!important}"):
+        assert len(_with_link(tmp_path, css)) == 1, css
+
+
+def test_an_inline_max_width_none_overrides_the_stylesheet_cap(tmp_path):
+    hits = _with_link(tmp_path, "img { max-width: 100%; }",
+                      body='<img src="dmlex_uml.svg" style="max-width:none">')
+    assert len(hits) == 1
+
+
+def test_a_screen_only_stylesheet_does_not_cap_the_print(tmp_path):
+    assert len(_with_link(tmp_path, "img{max-width:100%}",
+                          'rel="stylesheet" media="screen" href="local.css"')) == 1
+    assert len(_with_link(tmp_path, "img{max-width:100%}",
+                          'rel="alternate stylesheet" href="local.css"')) == 1
+    body = '<img src="dmlex_uml.svg">'
+    stage_dir, html = stage(tmp_path, body)
+    html = html.replace("<head>", '<head><style media="screen">img{max-width:100%}</style>')
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.check_image_policy(stage_dir, html, f)
+    assert len([x for x in f.items if "wider than the printable" in x["message"]]) == 1
+
+
+def test_a_stylesheet_outside_the_package_does_not_count(tmp_path):
+    pkg = tmp_path / "pkg"
+    pkg.mkdir()
+    (tmp_path / "outside.css").write_text("img{max-width:100%}")
+    stage_dir, html = stage(pkg, '<img src="dmlex_uml.svg">')
+    html = html.replace("<head>", '<head><link rel="stylesheet" href="../outside.css">')
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.check_image_policy(stage_dir, html, f)
+    assert len([x for x in f.items if "wider than the printable" in x["message"]]) == 1
