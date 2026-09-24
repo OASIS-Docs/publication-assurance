@@ -237,12 +237,14 @@ pub-check:
 
 ## Changing a check
 
-A pull request that changes `oasis_pub_check.py` must carry an
-`## Adversarial review` section in its body (the pull request template has
-one). An independent reviewer, not the author, is told to build an input on
+A pull request that changes `oasis_pub_check.py`, or any other Python file in
+`pub-check/` (a rename included), must carry an `## Adversarial review`
+section in its body (the pull request template has one). An independent reviewer, not the author, is told to build an input on
 which the change hides a real defect or raises a false one. The section names
 the test that pins each counterexample (`tests/test_x.py::test_y`), and the
-pull request must add or modify each named test. For a pure refactor or a
+pull request must add or modify each named test: a test pytest collects, that
+asserts something, and whose code changed (a comment or whitespace edit does
+not count). Node ids inside HTML comments or code fences are ignored. For a pure refactor or a
 message-text change, write `not applicable: <reason>`.
 `.github/workflows/gate-change-review.yml` enforces this on every pull request
 and re-runs when the body is edited. Its rule lives in
