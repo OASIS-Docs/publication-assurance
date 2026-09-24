@@ -23,7 +23,7 @@ itself before submitting.
 Quality control runs in two layers. Your TC runs the first; TC
 Administration runs the second.
 
-![How the two layers dovetail](assets/architecture/validation-audit-dovetail.png?v=171)
+![How the two layers dovetail](assets/architecture/validation-audit-dovetail.png?v=173)
 
 ## The two layers
 
@@ -63,11 +63,11 @@ must pass before the audit closes.
 
 **The dovetail.** Step 4b of the intake checklist is: re-run oasis-pub-check, on
 our side, with the identical code, and triage every finding. Your entire
-171-check validation layer plugs into the audit as one step. Both sides run
+173-check validation layer plugs into the audit as one step. Both sides run
 the same code, so acceptance is mechanical on both ends. Your green run
 predicts our green run; TC Administration still runs its own.
 
-![The OASIS publication quality stack](assets/architecture/two-layer-stack.png?v=171)
+![The OASIS publication quality stack](assets/architecture/two-layer-stack.png?v=173)
 
 ## Layer 1: the checks
 
@@ -87,18 +87,18 @@ form.
 
 The checks group into six areas:
 
-![pub-check validation flow](assets/gate.png?v=171)
+![pub-check validation flow](assets/gate.png?v=173)
 
 | Area | Checks | What it protects |
 |---|---|---|
 | Naming and stages | 39 | stage tokens per the current [Naming Directives](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html), version directories, delivery filenames, multi-part numbering, permitted characters, the Version identifier in the title, live revision collisions |
 | Front matter and links | 44 | This/Previous/Latest stage URL blocks, whether the cited previous-stage document actually retrieves, internal anchors, cited-but-missing files, dead mail addresses, link-target mismatches, URI aliasing |
 | Content residue | 17 | editor TODOs, placeholder sections, unresolved Authors, stale pandoc headers, working titles |
-| Rendering and sync | 27 | PDF built from the same revision as the HTML, embedded fonts vs the package's own CSS, image policy and figure width, Word render fidelity |
+| Rendering and sync | 29 | PDF built from the same revision as the HTML, embedded fonts vs the package's own CSS, printed body text size vs the declared size, image policy and figure width, Word render fidelity |
 | Template and policy | 23 | required front-matter sections, the [TC Process](https://www.oasis-open.org/policies-guidelines/tc-process/) Conformance requirement and clause stability, RFC 2119/8174 citation, the public-review companion files |
 | Package hygiene | 21 | junk files, recursive symlinks, schema `$id` vs publish path, manifest sha256, XML namespace form, ODT container integrity |
 
-The six areas partition all 171 conditions: `pub-check/render_checks_md.py`
+The six areas partition all 173 conditions: `pub-check/render_checks_md.py`
 asserts that every check class sits in exactly one area and that the areas sum
 to the registry total, and `tests/test_advertised_counts.py` pins the six
 figures above against the registry.
@@ -114,7 +114,7 @@ and what it compares that value against, is
 tool's own condition registry, and `--list-checks` reports the counts from
 the code.
 
-97 of the 171 conditions trace to a verbatim clause of written OASIS policy.
+97 of the 173 conditions trace to a verbatim clause of written OASIS policy.
 [`pub-check/AUTHORITIES.md`](pub-check/AUTHORITIES.md) gives the clause for
 each, and the corpus those clauses were quoted from ships beside it in
 [`pub-check/corpus/`](pub-check/corpus/), hashed, so your TC can check any of

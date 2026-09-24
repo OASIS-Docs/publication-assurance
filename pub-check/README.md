@@ -15,7 +15,7 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=171)
+![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=173)
 
 `oasis_pub_check.py` is the executable form of the publication acceptance
 criteria: the TC-side version of the checks OASIS TC Administration
@@ -33,7 +33,7 @@ Characteristics:
 - No configuration. Every expectation is derived from the package itself:
   its own front matter, its own CSS, its own schema `$id`s, its own publish
   path.
-- 171 individual checks across 58 check classes. `--list-checks` asserts
+- 173 individual checks across 59 check classes. `--list-checks` asserts
   that inventory against the code, and every count advertised anywhere in
   this repository comes from it.
 - It combines the intake acceptance criteria with the publication
@@ -156,6 +156,7 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | package-refs | 1 | BLOCKER | Files the document cites under its own stage path must be included in the package. |
 | pdf-cover | 2 | BLOCKER | The rendered PDF cover must carry the title exactly once and no CI paths. |
 | pdf-fonts | 2 | WARN | PDF embedded fonts are compared against the package's own CSS as typography authority. |
+| pdf-legibility | 2 | WARN | PDF body text size is measured against the body size the package's stylesheet declares. |
 | pdf-sync | 5 | BLOCKER/WARN | The PDF must be readable and rendered from the same revision as the rest of the package. |
 | previous-stage | 2 | BLOCKER | Second and later stages must cite the previous stage's URLs. |
 | public-review-metadata | 3 | BLOCKER/WARN | Post-publication audit: a csd/cnd stage directory that underwent a TC public review must carry the [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html companion file Project Administration is obligated to publish alongside it (Naming Directives v1.7 s5.2 / TC Handbook Naming). |
@@ -199,7 +200,7 @@ same command on either side of the gate (`--emit-manifest`):
   [OpenDocument releases](https://docs.oasis-open.org/office/OpenDocument/v1.4/csd01/OpenDocument-v1.4-csd01-manifest.txt)
   carry the precedent.
 
-![The verification chain](../assets/chain.png?v=171)
+![The verification chain](../assets/chain.png?v=173)
 
 If the package includes a `manifest.json` conforming to
 [`manifest-schema.json`](manifest-schema.json), the intake side can verify

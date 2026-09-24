@@ -11,9 +11,9 @@
   "missing": 30,
   "conditions_total": 96,
   "policy_grounded": 94,
-  "operational_extra": 73,
-  "total_conditions": 171,
-  "total_signatures": 167,
+  "operational_extra": 75,
+  "total_conditions": 173,
+  "total_signatures": 169,
   "policy_grounded_conditions": 97
  },
  "criteria": [
@@ -1328,6 +1328,16 @@
   {
    "check": "pdf-fonts",
    "sig": "pdffonts failed",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-legibility",
+   "sig": "Body text in the PDF measures a median word height",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-legibility",
+   "sig": "pdftotext -bbox failed",
    "status": "operational-extra"
   },
   {
