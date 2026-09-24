@@ -87,7 +87,8 @@ def stage_label(token: str) -> str:
     return STAGE_NAMES[kind] + (f" {num}" if num else "")
 
 
-def check_target(old: str, new: str, same_version: bool, unpublished_ok: bool) -> None:
+def check_target(old: str, new: str, same_version: bool, unpublished_ok: bool,
+                 prev_drafts: tuple[int, ...] = ()) -> None:
     kind, num = split_stage(new)
     if kind in RETIRED_STAGE_TOKENS or new in RETIRED_STAGE_TOKENS:
         raise Refused(f"{new} is a retired stage (Naming Directives v1.7); use csd, cnd, cs, cn or os")
@@ -112,10 +113,14 @@ def check_target(old: str, new: str, same_version: bool, unpublished_ok: bool) -
     if kind == okind and int(num) <= int(onum or 0):
         raise Refused(f"{new} does not come after {old}")
     if ORDER[kind] < ORDER[okind]:
-        # A new draft after an approved stage continues the draft numbering, so
-        # its number is higher than the approved stage's (CSAF v2.0: cs01, csd03).
-        if not (kind in ("csd", "cnd") and okind in ("cs", "cn") and int(num) > int(onum)):
-            raise Refused(f"{new} goes backwards from {old}, or reuses a stage that exists")
+        # A new draft after an approved stage continues the draft numbering.
+        # The highest draft the document cites as its Previous stage is the
+        # evidence; without one, the draft number must exceed the approved
+        # stage's (CSAF v2.0: cs01, then csd03).
+        floor = max(prev_drafts) if prev_drafts else int(onum)
+        if not (kind in ("csd", "cnd") and okind in ("cs", "cn") and int(num) > floor):
+            raise Refused(f"{new} goes backwards from {old}, or reuses a stage that exists "
+                          f"(the next draft here is numbered above {floor:02d})")
 
 
 def check_version(old: str, new: str) -> None:
@@ -135,6 +140,7 @@ class StageAdvance:
         self.crlf = "\r\n" in text
         self.src = text.replace("\r\n", "\n")
         self.sites: list[tuple[str, int, int]] = []    # (site, expected, found)
+        self.stale: list[str] = []
         head = self.src.split("\n## Notices", 1)[0]
         headings = re.findall(r"(?m)^#### (.+?)\s*$", head)
         if [h for h in headings if h in FRONT_HEADINGS] != FRONT_HEADINGS or \
@@ -188,12 +194,16 @@ class StageAdvance:
     # -- the rewrite -------------------------------------------------------
     def advance(self, to: str, when: date, version: str | None = None,
                 previous: str | None = None, formats: list[str] | None = None,
-                unpublished_ok: bool = False) -> str:
+                unpublished_ok: bool = False, leave_stale: bool = False) -> str:
         new_ver = version or self.version
         same = new_ver == self.version
         if not same:
             check_version(self.version, new_ver)
-        check_target(self.stage, to, same, unpublished_ok)
+        prev_block = self._block("Previous stage:").group("body")
+        draft_kind = {"cs": "csd", "cn": "cnd"}.get(self.stage.rstrip("0123456789"), "")
+        prev_drafts = tuple(int(n) for n in re.findall(
+            rf"/v{re.escape(self.version)}/{draft_kind}(\d{{2}})/", prev_block)) if draft_kind else ()
+        check_target(self.stage, to, same, unpublished_ok, prev_drafts)
         if not same and previous is None:
             raise Refused("the version changes, so the Previous stage is the editor's choice: "
                           "pass --previous source (cite this document's stage) or --previous none")
@@ -257,6 +267,20 @@ class StageAdvance:
         s = self._sub(s, f"Copyright © OASIS Open {years[0]}.",
                       f"Copyright © OASIS Open {start}{when.year}.", len(years),
                       "Notices copyright year")
+        # Anything that still names the source's stage, outside the Previous
+        # stage block, was not a site this tool knows how to rewrite: a URL
+        # wrapped across lines, the file name in a code sample, a sibling work
+        # product's path. List it; never guess.
+        prev_now = self._block("Previous stage:", s).group(0)
+        rest = s.replace(prev_now, "\n" * prev_now.count("\n"), 1)
+        stale_re = re.compile(rf"/v{re.escape(self.version)}/{re.escape(self.stage)}/|"
+                              rf"(?<![\w-]){re.escape(self.stem)}(?![\w])")
+        self.stale = [f"line {i}: {ln.strip()}" for i, ln in enumerate(rest.split("\n"), 1)
+                      if stale_re.search(ln)]
+        if self.stale and not leave_stale:
+            raise Refused("stale stage references this tool does not rewrite (edit them, or "
+                          "pass --leave-stale to write the cut and list them):\n  "
+                          + "\n  ".join(self.stale))
         self.new_stem = new_stem
         return s.replace("\n", "\r\n") if self.crlf else s
 
@@ -325,6 +349,8 @@ def main(argv=None) -> int:
     ap.add_argument("--out", help="directory for the new file (default: beside the source)")
     ap.add_argument("--allow-dirty", action="store_true")
     ap.add_argument("--unpublished-ok", action="store_true")
+    ap.add_argument("--leave-stale", action="store_true",
+                    help="write the cut even when references to the old stage remain, and list them")
     a = ap.parse_args(argv)
     try:
         clean, where = source_is_clean(a.source)
@@ -335,7 +361,8 @@ def main(argv=None) -> int:
         text = open(a.source, encoding="utf-8").read()
         adv = StageAdvance(text)
         out = adv.advance(a.to, a.date, a.version, a.previous,
-                          a.formats.split(",") if a.formats else None, a.unpublished_ok)
+                          a.formats.split(",") if a.formats else None, a.unpublished_ok,
+                          a.leave_stale)
     except Refused as e:
         print(f"REFUSED: {e}", file=sys.stderr)
         return 1
@@ -345,6 +372,8 @@ def main(argv=None) -> int:
     target = os.path.join(a.out or os.path.dirname(os.path.abspath(a.source)), adv.new_stem + ".md")
     sys.stdout.writelines(difflib.unified_diff(text.splitlines(True), out.splitlines(True),
                                                a.source, target, n=0))
+    for line in adv.stale:
+        print(f"STALE {line}")
     print("Not inspected: prose outside these sites, the Status wording, conformance text, "
           "and any typo. Run oasis_pub_check.py on the staged result.")
     if not a.write:

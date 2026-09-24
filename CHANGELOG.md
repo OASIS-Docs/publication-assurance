@@ -50,7 +50,11 @@ Each version is anchored by a git tag on this repository.
   This, Previous and Latest stage blocks exactly. An independent verification
   found a Previous stage block that dropped the `.md (Authoritative)` line, a
   cut that reused an existing stage, and refusals of legitimate CSAF and OData
-  front matter. Each is now a test. Multi-part specs with files in a stage
+  front matter. Each is now a test. A second round found OData cuts that
+  left stale references to the old stage (a wrapped URL, a file name in a
+  code sample, a sibling work product's path): anything outside the Previous
+  stage block that still names the source's stage is now listed and refused
+  unless `--leave-stale` is given. Multi-part specs with files in a stage
   subdirectory are refused. Pinned by `tests/test_advance_stage.py`. No check
   added.
 - New check class `pdf-legibility` (proposal 002), two conditions: the PDF's
