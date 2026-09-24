@@ -36,11 +36,11 @@ Each version is anchored by a git tag on this repository.
   browser renderer and that names Word, LibreOffice, TeX, Typst, FOP or
   Acrobat is skipped with an INFO, as is one with no readable text. Sheets
   are read in page order, so a later OASIS stylesheet link overrides an
-  earlier package rule, and an `!important` body size holds. Two rounds of
-  independent verification found two ways the first build hid a shrink (an
-  `html` root size read as the body size, and any stray `.css` in the tree
-  taken as the authority), then a missed `font:` shorthand, and eight lesser
-  cases; each is now a test. Known limits: `@import` is not followed, and a
+  earlier package rule, the last size in a block wins, and an `!important`
+  size holds. Three rounds of independent verification found two ways the
+  first build hid a shrink (an `html` root size read as the body size, and
+  any stray `.css` in the tree taken as the authority), then a missed `font:`
+  shorthand, then eleven lesser cases; each is now a test. Known limits: `@import` is not followed, and a
   PDF whose words are mostly code or table text can warn. Found in the corpus: the CSAF v2.0 csd01 to os PDFs,
   printed by wkhtmltopdf 0.12.5, set the stylesheet's 12pt body at a median
   word height of 7.8pt to 8.3pt, and now warn. CSAF v2.1 csd01 (12.5pt) is
