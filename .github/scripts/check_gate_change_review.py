@@ -63,7 +63,8 @@ def test_source(repo: str, rev: str, path: str, name: str) -> str | None:
     `rev`, dumped without positions, so a comment or whitespace edit is not a
     change. None when the file or the test is absent, or when the test is not
     one pytest collects: a test_*.py file and a test_* function that asserts
-    something (an assert, or a call such as pytest.raises)."""
+    something (an assert, a call such as pytest.raises, or a call to a helper
+    defined in the same file that does)."""
     try:
         src = git(repo, "show", f"{rev}:{path}")
     except subprocess.CalledProcessError:
@@ -79,11 +80,19 @@ def test_source(repo: str, rev: str, path: str, name: str) -> str | None:
     if scope:
         cls = next((n for n in nodes if isinstance(n, ast.ClassDef) and n.name == scope), None)
         nodes = cls.body if cls else []
+    def asserts(fn) -> bool:
+        return any(isinstance(n, (ast.Assert, ast.Raise, ast.With)) or
+                   (isinstance(n, ast.Call) and "raises" in ast.dump(n.func))
+                   for n in ast.walk(fn))
+
+    # Module-level helpers that assert: a test that calls one asserts through it.
+    checking_helpers = {n.name for n in tree.body
+                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and asserts(n)}
     for node in nodes:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func:
-            checks = any(isinstance(n, (ast.Assert, ast.Raise, ast.With)) or
-                         (isinstance(n, ast.Call) and "raises" in ast.dump(n.func))
-                         for n in ast.walk(node))
+            via_helper = any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+                             and n.func.id in checking_helpers for n in ast.walk(node))
+            checks = asserts(node) or via_helper
             return ast.dump(node, include_attributes=False) if checks else None
     return None
 
