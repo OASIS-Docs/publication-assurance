@@ -26,6 +26,16 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+- Pipeline (proposal 008): the step 2 workflow script now runs Stage 2 as
+  TRANSFORMS.md documents it, `fix_html_for_pdf.py` then the renderer's A4
+  argument vector. Before, it ran bare `wkhtmltopdf` on the HTML, so neither
+  the inline-code wrap nor the image cap reached its PDFs. The preprocessed
+  copy is hidden and removed after rendering, and the footer names the
+  published HTML (`step_2_convert_html_to_pdf.py --footer-name`). The workflow
+  passes its venv's Python. Pinned by `tests/test_step2_script.py`, which runs
+  the real script on the CSAF v2.1 csd01 package against a stub renderer. No
+  TC consumes this workflow; publisher-toolkit's step 2 has the same gap and
+  is raised separately.
 - New check class `pdf-legibility` (proposal 002), two conditions: the PDF's
   body text is measured as the median word height over every portrait page
   (`pdftotext -bbox`) and compared with the body size

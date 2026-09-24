@@ -121,6 +121,8 @@ jobs:
       env:
         SYNC_PATH: ${{ env.SYNC_PATH }}
         MODIFY_DATE: ${{ env.MODIFY_DATE }}
+        # the venv built in "Install dependencies" (bs4) is not active in this step
+        PYTHON: ${{ github.workspace }}/.github/src/venv/bin/python
       run: |
         set -e  # Exit immediately if a command exits with a non-zero status
         echo "Current directory: $(pwd)"

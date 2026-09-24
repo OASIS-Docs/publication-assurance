@@ -16,40 +16,39 @@
 #
 # Authored by Michael Coletta, Technical Advisor to OASIS Open.
 
-# Exit immediately if a command exits with a non-zero status
-set -e
+# Stage 2 as TRANSFORMS.md documents it: the PDF preprocessor, then the
+# renderer's A4 argument vector (PdfRenderer.build_command). The preprocessed
+# copy sits beside the source so relative CSS and images resolve, is hidden
+# (a leading dot) so no later `*.html` search can pick it, and is removed on
+# exit. The footer carries the published HTML's name, not the copy's. The
+# Python steps run in a scratch directory so their log files never land in
+# the package. PYTHON selects the interpreter (the workflow passes its venv's).
+set -euo pipefail
 
-# Directory containing the HTML file, provided as the first argument
-DIR="$1"
-
-# Ensure the directory exists
+DIR="${1:-}"
 if [ -z "$DIR" ] || [ ! -d "$DIR" ]; then
   echo "Directory not specified or does not exist: $DIR"
   exit 1
 fi
 
-# Find the first HTML file in the directory
-HTML_FILE=$(find "$DIR" -name '*.html' | head -n 1)
-
-# Check if the HTML file was found
+HTML_FILE=$(find "$DIR" -maxdepth 1 -name '*.html' ! -name '.*' ! -name '*_fixed.html' | sort | head -n 1)
 if [ -z "$HTML_FILE" ]; then
   echo "HTML file not found in directory: $DIR"
   exit 1
 fi
+HTML_FILE=$(cd "$(dirname "$HTML_FILE")" && pwd)/$(basename "$HTML_FILE")
+NAME=$(basename "$HTML_FILE" .html)
+PDF_FILE="$(dirname "$HTML_FILE")/$NAME.pdf"
+TMP_HTML="$(dirname "$HTML_FILE")/.$NAME-pdf.html"
+SRC=$(cd "$(dirname "$0")/../src" && pwd)
+PY=${PYTHON:-python3}
+WORK=$(mktemp -d)
+trap 'rm -rf "$TMP_HTML" "$WORK"' EXIT
 
 echo "Found HTML file: $HTML_FILE"
-
-# Define the output PDF file path by replacing .html with .pdf
-PDF_FILE="${HTML_FILE%.html}.pdf"
 echo "Output PDF file will be: $PDF_FILE"
-
-# Run the wkhtmltopdf command to convert the HTML file to PDF
-echo "Running wkhtmltopdf to convert HTML to PDF..."
-# The --enable-local-file-access flag is crucial for allowing wkhtmltopdf
-# to load local CSS and image files referenced in the HTML.
-if wkhtmltopdf --enable-local-file-access "$HTML_FILE" "$PDF_FILE"; then
-  echo "HTML to PDF conversion completed successfully"
-else
-  echo "HTML to PDF conversion failed"
-  exit 1
-fi
+( cd "$WORK" && "$PY" "$SRC/fix_html_for_pdf.py" "$HTML_FILE" -o "$TMP_HTML" )
+( cd "$WORK" && "$PY" "$SRC/step_2_convert_html_to_pdf.py" "$TMP_HTML" -o "$PDF_FILE" \
+    --footer-name "$(basename "$HTML_FILE")" )
+test -s "$PDF_FILE"
+echo "HTML to PDF conversion completed successfully"

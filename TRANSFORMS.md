@@ -92,7 +92,7 @@ Two commands:
 
 ```bash
 # 1. Inject targeted monospace/code-block CSS without touching the OASIS styles
-python3 .github/src/fix_html_for_pdf.py spec.html -o spec_pdf.html
+python3 .github/src/fix_html_for_pdf.py spec.html -o .spec-pdf.html
 
 # 2. Render (the argument vector PdfRenderer.build_command returns)
 wkhtmltopdf \
@@ -109,19 +109,26 @@ wkhtmltopdf \
   --enable-local-file-access \
   --load-error-handling ignore \
   --load-media-error-handling ignore \
-  spec_pdf.html spec.pdf
+  .spec-pdf.html spec.pdf
 ```
 
 The injected CSS also caps every image at the line width
 (`img { max-width: 100%; height: auto; }`), so a figure with no width of its
 own prints inside the margins instead of at its natural size.
 
-The preprocessor runs where a render calls it: a TC render script such as the
-DMLex `tools/publication-assurance/render.sh` runs command 1 and then prints
-with headless Chrome. This repository's own
-`.github/scripts/step_2_convert_html_to_pdf_V2_0.sh` runs `wkhtmltopdf
---enable-local-file-access` on the HTML directly and does not run command 1,
-so its PDFs carry neither the code nor the image rules.
+`.github/scripts/step_2_convert_html_to_pdf_V2_0.sh`, which the step 2
+workflow runs, performs both commands: `fix_html_for_pdf.py` writes a hidden
+copy (`.spec-pdf.html`) beside the source, so relative CSS and images resolve,
+and `step_2_convert_html_to_pdf.py --footer-name spec.html` renders it, so the
+footer names the published file. The copy is removed afterwards. A TC render
+script such as the DMLex `tools/publication-assurance/render.sh` runs command 1
+and then prints with headless Chrome.
+
+Where TC PDFs are made matters here. The step 2 workflow in this repository
+runs only when started by hand, and no TC repository calls it. TC PDFs built
+through the Publication Console come from publisher-toolkit's own step 2,
+which renders on Letter paper and does not run this preprocessor, so the
+code-wrap and image-cap rules do not reach those PDFs yet.
 
 The header title and the copyright year are read from the document being
 rendered: its `<title>` element (falling back to the first heading) and the
