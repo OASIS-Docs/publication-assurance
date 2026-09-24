@@ -48,15 +48,20 @@ Each version is anchored by a git tag on this repository.
   pages of the DMLex v1.0 render from v1.4.1 (8.9pt) and eleven pages of the
   v1.4.2 render (13.4pt).
 - Process (proposal 004): a pull request that changes
-  `pub-check/oasis_pub_check.py` must record an adversarial review in its body.
+  `pub-check/oasis_pub_check.py`, or any other Python file in `pub-check/`,
+  must record an adversarial review in its body.
   This means an `## Adversarial review` section naming a test node id that the
   pull request adds or modifies, or `not applicable: <reason>`. The new
   `Gate change review` workflow enforces it and re-runs when the body is
   edited. Its rule is in `.github/scripts/check_gate_change_review.py`, the
   section is in `.github/pull_request_template.md`, and it is pinned by
   `tests/test_gate_change_review.py`, which replays PR #9's own range. CI now
-  checks out full history for that test. `main` requires a pull request with
-  both checks green.
+  checks out full history for that test. A pinned test must be one pytest
+  collects, must assert something, and must have changed code; comments,
+  whitespace, HTML comments and code fences do not count. An independent
+  verification found three ways the first build could be satisfied without a
+  real pin, and four legitimate bodies it refused; each is now a test. `main`
+  requires a pull request with both checks green.
 - New condition in `image-policy` (proposal 001): an `<img>` that lays out
   wider than the printable width of an A4 page (643px) is a WARN when the
   package's own CSS sets no `max-width` on images. The width is the `<img>`'s
