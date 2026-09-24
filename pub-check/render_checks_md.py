@@ -102,7 +102,7 @@ AREAS = {
         "fence-collapse", "html-residue", "html-title", "residue"],
     "Rendering and sync": [
         "date-sync", "generator", "image-policy", "logo", "pdf-cover",
-        "pdf-fonts", "pdf-sync", "template-css", "vml-fallback"],
+        "pdf-fonts", "pdf-legibility", "pdf-sync", "template-css", "vml-fallback"],
     "Template and policy": [
         "comment-resolution-log", "conformance-structure",
         "public-review-metadata", "ref-rfc", "references-split",
@@ -141,6 +141,7 @@ CLASS_DESCRIPTIONS = {
     "package-refs": "Files the document cites under its own stage path must be included in the package.",
     "pdf-cover": "The rendered PDF cover must carry the title exactly once and no CI paths.",
     "pdf-fonts": "PDF embedded fonts are compared against the package's own CSS as typography authority.",
+    "pdf-legibility": "PDF body text size is measured against the body size the package's stylesheet declares.",
     "pdf-sync": "The PDF must be readable and rendered from the same revision as the rest of the package.",
     "previous-stage": "Second and later stages must cite the previous stage's URLs.",
     "ref-rfc": "An [RFCnnnn] references entry's label, body text, and URL must cite the same RFC number.",

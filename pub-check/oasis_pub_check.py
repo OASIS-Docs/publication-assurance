@@ -1516,6 +1516,107 @@ def check_pdf_fonts(stage_dir: str, pdf_path: str, html_text: str, f: Findings) 
               f"this after a toolchain change).")
 
 
+# Body size each published OASIS Markdown stylesheet declares. The package
+# links these from docs.oasis-open.org rather than shipping them, so the gate
+# carries their body size. v1.7.2 moved from 15px to 12pt.
+_LINKED_BODY_PT = [
+    (re.compile(r"markdown-styles-v1\.(?:[0-6](?:\.\d+)?|7|7\.[01])[a-z]?\.css", re.I), 11.25),
+    (re.compile(r"markdown-styles-v1\.(?:7\.[2-9]|8(?:\.\d+)?)[\w-]*\.css", re.I), 12.0),
+]
+# Producers that do not render from the package's CSS: judging their output
+# against the stylesheet would measure a document the stylesheet never shaped.
+_NON_CSS_PRODUCERS = re.compile(
+    r"Microsoft|Word|Writer|LibreOffice|OpenOffice|Typst|pdfTeX|LaTeX|Acrobat|FOP", re.I)
+LEGIBILITY_FLOOR = 0.85
+
+
+def _declared_body_pt(stage_dir: str, html_text: str) -> tuple[float | None, str]:
+    """The body font size the package declares, in pt, and where it came from:
+    its own CSS (inline <style> or a shipped .css, last body rule wins), else
+    the published OASIS stylesheet it links."""
+    css = " ".join(re.findall(r"<style\b[^>]*>(.*?)</style>", html_text or "", re.I | re.S))
+    for root, _dirs, files in os.walk(stage_dir):
+        for name in sorted(files):
+            if name.lower().endswith(".css"):
+                css += " " + read_text(os.path.join(root, name))
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    size = None
+    for sel, body in re.findall(r"([^{}]+)\{([^{}]*)\}", css):
+        if not re.search(r"(^|,)\s*(body|html)\s*(,|$)", sel.strip(), re.I):
+            continue
+        m = re.search(r"font-size\s*:\s*([0-9.]+)\s*(pt|px)\b", body, re.I)
+        if m:
+            size = float(m.group(1)) * (0.75 if m.group(2).lower() == "px" else 1.0)
+    if size:
+        return size, "the package's own CSS"
+    for href in re.findall(r'<link\b[^>]*href="([^"]+\.css)"', html_text or "", re.I):
+        for pat, pt in _LINKED_BODY_PT:
+            if pat.search(href.rsplit("/", 1)[-1]):
+                return pt, href.rsplit("/", 1)[-1]
+    return None, ""
+
+
+def check_pdf_legibility(pdf_path: str, stage_dir: str, html_text: str, f: Findings) -> None:
+    """The PDF's body text should print near the size the package's stylesheet
+    declares. A renderer that shrinks every page to fit one over-wide element
+    passes every text and font check and prints 12pt as 8pt (DMLex v1.0,
+    Sep 2026). Measures the document-wide median word height with
+    `pdftotext -bbox` and warns below 85% of the declared body size. A word
+    box runs about 1.05 to 1.15 times the type size, so the comparison is
+    generous. Skips landscape PDFs and PDFs produced by Word, LibreOffice,
+    TeX, Typst, FOP or Acrobat, which the package's CSS did not shape."""
+    declared, source = _declared_body_pt(stage_dir, html_text)
+    if not declared:
+        f.add(INFO, "pdf-legibility", "The package declares no body font size (no body "
+                                      "font-size in its CSS, no known OASIS stylesheet "
+                                      "linked); PDF text-size check skipped.")
+        return
+    pdftotext = shutil.which("pdftotext")
+    if not pdftotext:
+        f.add(INFO, "pdf-legibility", "pdftotext (poppler) not on PATH; PDF text-size "
+                                      "check skipped. The intake side runs it.")
+        return
+    pdfinfo = shutil.which("pdfinfo")
+    if pdfinfo:
+        try:
+            info = subprocess.run([pdfinfo, pdf_path], capture_output=True, text=True,
+                                  timeout=60).stdout
+        except Exception:  # noqa: BLE001
+            info = ""
+        made_by = " ".join(re.findall(r"^(?:Creator|Producer):\s*(.*)$", info, re.M))
+        if _NON_CSS_PRODUCERS.search(made_by):
+            f.add(INFO, "pdf-legibility", f"PDF produced by {made_by.strip()}, not rendered "
+                                          f"from the package's CSS; text-size check skipped.")
+            return
+    try:
+        proc = subprocess.run([pdftotext, "-bbox", pdf_path, "-"], capture_output=True,
+                              text=True, timeout=180)
+    except Exception as e:  # noqa: BLE001
+        f.add(WARN, "pdf-legibility", f"pdftotext -bbox failed: {e}")
+        return
+    page = re.search(r'<page width="([\d.]+)" height="([\d.]+)"', proc.stdout)
+    if page and float(page.group(1)) > float(page.group(2)):
+        f.add(INFO, "pdf-legibility", "Landscape PDF; text-size check skipped.")
+        return
+    heights = sorted(float(b) - float(a) for a, b in re.findall(
+        r'<word xMin="[^"]*" yMin="([^"]*)" xMax="[^"]*" yMax="([^"]*)"', proc.stdout))
+    if not heights:
+        return
+    n = len(heights)
+    median = heights[n // 2] if n % 2 else (heights[n // 2 - 1] + heights[n // 2]) / 2
+    ratio = median / declared
+    f.observe("pdf-legibility", median_word_height_pt=f"{median:.1f}",
+              declared_body_pt=f"{declared:g}", declared_by=source, words=n)
+    if ratio < LEGIBILITY_FLOOR:
+        f.add(WARN, "pdf-legibility",
+              f"Body text in the PDF measures a median word height of {median:.1f}pt "
+              f"against the {declared:g}pt body size {source} declares ({ratio:.0%}). "
+              f"The renderer has printed the text small, typically by shrinking every "
+              f"page to fit one element wider than the line (a long unbreakable code "
+              f"span, a wide table or figure). Find the overflowing element and let it "
+              f"wrap or scale; do not set a smaller font.")
+
+
 def check_manifest(stage_dir: str, f: Findings) -> None:
     mpath = os.path.join(stage_dir, "manifest.json")
     f.observe("manifest", manifest_json="present" if os.path.exists(mpath) else "absent")
@@ -6480,6 +6581,7 @@ def run(stage_dir: str, f: Findings) -> None:
             title = re.sub(r"\s+", " ", tm.group(1)).strip() if tm else ""
         check_pdf_cover(items["pdf"], title, f)
         check_pdf_fonts(stage_dir, items["pdf"], html_text, f)
+        check_pdf_legibility(items["pdf"], stage_dir, html_text, f)
 
     # ---- source add-ons ---------------------------------------------------
     if md_text:
@@ -6869,6 +6971,15 @@ CONDITION_DOCS: list[dict] = [
          condition="The PDF's embedded fonts are declared by the package's own CSS",
          pulls="the font base names embedded in the PDF (pdffonts)",
          compares_to="the font families declared in the package's HTML/CSS (its own typography authority)"),
+    # pdf-legibility
+    dict(check="pdf-legibility", sig="pdftotext -bbox failed", applies="all", requires="pdftotext",
+         condition="pdftotext -bbox executes against the PDF",
+         pulls="the pdftotext process outcome",
+         compares_to="a clean execution"),
+    dict(check="pdf-legibility", sig="Body text in the PDF measures a median word height", applies="all", requires="pdftotext",
+         condition="The PDF's body text prints at no less than 85% of the body size the package declares",
+         pulls="the median word-box height over every page (pdftotext -bbox), and the body font-size from the package's own CSS or the OASIS stylesheet it links",
+         compares_to="85% of the declared body size; skipped for landscape PDFs and PDFs from Word, LibreOffice, TeX, Typst, FOP or Acrobat"),
     # manifest
     dict(check="manifest", sig="manifest.json is not valid JSON", applies="all", requires="manifest",
          condition="manifest.json parses as JSON",
