@@ -1531,20 +1531,24 @@ LEGIBILITY_FLOOR = 0.85
 def _font_size(body: str, root_pt: float) -> tuple[float | None, bool]:
     """A declaration block's font size in pt, from font-size or the font
     shorthand (em, rem and % against the root size), and whether it is
-    !important. (None, False) when it sets none or an impossible one."""
+    !important. The last declaration wins unless an earlier one is
+    !important. (None, False) when the block sets none or an impossible one."""
     body = body.replace("\n", " ")
-    m = re.search(rf"(?:^|;)\s*font-size\s*:\s*({_NUM})\s*(pt|px|rem|em|%)([^;]*)", body, re.I)
-    if not m:
-        m = re.search(rf"(?:^|;)\s*font\s*:\s*(?:[^;]*?\s)?({_NUM})(pt|px|rem|em|%)"
-                      rf"(?=\s*/|\s|;|$)([^;]*)", body, re.I)
-    if not m:
+    decls = []
+    for m in re.finditer(
+            rf"(?:^|;)\s*(?:font-size\s*:\s*({_NUM})\s*(pt|px|rem|em|%)([^;]*)"
+            rf"|font\s*:\s*(?:[^;]*?\s)?({_NUM})(pt|px|rem|em|%)(?=\s*/|\s|;|$)([^;]*))",
+            body, re.I):
+        num, unit, tail = (m.group(1, 2, 3) if m.group(1) else m.group(4, 5, 6))
+        decls.append((float(num), unit.lower(), bool(re.search(r"!\s*important", tail, re.I))))
+    if not decls:
         return None, False
-    v, unit = float(m.group(1)), m.group(2).lower()
+    v, unit, imp = ([d for d in decls if d[2]] or decls)[-1]
     pt = {"pt": v, "px": v * 0.75, "rem": v * root_pt, "em": v * root_pt,
           "%": v / 100 * root_pt}[unit]
     if not (0 < pt < 1000):
         return None, False
-    return pt, bool(re.search(r"!\s*important", m.group(3), re.I))
+    return pt, imp
 
 
 def _declared_body_pt(stage_dir: str, html_text: str) -> tuple[float | None, str]:
@@ -1561,7 +1565,7 @@ def _declared_body_pt(stage_dir: str, html_text: str) -> tuple[float | None, str
         parsed.close()
     except Exception:  # noqa: BLE001
         pass
-    root_pt, body, source, important = 12.0, None, "", False
+    root_pt, root_imp, body, source, important = 12.0, False, None, "", False
     for kind, value in parsed.sheets:
         m = _LINKED_STYLESHEET.search(value.split("?")[0]) if kind == "link" else None
         if m:
@@ -1573,7 +1577,9 @@ def _declared_body_pt(stage_dir: str, html_text: str) -> tuple[float | None, str
         for sel, decl in _css_rules(_package_css(stage_dir, [(kind, value)])):
             for one in (x.strip().lower() for x in sel.split(",")):
                 if one in ("html", ":root"):
-                    root_pt = _font_size(decl, 12.0)[0] or root_pt
+                    pt, imp = _font_size(decl, 12.0)
+                    if pt and (imp or not root_imp):
+                        root_pt, root_imp = pt, imp or root_imp
                 elif one == "body":
                     pt, imp = _font_size(decl, root_pt)
                     if pt and (imp or not important):
@@ -1593,7 +1599,10 @@ def check_pdf_legibility(pdf_path: str, stage_dir: str, html_text: str, f: Findi
     is not a browser renderer and that name Word, LibreOffice, TeX, Typst,
     FOP or Acrobat, which the package's CSS did not shape. `_info` stands in
     for pdfinfo's output in tests."""
-    declared, source = _declared_body_pt(stage_dir, html_text)
+    try:
+        declared, source = _declared_body_pt(stage_dir, html_text)
+    except RecursionError:   # pathologically nested at-rules
+        declared, source = None, ""
     if not declared:
         f.add(INFO, "pdf-legibility", "The package declares no body font size (no body "
                                       "font-size in its CSS, no known OASIS stylesheet "
