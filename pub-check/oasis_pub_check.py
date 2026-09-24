@@ -937,7 +937,11 @@ def check_correction_classes(md_text: str, stage_dir: str, base: str, stage: str
         for u in sorted(set(re.findall(re.escape(base) + r"[\w./%-]+", prose))):
             rel = u[len(base):].rstrip(".,)\\")
             if rel and not rel.endswith((".md", ".html", ".pdf")):
-                if not os.path.isfile(os.path.join(stage_dir, rel)):
+                # A citation ending in "/" names a directory (a schemas/ index,
+                # say), which ships as a directory, not a file.
+                target = os.path.join(stage_dir, rel)
+                shipped = os.path.isdir(target) if rel.endswith("/") else os.path.isfile(target)
+                if not shipped:
                     f.add(BLOCKER, "package-refs",
                           f"The document cites {u} under its own stage path, but "
                           f"'{rel}' is not in the package: it will 404 on publication.")
