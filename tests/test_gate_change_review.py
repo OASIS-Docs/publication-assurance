@@ -194,3 +194,24 @@ def test_heading_variants_and_class_node_ids_are_read():
                  "## Adversarial review (independent)"):
         assert verdict(f"{head}\n\n{PINNED}\n")[0], head
     assert load().NODE.findall("tests/x.py::TestC::test_y") == [("tests/x.py", "TestC::test_y")]
+
+
+def test_a_test_that_asserts_through_a_helper_is_a_pin(tmp_path):
+    """PR #14's own tests call a module helper that wraps pytest.raises; the
+    first build refused them as asserting nothing."""
+    def edit(repo):
+        _touch_checker(repo)
+        (repo / "tests/test_via_helper.py").write_text(
+            "import pytest\n\n\ndef refused(x):\n    with pytest.raises(ValueError):\n"
+            "        int(x)\n\n\ndef test_bad_number_is_refused():\n    refused('x')\n\n\n"
+            "def helper_without_checks():\n    return 1\n\n\n"
+            "def test_calls_only_a_non_asserting_helper():\n    helper_without_checks()\n")
+    repo, head = _synthetic(tmp_path, edit)
+    ok, why = load().evaluate("## Adversarial review\n\n"
+                              "tests/test_via_helper.py::test_bad_number_is_refused\n",
+                              PR9[1], head, repo=repo)
+    assert ok, why
+    ok, _ = load().evaluate("## Adversarial review\n\n"
+                            "tests/test_via_helper.py::test_calls_only_a_non_asserting_helper\n",
+                            PR9[1], head, repo=repo)
+    assert not ok
