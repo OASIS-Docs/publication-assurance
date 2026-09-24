@@ -171,3 +171,27 @@ def test_an_unreadable_pdf_says_so(tmp_path):
     bad.write_bytes(b"%PDF-1.4 not really")
     f = run(bad, f"<html><head>{V173}</head></html>", tmp_path)
     assert any(x["check"] == "pdf-legibility" for x in f.items), f.items
+
+
+# Second verification round.
+
+def test_font_shorthand_without_a_space_is_read():
+    for css in ("body{font:12pt/1.4 Arial}", "body{font:12pt Arial}",
+                "body{margin:0;font:12pt/1.2 serif}",
+                "html{font-size:10px} body{font:1.6rem/1.4 Arial}"):
+        assert len(warns(run(SHRUNK, f"<style>{css}</style>"))) == 1, css
+
+
+def test_a_later_oasis_link_wins_over_an_earlier_package_rule():
+    html = f"<style>body{{font-size:9pt}}</style>{V173}"
+    assert len(warns(run(SHRUNK, html))) == 1
+
+
+def test_an_important_body_size_holds_against_a_later_rule():
+    html = "<style>body{font-size:12pt!important} body{font-size:9pt}</style>"
+    assert len(warns(run(SHRUNK, html))) == 1
+
+
+def test_an_infinite_body_size_is_not_a_size():
+    f = run(SHRUNK, "<style>body{font-size:1e999px}</style>")
+    assert warns(f) == [] and not any("inf" in x["message"] for x in f.items)

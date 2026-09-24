@@ -1528,50 +1528,57 @@ _NON_CSS_PRODUCERS = re.compile(
 LEGIBILITY_FLOOR = 0.85
 
 
-def _font_size(body: str, root_pt: float) -> float | None:
+def _font_size(body: str, root_pt: float) -> tuple[float | None, bool]:
     """A declaration block's font size in pt, from font-size or the font
-    shorthand; em, rem and % resolve against the root size."""
+    shorthand (em, rem and % against the root size), and whether it is
+    !important. (None, False) when it sets none or an impossible one."""
     body = body.replace("\n", " ")
-    m = re.search(rf"(?:^|;)\s*font-size\s*:\s*({_NUM})\s*(pt|px|rem|em|%)", body, re.I)
+    m = re.search(rf"(?:^|;)\s*font-size\s*:\s*({_NUM})\s*(pt|px|rem|em|%)([^;]*)", body, re.I)
     if not m:
-        m = re.search(rf"(?:^|;)\s*font\s*:[^;]*?(?:^|\s|:)({_NUM})(pt|px|rem|em|%)(?=\s*/|\s)",
-                      body, re.I)
+        m = re.search(rf"(?:^|;)\s*font\s*:\s*(?:[^;]*?\s)?({_NUM})(pt|px|rem|em|%)"
+                      rf"(?=\s*/|\s|;|$)([^;]*)", body, re.I)
     if not m:
-        return None
+        return None, False
     v, unit = float(m.group(1)), m.group(2).lower()
-    return {"pt": v, "px": v * 0.75, "rem": v * root_pt, "em": v * root_pt,
-            "%": v / 100 * root_pt}[unit]
+    pt = {"pt": v, "px": v * 0.75, "rem": v * root_pt, "em": v * root_pt,
+          "%": v / 100 * root_pt}[unit]
+    if not (0 < pt < 1000):
+        return None, False
+    return pt, bool(re.search(r"!\s*important", m.group(3), re.I))
 
 
 def _declared_body_pt(stage_dir: str, html_text: str) -> tuple[float | None, str]:
-    """The body font size the package declares, in pt, and where it came
-    from: a body rule in its own CSS (inline <style>, or a stylesheet inside
-    the package the HTML links, read in page order, last rule wins; em, rem
-    and % against the html root, 16px by default), else the published OASIS
-    stylesheet it links. An html-only rule sets the root, not the body."""
+    """The body font size the page declares, in pt, and where it came from.
+    Sheets are read in page order and the last body size wins, as in a
+    browser (an !important one holds): inline <style> blocks and stylesheets
+    inside the package that the HTML links contribute their body rules (em,
+    rem and % against the html root, 16px by default), and a linked published
+    OASIS Markdown stylesheet contributes the body size it is known to set.
+    An html-only rule sets the root, not the body. @import is not followed."""
     parsed = _ImgCollector()
     try:
         parsed.feed(html_text or "")
         parsed.close()
     except Exception:  # noqa: BLE001
         pass
-    root_pt, body = 12.0, None
-    for sel, decl in _css_rules(_package_css(stage_dir, parsed.sheets)):
-        for one in (x.strip().lower() for x in sel.split(",")):
-            if one in ("html", ":root"):
-                root_pt = _font_size(decl, 12.0) or root_pt
-            elif one == "body":
-                body = _font_size(decl, root_pt) or body
-    if body:
-        return body, "the package's own CSS"
-    for kind, href in parsed.sheets:
-        m = _LINKED_STYLESHEET.search(href.split("?")[0]) if kind == "link" else None
-        if not m and kind == "link":
-            continue
+    root_pt, body, source, important = 12.0, None, "", False
+    for kind, value in parsed.sheets:
+        m = _LINKED_STYLESHEET.search(value.split("?")[0]) if kind == "link" else None
         if m:
-            ver = tuple(int(x or 0) for x in m.groups())
-            return (12.0 if ver >= (1, 7, 2) else 11.25), href.rsplit("/", 1)[-1]
-    return None, ""
+            if not important:
+                ver = tuple(int(x or 0) for x in m.groups())
+                body = 12.0 if ver >= (1, 7, 2) else 11.25
+                source = value.split("?")[0].rsplit("/", 1)[-1]
+            continue
+        for sel, decl in _css_rules(_package_css(stage_dir, [(kind, value)])):
+            for one in (x.strip().lower() for x in sel.split(",")):
+                if one in ("html", ":root"):
+                    root_pt = _font_size(decl, 12.0)[0] or root_pt
+                elif one == "body":
+                    pt, imp = _font_size(decl, root_pt)
+                    if pt and (imp or not important):
+                        body, source, important = pt, "the package's own CSS", imp or important
+    return body, source
 
 
 def check_pdf_legibility(pdf_path: str, stage_dir: str, html_text: str, f: Findings,
