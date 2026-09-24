@@ -74,7 +74,11 @@ class PdfPreprocessor(PipelineStep):
         border: 1px solid #ddd !important;
         border-radius: 2px !important;
         padding: 1px 4px !important;
-        white-space: nowrap !important;
+        /* Wrap only when a span is wider than the line. Forbidding wraps let one long
+           inline path (DMLex s3.2.1) widen the page, and Chrome then scaled
+           every page of the PDF down to fit it. */
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
     }
     
     /* Code blocks styling */
@@ -124,7 +128,8 @@ class PdfPreprocessor(PipelineStep):
     /* Code in tables */
     table code, td code, th code {
         font-size: 0.8em !important;
-        white-space: nowrap !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
     }
     
     /* PDF-specific code formatting */

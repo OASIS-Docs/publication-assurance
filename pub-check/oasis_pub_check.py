@@ -2051,15 +2051,26 @@ def check_stage_uri_reachability(md_text: str, f: Findings) -> None:
 
     # The first stage of a new version cites Latest-stage URIs in its own
     # version root, which this publication creates: they cannot retrieve
-    # before it. That holds only while no earlier stage of the same version
-    # exists, i.e. no Previous-stage URI lies under the same version root.
-    # (DMLex v1.1 wd01, Sep 2026: every first stage of a version was blocked.)
+    # before it. Skip them only when that version root is itself absent from
+    # the site, which is what "no stage of this version is published yet"
+    # means. Inferring it from the Previous-stage line instead let a later
+    # stage that mis-cites its Previous stage hide a broken Latest URI.
+    # (DMLex v1.1 wd01, Sep 2026.)
     own_roots = {u.rsplit("/", 2)[0] + "/"
                  for u in stage_urls_from_md(md_text, "This")
                  if u.startswith(SITE + "/") and u.count("/") >= 5}
-    first_stage_of_version = bool(own_roots) and not any(
-        p.startswith(r) for p in prev_urls for r in own_roots)
     not_yet_created = []
+    root_absent: dict = {}
+
+    def _http_status(url):
+        try:
+            req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "pub-check"})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return r.status
+        except urllib.error.HTTPError as e:
+            return e.code
+        except Exception:  # noqa: BLE001 - unknown is not absent
+            return None
 
     checked = 0
     for role, urls in (("Previous stage", prev_urls), ("Latest stage", latest_urls)):
@@ -2067,10 +2078,13 @@ def check_stage_uri_reachability(md_text: str, f: Findings) -> None:
             u = raw.rstrip(".,)\\")
             if not u.startswith(SITE + "/"):
                 continue  # shape checks own off-site URIs
-            if (role == "Latest stage" and first_stage_of_version
-                    and u.rsplit("/", 1)[0] + "/" in own_roots):
-                not_yet_created.append(u)
-                continue
+            root = u.rsplit("/", 1)[0] + "/"
+            if role == "Latest stage" and root in own_roots:
+                if root not in root_absent:
+                    root_absent[root] = _http_status(root) in (404, 410)
+                if root_absent[root]:
+                    not_yet_created.append(u)
+                    continue
             checked += 1
             try:
                 req = urllib.request.Request(
