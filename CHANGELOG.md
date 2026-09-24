@@ -46,11 +46,14 @@ Each version is anchored by a git tag on this repository.
   print media, from a stylesheet inside the package, read in page order. Any
   rule that can reach an image (a scoped `img` selector, or `*`) and lifts
   the cap cancels it wherever it sits, as does an inline `max-width: none`,
-  because specificity and `!important` can let it win. Hardened by three
-  rounds of independent verification (fourteen wrong answers in the first
-  build, nine in the second, one crash and six misses in the third); each
-  is now a test. Known limits, all on the side of warning: a cap written
-  with `calc()` or `vw`, or inside `@layer`, is not read.
+  because specificity and `!important` can let it win; so does a
+  `min-width` wider than the page. Hardened by four rounds of independent
+  verification (fourteen wrong answers in the first build, nine in the
+  second, one crash and six misses in the third, one crash and five misses
+  in the fourth); each is now a test. Known limits: a cap written with
+  `calc()` or `vw`, or inside `@layer`, is not read (extra warnings); a cap
+  lifted through `:is()` or defeated by a parent box wider than the page is
+  not seen.
 
 ## v1.4.2 - 2026-09-24
 

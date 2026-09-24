@@ -654,16 +654,24 @@ _CSS_PX = {"px": 1.0, "pt": 96 / 72, "pc": 16.0, "in": 96.0, "cm": 96 / 2.54,
 _NUM = r"[0-9]*\.?[0-9]+(?:e[+-]?[0-9]+)?"
 
 
+def _px(value: float) -> int | None:
+    """Round to px; None for a value no layout can hold (inf, nan, overflow)."""
+    try:
+        return round(value)
+    except (OverflowError, ValueError):
+        return None
+
+
 def _css_length_px(value: str, units: str = "px|pt|pc|in|cm|mm|em|") -> int | None:
     """A CSS or SVG length in px; None for a percentage, auto or anything unparsable."""
     m = re.fullmatch(rf"\s*({_NUM})\s*({units})\s*", value or "", re.I)
-    return round(float(m.group(1)) * _CSS_PX[m.group(2).lower()]) if m else None
+    return _px(float(m.group(1)) * _CSS_PX[m.group(2).lower()]) if m else None
 
 
 def _html_width_px(value: str) -> int | None:
     """An HTML width attribute: leading digits are pixels, a trailing % is relative."""
     m = re.match(r"\s*([0-9]+(?:\.[0-9]+)?)\s*(%?)", value or "")
-    return None if not m or m.group(2) else round(float(m.group(1)))
+    return None if not m or m.group(2) else _px(float(m.group(1)))
 
 
 def _intrinsic_width_px(path: str) -> int | None:
@@ -697,7 +705,7 @@ def _intrinsic_width_px(path: str) -> int | None:
     if w:
         return _css_length_px(w.group(1))
     vb = re.search(rf'\sviewBox\s*=\s*["\']\s*{_NUM}[\s,]+{_NUM}[\s,]+({_NUM})', tag, re.I)
-    return round(float(vb.group(1))) if vb else None
+    return _px(float(vb.group(1))) if vb else None
 
 
 def _style_decl(style: str, prop: str) -> str | None:
@@ -722,7 +730,10 @@ def _img_effective_width(attrs: dict, path: str) -> int | None:
     attribute, else the image's natural width. None when relative (a
     percentage fits its container), capped by its own max-width, or unknown."""
     style = attrs.get("style") or ""
-    if _caps_at_line(_style_decl(style, "max-width")):
+    floor = _css_length_px(_style_decl(style, "min-width") or "") or 0
+    if floor > PRINTABLE_WIDTH_PX:
+        return floor
+    if _caps_at_line(_style_decl(style, "max-width") or _style_decl(style, "max-inline-size")):
         return None
     sw = _style_decl(style, "width")
     if sw is not None:
@@ -743,6 +754,7 @@ class _ImgCollector(HTMLParser):
         self.imgs: list[dict] = []
         self.sheets: list[tuple[str, str]] = []   # ("style", css) / ("link", href), in page order
         self._in_style = False
+        self._template = 0
 
     @staticmethod
     def _prints(media: str | None) -> bool:
@@ -751,10 +763,14 @@ class _ImgCollector(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         a = {k.lower(): (v or "") for k, v in attrs}
+        if tag == "template":
+            self._template += 1
+        if self._template:
+            return
         if tag == "img":
             self.imgs.append(a)
         elif tag == "link" and a.get("rel", "").lower().split() == ["stylesheet"] \
-                and self._prints(a.get("media")):
+                and "disabled" not in a and self._prints(a.get("media")):
             self.sheets.append(("link", a.get("href", "")))
         elif tag == "style":
             self._in_style = self._prints(a.get("media"))
@@ -762,6 +778,8 @@ class _ImgCollector(HTMLParser):
     handle_startendtag = handle_starttag
 
     def handle_endtag(self, tag):
+        if tag == "template" and self._template:
+            self._template -= 1
         if tag == "style":
             self._in_style = False
 
@@ -829,14 +847,19 @@ def _css_caps_images(css: str) -> bool:
     That errs toward a warning. The linked OASIS stylesheets set no cap."""
     capped = lifted = False
     for sel, body in _css_rules(css):
-        values = re.findall(r"(?:^|;)\s*max-width\s*:\s*([^;]+)", body.replace("\n", " "), re.I)
-        if not values:
+        flat = body.replace("\n", " ")
+        values = re.findall(r"(?:^|;)\s*max-(?:width|inline-size)\s*:\s*([^;]+)", flat, re.I)
+        floors = [_css_length_px(re.sub(r"!\s*important", "", v, flags=re.I)) or 0
+                  for v in re.findall(r"(?:^|;)\s*min-(?:width|inline-size)\s*:\s*([^;]+)", flat, re.I)]
+        if not values and not floors:
             continue
         for one in sel.split(","):
             one = one.strip()
             if not re.search(r"(^|[\s>+~])(img|\*)([.#\[:][^\s>+~]*)?$", one, re.I):
                 continue
             unscoped = re.fullmatch(r"(?:(?:html|body)\s+)*img", one, re.I)
+            if any(fl > PRINTABLE_WIDTH_PX for fl in floors):
+                lifted = True
             for v in values:
                 if not _caps_at_line(v):
                     lifted = True
@@ -859,7 +882,10 @@ def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
         parsed.close()
     except Exception:  # noqa: BLE001  (a malformed page is judged by other checks)
         pass
-    capped = _css_caps_images(_package_css(stage_dir, parsed.sheets))
+    try:
+        capped = _css_caps_images(_package_css(stage_dir, parsed.sheets))
+    except RecursionError:   # pathologically nested at-rules: judge without a cap
+        capped = False
     for attrs in parsed.imgs:
         own = _style_decl(attrs.get("style") or "", "max-width")
         if capped and not (own and not _caps_at_line(own)):
