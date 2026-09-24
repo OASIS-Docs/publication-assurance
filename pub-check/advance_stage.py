@@ -274,7 +274,8 @@ class StageAdvance:
         prev_now = self._block("Previous stage:", s).group(0)
         rest = s.replace(prev_now, "\n" * prev_now.count("\n"), 1)
         stale_re = re.compile(rf"/v{re.escape(self.version)}/{re.escape(self.stage)}/|"
-                              rf"(?<![\w-]){re.escape(self.stem)}(?![\w])")
+                              rf"\.\./{re.escape(self.stage)}/|"
+                              rf"(?<![A-Za-z0-9-]){re.escape(self.stem)}(?![A-Za-z0-9])", re.I)
         self.stale = [f"line {i}: {ln.strip()}" for i, ln in enumerate(rest.split("\n"), 1)
                       if stale_re.search(ln)]
         if self.stale and not leave_stale:
