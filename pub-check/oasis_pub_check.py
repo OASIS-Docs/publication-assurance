@@ -1518,11 +1518,9 @@ def check_pdf_fonts(stage_dir: str, pdf_path: str, html_text: str, f: Findings) 
 
 # Body size each published OASIS Markdown stylesheet declares. The package
 # links these from docs.oasis-open.org rather than shipping them, so the gate
-# carries their body size. v1.7.2 moved from 15px to 12pt.
-_LINKED_BODY_PT = [
-    (re.compile(r"markdown-styles-v1\.(?:[0-6](?:\.\d+)?|7|7\.[01])[a-z]?\.css", re.I), 11.25),
-    (re.compile(r"markdown-styles-v1\.(?:7\.[2-9]|8(?:\.\d+)?)[\w-]*\.css", re.I), 12.0),
-]
+# carries their body size: 15px up to v1.7.1, 12pt from v1.7.2 on.
+_LINKED_STYLESHEET = re.compile(r"markdown-styles-v(\d+)\.(\d+)(?:\.(\d+))?[\w-]*\.css$", re.I)
+_BROWSER_CREATORS = re.compile(r"Chrome|Mozilla|wkhtmltopdf|WeasyPrint|Prince|Paged\.js", re.I)
 # Producers that do not render from the package's CSS: judging their output
 # against the stylesheet would measure a document the stylesheet never shaped.
 _NON_CSS_PRODUCERS = re.compile(
@@ -1530,41 +1528,64 @@ _NON_CSS_PRODUCERS = re.compile(
 LEGIBILITY_FLOOR = 0.85
 
 
+def _font_size(body: str, root_pt: float) -> float | None:
+    """A declaration block's font size in pt, from font-size or the font
+    shorthand; em, rem and % resolve against the root size."""
+    body = body.replace("\n", " ")
+    m = re.search(rf"(?:^|;)\s*font-size\s*:\s*({_NUM})\s*(pt|px|rem|em|%)", body, re.I)
+    if not m:
+        m = re.search(rf"(?:^|;)\s*font\s*:[^;]*?(?:^|\s|:)({_NUM})(pt|px|rem|em|%)(?=\s*/|\s)",
+                      body, re.I)
+    if not m:
+        return None
+    v, unit = float(m.group(1)), m.group(2).lower()
+    return {"pt": v, "px": v * 0.75, "rem": v * root_pt, "em": v * root_pt,
+            "%": v / 100 * root_pt}[unit]
+
+
 def _declared_body_pt(stage_dir: str, html_text: str) -> tuple[float | None, str]:
-    """The body font size the package declares, in pt, and where it came from:
-    its own CSS (inline <style> or a shipped .css, last body rule wins), else
-    the published OASIS stylesheet it links."""
-    css = " ".join(re.findall(r"<style\b[^>]*>(.*?)</style>", html_text or "", re.I | re.S))
-    for root, _dirs, files in os.walk(stage_dir):
-        for name in sorted(files):
-            if name.lower().endswith(".css"):
-                css += " " + read_text(os.path.join(root, name))
-    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
-    size = None
-    for sel, body in re.findall(r"([^{}]+)\{([^{}]*)\}", css):
-        if not re.search(r"(^|,)\s*(body|html)\s*(,|$)", sel.strip(), re.I):
+    """The body font size the package declares, in pt, and where it came
+    from: a body rule in its own CSS (inline <style>, or a stylesheet inside
+    the package the HTML links, read in page order, last rule wins; em, rem
+    and % against the html root, 16px by default), else the published OASIS
+    stylesheet it links. An html-only rule sets the root, not the body."""
+    parsed = _ImgCollector()
+    try:
+        parsed.feed(html_text or "")
+        parsed.close()
+    except Exception:  # noqa: BLE001
+        pass
+    root_pt, body = 12.0, None
+    for sel, decl in _css_rules(_package_css(stage_dir, parsed.sheets)):
+        for one in (x.strip().lower() for x in sel.split(",")):
+            if one in ("html", ":root"):
+                root_pt = _font_size(decl, 12.0) or root_pt
+            elif one == "body":
+                body = _font_size(decl, root_pt) or body
+    if body:
+        return body, "the package's own CSS"
+    for kind, href in parsed.sheets:
+        m = _LINKED_STYLESHEET.search(href.split("?")[0]) if kind == "link" else None
+        if not m and kind == "link":
             continue
-        m = re.search(r"font-size\s*:\s*([0-9.]+)\s*(pt|px)\b", body, re.I)
         if m:
-            size = float(m.group(1)) * (0.75 if m.group(2).lower() == "px" else 1.0)
-    if size:
-        return size, "the package's own CSS"
-    for href in re.findall(r'<link\b[^>]*href="([^"]+\.css)"', html_text or "", re.I):
-        for pat, pt in _LINKED_BODY_PT:
-            if pat.search(href.rsplit("/", 1)[-1]):
-                return pt, href.rsplit("/", 1)[-1]
+            ver = tuple(int(x or 0) for x in m.groups())
+            return (12.0 if ver >= (1, 7, 2) else 11.25), href.rsplit("/", 1)[-1]
     return None, ""
 
 
-def check_pdf_legibility(pdf_path: str, stage_dir: str, html_text: str, f: Findings) -> None:
+def check_pdf_legibility(pdf_path: str, stage_dir: str, html_text: str, f: Findings,
+                         _info: str | None = None) -> None:
     """The PDF's body text should print near the size the package's stylesheet
     declares. A renderer that shrinks every page to fit one over-wide element
     passes every text and font check and prints 12pt as 8pt (DMLex v1.0,
-    Sep 2026). Measures the document-wide median word height with
+    Sep 2026). Measures the median word height over every portrait page with
     `pdftotext -bbox` and warns below 85% of the declared body size. A word
-    box runs about 1.05 to 1.15 times the type size, so the comparison is
-    generous. Skips landscape PDFs and PDFs produced by Word, LibreOffice,
-    TeX, Typst, FOP or Acrobat, which the package's CSS did not shape."""
+    box runs about 0.9 to 1.15 times the type size depending on the face, so
+    the floor sits below any face's normal reading. Skips PDFs whose Creator
+    is not a browser renderer and that name Word, LibreOffice, TeX, Typst,
+    FOP or Acrobat, which the package's CSS did not shape. `_info` stands in
+    for pdfinfo's output in tests."""
     declared, source = _declared_body_pt(stage_dir, html_text)
     if not declared:
         f.add(INFO, "pdf-legibility", "The package declares no body font size (no body "
@@ -1576,32 +1597,42 @@ def check_pdf_legibility(pdf_path: str, stage_dir: str, html_text: str, f: Findi
         f.add(INFO, "pdf-legibility", "pdftotext (poppler) not on PATH; PDF text-size "
                                       "check skipped. The intake side runs it.")
         return
-    pdfinfo = shutil.which("pdfinfo")
-    if pdfinfo:
+    info = _info
+    if info is None and shutil.which("pdfinfo"):
         try:
-            info = subprocess.run([pdfinfo, pdf_path], capture_output=True, text=True,
-                                  timeout=60).stdout
+            info = subprocess.run([shutil.which("pdfinfo"), pdf_path], capture_output=True,
+                                  text=True, timeout=60).stdout
         except Exception:  # noqa: BLE001
             info = ""
-        made_by = " ".join(re.findall(r"^(?:Creator|Producer):\s*(.*)$", info, re.M))
-        if _NON_CSS_PRODUCERS.search(made_by):
-            f.add(INFO, "pdf-legibility", f"PDF produced by {made_by.strip()}, not rendered "
-                                          f"from the package's CSS; text-size check skipped.")
-            return
+    creator = re.search(r"^Creator:\s*(.*)$", info or "", re.M)
+    producer = re.search(r"^Producer:\s*(.*)$", info or "", re.M)
+    creator = creator.group(1).strip() if creator else ""
+    producer = producer.group(1).strip() if producer else ""
+    if not _BROWSER_CREATORS.search(creator):
+        for field, value in (("Creator", creator), ("Producer", producer)):
+            if _NON_CSS_PRODUCERS.search(value):
+                f.add(INFO, "pdf-legibility", f"PDF {field} is {value}: not rendered from "
+                                              f"the package's CSS; text-size check skipped.")
+                return
     try:
         proc = subprocess.run([pdftotext, "-bbox", pdf_path, "-"], capture_output=True,
                               text=True, timeout=180)
     except Exception as e:  # noqa: BLE001
         f.add(WARN, "pdf-legibility", f"pdftotext -bbox failed: {e}")
         return
-    page = re.search(r'<page width="([\d.]+)" height="([\d.]+)"', proc.stdout)
-    if page and float(page.group(1)) > float(page.group(2)):
-        f.add(INFO, "pdf-legibility", "Landscape PDF; text-size check skipped.")
-        return
-    heights = sorted(float(b) - float(a) for a, b in re.findall(
-        r'<word xMin="[^"]*" yMin="([^"]*)" xMax="[^"]*" yMax="([^"]*)"', proc.stdout))
+    heights = []
+    for w, h, content in re.findall(
+            r'<page width="([\d.]+)" height="([\d.]+)">(.*?)</page>', proc.stdout, re.S):
+        if float(w) > float(h):
+            continue
+        heights += [float(b) - float(a) for a, b in re.findall(
+            r'<word xMin="[^"]*" yMin="([^"]*)" xMax="[^"]*" yMax="([^"]*)"', content)]
     if not heights:
+        f.add(INFO, "pdf-legibility", "No text on any portrait page could be read from the "
+                                      f"PDF (pdftotext exit {proc.returncode}); text-size "
+                                      "check skipped.")
         return
+    heights.sort()
     n = len(heights)
     median = heights[n // 2] if n % 2 else (heights[n // 2 - 1] + heights[n // 2]) / 2
     ratio = median / declared
