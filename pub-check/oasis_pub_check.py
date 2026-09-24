@@ -650,21 +650,28 @@ IMG_EXTS = {".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp"}
 # A4 less the 20mm side margins the OASIS PDF renderers use, at CSS 96px/in.
 PRINTABLE_WIDTH_PX = 643
 _CSS_PX = {"px": 1.0, "pt": 96 / 72, "pc": 16.0, "in": 96.0, "cm": 96 / 2.54,
-           "mm": 96 / 25.4, "": 1.0}
+           "mm": 96 / 25.4, "em": 16.0, "": 1.0}
+_NUM = r"[0-9]*\.?[0-9]+(?:e[+-]?[0-9]+)?"
 
 
-def _css_length_px(value: str) -> int | None:
-    """A CSS or SVG length in px; None for a percentage, em or anything unparsable."""
-    m = re.fullmatch(r"\s*([0-9]*\.?[0-9]+)\s*(px|pt|pc|in|cm|mm|)\s*", value or "", re.I)
+def _css_length_px(value: str, units: str = "px|pt|pc|in|cm|mm|em|") -> int | None:
+    """A CSS or SVG length in px; None for a percentage, auto or anything unparsable."""
+    m = re.fullmatch(rf"\s*({_NUM})\s*({units})\s*", value or "", re.I)
     return round(float(m.group(1)) * _CSS_PX[m.group(2).lower()]) if m else None
+
+
+def _html_width_px(value: str) -> int | None:
+    """An HTML width attribute: leading digits are pixels, a trailing % is relative."""
+    m = re.match(r"\s*([0-9]+(?:\.[0-9]+)?)\s*(%?)", value or "")
+    return None if not m or m.group(2) else round(float(m.group(1)))
 
 
 def _intrinsic_width_px(path: str) -> int | None:
     """Natural width of an SVG, PNG, GIF or JPEG, read from the file header."""
     try:
         with open(path, "rb") as fh:
-            head = fh.read(65536)
-    except OSError:
+            head = fh.read(1_048_576)
+    except (OSError, ValueError):
         return None
     if head[:8] == b"\x89PNG\r\n\x1a\n" and len(head) >= 24:
         return int.from_bytes(head[16:20], "big")
@@ -682,45 +689,123 @@ def _intrinsic_width_px(path: str) -> int | None:
                 return int.from_bytes(head[i + 7:i + 9], "big")
             i += 2 + int.from_bytes(head[i + 2:i + 4], "big")
         return None
-    svg = re.search(rb"<svg\b[^>]*>", head, re.S)
+    svg = re.search(rb"<(?:\w+:)?svg\b[^>]*>", head, re.S)
     if not svg:
         return None
     tag = svg.group(0).decode("utf-8", "replace")
     w = re.search(r'\swidth\s*=\s*["\']([^"\']*)["\']', tag)
     if w:
         return _css_length_px(w.group(1))
-    vb = re.search(r'\sviewBox\s*=\s*["\']\s*[-0-9.]+[\s,]+[-0-9.]+[\s,]+([0-9.]+)', tag)
+    vb = re.search(rf'\sviewBox\s*=\s*["\']\s*{_NUM}[\s,]+{_NUM}[\s,]+({_NUM})', tag, re.I)
     return round(float(vb.group(1))) if vb else None
 
 
-def _img_effective_width(tag: str, path: str) -> int | None:
+def _style_decl(style: str, prop: str) -> str | None:
+    m = re.search(rf"(?:^|;)\s*{prop}\s*:\s*([^;]+)", style or "", re.I)
+    return m.group(1).strip() if m else None
+
+
+def _caps_at_line(value: str | None) -> bool:
+    """A max-width that keeps an image inside the printable width."""
+    if not value:
+        return False
+    m = re.fullmatch(rf"\s*({_NUM})\s*%\s*(!important)?\s*", value, re.I)
+    if m:
+        return float(m.group(1)) <= 100
+    px = _css_length_px(re.sub(r"!important", "", value, flags=re.I))
+    return px is not None and px <= PRINTABLE_WIDTH_PX
+
+
+def _img_effective_width(attrs: dict, path: str) -> int | None:
     """The width an <img> lays out at: its style width, else its width
     attribute, else the image's natural width. None when relative (a
-    percentage fits its container) or unknown."""
-    style = re.search(r'\sstyle\s*=\s*"([^"]*)"', tag, re.I)
-    if style:
-        sw = re.search(r'(?:^|;)\s*width\s*:\s*([^;]+)', style.group(1), re.I)
-        if sw:
-            return _css_length_px(sw.group(1))
-    attr = re.search(r'\swidth\s*=\s*["\']?([^"\'\s>]+)', tag, re.I)
-    if attr:
-        return _css_length_px(attr.group(1))
+    percentage fits its container), capped by its own max-width, or unknown."""
+    style = attrs.get("style") or ""
+    if _caps_at_line(_style_decl(style, "max-width")):
+        return None
+    sw = _style_decl(style, "width")
+    if sw is not None:
+        if sw.lower().startswith("auto"):
+            return _intrinsic_width_px(path)
+        return _css_length_px(sw)
+    if attrs.get("width") is not None:
+        return _html_width_px(attrs["width"])
     return _intrinsic_width_px(path)
 
 
-def _css_caps_images(stage_dir: str, html_flat: str) -> bool:
-    """True when the package's own CSS (inline <style> or a shipped .css)
-    gives img a max-width. The linked OASIS stylesheets set none."""
-    css = " ".join(re.findall(r"<style\b[^>]*>(.*?)</style>", html_flat, re.I | re.S))
-    for root, _dirs, files in os.walk(stage_dir):
-        for name in files:
-            if name.lower().endswith(".css"):
-                css += " " + read_text(os.path.join(root, name))
+class _ImgCollector(HTMLParser):
+    """Every <img> and stylesheet <link>, with attributes decoded as a browser
+    reads them (any quoting, any case, entities resolved, comments skipped)."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.imgs: list[dict] = []
+        self.css_hrefs: list[str] = []
+        self.styles: list[str] = []
+        self._in_style = False
+
+    def handle_starttag(self, tag, attrs):
+        a = {k.lower(): (v or "") for k, v in attrs}
+        if tag == "img":
+            self.imgs.append(a)
+        elif tag == "link" and "stylesheet" in a.get("rel", "").lower():
+            self.css_hrefs.append(a.get("href", ""))
+        elif tag == "style":
+            self._in_style = True
+
+    handle_startendtag = handle_starttag
+
+    def handle_endtag(self, tag):
+        if tag == "style":
+            self._in_style = False
+
+    def handle_data(self, data):
+        if self._in_style:
+            self.styles.append(data)
+
+
+def _css_rules(css: str):
+    """(selector, body) for every rule that applies when printing: top-level
+    rules and rules inside @media print/all. Other @media blocks are skipped."""
     css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
-    for sel, body in re.findall(r"([^{}]+)\{([^{}]*)\}", css):
-        if (re.search(r"(^|[\s,>])img\b", sel.strip(), re.I)
-                and re.search(r"max-width\s*:", body, re.I)):
-            return True
+    i, n = 0, len(css)
+    while i < n:
+        j = css.find("{", i)
+        if j < 0:
+            return
+        sel = css[i:j].strip()
+        depth, k = 1, j + 1
+        while k < n and depth:
+            depth += {"{": 1, "}": -1}.get(css[k], 0)
+            k += 1
+        inner = css[j + 1:k - 1]
+        if sel.startswith("@"):
+            q = sel.lower()
+            if q.startswith("@media") and re.search(r"\b(print|all)\b", q) \
+                    and not re.search(r"\bnot\b", q):
+                yield from _css_rules(inner)
+        else:
+            yield sel, inner
+        i = k
+
+
+def _css_caps_images(stage_dir: str, styles: list[str], hrefs: list[str]) -> bool:
+    """True when the package's own CSS (an inline <style>, or a local .css the
+    HTML links) caps every img at the line width. A rule scoped by class, id,
+    attribute or a parent element caps only some images and does not count.
+    The linked OASIS stylesheets on docs.oasis-open.org set no image cap."""
+    css = " ".join(styles)
+    for href in hrefs:
+        if re.match(r"(?i)^(https?:)?//", href):
+            continue
+        p = os.path.join(stage_dir, urllib.parse.unquote(href.split("?")[0].split("#")[0]))
+        if os.path.isfile(p):
+            css += " " + read_text(p)
+    for sel, body in _css_rules(css):
+        for one in sel.split(","):
+            if re.fullmatch(r"\s*(?:(?:html|body)\s+)*img\s*", one, re.I) \
+                    and _caps_at_line(_style_decl(body.strip().replace("\n", " "), "max-width")):
+                return True
     return False
 
 
@@ -732,7 +817,26 @@ def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
     Size caps mirror the inliner's policy (warn 500KB, refuse 2MB, 5MB total)."""
     flat = (html_text or "").replace("\r", "").replace("\n", "")
     f.observe("image-policy", img_tags=len(re.findall(r'<img\b', flat, re.I)))
-    capped = _css_caps_images(stage_dir, flat)
+    parsed = _ImgCollector()
+    try:
+        parsed.feed(html_text or "")
+        parsed.close()
+    except Exception:  # noqa: BLE001  (a malformed page is judged by other checks)
+        pass
+    capped = _css_caps_images(stage_dir, parsed.styles, parsed.css_hrefs)
+    for attrs in ([] if capped else parsed.imgs):
+        src = attrs.get("src", "").strip()
+        if not src or re.match(r"(?i)^(https?:|data:|//)", src):
+            continue
+        path = urllib.parse.unquote(src.split("#")[0].split("?")[0])
+        px = _img_effective_width(attrs, os.path.join(stage_dir, path))
+        if px and px > PRINTABLE_WIDTH_PX:
+            f.add(WARN, "image-policy",
+                  f"<img src=\"{src}\"> renders {px}px wide, wider than the "
+                  f"printable width of an A4 page ({PRINTABLE_WIDTH_PX}px), and "
+                  f"the package's own CSS sets no max-width on images. The "
+                  f"figure runs off the PDF page, or the renderer shrinks every "
+                  f"page to fit it. Give the <img> a width, or cap images in CSS.")
     for m in re.finditer(r'<img\b[^>]*>', flat, re.I):
         tag = m.group(0)
         src_m = re.search(r'src="([^"]*)"', tag)
@@ -750,15 +854,6 @@ def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
             f.add(WARN, "image-policy",
                   "<img srcset> present: the publication pipeline refuses "
                   "responsive-image constructs (self-containment policy).")
-        if src and not capped:
-            px = _img_effective_width(tag, os.path.join(stage_dir, src.split("?")[0]))
-            if px and px > PRINTABLE_WIDTH_PX:
-                f.add(WARN, "image-policy",
-                      f"<img src=\"{src}\"> renders {px}px wide, wider than the "
-                      f"printable width of an A4 page ({PRINTABLE_WIDTH_PX}px), and "
-                      f"the package's own CSS sets no max-width on images. The "
-                      f"figure runs off the PDF page, or the renderer shrinks every "
-                      f"page to fit it. Give the <img> a width, or cap images in CSS.")
     if re.search(r"<picture\b", flat, re.I):
         f.add(WARN, "image-policy",
               "<picture> element present: the publication pipeline refuses it "
