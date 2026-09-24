@@ -274,9 +274,13 @@ citation from its fields. It refuses, and writes nothing, in any of these cases:
 
 - the source is not a clean committed file;
 - the stage is retired, unknown or misnumbered;
-- the stage goes backwards, leaves an OASIS Standard, or changes track;
+- the stage goes backwards, reuses a stage that exists, leaves an OASIS
+  Standard, reaches os other than from cs, or changes track (a new draft after
+  cs01 must be csd02 or later);
+- the new version is not of the form X.Y or does not come after the old one;
 - the front matter is not the OASIS Markdown shape (a NIEM Project Note, for
-  example);
+  example), or the spec keeps its files in a subdirectory of the stage
+  (multi-part specs such as OData);
 - a site is found an unexpected number of times;
 - the version changes without `--previous source|none`;
 - the target is a Working Draft without `--unpublished-ok`.
