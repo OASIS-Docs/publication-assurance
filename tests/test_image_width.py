@@ -201,3 +201,33 @@ def test_a_stylesheet_outside_the_package_does_not_count(tmp_path):
     f = oasis_pub_check.Findings()
     oasis_pub_check.check_image_policy(stage_dir, html, f)
     assert len([x for x in f.items if "wider than the printable" in x["message"]]) == 1
+
+
+# Third verification round.
+
+def test_a_null_byte_in_a_stylesheet_href_does_not_crash_the_gate(tmp_path):
+    assert len(_with_link(tmp_path, "img{max-width:100%}",
+                          'rel="stylesheet" href="a%00b.css"')) == 1
+
+
+def test_any_rule_that_lifts_the_cap_cancels_it_whatever_its_order(tmp_path):
+    for css in (".x img{max-width:none} img{max-width:100%}",
+                "img{max-width:none!important} img{max-width:100%}",
+                "img{max-width:100%} *{max-width:none}"):
+        assert len(_with_link(tmp_path, css)) == 1, css
+
+
+def test_a_later_inline_style_is_read_after_the_linked_sheet(tmp_path):
+    (tmp_path / "local.css").write_text("img{max-width:100%}")
+    stage_dir, html = stage(tmp_path, '<img src="dmlex_uml.svg">')
+    html = html.replace("<head>", '<head><link rel="stylesheet" href="local.css">'
+                                  '<style>img{max-width:none}</style>')
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.check_image_policy(stage_dir, html, f)
+    assert len([x for x in f.items if "wider than the printable" in x["message"]]) == 1
+
+
+def test_not_print_media_and_supports_not_do_not_cap(tmp_path):
+    assert len(_with_link(tmp_path, "img{max-width:100%}",
+                          'rel="stylesheet" media="not print" href="local.css"')) == 1
+    assert len(_with_link(tmp_path, "@supports not (display:grid){img{max-width:100%}}")) == 1

@@ -741,13 +741,13 @@ class _ImgCollector(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.imgs: list[dict] = []
-        self.css_hrefs: list[str] = []
-        self.styles: list[str] = []
+        self.sheets: list[tuple[str, str]] = []   # ("style", css) / ("link", href), in page order
         self._in_style = False
 
     @staticmethod
     def _prints(media: str | None) -> bool:
-        return not media or bool(re.search(r"\b(print|all)\b", media, re.I))
+        return not media or (bool(re.search(r"\b(print|all)\b", media, re.I))
+                             and not re.search(r"\bnot\b", media, re.I))
 
     def handle_starttag(self, tag, attrs):
         a = {k.lower(): (v or "") for k, v in attrs}
@@ -755,7 +755,7 @@ class _ImgCollector(HTMLParser):
             self.imgs.append(a)
         elif tag == "link" and a.get("rel", "").lower().split() == ["stylesheet"] \
                 and self._prints(a.get("media")):
-            self.css_hrefs.append(a.get("href", ""))
+            self.sheets.append(("link", a.get("href", "")))
         elif tag == "style":
             self._in_style = self._prints(a.get("media"))
 
@@ -767,7 +767,7 @@ class _ImgCollector(HTMLParser):
 
     def handle_data(self, data):
         if self._in_style:
-            self.styles.append(data)
+            self.sheets.append(("style", data))
 
 
 def _css_rules(css: str):
@@ -790,44 +790,59 @@ def _css_rules(css: str):
         if sel.startswith("@"):
             q = sel.lower()
             if (q.startswith("@media") and re.search(r"\b(print|all)\b", q)
-                    and not re.search(r"\bnot\b", q)) or q.startswith("@supports"):
+                    and not re.search(r"\bnot\b", q)) or (
+                    q.startswith("@supports") and not re.search(r"\bnot\b", q)):
                 yield from _css_rules(inner)
         else:
             yield sel, inner
         i = k
 
 
-def _css_caps_images(stage_dir: str, styles: list[str], hrefs: list[str]) -> bool:
-    """True when the package's own CSS (an inline <style>, or a stylesheet
-    inside the package that the HTML links for print) caps every img at the
-    line width, and no later rule lifts the cap. A rule scoped by class, id,
-    attribute or a parent element caps only some images and does not count,
-    but one that lifts the cap for some images cancels it. The linked OASIS
-    stylesheets on docs.oasis-open.org set no image cap."""
-    css = " ".join(styles)
+def _package_css(stage_dir: str, sheets: list[tuple[str, str]]) -> str:
+    """The package's own CSS in page order: inline <style> blocks and the
+    stylesheets inside the package that the HTML links for print. Remote
+    stylesheets and paths that leave the package are not read."""
     root = os.path.realpath(stage_dir)
-    for href in hrefs:
-        if re.match(r"(?i)^(https?:)?//", href):
+    parts = []
+    for kind, value in sheets:
+        if kind == "style":
+            parts.append(value)
             continue
-        p = os.path.realpath(os.path.join(
-            stage_dir, urllib.parse.unquote(href.split("?")[0].split("#")[0])))
-        if p.startswith(root + os.sep) and os.path.isfile(p):
-            css += " " + read_text(p)
-    capped = False
+        if re.match(r"(?i)^(https?:)?//", value):
+            continue
+        try:
+            p = os.path.realpath(os.path.join(
+                stage_dir, urllib.parse.unquote(value.split("?")[0].split("#")[0])))
+            if p.startswith(root + os.sep) and os.path.isfile(p):
+                parts.append(read_text(p))
+        except (OSError, ValueError):
+            continue
+    return " ".join(parts)
+
+
+def _css_caps_images(css: str) -> bool:
+    """True when the package's CSS caps every img at the line width: an
+    unscoped img rule (bare, or under html/body) with a max-width of 100% or
+    less, or 643px or less. Any rule that can reach an img (a scoped img
+    selector, or *) and sets a max-width that does not cap cancels the cap
+    whatever its position, because specificity and !important can let it win.
+    That errs toward a warning. The linked OASIS stylesheets set no cap."""
+    capped = lifted = False
     for sel, body in _css_rules(css):
         values = re.findall(r"(?:^|;)\s*max-width\s*:\s*([^;]+)", body.replace("\n", " "), re.I)
         if not values:
             continue
         for one in sel.split(","):
-            if not re.search(r"(^|[\s>+~])img([.#\[:][^\s>+~]*)?\s*$", one.strip(), re.I):
+            one = one.strip()
+            if not re.search(r"(^|[\s>+~])(img|\*)([.#\[:][^\s>+~]*)?$", one, re.I):
                 continue
-            unscoped = re.fullmatch(r"\s*(?:(?:html|body)\s+)*img\s*", one, re.I)
+            unscoped = re.fullmatch(r"(?:(?:html|body)\s+)*img", one, re.I)
             for v in values:
                 if not _caps_at_line(v):
-                    capped = False
+                    lifted = True
                 elif unscoped:
                     capped = True
-    return capped
+    return capped and not lifted
 
 
 def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
@@ -844,7 +859,7 @@ def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
         parsed.close()
     except Exception:  # noqa: BLE001  (a malformed page is judged by other checks)
         pass
-    capped = _css_caps_images(stage_dir, parsed.styles, parsed.css_hrefs)
+    capped = _css_caps_images(_package_css(stage_dir, parsed.sheets))
     for attrs in parsed.imgs:
         own = _style_decl(attrs.get("style") or "", "max-width")
         if capped and not (own and not _caps_at_line(own)):
