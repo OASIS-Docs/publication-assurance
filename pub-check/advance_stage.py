@@ -103,47 +103,68 @@ def check_target(old: str, new: str, same_version: bool, unpublished_ok: bool) -
     okind, onum = split_stage(old)
     if TRACK[kind] != TRACK.get(okind, TRACK[kind]):
         raise Refused(f"{old} to {new} changes track (specification and note are separate tracks)")
-    if same_version:
-        if okind == "os":
-            raise Refused(f"{old} is the final stage of this version; cut the next version instead")
-        if kind == okind and int(num) <= int(onum or 0):
-            raise Refused(f"{new} does not come after {old}")
-        if ORDER[kind] < ORDER[okind] and kind != "csd" and kind != "cnd":
-            raise Refused(f"{new} goes backwards from {old}")
+    if not same_version:
+        return
+    if okind == "os":
+        raise Refused(f"{old} is the final stage of this version; cut the next version instead")
+    if kind == "os" and okind != "cs":
+        raise Refused(f"an OASIS Standard follows a Committee Specification, not {old}")
+    if kind == okind and int(num) <= int(onum or 0):
+        raise Refused(f"{new} does not come after {old}")
+    if ORDER[kind] < ORDER[okind]:
+        # A new draft after an approved stage continues the draft numbering, so
+        # its number is higher than the approved stage's (CSAF v2.0: cs01, csd03).
+        if not (kind in ("csd", "cnd") and okind in ("cs", "cn") and int(num) > int(onum)):
+            raise Refused(f"{new} goes backwards from {old}, or reuses a stage that exists")
+
+
+def check_version(old: str, new: str) -> None:
+    if not re.fullmatch(r"\d+\.\d+", new or ""):
+        raise Refused(f"version {new!r} is not of the form X.Y")
+    if tuple(map(int, new.split("."))) <= tuple(map(int, old.split("."))):
+        raise Refused(f"version {new} does not come after {old}")
+
+
+URL = r"https?://docs\.oasis-open\.org/[^\s<>)\]]+"
 
 
 class StageAdvance:
     """Parse one OASIS Markdown spec and rewrite its stage-bound sites."""
 
     def __init__(self, text: str):
-        self.src = text
+        self.crlf = "\r\n" in text
+        self.src = text.replace("\r\n", "\n")
         self.sites: list[tuple[str, int, int]] = []    # (site, expected, found)
-        head = text.split("\n## Notices", 1)[0]
+        head = self.src.split("\n## Notices", 1)[0]
         headings = re.findall(r"(?m)^#### (.+?)\s*$", head)
         if [h for h in headings if h in FRONT_HEADINGS] != FRONT_HEADINGS or \
                 re.search(r"(?m)^#### Open Project:", head) or \
                 re.search(r"(?m)^## OASIS Project Note", head):
             raise Refused("front matter is not the OASIS Markdown shape (This/Previous/Latest "
                           "stage, then Technical Committee)")
-        block = self._block("This stage:")
+        block = self._block("This stage:").group("body")
         urls = list(STAGE_URL.finditer(block))
         if not urls:
-            raise Refused("no docs.oasis-open.org URL in the This stage block")
+            raise Refused("no docs.oasis-open.org URL of the form <root>/vX.Y/<stage>/<file> in "
+                          "the This stage block (a multi-part spec with files in a subdirectory "
+                          "is not supported)")
         first = urls[0]
         self.root, self.version, self.stage = first["root"], first["ver"], first["stage"]
         self.stem = first["stem"]
         self.formats = [u["ext"] for u in urls]
         self.authoritative = next((u["ext"] for u in urls if u["auth"]), None)
+        self.bracketed = "<http" in block
         if any((u["root"], u["ver"], u["stage"], u["stem"]) !=
                (self.root, self.version, self.stage, self.stem) for u in urls):
             raise Refused("This stage URLs do not share one stage path and file name")
 
     # -- parsing helpers ---------------------------------------------------
-    def _block(self, heading: str) -> str:
-        m = re.search(rf"(?ms)^#### {re.escape(heading)}\s*\n\n(.*?)\n\n(?=#### |---|## )", self.src)
+    def _block(self, heading: str, text: str | None = None):
+        m = re.search(rf"(?ms)^(?P<head>#### {re.escape(heading)}[ \t]*\n\n?)(?P<body>.*?)"
+                      rf"(?P<tail>\n\n?)(?=#### |---|## )", text if text is not None else self.src)
         if not m:
             raise Refused(f"no '#### {heading}' block")
-        return m.group(1)
+        return m
 
     def _sub(self, text: str, old: str, new: str, expected: int, site: str) -> str:
         found = text.count(old)
@@ -152,9 +173,15 @@ class StageAdvance:
             raise Refused(f"{site}: expected {expected}, found {found}")
         return text.replace(old, new)
 
-    def _stage_urls(self, root, ver, stage, stem, formats, auth) -> str:
+    def _replace_block(self, s: str, heading: str, new_body: str, site: str) -> str:
+        m = self._block(heading, s)
+        return self._sub(s, m.group(0), m.group("head") + new_body + m.group("tail"), 1, site)
+
+    @staticmethod
+    def _stage_urls(root, ver, stage, stem, formats, auth, bracketed=False) -> str:
         base = f"https://docs.oasis-open.org/{root}/v{ver}/" + (f"{stage}/" if stage else "")
-        lines = [f"{base}{stem}.{ext}" + (" (Authoritative)" if ext == auth else "")
+        wrap = (lambda u: f"<{u}>") if bracketed else (lambda u: u)
+        lines = [wrap(f"{base}{stem}.{ext}") + (" (Authoritative)" if ext == auth else "")
                  for ext in formats]
         return " \\\n".join(lines)
 
@@ -164,83 +191,95 @@ class StageAdvance:
                 unpublished_ok: bool = False) -> str:
         new_ver = version or self.version
         same = new_ver == self.version
+        if not same:
+            check_version(self.version, new_ver)
         check_target(self.stage, to, same, unpublished_ok)
         if not same and previous is None:
             raise Refused("the version changes, so the Previous stage is the editor's choice: "
                           "pass --previous source (cite this document's stage) or --previous none")
         previous = previous or "source"
+        if previous not in ("source", "none"):
+            raise Refused("--previous takes source or none")
         wp = self.stem.split(f"-v{self.version}")[0]
-        new_stem = f"{wp}-v{new_ver}-{to}" if to != "os" else f"{wp}-v{new_ver}-os"
+        new_stem = f"{wp}-v{new_ver}-{to}"
         fmts = formats or self.formats
         auth = self.authoritative if self.authoritative in fmts else None
         s = self.src
         # title
         if not same:
-            t = re.search(rf"(?m)^# [^\n]* Version {re.escape(self.version)}$", s)
+            t = re.search(rf"(?m)^(# .*? Version ){re.escape(self.version)}\b(.*)$", s)
             if not t:
                 raise Refused(f"title: no '# ... Version {self.version}' line")
-            s = self._sub(s, t.group(0) + "\n",
-                          t.group(0)[:-len(self.version)] + new_ver + "\n", 1, "title version")
+            s = self._sub(s, t.group(0), t.group(1) + new_ver + t.group(2), 1, "title version")
         # stage line and date: the two level-2 headings after the title
         m = re.search(r"(?m)^## (.+)\n\n## (\d{1,2} [A-Z][a-z]+ \d{4})\n", s)
         if not m or m.group(1) != stage_label(self.stage):
             raise Refused(f"stage line: expected '## {stage_label(self.stage)}' then a date")
-        new_date = f"{when.day} {MONTHS[when.month - 1]} {when.year}"
-        if re.fullmatch(r"0\d .*", m.group(2)):
-            new_date = f"{when.day:02d} {MONTHS[when.month - 1]} {when.year}"
+        pad = "02d" if re.fullmatch(r"0\d .*", m.group(2)) else "d"
+        new_date = f"{when.day:{pad}} {MONTHS[when.month - 1]} {when.year}"
         s = self._sub(s, m.group(0), f"## {stage_label(to)}\n\n## {new_date}\n", 1, "stage line and date")
-        # This / Previous / Latest
-        this_new = self._stage_urls(self.root, new_ver, to, new_stem, fmts, auth)
-        s = self._sub(s, self._block("This stage:"), this_new, 1, "This stage block")
+        # This stage
+        s = self._replace_block(s, "This stage:", self._stage_urls(
+            self.root, new_ver, to, new_stem, fmts, auth, self.bracketed), "This stage block")
         # citation label and body
         s = self._citation(s, new_ver, to, new_date, new_stem, wp)
-        # every other URL under the old stage path
-        old_dir = f"https://docs.oasis-open.org/{self.root}/v{self.version}/{self.stage}/"
-        new_dir = f"https://docs.oasis-open.org/{self.root}/v{new_ver}/{to}/"
-        n = s.count(old_dir)
+        # every other URL under the old stage path, before Previous is written
+        old_dir = re.compile(rf"(https?)://docs\.oasis-open\.org/{re.escape(self.root)}/"
+                             rf"v{re.escape(self.version)}/{re.escape(self.stage)}/([^\s<>)\]]*)")
+
+        def move(mm):
+            rest = mm.group(2)
+            if rest.startswith(self.stem):
+                rest = new_stem + rest[len(self.stem):]
+            return f"{mm.group(1)}://docs.oasis-open.org/{self.root}/v{new_ver}/{to}/{rest}"
+        s, n = old_dir.subn(move, s)
         self.sites.append(("self URLs under the stage path", n, n))
-        s = s.replace(old_dir + self.stem + ".", new_dir + new_stem + ".").replace(old_dir, new_dir)
-        prev_new = ("N/A" if previous == "none" else
-                    self._stage_urls(self.root, self.version, self.stage, self.stem,
-                                     [f for f in self.formats if f != "md"] or self.formats,
-                                     self.authoritative))
-        if previous == "source" or previous == "none":
-            s = self._sub(s, f"#### Previous stage:\n\n{self._block('Previous stage:')}\n",
-                          f"#### Previous stage:\n\n{prev_new}\n", 1, "Previous stage block")
-        else:
-            raise Refused("--previous takes source or none")
-        latest_old = self._block("Latest stage:")
-        latest_urls = list(re.finditer(r"https?://docs\.oasis-open\.org/\S+", latest_old))
-        latest_fmts = [u.group(0).rsplit(".", 1)[-1] for u in latest_urls]
-        latest_auth = self.authoritative if "(Authoritative)" in latest_old else None
-        latest_new = self._stage_urls(self.root, new_ver, "", f"{wp}-v{new_ver}",
-                                      latest_fmts or ["html", "pdf"], latest_auth)
-        s = self._sub(s, latest_old, latest_new, 1, "Latest stage block")
-        # Notices copyright year
-        years = re.findall(r"(?m)^Copyright © OASIS Open (\d{4})\.", s)
+        # Previous stage: this document's own stage, every format it lists
+        prev_new = "N/A" if previous == "none" else self._stage_urls(
+            self.root, self.version, self.stage, self.stem, self.formats, self.authoritative,
+            self.bracketed)
+        s = self._replace_block(s, "Previous stage:", prev_new, "Previous stage block")
+        # Latest stage: the version root, in the formats and form it already uses
+        latest = self._block("Latest stage:", s).group("body")
+        exts = [u.rsplit(".", 1)[-1] for u in re.findall(URL, latest)]
+        latest_auth = next((e for e in exts if re.search(
+            rf"\.{e}>? \(Authoritative\)", latest)), None)
+        s = self._replace_block(s, "Latest stage:", self._stage_urls(
+            self.root, new_ver, "", f"{wp}-v{new_ver}", exts or ["html", "pdf"], latest_auth,
+            "<http" in latest), "Latest stage block")
+        # Notices copyright years (a range keeps its first year)
+        years = re.findall(r"(?m)^Copyright © OASIS Open ((?:\d{4}-)?\d{4})\.", s)
         if not years:
             raise Refused("Notices: no 'Copyright © OASIS Open YYYY.' line")
         if len(set(years)) > 1:
             raise Refused(f"Notices: copyright lines disagree ({', '.join(sorted(set(years)))})")
+        start = years[0].split("-")[0] + "-" if "-" in years[0] else ""
         s = self._sub(s, f"Copyright © OASIS Open {years[0]}.",
-                      f"Copyright © OASIS Open {when.year}.", len(years), "Notices copyright year")
+                      f"Copyright © OASIS Open {start}{when.year}.", len(years),
+                      "Notices copyright year")
         self.new_stem = new_stem
-        return s
+        return s.replace("\n", "\r\n") if self.crlf else s
 
     def _citation(self, s, new_ver, to, new_date, new_stem, wp) -> str:
         block = s.split("#### Citation format:", 1)
         if len(block) != 2:
             raise Refused("no '#### Citation format:' section")
         cite = block[1].split("\n---", 1)[0]
-        lab = re.search(r"(?m)^(\\\[|\*\*\[)([^\]\\]*?)" + re.escape(self.version) + r"(\\\]|\]\*\*)[ \t]*$", cite)
+        lab = re.search(r"(?m)^(\\\[|\*\*\[)([^\]\\]*?)" + re.escape(self.version) +
+                        r"(\\\]|\]\*\*)[ \t]*$", cite)
         if not lab:
             raise Refused("citation label: expected a [name-X.Y] label carrying the version")
-        body = re.search(
-            r"(?m)^(?P<d>[*_])(?P<title>[^*_\n]+?)(?P=d)\. Edited by (?P<eds>[^\n]+?)\. "
-            r"(?P<date>\d{1,2} [A-Z][a-z]+ \d{4})\. OASIS (?P<stage>[^\n]+?)\. "
+        paras = [p for p in re.split(r"\n[ \t]*\n", cite) if re.match(r"\s*(\*(?!\*)|_)", p)]
+        if len(paras) != 1:
+            raise Refused(f"citation body: expected one paragraph starting with the title, "
+                          f"found {len(paras)}")
+        flat = re.sub(r"\s*\n\s*", " ", paras[0].strip())
+        body = re.fullmatch(
+            r"(?P<d>[*_])(?P<title>[^*_]+?)(?P=d)\. Edited by (?P<eds>.+?)\. "
+            r"(?P<date>\d{1,2} [A-Z][a-z]+ \d{4})\. OASIS (?P<stage>.+?)\. "
             r"(?P<lt><?)(?P<this>https://docs\.oasis-open\.org/\S+?)>?\. "
-            r"Latest (?P<lw>version|stage): <?(?P<latest>https://docs\.oasis-open\.org/\S+?)>?\.[ \t]*$",
-            cite)
+            r"Latest (?P<lw>version|stage): <?(?P<latest>https://docs\.oasis-open\.org/\S+?)>?\.",
+            flat)
         if not body:
             raise Refused("citation body: fields the template does not know (expected "
                           "Title. Edited by ... Date. OASIS Stage. <this>. Latest version: <latest>.)")
@@ -253,7 +292,7 @@ class StageAdvance:
                     f"{body['lt']}{this_url}{close}. Latest {body['lw']}: "
                     f"{body['lt']}{latest}{close}.")
         new_label = lab.group(1) + lab.group(2) + new_ver + lab.group(3)
-        new_cite = cite.replace(lab.group(0), new_label, 1).replace(body.group(0), new_body, 1)
+        new_cite = cite.replace(lab.group(0), new_label, 1).replace(paras[0].strip(), new_body, 1)
         self.sites.append(("citation label", 1, 1))
         self.sites.append(("citation body", 1, 1))
         return block[0] + "#### Citation format:" + new_cite + block[1][len(cite):]
