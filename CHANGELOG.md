@@ -24,6 +24,16 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.4.1 - 2026-09-24
+
+PATCH. `package-refs` checked every citation under the document's own stage
+path with a file test, so a cited directory (a URL ending in `/`, such as
+`schemas/` or `schemas/JSON/`) was reported missing even when it shipped. The
+DMLex v1.0 OS package, staged with its `schemas/` tree, drew five false
+blockers. A cited directory now passes when the directory is present; an
+absent directory or file is still a blocker. Pinned by
+`tests/test_package_refs.py`. No criteria added or removed.
+
 ## v1.4.0 - 2026-09-05
 
 The evidence behind the acceptance criteria now ships with them, and the
