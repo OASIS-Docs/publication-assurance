@@ -24,6 +24,17 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## v1.4.2 - 2026-09-24
+
+PATCH. `stage-uri-live` blocked the first stage of every new version: its
+Latest-stage URIs sit in the version root that this publication creates, so
+they cannot retrieve beforehand (DMLex v1.1 wd01). Those URIs are now recorded
+as created by this publication and not fetched, but only while no
+Previous-stage URI lies in the same version root. A later stage of the same
+version, or a Latest URI in another version root, is still fetched and still
+blocks on 404. Pinned by `tests/test_stage_uri_live_first_stage.py`. No
+criteria added or removed.
+
 ## v1.4.1 - 2026-09-24
 
 PATCH. `package-refs` checked every citation under the document's own stage
