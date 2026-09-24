@@ -41,8 +41,8 @@ Each version is anchored by a git tag on this repository.
   and date, the This/Previous/Latest stage blocks, the citation (regenerated
   from its fields), every URL under the old stage path and the Notices
   copyright years, with a count asserted for each. It is a dry run unless
-  `--write` is given, never overwrites, and refuses rather than guesses (the
-  eight rules are in `pub-check/README.md`). On the full DMLex v1.0 OS
+  `--write` is given, never overwrites, and refuses rather than guesses (its
+  refusal rules are in `pub-check/README.md`). On the full DMLex v1.0 OS
   source (lexidma 83827ff), cutting v1.1 wd01 reproduces the hand-cut
   edition except for its two copyright years, which the tool updates and
   the hand cut missed, and its two `.pdf.pdf` typo fixes, which are content
