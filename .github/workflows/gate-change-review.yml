@@ -1,0 +1,41 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
+
+# A pull request that changes the checker must record an adversarial review.
+#
+# PR #9 (Sep 2026) exempted a check. Its first draft passed its own tests and
+# CI, and an independent agent then built an input on which the exemption hid
+# a real defect. Nothing required that review; this job does. See
+# .github/scripts/check_gate_change_review.py for the rule and
+# .github/pull_request_template.md for the section it reads.
+#
+# It runs on every pull request, and again when the body is edited, so a review
+# added after the first push re-runs it. A pull request that does not touch the
+# checker passes at once.
+
+name: Gate change review
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  gate-change-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # The body is passed through the environment and never interpolated into
+      # the script, so nothing in it can run as shell.
+      - name: Require an adversarial review for a checker change
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 .github/scripts/check_gate_change_review.py --base "$BASE_SHA" --head "$HEAD_SHA"

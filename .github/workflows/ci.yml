@@ -23,7 +23,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      # Full history: tests/test_gate_change_review.py replays this
+      # repository's own pull requests as its fixtures.
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v6
         with:
