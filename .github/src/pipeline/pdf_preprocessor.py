@@ -146,6 +146,14 @@ class PdfPreprocessor(PipelineStep):
         }
     }
     
+    /* Figures: never wider than the line. DMLex v1.0's figures carried no
+       width, so each printed at its natural size and the 1505pt UML diagram
+       ran off the page. */
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    
     /* Page setup - portrait with wider margins */
     @page {
         size: A4 portrait;

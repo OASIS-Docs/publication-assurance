@@ -647,6 +647,83 @@ def check_md_fences(md_text: str, f: Findings) -> None:
 IMG_EXTS = {".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp"}
 
 
+# A4 less the 20mm side margins the OASIS PDF renderers use, at CSS 96px/in.
+PRINTABLE_WIDTH_PX = 643
+_CSS_PX = {"px": 1.0, "pt": 96 / 72, "pc": 16.0, "in": 96.0, "cm": 96 / 2.54,
+           "mm": 96 / 25.4, "": 1.0}
+
+
+def _css_length_px(value: str) -> int | None:
+    """A CSS or SVG length in px; None for a percentage, em or anything unparsable."""
+    m = re.fullmatch(r"\s*([0-9]*\.?[0-9]+)\s*(px|pt|pc|in|cm|mm|)\s*", value or "", re.I)
+    return round(float(m.group(1)) * _CSS_PX[m.group(2).lower()]) if m else None
+
+
+def _intrinsic_width_px(path: str) -> int | None:
+    """Natural width of an SVG, PNG, GIF or JPEG, read from the file header."""
+    try:
+        with open(path, "rb") as fh:
+            head = fh.read(65536)
+    except OSError:
+        return None
+    if head[:8] == b"\x89PNG\r\n\x1a\n" and len(head) >= 24:
+        return int.from_bytes(head[16:20], "big")
+    if head[:6] in (b"GIF87a", b"GIF89a"):
+        return int.from_bytes(head[6:8], "little")
+    if head[:2] == b"\xff\xd8":
+        i = 2
+        while i + 9 < len(head):
+            if head[i] != 0xFF:
+                i += 1
+                continue
+            marker = head[i + 1]
+            if marker in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB,
+                          0xCD, 0xCE, 0xCF):
+                return int.from_bytes(head[i + 7:i + 9], "big")
+            i += 2 + int.from_bytes(head[i + 2:i + 4], "big")
+        return None
+    svg = re.search(rb"<svg\b[^>]*>", head, re.S)
+    if not svg:
+        return None
+    tag = svg.group(0).decode("utf-8", "replace")
+    w = re.search(r'\swidth\s*=\s*["\']([^"\']*)["\']', tag)
+    if w:
+        return _css_length_px(w.group(1))
+    vb = re.search(r'\sviewBox\s*=\s*["\']\s*[-0-9.]+[\s,]+[-0-9.]+[\s,]+([0-9.]+)', tag)
+    return round(float(vb.group(1))) if vb else None
+
+
+def _img_effective_width(tag: str, path: str) -> int | None:
+    """The width an <img> lays out at: its style width, else its width
+    attribute, else the image's natural width. None when relative (a
+    percentage fits its container) or unknown."""
+    style = re.search(r'\sstyle\s*=\s*"([^"]*)"', tag, re.I)
+    if style:
+        sw = re.search(r'(?:^|;)\s*width\s*:\s*([^;]+)', style.group(1), re.I)
+        if sw:
+            return _css_length_px(sw.group(1))
+    attr = re.search(r'\swidth\s*=\s*["\']?([^"\'\s>]+)', tag, re.I)
+    if attr:
+        return _css_length_px(attr.group(1))
+    return _intrinsic_width_px(path)
+
+
+def _css_caps_images(stage_dir: str, html_flat: str) -> bool:
+    """True when the package's own CSS (inline <style> or a shipped .css)
+    gives img a max-width. The linked OASIS stylesheets set none."""
+    css = " ".join(re.findall(r"<style\b[^>]*>(.*?)</style>", html_flat, re.I | re.S))
+    for root, _dirs, files in os.walk(stage_dir):
+        for name in files:
+            if name.lower().endswith(".css"):
+                css += " " + read_text(os.path.join(root, name))
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    for sel, body in re.findall(r"([^{}]+)\{([^{}]*)\}", css):
+        if (re.search(r"(^|[\s,>])img\b", sel.strip(), re.I)
+                and re.search(r"max-width\s*:", body, re.I)):
+            return True
+    return False
+
+
 def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
     """Absorbed from publisher-toolkit inline_images.py (lint D7). Two halves:
     HTML constructs the publication pipeline refuses (empty/absolute/traversal
@@ -655,6 +732,7 @@ def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
     Size caps mirror the inliner's policy (warn 500KB, refuse 2MB, 5MB total)."""
     flat = (html_text or "").replace("\r", "").replace("\n", "")
     f.observe("image-policy", img_tags=len(re.findall(r'<img\b', flat, re.I)))
+    capped = _css_caps_images(stage_dir, flat)
     for m in re.finditer(r'<img\b[^>]*>', flat, re.I):
         tag = m.group(0)
         src_m = re.search(r'src="([^"]*)"', tag)
@@ -672,6 +750,15 @@ def check_image_policy(stage_dir: str, html_text: str, f: Findings) -> None:
             f.add(WARN, "image-policy",
                   "<img srcset> present: the publication pipeline refuses "
                   "responsive-image constructs (self-containment policy).")
+        if src and not capped:
+            px = _img_effective_width(tag, os.path.join(stage_dir, src.split("?")[0]))
+            if px and px > PRINTABLE_WIDTH_PX:
+                f.add(WARN, "image-policy",
+                      f"<img src=\"{src}\"> renders {px}px wide, wider than the "
+                      f"printable width of an A4 page ({PRINTABLE_WIDTH_PX}px), and "
+                      f"the package's own CSS sets no max-width on images. The "
+                      f"figure runs off the PDF page, or the renderer shrinks every "
+                      f"page to fit it. Give the <img> a width, or cap images in CSS.")
     if re.search(r"<picture\b", flat, re.I):
         f.add(WARN, "image-policy",
               "<picture> element present: the publication pipeline refuses it "
@@ -6478,6 +6565,10 @@ CONDITION_DOCS: list[dict] = [
          condition="No responsive srcset image constructs",
          pulls="each <img> tag's attributes",
          compares_to="the publication pipeline's self-containment policy refuses srcset"),
+    dict(check="image-policy", sig="wider than the printable width of an A4 page", applies="all",
+         condition="No image lays out wider than the printable width of the PDF page",
+         pulls="each <img>'s style width, else width attribute, else the image file's natural width (SVG width/viewBox, PNG/GIF/JPEG header), and any img max-width rule in the package's own CSS",
+         compares_to="643px (A4 less 20mm side margins at 96px/in) unless the package's CSS caps images; a wider figure runs off the page or shrinks every page"),
     dict(check="image-policy", sig="<picture> element present", applies="all",
          condition="No <picture> elements",
          pulls="the HTML body",
