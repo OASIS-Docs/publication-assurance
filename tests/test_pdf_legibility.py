@@ -110,3 +110,64 @@ def test_it_runs_on_a_package(tmp_path):
     oasis_pub_check.run(str(stage), f)
     assert any(x["check"] == "pdf-legibility" for x in f.items), \
         sorted({x["check"] for x in f.items})
+
+
+# Counterexamples from the independent verification of this change.
+
+def test_an_html_root_size_is_not_the_body_size():
+    html = f"<html><head>{V173}<style>html {{ font-size: 10px; }}</style></head></html>"
+    assert len(warns(run(SHRUNK, html))) == 1
+
+
+def test_a_rem_body_is_resolved_against_the_root():
+    html = (f"<html><head>{V173}<style>html {{ font-size: 10px; }} "
+            f"body {{ font-size: 1.6rem; }}</style></head></html>")
+    w = warns(run(SHRUNK, html))
+    assert len(w) == 1 and "12pt" in w[0]["message"], w
+
+
+def test_an_unlinked_css_file_in_the_tree_is_not_the_body_authority(tmp_path):
+    (tmp_path / "docson" / "css").mkdir(parents=True)
+    (tmp_path / "docson" / "css" / "docson.css").write_text("body { font-size: 10px; }")
+    html = f"<html><head>{V173}<style>body {{ font-size: 12pt; }}</style></head></html>"
+    assert len(warns(run(SHRUNK, html, tmp_path))) == 1
+
+
+def test_font_shorthand_and_single_quoted_links_are_read():
+    assert len(warns(run(SHRUNK, "<style>body { font: 12pt/1.4 Arial; }</style>"))) == 1
+    single = ("<link href='https://docs.oasis-open.org/templates/css/"
+              "markdown-styles-v1.7.3a.css' rel='stylesheet'>")
+    assert len(warns(run(SHRUNK, single))) == 1
+
+
+def test_a_landscape_cover_does_not_skip_a_portrait_body(tmp_path):
+    import subprocess
+    cover = CORPUS / "eox-core-v1.0-csd01/eox-core-v1.0-csd01-pub-check-validation-2026-07-27.pdf"
+    out = tmp_path / "mixed.pdf"
+    subprocess.run(["qpdf", "--empty", "--pages", str(cover), "1", str(SHRUNK), "--", str(out)],
+                   check=True)
+    assert len(warns(run(out, f"<html><head>{V173}</head></html>"))) == 1
+
+
+def test_a_chrome_pdf_resaved_by_acrobat_is_still_judged():
+    """Creator names the renderer; a re-save only changes the Producer."""
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.check_pdf_legibility(
+        str(SHRUNK), str(FIX), f"<html><head>{V173}</head></html>", f,
+        _info="Creator:        HeadlessChrome/153\nProducer:       Adobe Acrobat Pro 2024\n")
+    assert len(warns(f)) == 1
+
+
+def test_a_word_creator_is_still_skipped():
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.check_pdf_legibility(
+        str(SHRUNK), str(FIX), f"<html><head>{V173}</head></html>", f,
+        _info="Creator:        Microsoft Word 2016\nProducer:       Microsoft Word 2016\n")
+    assert warns(f) == []
+
+
+def test_an_unreadable_pdf_says_so(tmp_path):
+    bad = tmp_path / "bad.pdf"
+    bad.write_bytes(b"%PDF-1.4 not really")
+    f = run(bad, f"<html><head>{V173}</head></html>", tmp_path)
+    assert any(x["check"] == "pdf-legibility" for x in f.items), f.items
