@@ -34,8 +34,17 @@ Each version is anchored by a git tag on this repository.
   edition's 49 figures carried no width and printed at natural size, the
   1505pt UML diagram off the page. Pinned by `tests/test_image_width.py`,
   which uses the real DMLex figures.
-- Pipeline: the PDF preprocessor caps images at the line width
-  (`img { max-width: 100%; height: auto; }`).
+- Pipeline: the PDF preprocessor (`fix_html_for_pdf.py`) caps images at the
+  line width (`img { max-width: 100%; height: auto; }`). This reaches renders
+  that call the preprocessor, such as the DMLex `render.sh`; the step 2
+  workflow script in this repository does not call it (TRANSFORMS.md now says
+  so).
+- The width check reads the page with the standard library HTML parser, so
+  quoting, case, entities and comments are read the way a browser reads them,
+  and it counts an image cap only from an unscoped `img` rule in the package's
+  inline CSS or a local stylesheet the HTML links, in screen-and-print or
+  print media. Hardened by an independent verification that found fourteen
+  wrong answers in the first build; each is now a test.
 
 ## v1.4.2 - 2026-09-24
 
