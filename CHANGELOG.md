@@ -71,7 +71,9 @@ Each version is anchored by a git tag on this repository.
   whitespace, HTML comments and code fences do not count. An independent
   verification found three ways the first build could be satisfied without a
   real pin, and four legitimate bodies it refused; each is now a test. `main`
-  requires a pull request with both checks green.
+  requires a pull request with both checks green. Its first live run refused
+  PR #14, whose tests assert through a helper defined in their own file; a
+  call to such a helper now counts as asserting.
 - New condition in `image-policy` (proposal 001): an `<img>` that lays out
   wider than the printable width of an A4 page (643px) is a WARN when the
   package's own CSS sets no `max-width` on images. The width is the `<img>`'s
