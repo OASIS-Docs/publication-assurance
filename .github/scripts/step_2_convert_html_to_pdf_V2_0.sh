@@ -31,24 +31,35 @@ if [ -z "$DIR" ] || [ ! -d "$DIR" ]; then
   exit 1
 fi
 
-HTML_FILE=$(find "$DIR" -maxdepth 1 -name '*.html' ! -name '.*' ! -name '*_fixed.html' | sort | head -n 1)
-if [ -z "$HTML_FILE" ]; then
+HTMLS=$(find "$DIR" -maxdepth 1 -name '*.html' ! -name '.*' ! -name '*_fixed.html' | sort)
+if [ -z "$HTMLS" ]; then
   echo "HTML file not found in directory: $DIR"
   exit 1
 fi
+if [ "$(printf '%s\n' "$HTMLS" | wc -l)" -gt 1 ]; then
+  echo "more than one HTML file in $DIR; the stage holds one specification:"
+  printf '  %s\n' "$HTMLS"
+  exit 1
+fi
+HTML_FILE=$HTMLS
 HTML_FILE=$(cd "$(dirname "$HTML_FILE")" && pwd)/$(basename "$HTML_FILE")
 NAME=$(basename "$HTML_FILE" .html)
 PDF_FILE="$(dirname "$HTML_FILE")/$NAME.pdf"
-TMP_HTML="$(dirname "$HTML_FILE")/.$NAME-pdf.html"
+# A name no package file can already carry (the pid and a random suffix).
+TMP_HTML="$(dirname "$HTML_FILE")/.$NAME-pdf-$$-$RANDOM.html"
+TMP_PDF="$(dirname "$HTML_FILE")/.$NAME-$$-$RANDOM.pdf"
 SRC=$(cd "$(dirname "$0")/../src" && pwd)
 PY=${PYTHON:-python3}
 WORK=$(mktemp -d)
-trap 'rm -rf "$TMP_HTML" "$WORK"' EXIT
+trap 'rm -rf "$TMP_HTML" "$TMP_PDF" "$WORK"' EXIT
 
 echo "Found HTML file: $HTML_FILE"
 echo "Output PDF file will be: $PDF_FILE"
 ( cd "$WORK" && "$PY" "$SRC/fix_html_for_pdf.py" "$HTML_FILE" -o "$TMP_HTML" )
-( cd "$WORK" && "$PY" "$SRC/step_2_convert_html_to_pdf.py" "$TMP_HTML" -o "$PDF_FILE" \
+# Render beside the target and move into place only on success, so a failed
+# render never leaves a partial PDF under the published name.
+( cd "$WORK" && "$PY" "$SRC/step_2_convert_html_to_pdf.py" "$TMP_HTML" -o "$TMP_PDF" \
     --footer-name "$(basename "$HTML_FILE")" )
-test -s "$PDF_FILE"
+test -s "$TMP_PDF"
+mv "$TMP_PDF" "$PDF_FILE"
 echo "HTML to PDF conversion completed successfully"
