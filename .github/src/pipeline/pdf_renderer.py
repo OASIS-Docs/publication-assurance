@@ -49,9 +49,16 @@ class PdfRenderer(PipelineStep):
     running header/footer and the pipeline's standard margins.
     """
 
-    def __init__(self, html_file: str, output_pdf: str, base_dir: Optional[str] = None):
-        """Resolve absolute paths and validate the input HTML exists."""
+    def __init__(self, html_file: str, output_pdf: str, base_dir: Optional[str] = None,
+                 footer_name: Optional[str] = None):
+        """Resolve absolute paths and validate the input HTML exists.
+
+        ``footer_name`` is the file name printed in the running footer. It
+        defaults to the input's name; pass the published HTML's name when the
+        input is a preprocessed intermediate.
+        """
         self.html_file = Path(html_file).resolve()
+        self.footer_name = footer_name or self.html_file.name
         self.output_pdf = Path(output_pdf).resolve()
         self.base_dir = Path(base_dir).resolve() if base_dir else self.html_file.parent
 
@@ -279,7 +286,7 @@ class PdfRenderer(PipelineStep):
             '--header-center', self.document_title(),
             '--footer-line',
             '--footer-spacing', '4',
-            '--footer-left', str(self.html_file.name),
+            '--footer-left', self.footer_name,
             '--footer-center', self.copyright_line(),
             '--footer-right', '[date] - Page [page] of [topage]',
             '--footer-font-size', '8',
@@ -381,6 +388,11 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--footer-name",
+        help="File name for the running footer (default: the input file's name)"
+    )
+
+    parser.add_argument(
         "-v", "--verbose",
         action="store_true",
         help="Enable verbose logging"
@@ -404,7 +416,8 @@ def main() -> None:
         converter = PdfRenderer(
             html_file=args.html_file,
             output_pdf=output_pdf,
-            base_dir=args.base_dir
+            base_dir=args.base_dir,
+            footer_name=args.footer_name
         )
 
         converter.convert()

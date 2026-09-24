@@ -45,10 +45,12 @@ jobs:
       # vector. PyYAML reads the shipped criteria and authority map for
       # tests/test_authorities.py. Both are imported hard rather than skipped:
       # a skipped authority check proves nothing.
+      # requests is imported by the pipeline package that
+      # tests/test_step2_script.py runs end to end through the step 2 script.
       - name: Install test dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install pytest beautifulsoup4 PyYAML
+          python3 -m pip install pytest beautifulsoup4 PyYAML requests
 
       - name: Run pytest
         run: pytest tests/ -v
