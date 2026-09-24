@@ -235,6 +235,21 @@ pub-check:
 	python3 oasis_pub_check.py ../share/  # or your stage dir
 ```
 
+## Changing a check
+
+A pull request that changes `oasis_pub_check.py` must carry an
+`## Adversarial review` section in its body (the pull request template has
+one). An independent reviewer, not the author, is told to build an input on
+which the change hides a real defect or raises a false one. The section names
+the test that pins each counterexample (`tests/test_x.py::test_y`), and the
+pull request must add or modify each named test. For a pure refactor or a
+message-text change, write `not applicable: <reason>`.
+`.github/workflows/gate-change-review.yml` enforces this on every pull request
+and re-runs when the body is edited. Its rule lives in
+`.github/scripts/check_gate_change_review.py`. The rule exists because the
+first draft of PR #9 passed its own tests and CI while hiding a broken Latest
+URI, and only a voluntary review found it.
+
 ## Scope and track detection
 
 The gate measures the output, which is the same contract for every TC:
