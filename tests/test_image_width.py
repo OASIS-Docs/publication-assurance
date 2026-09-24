@@ -231,3 +231,35 @@ def test_not_print_media_and_supports_not_do_not_cap(tmp_path):
     assert len(_with_link(tmp_path, "img{max-width:100%}",
                           'rel="stylesheet" media="not print" href="local.css"')) == 1
     assert len(_with_link(tmp_path, "@supports not (display:grid){img{max-width:100%}}")) == 1
+
+
+# Fourth verification round.
+
+def test_an_overflowing_length_does_not_crash_the_gate(tmp_path):
+    (tmp_path / "v.svg").write_text("<svg viewBox='0 0 1e999 10'/>")
+    (tmp_path / "w.svg").write_text("<svg width='1e999'/>")
+    for tag in ('<img src="v.svg">', '<img src="w.svg">',
+                '<img src="entry.svg" style="width:1e999px">',
+                '<img src="entry.svg" width="' + "9" * 400 + '">'):
+        wide(tmp_path, tag)
+    wide(tmp_path, '<img src="entry.svg">', ".x img{max-width:1e999px}")
+    wide(tmp_path, '<img src="entry.svg">', "@supports (a:b){" * 3000 + "}" * 3000)
+
+
+def test_min_width_and_logical_properties_are_read(tmp_path):
+    assert len(wide(tmp_path, '<img src="entry.svg" width="500" style="min-width:2000px">')) == 1
+    assert len(wide(tmp_path, '<img src="dmlex_uml.svg">',
+                    "img{max-width:100%} .x img{min-width:2000px}")) == 1
+    assert len(wide(tmp_path, '<img src="dmlex_uml.svg">',
+                    "img{max-width:100%} .x img{max-inline-size:none}")) == 1
+    assert wide(tmp_path, '<img src="dmlex_uml.svg">', "img{max-inline-size:100%}") == []
+
+
+def test_a_template_or_disabled_stylesheet_is_not_read(tmp_path):
+    stage_dir, html = stage(tmp_path, '<img src="dmlex_uml.svg">')
+    html = html.replace("<head>", "<head><template><style>img{max-width:100%}</style></template>")
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.check_image_policy(stage_dir, html, f)
+    assert len([x for x in f.items if "wider than the printable" in x["message"]]) == 1
+    assert len(_with_link(tmp_path, "img{max-width:100%}",
+                          'rel="stylesheet" disabled href="local.css"')) == 1
