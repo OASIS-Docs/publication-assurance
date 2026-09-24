@@ -144,8 +144,10 @@ def test_a_landscape_cover_does_not_skip_a_portrait_body(tmp_path):
     import subprocess
     cover = CORPUS / "eox-core-v1.0-csd01/eox-core-v1.0-csd01-pub-check-validation-2026-07-27.pdf"
     out = tmp_path / "mixed.pdf"
-    subprocess.run(["qpdf", "--empty", "--pages", str(cover), "1", str(SHRUNK), "--", str(out)],
+    # pdfunite ships in poppler-utils, which CI installs for pdftotext
+    subprocess.run(["pdfseparate", "-f", "1", "-l", "1", str(cover), str(tmp_path / "c%d.pdf")],
                    check=True)
+    subprocess.run(["pdfunite", str(tmp_path / "c1.pdf"), str(SHRUNK), str(out)], check=True)
     assert len(warns(run(out, f"<html><head>{V173}</head></html>"))) == 1
 
 
@@ -195,3 +197,20 @@ def test_an_important_body_size_holds_against_a_later_rule():
 def test_an_infinite_body_size_is_not_a_size():
     f = run(SHRUNK, "<style>body{font-size:1e999px}</style>")
     assert warns(f) == [] and not any("inf" in x["message"] for x in f.items)
+
+
+# Third verification round.
+
+def test_the_last_size_in_a_block_wins():
+    for css in ("body{font-size:9pt;font-size:12pt}", "body{font-size:9pt;font:12pt Arial}"):
+        assert len(warns(run(SHRUNK, f"<style>{css}</style>"))) == 1, css
+
+
+def test_an_important_root_size_holds():
+    css = "html{font-size:16px!important} html{font-size:10px} body{font-size:1.2rem}"
+    assert len(warns(run(SHRUNK, f"<style>{css}</style>"))) == 1
+
+
+def test_pathologically_nested_css_does_not_crash_the_gate():
+    css = "@media print{" * 3000 + "body{font-size:12pt}" + "}" * 3000
+    run(SHRUNK, f"<style>{css}</style>{V173}")
