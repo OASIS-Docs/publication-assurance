@@ -24,6 +24,19 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## Unreleased
+
+- New condition in `image-policy` (proposal 001): an `<img>` that lays out
+  wider than the printable width of an A4 page (643px) is a WARN when the
+  package's own CSS sets no `max-width` on images. The width is the `<img>`'s
+  style width, else its `width` attribute, else the file's natural width
+  (SVG `width`/`viewBox`, PNG, GIF or JPEG header). The DMLex v1.0 Markdown
+  edition's 49 figures carried no width and printed at natural size, the
+  1505pt UML diagram off the page. Pinned by `tests/test_image_width.py`,
+  which uses the real DMLex figures.
+- Pipeline: the PDF preprocessor caps images at the line width
+  (`img { max-width: 100%; height: auto; }`).
+
 ## v1.4.2 - 2026-09-24
 
 PATCH, two fixes found rendering DMLex v1.1 wd01.

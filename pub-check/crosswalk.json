@@ -11,9 +11,9 @@
   "missing": 30,
   "conditions_total": 96,
   "policy_grounded": 94,
-  "operational_extra": 72,
-  "total_conditions": 170,
-  "total_signatures": 166,
+  "operational_extra": 73,
+  "total_conditions": 171,
+  "total_signatures": 167,
   "policy_grounded_conditions": 97
  },
  "criteria": [
@@ -1086,6 +1086,11 @@
   {
    "check": "image-policy",
    "sig": "references an external image/use target",
+   "status": "operational-extra"
+  },
+  {
+   "check": "image-policy",
+   "sig": "wider than the printable width of an A4 page",
    "status": "operational-extra"
   },
   {

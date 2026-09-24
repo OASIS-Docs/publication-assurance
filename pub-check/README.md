@@ -15,7 +15,7 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=170)
+![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=171)
 
 `oasis_pub_check.py` is the executable form of the publication acceptance
 criteria: the TC-side version of the checks OASIS TC Administration
@@ -33,7 +33,7 @@ Characteristics:
 - No configuration. Every expectation is derived from the package itself:
   its own front matter, its own CSS, its own schema `$id`s, its own publish
   path.
-- 170 individual checks across 58 check classes. `--list-checks` asserts
+- 171 individual checks across 58 check classes. `--list-checks` asserts
   that inventory against the code, and every count advertised anywhere in
   this repository comes from it.
 - It combines the intake acceptance criteria with the publication
@@ -141,7 +141,7 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | html-anchors | 2 | BLOCKER/WARN | Every internal fragment link must resolve to an anchor in the document. |
 | html-residue | 3 | BLOCKER | Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths. |
 | html-title | 2 | BLOCKER/WARN | The HTML title element must be an actual document title with no working residue. |
-| image-policy | 10 | BLOCKER/WARN | Images must be self-contained, inert, and within the pipeline's size caps. |
+| image-policy | 11 | BLOCKER/WARN | Images must be self-contained, inert, and within the pipeline's size caps. |
 | junk-files | 2 | BLOCKER | OS and editor junk must not be in the package. |
 | link-mismatch | 2 | BLOCKER | A visible URL and its link target must agree. |
 | logo | 1 | WARN | The cover logo should be the canonical OASIS template logo. |
@@ -199,7 +199,7 @@ same command on either side of the gate (`--emit-manifest`):
   [OpenDocument releases](https://docs.oasis-open.org/office/OpenDocument/v1.4/csd01/OpenDocument-v1.4-csd01-manifest.txt)
   carry the precedent.
 
-![The verification chain](../assets/chain.png?v=170)
+![The verification chain](../assets/chain.png?v=171)
 
 If the package includes a `manifest.json` conforming to
 [`manifest-schema.json`](manifest-schema.json), the intake side can verify
