@@ -1,0 +1,177 @@
+"""advance_stage.py cuts the next stage of an OASIS Markdown spec.
+
+DMLex v1.1 WD01 (Sep 2026) was cut from the v1.0 OS Markdown edition by a
+hand-written script asserting eleven replacements
+(~/h/lexidma-helpers/make_wd01.py). This tool does the same job for any spec
+in the OASIS Markdown template, and refuses rather than guess.
+
+Fixtures, both real:
+
+- dmlex-v1.0-os.md: the DMLex v1.0 OS Markdown edition from
+  MColetta-OASIS/lexidma branch markdown-conversion at commit 83827ff.
+  It keeps lines 1 to 116 (the front matter, the citation and the Notices),
+  9706 to 9719 (Appendix C's schema links) and 9925 to 9950 (the change log,
+  whose older draft URLs must not move).
+- expected-dmlex-v1.1-wd01.md: make_wd01.py's own replacements applied to
+  the same excerpt, with two adjustments. Its two `.pdf.pdf]` typo fixes are
+  left out, because they are content edits rather than stage edits. The
+  Notices year moves to 2026, which the hand script missed and the gate's
+  date-sync check reports.
+- niem-pubs-v1.0-pn01-front.md: the first 40 lines of the NIEMOpen Project
+  Note (OASIS-Docs/niemopen 5630ee4), a front matter shape the tool refuses.
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import subprocess
+from datetime import date
+
+import pytest
+
+from conftest import FIXTURES, REPO_ROOT, oasis_pub_check
+
+FIX = FIXTURES / "advance_stage"
+TOOL = REPO_ROOT / "pub-check/advance_stage.py"
+
+
+def load():
+    spec = importlib.util.spec_from_file_location("advance_stage", TOOL)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def dmlex():
+    return (FIX / "dmlex-v1.0-os.md").read_text(encoding="utf-8")
+
+
+def cut(text=None, mod=None, **kw):
+    mod = mod or load()
+    kw.setdefault("when", date(2026, 9, 24))
+    return mod.StageAdvance(text or dmlex()).advance(**kw)
+
+
+def refused(**kw):
+    mod = load()
+    with pytest.raises(mod.Refused) as e:
+        cut(mod=mod, **kw)
+    return str(e.value)
+
+
+WD01 = dict(to="wd01", version="1.1", previous="source", formats=["md", "html", "pdf"],
+            unpublished_ok=True)
+
+
+def test_dmlex_wd01_matches_the_hand_cut_edition():
+    assert cut(**WD01) == (FIX / "expected-dmlex-v1.1-wd01.md").read_text(encoding="utf-8")
+
+
+def test_it_regenerates_the_citation_and_so_drops_the_doubled_oasis():
+    out = cut(**WD01)
+    assert "OASIS OASIS Standard" not in out and "OASIS Working Draft 01." in out
+
+
+def test_older_draft_urls_in_the_change_log_do_not_move():
+    out = cut(**WD01)
+    for old in ("v1.0/csd04/dmlex-v1.0-csd04.pdf.pdf", "v1.0/csd03/dmlex-v1.0-csd03.pdf.pdf",
+                "v1.0/csd02/dmlex-v1.0-csd02.pdf"):
+        assert old in out, old
+
+
+def test_a_published_stage_cut_passes_the_gate_front_matter_checks(tmp_path, monkeypatch):
+    out = cut(to="csd01", version="1.1", previous="source")
+    stage = tmp_path / "lexidma/dmlex/v1.1/csd01"
+    stage.mkdir(parents=True)
+    (stage / "dmlex-v1.1-csd01.md").write_text(out, encoding="utf-8")
+    monkeypatch.setenv("PUB_CHECK_OFFLINE", "1")
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.run(str(stage), f)
+    watched = {"stage-name", "version-naming", "date-sync", "stage-token", "title-version"}
+    bad = [x for x in f.items if x["check"] in watched and x["severity"] != "INFO"]
+    assert bad == [], bad
+    assert "OASIS Committee Specification Draft 01." in out
+    assert "https://docs.oasis-open.org/lexidma/dmlex/v1.1/csd01/dmlex-v1.1-csd01.pdf (Authoritative)" in out
+
+
+def test_a_working_draft_needs_unpublished_ok():
+    assert "--unpublished-ok" in refused(**{**WD01, "unpublished_ok": False})
+
+
+def test_a_new_version_needs_an_explicit_previous_stage():
+    assert "--previous" in refused(to="csd01", version="1.1")
+
+
+@pytest.mark.parametrize("to", ["csprd01", "cos01", "os01", "csd", "cs", "zz01"])
+def test_retired_unknown_and_misnumbered_stages_are_refused(to):
+    refused(to=to, version="1.1", previous="source")
+
+
+def test_an_os_version_takes_no_further_stage():
+    assert "final stage" in refused(to="cs02")
+
+
+def test_a_track_change_is_refused():
+    assert "track" in refused(to="cnd01", version="1.1", previous="source")
+
+
+def test_a_niem_project_note_is_refused():
+    mod = load()
+    with pytest.raises(mod.Refused, match="shape"):
+        mod.StageAdvance((FIX / "niem-pubs-v1.0-pn01-front.md").read_text(encoding="utf-8"))
+
+
+def test_an_unknown_citation_shape_is_refused():
+    text = dmlex().replace("Edited by David Filip", "Ed. David Filip", 1)
+    assert "citation" in refused(text=text, **WD01)
+
+
+def test_a_missing_site_is_refused():
+    text = dmlex().replace("Copyright © OASIS Open 2025.", "Copyright OASIS 2025.", 1)
+    assert "Notices" in refused(text=text, **WD01)
+
+
+def test_the_shared_stage_vocabulary_is_the_gates():
+    mod = load()
+    assert mod.VALID_STAGE_PREFIXES is oasis_pub_check.VALID_STAGE_PREFIXES or \
+        mod.VALID_STAGE_PREFIXES == oasis_pub_check.VALID_STAGE_PREFIXES
+    assert set(mod.RETIRED_STAGE_TOKENS) == {"csprd", "cnprd", "cos", "csdpr", "cndpr"}
+
+
+def _git_source(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    src = repo / "dmlex-v1.0-os.md"
+    src.write_text(dmlex(), encoding="utf-8")
+    g = ["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@example.org"]
+    subprocess.run(g[:3] + ["init", "-q"], check=True)
+    subprocess.run(g + ["add", "."], check=True)
+    subprocess.run(g + ["commit", "-qm", "source"], check=True)
+    return repo, src
+
+
+ARGS = ["--to", "wd01", "--version", "1.1", "--previous", "source", "--formats",
+        "md,html,pdf", "--unpublished-ok", "--date", "2026-09-24"]
+
+
+def test_the_cli_dry_runs_by_default_and_writes_only_on_request(tmp_path, capsys):
+    repo, src = _git_source(tmp_path)
+    assert load().main([str(src), *ARGS]) == 0
+    assert not (repo / "dmlex-v1.1-wd01.md").exists()
+    assert "dry run" in capsys.readouterr().out
+    assert load().main([str(src), *ARGS, "--write"]) == 0
+    assert (repo / "dmlex-v1.1-wd01.md").read_text(encoding="utf-8") == \
+        (FIX / "expected-dmlex-v1.1-wd01.md").read_text(encoding="utf-8")
+    assert load().main([str(src), *ARGS, "--write"]) == 1   # never overwrites
+
+
+def test_a_dirty_source_is_refused(tmp_path):
+    repo, src = _git_source(tmp_path)
+    src.write_text(dmlex() + "\nedit\n", encoding="utf-8")
+    assert load().main([str(src), *ARGS]) == 1
+    assert load().main([str(src), *ARGS, "--allow-dirty"]) == 0
+
+
+def test_the_date_is_required():
+    with pytest.raises(SystemExit):
+        load().main([str(FIX / "dmlex-v1.0-os.md"), "--to", "csd01"])

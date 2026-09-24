@@ -208,6 +208,7 @@ publication-assurance/
 │   ├── criteria.yaml                #   the acceptance criteria themselves, with their quotes
 │   ├── corpus/                      #   the 25 snapshotted policy pages + MANIFEST.json (sha256)
 │   ├── render_summary.py            #   the Step Summary renderer the Action calls
+│   ├── advance_stage.py             #   cuts the next stage of a Markdown spec (dry run by default)
 │   ├── rules/                       #   oasis.rules.yaml, the criteria as data for nide
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
