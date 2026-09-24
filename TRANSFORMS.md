@@ -112,6 +112,10 @@ wkhtmltopdf \
   spec_pdf.html spec.pdf
 ```
 
+The injected CSS also caps every image at the line width
+(`img { max-width: 100%; height: auto; }`), so a figure with no width of its
+own prints inside the margins instead of at its natural size.
+
 The header title and the copyright year are read from the document being
 rendered: its `<title>` element (falling back to the first heading) and the
 copyright line in its own front matter.
