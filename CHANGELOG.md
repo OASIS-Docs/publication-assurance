@@ -26,6 +26,18 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+- New check class `pdf-legibility` (proposal 002), two conditions: the PDF's
+  body text is measured as the median word height over every page
+  (`pdftotext -bbox`) and compared with the body size the package declares,
+  from its own CSS or, failing that, the OASIS Markdown stylesheet it links
+  (12pt for v1.7.2 and later, 15px before). Below 85% is a WARN. Landscape
+  PDFs, and PDFs made by Word, LibreOffice, TeX, Typst, FOP or Acrobat, are
+  skipped with an INFO. Found in the corpus: the CSAF v2.0 csd01 to os PDFs,
+  printed by wkhtmltopdf 0.12.5, set the stylesheet's 12pt body at a median
+  word height of 7.8pt to 8.3pt, and now warn. CSAF v2.1 csd01 (12.5pt) is
+  silent. Pinned by `tests/test_pdf_legibility.py`, whose fixtures are eight
+  pages of the DMLex v1.0 render from v1.4.1 (8.9pt) and eleven pages of the
+  v1.4.2 render (13.4pt).
 - New condition in `image-policy` (proposal 001): an `<img>` that lays out
   wider than the printable width of an A4 page (643px) is a WARN when the
   package's own CSS sets no `max-width` on images. The width is the `<img>`'s
