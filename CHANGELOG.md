@@ -113,11 +113,6 @@ Each version is anchored by a git tag on this repository.
   "exit code 1" annotation beside the gate's exit code 2. Earlier report
   files in `report-dir` are removed. Pinned by
   `tests/test_action_bad_target.py`.
-- Validation Report: a check class none of whose conditions applied reads
-  NA in the class table, not PASS. With `PUB_CHECK_OFFLINE=1`,
-  `public-review-metadata`, `revision-collision` and `stage-uri-live` read
-  PASS although every condition in them was NA. Pinned by
-  `tests/test_validation_report.py::test_a_class_whose_every_condition_is_na_is_not_pass`.
 
 Corpus effect (`PUB_CHECK_OFFLINE=1`, every stage package in `examples/`):
 the ten CSAF stage directories lose the title-version "Not evaluated" INFO
