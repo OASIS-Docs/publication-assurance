@@ -265,13 +265,13 @@ CSS = """
 *{box-sizing:border-box}
 body{margin:0;padding:24px 16px;background:var(--bg);color:var(--ink);
 font:14px/1.45 Inter,"Helvetica Neue",Arial,sans-serif}
-main{max-width:1400px;margin:0 auto}
-h1{font-size:22px;margin:0 0 12px}h2{font-size:17px;margin:28px 0 8px}
-dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:0 0 12px}
+main{max-width:1400px;margin:0 auto;min-width:0}
+h1{font-size:22px;margin:0 0 12px;overflow-wrap:anywhere}h2{font-size:17px;margin:28px 0 8px}
+dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 16px;margin:0 0 12px}
 dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
-.verdict{padding:10px 14px;border-radius:6px;font-weight:600}
+.verdict{padding:10px 14px;border-radius:6px;font-weight:600;overflow-wrap:anywhere}
 .verdict.ok{background:var(--goodbg);color:var(--good)}.verdict.no{background:var(--badbg);color:var(--bad)}
-.wrap{overflow-x:auto}
+.wrap{overflow-x:auto;max-width:100%}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{border:1px solid var(--border);padding:5px 7px;text-align:left;vertical-align:top}
 th,td.n,td.r,td code{white-space:nowrap}
