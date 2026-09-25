@@ -510,7 +510,7 @@ The stage token must be a current, correctly numbered stage per the Naming Direc
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 138 | Stage directory name carries a two-digit revision number | the stage directory name | valid stage prefixes must carry a two-digit suffix (csd01, never bare csd) | BLOCKER | all | - |
+| 138 | Stage directory name, and an errataNN parent directory, carry a two-digit number | the stage directory name, and the parent directory name when it is an errata directory | valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4) | BLOCKER | all | - |
 | 139 | Stage token is not a retired abbreviation | the alphabetic prefix of the stage directory name | retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7 | BLOCKER | all | - |
 | 140 | Stage token is a recognized current stage | the alphabetic prefix of the stage directory name | valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata | BLOCKER | all | - |
 
