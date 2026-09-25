@@ -282,8 +282,8 @@ class PdfPreprocessor(PipelineStep):
         root = base['href']
         for a in soup.find_all('a', href=True):
             href = a['href'].strip()
-            if href and not href.startswith('#') and not urlsplit(href).scheme \
-                    and not href.startswith('//'):
+            # "//host/path" is relative too: it takes the base's scheme.
+            if href and not href.startswith('#') and not urlsplit(href).scheme:
                 a['href'] = urljoin(root, href)
         for extra in soup.find_all('base'):
             extra.decompose()
