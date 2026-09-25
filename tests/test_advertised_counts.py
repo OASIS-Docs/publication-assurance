@@ -59,6 +59,7 @@ DOCS = [
     "pub-check/README.md",
     "pub-check/CHECKS.md",
     "pub-check/AUTHORITIES.md",
+    "docs/ADOPTING.md",
 ]
 
 
