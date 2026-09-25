@@ -28,6 +28,8 @@ and each run publishes a Validation Report you can open in a browser.
 | [Troubleshooting](#troubleshooting) | Something did not work as described |
 | [Checks and their authorities](#checks-and-their-authorities) | You want the rule behind a finding |
 
+### Terms
+
 | Term | Meaning |
 |---|---|
 | Workflow | A YAML file under `.github/workflows/` that tells GitHub Actions what to run and when |
@@ -38,6 +40,9 @@ and each run publishes a Validation Report you can open in a browser.
 | Workflow token | The credential GitHub gives each run; `permissions:` sets what it may do |
 | Matrix | One job definition run once per entry in a list, for example once per document |
 | Exit code | The number a program ends with: `0` publishable, `1` blockers, `2` the target could not be read |
+| Annotation | A message pinned to a run, listed under **Annotations** on its **Summary** page |
+| GitHub Pages | GitHub's web hosting for a repository branch; here it serves the reports as web pages |
+| TCADMIN | The OASIS TC Administration issue tracker, where TCs ask staff for publication and other actions |
 
 ## Quick start
 
@@ -119,9 +124,14 @@ This step is optional and recommended. It gives every report a web
 address that anyone can open without downloading anything.
 
 The first run in Step 1 created a branch named `pubcheck-reports` that holds
-the reports. If the **Branch** list in step 3 below does not offer it, that
-run did not publish: see [Troubleshooting](#troubleshooting). To serve the
-branch as a web page:
+the reports. It shares no history with your code. Each run writes one
+folder, `<branch>/<document>/`, named from the branch that was checked and
+the `summary-title` (or the `target` path when there is none), and a later
+run of the same branch and document replaces that folder; the branch's own
+history keeps every earlier run. The branch root holds `index.html`, a list
+of every folder, newest first, with its verdict. If the **Branch** list in
+item 3 below does not offer `pubcheck-reports`, that run did not publish:
+see [Troubleshooting](#troubleshooting). To serve the branch as a web page:
 
 1. In the repository on GitHub, open **Settings > Pages**.
 2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
@@ -129,8 +139,11 @@ branch as a web page:
    select **Save**.
 
 **Success looks like:** within a minute or two the Pages settings show
-"Your site is live at `https://<owner>.github.io/<repo>/`". From the next
-run on, the report links include an HTML page.
+"Your site is live at `https://<owner>.github.io/<repo>/`", and that
+address opens the list of reports. From the next run on, the HTML link
+opens the report as a web page, at
+`https://<owner>.github.io/<repo>/<branch>/<document>/pubcheck-validation.html`.
+The action never turns Pages on by itself.
 
 GitHub Pages is free for public repositories. A private repository needs a
 paid GitHub plan for Pages; without it, skip this step and use the PDF and
@@ -144,9 +157,12 @@ Markdown links, which work in any repository.
    select **Run workflow**.
 2. In the **Actions** tab, select the run. Its **Summary** page opens.
 3. Scroll to the **pub-check** section of the summary. It starts with the
-   report links: **PDF**, **Markdown**, **Folder** and, once Step 2 is
-   done, **HTML**. The same links appear as a notice under
-   **Annotations**, higher on the same page.
+   report links: the PDF and the Markdown report (both open in GitHub),
+   the folder holding this run's files, and the HTML report, which opens
+   as a web page once Step 2 is done and as HTML source before that.
+   Higher on the same page, under **Annotations**, a notice titled
+   **Validation report** carries one link: the HTML report when Pages
+   serves it, otherwise the PDF.
 4. Open the report and read the verdict at the top.
 
 | Result | Meaning | What to do |
@@ -159,7 +175,7 @@ Markdown links, which work in any repository.
 
 **Success looks like:** a report whose heading names your package and
 whose verdict reads `PUBLICATION-READY: zero blockers.` or
-`NOT publication-ready: N blocker(s).`. The run is red when the report
+`NOT publication-ready: N blocker(s).` The run is red when the report
 lists a blocker, or when no report could be produced (exit code `2`, a
 wrong `target` path); your own package goes green once its blockers
 are fixed. (The CSAF sample bundled with this repository stays red on one
@@ -228,7 +244,7 @@ says why. The common reasons:
 | `evaluated on the markdown-source row for this package` | The same rule was checked against the Markdown, which is authoritative |
 | `pdffonts unavailable or the package declares no font authority` | The runner had no poppler, or your HTML and CSS name no font family to compare against |
 | `no manifest.json in the package` | Add a manifest to enable the manifest checks ([Local runs](#local-runs) shows `--emit-manifest`) |
-| `not evaluated on this package: ...` | Something earlier in the same package stopped this condition from running; the rest of the text names it. Fix that and the condition runs. If the class it names shows PASS, report it to TC Administration |
+| `not evaluated on this package: ...` | Something earlier in the same package stopped this condition from running; the rest of the text names it. Fix that and the condition runs. If the class it names shows PASS, report it as a finding believed wrong (see [Blocker ownership](#blocker-ownership)) |
 
 A few conditions also need the network: they compare your package with
 the live `docs.oasis-open.org`. GitHub's runners have network access, so
@@ -250,7 +266,7 @@ with the run link.
 | `member-uri`: a member-only (Kavi) URL is cited | TC, with staff help | The TC replaces the citation; staff can supply a public URL for the cited document |
 | `public-review-metadata`: a reviewed stage lacks its public-review metadata file | TC Administration | Project Administration publishes that file (Naming Directives v1.7 s5.2) |
 | `revision-collision` (WARN): the stage is already live | TC, with staff confirmation | A new submission takes the next revision number; ignore it when re-checking the published package itself |
-| Any finding you believe is wrong | TC Administration | An issue on the repository, as above; false positives are fixed in the gate, not worked around in the document |
+| Any finding you believe is wrong | Gate maintainers (GitHub issue) | An issue on the repository, as above; false positives are fixed in the gate, not worked around in the document |
 
 ## Reference
 
@@ -263,12 +279,18 @@ All inputs except `target` are optional.
 | Input | Default | Meaning |
 |---|---|---|
 | `target` | (required) | Stage directory or package `.zip`, relative to the repository root after checkout |
-| `args` | `''` | Extra flags passed to the gate, for example `--emit-manifest`. `--json` is not needed: the action always writes `pubcheck-report.json`, and `--json` here turns `pubcheck-report.txt` into JSON too |
+| `args` | `''` | Extra flags passed to the gate, for example `--emit-manifest`. Do not pass `--json`: the action already writes `pubcheck-report.json`, and adding it makes `pubcheck-report.txt` JSON as well |
 | `python-version` | `3.x` | Python version the gate runs on |
 | `install-poppler` | `true` | Installs `pdftotext` and `pdffonts` on Linux runners for the PDF cross-checks. Without them those conditions report NA |
 | `report-dir` | `pubcheck-report` | Where the report files are written in the job's working directory. `''` writes none |
 | `write-summary` | `true` | Writes the verdict, the findings and the report tables to the job summary |
-| `summary-title` | `''` (the target path is used) | Heading for this call's summary section; set it when the action runs more than once in a job or matrix |
+| `publish-branch` | `pubcheck-reports` | The branch the reports are committed to. `''` turns publishing off |
+| `publish-token` | `${{ github.token }}` | The token that pushes the report branch and reads the Pages settings |
+| `summary-title` | `''` (the target path is used) | Heading for this call's summary section, and the name of its folder on the report branch; set it when the action runs more than once in a job or matrix |
+
+The PDF report has no input of its own: the action writes it whenever the
+runner has Chrome or Chromium, as `ubuntu-latest` does. To use a specific
+browser, set the environment variable `PUBCHECK_CHROME` to its path.
 
 ### Action outputs
 
@@ -288,14 +310,18 @@ step.
 | `report-validation-md` | Path to the Validation Report in Markdown |
 | `report-validation-html` | Path to the Validation Report as one self-contained HTML page |
 | `report-validation-pdf` | Path to the Validation Report as an A4 landscape PDF |
-| `report-url-pdf` | Web address of the published PDF report |
+| `report-url-pdf` | Web address of the published PDF report on the report branch |
+| `report-url-pdf-pinned` | The same PDF at the commit that published it; this address never changes, so it suits a ticket or an email |
 | `report-url-md` | Web address of the published Markdown report |
 | `report-url-folder` | Web address of the folder holding this run's reports |
-| `report-url-html` | Web address of the HTML report on GitHub Pages, when Pages is on |
+| `report-url-html` | The HTML report on GitHub Pages when Pages serves the report branch, otherwise its source view on GitHub |
+| `report-publish-note` | `published`, or the reason the report was not published |
 
-The path outputs are empty when `report-dir` is `''`; the three Validation
-Report paths are also empty when that report could not be rendered, which
-never changes the gate's result.
+The path outputs are empty when `report-dir` is `''` and when the exit code
+is `2`. The Validation Report paths are also empty when that report could
+not be rendered, and the PDF path when the runner has no Chrome; neither
+changes the gate's result. Every `report-url-*` output is empty when
+nothing was published.
 
 An example that posts the blocker count as a notice:
 
@@ -475,8 +501,10 @@ from outside the repository cannot write to it. The gate itself needs no
 write access and runs normally: the verdict, the red or green status, the
 job summary and the report files on the runner are all produced. Only
 publishing to the `pubcheck-reports` branch needs write access, so on a
-fork pull request the report is not published and the run says so in a
-warning; the gate result is unaffected.
+fork pull request nothing is pushed and the gate result is unaffected. The
+job summary says why the report was not published, and the
+**Validation report** notice reads
+`Report not published: <reason>. Files for this run: <run address>`.
 
 The Quick start workflow's last step attaches the report files to the
 run as an artifact whatever the token allows, so a fork's reports are
@@ -487,7 +515,12 @@ If the organisation or repository sets the default workflow token to
 read-only (**Settings > Actions > General > Workflow permissions**), the
 `permissions: contents: write` line in the workflow file overrides it for
 this workflow. If an organisation policy forbids write tokens entirely,
-the report is not published and the rest of the run is unchanged.
+the report is not published and the rest of the run is unchanged. The same
+happens on purpose with `publish-branch: ''`.
+
+To find the Pages address of a private repository the action reads the
+Pages settings with its token; add `pages: read` under `permissions:` for
+that. A public repository needs nothing extra.
 
 ### Version pinning and upgrades
 
@@ -566,6 +599,16 @@ same as the action's: `0`, `1` or `2`.
 | `oasis_pub_check.py --help` | The options |
 | `PUB_CHECK_OFFLINE=1 oasis_pub_check.py TARGET` | Skips the conditions that compare the package with the live `docs.oasis-open.org`; they report NA |
 
+The same setting works in a workflow, on the gate step:
+
+```yaml
+      - uses: OASIS-Docs/publication-assurance@v1.5.0
+        env:
+          PUB_CHECK_OFFLINE: '1'   # skip the live docs.oasis-open.org conditions
+        with:
+          target: work/v1.0/csd01
+```
+
 `--emit-manifest` writes into the stage directory, so run it on the
 directory you intend to submit. The checks read the directory's own name
 and path, so a renamed copy (such as `csd01-copy`) raises naming blockers
@@ -602,6 +645,8 @@ those conditions report NA and the rest run unchanged.
 | `Unable to resolve action` | The tag in `uses:` does not exist | Use a tag from the [releases page](https://github.com/OASIS-Docs/publication-assurance/releases) |
 | Job summary has the findings but no class or condition tables | The action is older than v1.5.0, often through `@v1` | Pin to `@v1.5.0` or later |
 | Report publishing fails with a 403 or "permission denied" warning | The workflow token cannot write | Add `permissions: contents: write`; on a fork pull request this is expected, see [Fork pull requests](#fork-pull-requests-and-read-only-tokens) |
+| `pubcheck-reports` is not in the Pages **Branch** list | The first run did not publish: it exited `2`, ran from a fork pull request, or had a read-only token. The `report-publish-note` output and the **Validation report** notice give the reason | Fix the cause (the target path, or `permissions: contents: write`), then run the workflow again |
+| The HTML link opens HTML source, not a page | Pages is not serving `pubcheck-reports` | Complete [Step 2](#step-2-report-page) |
 | The HTML link returns 404 | Pages is not on, or its first deployment has not finished | Complete [Step 2](#step-2-report-page); a new Pages site takes a minute or two |
 | PDF conditions all NA with `pdffonts unavailable` | poppler is missing: `install-poppler: false`, or a macOS or Windows runner | Leave `install-poppler` at `true` and use `ubuntu-latest` |
 | `public-review-metadata` blocker | The metadata file is published by Project Administration | Raise it with TC Administration; see [Blocker ownership](#blocker-ownership) |
@@ -609,7 +654,7 @@ those conditions report NA and the rest run unchanged.
 | Matrix summaries are headed with paths, not document names | `summary-title` is not set | Set `summary-title` per matrix entry |
 | A matrix upload fails with `409` and "an artifact with this name already exists" | Two entries upload under one artifact name | Name each artifact from the matrix entry, as in [Several documents](#several-documents-in-one-repository) |
 | Two calls to the action in one job leave only the second's report files | The calls share one `report-dir` | Give each call its own `report-dir` |
-| Findings read `could not be reached ... (transport failure, not a 404)` | A network or site outage during the run | These are recorded as INFO, never as blockers. To skip the live-site conditions, set `env: PUB_CHECK_OFFLINE: '1'` on the gate step |
+| Findings read `could not be reached ... (transport failure, not a 404)` | A network or site outage during the run | These are recorded as INFO, never as blockers. To skip the live-site conditions, set `PUB_CHECK_OFFLINE`, as shown under [Local runs](#local-runs) |
 | A published standard in the repository keeps the run red | Its findings cannot be fixed in a published document | Run it report-only, see [Gating and report-only runs](#gating-and-report-only-runs) |
 | A finding you believe is wrong | A gap or error in the gate | See [Blocker ownership](#blocker-ownership) |
 

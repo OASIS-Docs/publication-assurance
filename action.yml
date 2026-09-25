@@ -62,7 +62,7 @@ inputs:
     description: "Stage directory or package .zip to check, relative to the calling repo's checkout (e.g. work/v1.0/csd01 or dist/mytc-v1.0-csd01.zip)."
     required: true
   args:
-    description: "Extra flags passed through to oasis_pub_check.py (e.g. '--json' for machine-readable output, '--emit-manifest')."
+    description: "Extra flags passed through to oasis_pub_check.py (e.g. '--emit-manifest'). The action always writes the --json report itself; '--json' here also turns pubcheck-report.txt into JSON."
     required: false
     default: ""
   python-version:
@@ -223,7 +223,7 @@ runs:
         # The full Validation Report (every check class and condition, not
         # only the findings), rendered from the --json run above. A rendering
         # failure is a warning, never a change to the gate's exit code.
-        # A matrix of calls shares RUNNER_TEMP: clear the previous call's copy.
+        # Repeated calls in one job share RUNNER_TEMP: clear the previous call's copy.
         rm -f "$RUNNER_TEMP/pubcheck-validation.md" "$RUNNER_TEMP/pubcheck-validation.html" \
           "$RUNNER_TEMP/pubcheck-validation.pdf"
         validation_ok=0
