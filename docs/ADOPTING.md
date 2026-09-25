@@ -322,13 +322,19 @@ writes one folder, `<checked-branch>/<document>/`:
 | `<checked-branch>` | The pull request's head branch, or the branch the run checked |
 | `<document>` | `summary-title`, or the `target` path when there is none |
 
-Both are reduced to lower-case letters, digits, dots, underscores and
-hyphens. Each folder holds `pubcheck-validation.pdf`, `.md` and `.html`,
+Both are lower-cased, and every run of other characters (a `/` in a path,
+a space in a title) becomes one hyphen; a name is cut at 80 characters. Each folder holds `pubcheck-validation.pdf`, `.md` and `.html`,
 `pubcheck-report.json` and `.txt`, and `meta.json`. A later run of the same
 branch and document replaces the folder; the branch's own history keeps
 every earlier run. The branch root holds `index.html`, every folder newest
-first with its verdict, and `.nojekyll` (which tells Pages to serve the
-files as they are).
+first with its verdict; `.nojekyll`, which tells Pages to serve the files
+as they are; and `.pubcheck-reports`, which marks the branch as the
+action's own. The action writes only to a branch that carries that marker
+or does not exist yet, so pointing `publish-branch` at an existing branch
+such as `main` or `gh-pages` publishes nothing.
+
+Runs that finish together, such as the jobs of a matrix, each retry their
+push against the latest state of the branch, up to ten times.
 
 ### Action outputs
 
@@ -672,6 +678,7 @@ those conditions report NA and the rest run unchanged.
 | `Unable to resolve action` | The tag in `uses:` does not exist | Use a tag from the [releases page](https://github.com/OASIS-Docs/publication-assurance/releases) |
 | Job summary has the findings but no class or condition tables | The action is older than v1.5.0, often through `@v1` | Pin to `@v1.5.0` or later |
 | Report publishing fails with a 403 or "permission denied" warning | The workflow token cannot write | Add `permissions: contents: write`; on a fork pull request this is expected, see [Fork pull requests](#fork-pull-requests-and-read-only-tokens) |
+| The notice reads "branch ... exists and was not created for pub-check reports" | `publish-branch` names a branch that already existed, such as `main` or `gh-pages` | Leave `publish-branch` at its default, or name a branch that does not exist yet |
 | `pubcheck-reports` is not in the Pages **Branch** list | The first run did not publish: it exited `2`, ran from a fork pull request, or had a read-only token. The `report-publish-note` output and the **Validation report** notice give the reason | Fix the cause (the target path, or `permissions: contents: write`), then run the workflow again |
 | The HTML link opens HTML source, not a page | Pages is not serving `pubcheck-reports`, or, in a private repository, the workflow lacks `pages: read` | Complete [Step 2](#step-2-report-page), including its `pages: read` note |
 | The HTML link returns 404 | Pages is not on, or its first deployment has not finished | Complete [Step 2](#step-2-report-page); a new Pages site takes a minute or two |
