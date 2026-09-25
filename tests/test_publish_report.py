@@ -63,18 +63,23 @@ def remote(tmp_path) -> Path:
     return bare
 
 
+def runner_env(remote) -> dict:
+    """A runner's environment pointed at the local remote. The real one's
+    GITHUB_HEAD_REF and GITHUB_EVENT_PATH (CI runs these tests inside a pull
+    request) would otherwise decide the folder and the fork check."""
+    env = {k: v for k, v in os.environ.items()
+           if k not in ("GITHUB_HEAD_REF", "GITHUB_EVENT_PATH", "GITHUB_OUTPUT")}
+    return {**env, "GITHUB_SERVER_URL": f"file://{remote.parent.parent}",
+            "GITHUB_API_URL": "http://127.0.0.1:9", "GITHUB_REPOSITORY": "OASIS/tc",
+            "GITHUB_REF_NAME": "main", "GITHUB_RUN_ID": "42", "PUBLISH_TOKEN": "t0ken"}
+
+
 def publish(tmp_path, files, remote, *, branch="pubcheck-reports", title="CSAF v2.1 CSD01",
             extra_env=None) -> tuple[subprocess.CompletedProcess, dict, str]:
     out = tmp_path / f"github-output-{title}"
     out.write_text("")
     links = tmp_path / f"links-{title}.md"
-    env = {**os.environ, "GITHUB_SERVER_URL": f"file://{remote.parent.parent}",
-           "GITHUB_API_URL": "http://127.0.0.1:9", "GITHUB_REPOSITORY": "OASIS/tc",
-           "GITHUB_REF_NAME": "main", "GITHUB_RUN_ID": "42", "GITHUB_OUTPUT": str(out),
-           "PUBLISH_TOKEN": "t0ken", **(extra_env or {})}
-    env.pop("GITHUB_HEAD_REF", None)
-    env.pop("GITHUB_EVENT_PATH", None)
-    env.update(extra_env or {})
+    env = {**runner_env(remote), "GITHUB_OUTPUT": str(out), **(extra_env or {})}
     r = subprocess.run([sys.executable, str(PUBLISH), "--files", str(files), "--branch", branch,
                         f"--title={title}", "--links-md", str(links)],
                        capture_output=True, text=True, env=env, timeout=120)
@@ -92,7 +97,7 @@ def test_first_publish_creates_an_orphan_branch_with_every_file_and_the_links(
     for name in ("pubcheck-validation.pdf", "pubcheck-validation.md", "pubcheck-validation.html",
                  "pubcheck-report.json", "pubcheck-report.txt", "meta.json"):
         assert f"{folder}/{name}" in listing, listing
-    assert "index.html" in listing and ".nojekyll" in listing
+    assert "index.html" in listing and ".nojekyll" in listing and ".pubcheck-reports" in listing
     # An orphan: no history shared with the code branch.
     merge_base = subprocess.run(["git", "-C", str(remote), "merge-base", "main",
                                  "pubcheck-reports"], capture_output=True)
@@ -131,9 +136,7 @@ def test_concurrent_matrix_calls_all_land(tmp_path, files, remote):
     """Red-team counterexample: matrix jobs push to one branch at once. A
     push that loses the race must fetch, re-apply on the new tip and push
     again, so no job's report is dropped."""
-    env = {**os.environ, "GITHUB_SERVER_URL": f"file://{remote.parent.parent}",
-           "GITHUB_API_URL": "http://127.0.0.1:9", "GITHUB_REPOSITORY": "OASIS/tc",
-           "GITHUB_REF_NAME": "main", "PUBLISH_TOKEN": "t"}
+    env = runner_env(remote)
     procs = [subprocess.Popen([sys.executable, str(PUBLISH), "--files", str(files),
                                f"--title=job-{i}", "--links-md", str(tmp_path / f"l{i}")],
                               env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -205,3 +208,34 @@ def test_pages_serving_the_branch_puts_the_rendered_html_first(tmp_path, files, 
     assert links.split("\n- ")[1].startswith(f"[HTML report (opens in browser)]({page})")
     assert f"::notice title=Validation report::HTML report (opens in browser): {page}" in r.stdout
     assert "source view" not in links
+
+
+def test_an_existing_branch_it_did_not_create_is_never_written(tmp_path, files, remote):
+    """Red-team counterexample: publish-branch: main overwrote the site's
+    own index.html with the reports index."""
+    before = git(remote, "rev-parse", "main")
+    r, out, links = publish(tmp_path, files, remote, branch="main")
+    assert r.returncode == 0
+    assert "was not created for pub-check reports" in out["report_publish_note"], out
+    assert git(remote, "rev-parse", "main") == before
+    assert "Report not published" in links
+
+
+def test_a_ref_named_like_a_root_file_gets_its_own_folder(tmp_path, files, remote):
+    """Red-team counterexample: a branch named index.html collided with the
+    root index.html and publishing failed with a raw path error."""
+    publish(tmp_path, files, remote)
+    r, out, _ = publish(tmp_path, files, remote, extra_env={"GITHUB_HEAD_REF": "index.html"})
+    assert out["report_publish_note"] == "published", out
+    listing = git(remote, "ls-tree", "-r", "--name-only", "pubcheck-reports").split()
+    assert "ref-index.html/csaf-v2.1-csd01/meta.json" in listing
+    assert "index.html" in listing
+
+
+def test_a_multi_line_reason_stays_one_workflow_command(tmp_path, files, remote):
+    """Red-team counterexample: a git error spanning lines broke the
+    ::notice command and put raw '::' lines in the log."""
+    r, out, _ = publish(tmp_path, files, remote, branch="reports\n::error::INJECTED")
+    lines = [l for l in r.stdout.splitlines() if l.startswith("::")]
+    assert len(lines) == 1 and lines[0].startswith("::notice title=Validation report::"), r.stdout
+    assert "\n" not in out["report_publish_note"]

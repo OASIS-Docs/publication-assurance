@@ -60,6 +60,8 @@ FILES = {  # name on the runner -> name on the branch
 ATTEMPTS = 10           # a matrix pushes to one branch; each retry re-applies on the new tip
 BOT = ("github-actions[bot]", "41898282+github-actions[bot]@users.noreply.github.com")
 PAGES_HOWTO = "Settings > Pages > Deploy from a branch > {branch} / (root)"
+MARKER = ".pubcheck-reports"   # at the root of every branch this script created
+RESERVED = {"index.html", MARKER, ".nojekyll"}
 
 
 class NotPublished(Exception):
@@ -75,8 +77,9 @@ def slug(text: str) -> str:
 def folder_for(env: dict, title: str, target: str) -> str:
     """<ref>/<slug>: the pull request's head branch, else the ref name, then
     the summary title, else the target."""
-    ref = env.get("GITHUB_HEAD_REF") or env.get("GITHUB_REF_NAME") or "local"
-    return f"{slug(ref)}/{slug(title or target)}"
+    ref = slug(env.get("GITHUB_HEAD_REF") or env.get("GITHUB_REF_NAME") or "local")
+    # A ref named like a file at the branch root would collide with it.
+    return f"{'ref-' + ref if ref in RESERVED else ref}/{slug(title or target)}"
 
 
 def fork_pull_request(env: dict) -> bool:
@@ -125,6 +128,11 @@ class Branch:
         self.git("fetch", "-q", "--depth=1", "origin",
                  f"+refs/heads/{self.branch}:refs/remotes/origin/{self.branch}")
         self.git("checkout", "-q", "-B", self.branch, f"origin/{self.branch}")
+        if not os.path.isfile(os.path.join(self.dir, MARKER)):
+            # Somebody's real branch (main, gh-pages): never write into it.
+            raise NotPublished(f"branch `{self.branch}` exists and was not created for pub-check "
+                               f"reports (it has no {MARKER} file); set `publish-branch` to "
+                               "a branch of its own")
         return True
 
     def commit_and_push(self, message: str) -> str | None:
@@ -162,7 +170,8 @@ def write_run(root: str, folder: str, files: str, meta: dict) -> None:
             shutil.copyfile(os.path.join(files, src), os.path.join(dest, name))
     with open(os.path.join(dest, "meta.json"), "w") as f:
         json.dump(meta, f, indent=2, sort_keys=True)
-    open(os.path.join(root, ".nojekyll"), "w").close()
+    for name in (".nojekyll", MARKER):
+        open(os.path.join(root, name), "w").close()
     with open(os.path.join(root, "index.html"), "w") as f:
         f.write(render_index(root))
 
@@ -256,6 +265,12 @@ def links_block(title: str, verdict: str, urls: dict, note: str, pages_why: str,
     return "\n".join(lines + ["", ""])
 
 
+def command_data(text: str) -> str:
+    """Text safe as a workflow command's message: one line, with GitHub's
+    escapes for %, CR and LF."""
+    return text.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--files", required=True)
@@ -277,7 +292,7 @@ def main() -> int:
         verdict = f"{validation_report.verdict(rec)} {validation_report.result_line(rec)}"
     except (OSError, ValueError, KeyError, TypeError):
         data, rec, verdict = {}, None, "The gate produced no readable --json report."
-    title = args.title or data.get("target", "package")
+    title = " ".join((args.title or data.get("target", "package")).split())
     folder = folder_for(env, args.title, data.get("target", "package"))
     urls: dict = {}
     pages_why = ""
@@ -331,17 +346,17 @@ def main() -> int:
             urls["html_page"] = f"{site}{folder}/pubcheck-validation.html"
         note = "published"
     except NotPublished as exc:
-        note = str(exc)
+        note = " ".join(str(exc).split())
     except (subprocess.CalledProcessError, OSError) as exc:
         detail = getattr(exc, "stderr", "") or str(exc)
-        note = f"publishing failed: {detail.strip()}"
+        note = f"publishing failed: {' '.join(detail.split())}"
         urls = {}
 
     outputs = {"report_url_pdf": urls.get("pdf", ""), "report_url_md": urls.get("md", ""),
                "report_url_html": urls.get("html_page") or urls.get("html_blob", ""),
                "report_url_folder": urls.get("folder", ""),
                "report_url_pdf_pinned": urls.get("pdf_pinned", ""),
-               "report_publish_note": note.replace("\n", " ")}
+               "report_publish_note": note}
     out = env.get("GITHUB_OUTPUT")
     if out:
         with open(out, "a") as f:
@@ -354,7 +369,7 @@ def main() -> int:
         notice = f"Markdown report: {urls['md']}"
     else:
         notice = f"Report not published: {note}. Files for this run: {run_url}"
-    print(f"::notice title=Validation report::{notice}")
+    print(f"::notice title=Validation report::{command_data(notice)}")
     block = links_block(title, verdict, urls, note, pages_why, args.branch, run_url)
     if args.links_md:
         with open(args.links_md, "w") as f:
