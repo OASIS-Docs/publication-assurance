@@ -45,11 +45,15 @@ def squash(text: str) -> str:
     return re.sub(r"\s+", "", text)
 
 
-def test_the_pdf_carries_every_check_class_and_condition(tmp_path):
+def require_browser() -> None:
     if not validation_report.find_browser():
         if os.environ.get("REQUIRE_CHROME") == "1":
             pytest.fail("REQUIRE_CHROME=1 but no Chrome or Chromium was found")
         pytest.skip("no Chrome or Chromium on this machine")
+
+
+def test_the_pdf_carries_every_check_class_and_condition(tmp_path):
+    require_browser()
     stage = stage_from_corpus(tmp_path / "pkg", CSAF_CSD01)
     gate = run_cli("--json", str(stage))
     assert gate.returncode in (0, 1), gate.stderr
@@ -94,3 +98,59 @@ def test_no_browser_means_no_pdf_a_warning_and_the_same_exit(tmp_path):
     assert md.stat().st_size > 0
     assert not pdf.exists()
     assert "PDF not written" in result.stderr
+
+
+def test_a_row_taller_than_a_page_loses_no_line(tmp_path):
+    """Red-team counterexample: a 200-line observed value and a 10,000
+    character token with no break opportunity, each in a row taller than a
+    page. Every line and every character must reach the text layer."""
+    require_browser()
+    lines = "\n".join(f"line {i} of a very long observed value" for i in range(200))
+    token = "X" * 10000
+    data = {"target": "t", "observed": {},
+            "findings": [{"severity": "WARN", "check": "x", "message": f"tall:\n{lines}"},
+                         {"severity": "BLOCKER", "check": "y", "message": f"wide: {token}"}],
+            "conditions": [{"check": "x", "sig": "tall", "applies": "all", "condition": "c",
+                            "pulls": "p", "compares_to": "e"},
+                           {"check": "y", "sig": "wide", "applies": "all", "condition": "d",
+                            "pulls": "p", "compares_to": "e"}]}
+    (tmp_path / "r.json").write_text(json.dumps(data))
+    pdf = tmp_path / "o.pdf"
+    result = subprocess.run([sys.executable, str(REPORT), str(tmp_path / "r.json"),
+                             "--md", str(tmp_path / "o.md"), "--pdf", str(pdf)],
+                            capture_output=True, text=True)
+    assert result.returncode == 0 and pdf.exists(), result.stderr
+    text = pdf_text(pdf)
+    # A line wrapped across a page break has the footer between its halves,
+    # so count the "line N of" heads: once in the class table, once below.
+    heads = re.findall(r"line\s+(\d+)\s+of", text)
+    short = [n for n in range(200) if heads.count(str(n)) < 2]
+    assert not short, f"lines missing from the PDF: {short}"
+    assert text.count("X") == 2 * len(token)
+
+
+def test_a_hung_browser_times_out_and_leaves_no_process_behind(tmp_path):
+    """Red-team counterexample: a browser that never answers. The report must
+    still exit 0 without a PDF, and no process the browser started may
+    outlive it."""
+    if validation_report.fcntl is None:
+        pytest.skip("the PDF step is POSIX-only")
+    pidfile = tmp_path / "child.pid"
+    fake = tmp_path / "hung-browser"
+    fake.write_text(f"#!/bin/sh\nsleep 300 &\necho $! > {pidfile}\nwait\n")
+    fake.chmod(0o755)
+    (tmp_path / "r.json").write_text(json.dumps({
+        "target": "t", "observed": {}, "findings": [],
+        "conditions": [{"check": "x", "sig": "s", "applies": "all", "condition": "c",
+                        "pulls": "p", "compares_to": "e"}]}))
+    pdf = tmp_path / "o.pdf"
+    env = {**os.environ, "PUBCHECK_CHROME": str(fake), "PUBCHECK_PDF_TIMEOUT": "2"}
+    result = subprocess.run([sys.executable, str(REPORT), str(tmp_path / "r.json"),
+                             "--md", str(tmp_path / "o.md"), "--pdf", str(pdf)],
+                            capture_output=True, text=True, env=env, timeout=60)
+    assert result.returncode == 0, result.stderr
+    assert not pdf.exists()
+    assert "within 2s" in result.stderr, result.stderr
+    child = int(pidfile.read_text())
+    with pytest.raises(ProcessLookupError):
+        os.kill(child, 0)

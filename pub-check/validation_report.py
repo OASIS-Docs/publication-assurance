@@ -41,6 +41,7 @@ import os
 import re
 import select
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -396,7 +397,7 @@ def render_summary(rec: dict, report_files: str | None) -> str:
 BROWSERS = ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome",
             "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
             "/Applications/Chromium.app/Contents/MacOS/Chromium")
-PDF_TIMEOUT = 120  # seconds for the whole browser session
+PDF_TIMEOUT = 120  # seconds for the whole browser session; $PUBCHECK_PDF_TIMEOUT overrides
 
 
 def find_browser() -> str | None:
@@ -448,19 +449,22 @@ class _DevTools:
             # Ubuntu 24.04 blocks the unprivileged user namespaces Chrome's
             # sandbox needs. The page is our own escaped HTML with no script.
             args.append("--no-sandbox")
+        # Its own session, so close() can end every helper process the
+        # browser started, not only the one it launched.
         self.proc = subprocess.Popen(args, preexec_fn=wire, close_fds=False,
-                                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                                     stderr=subprocess.DEVNULL)
+                                     start_new_session=True, stdin=subprocess.DEVNULL,
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         os.close(to_chrome)
         os.close(from_chrome)
         self._buf, self._next, self._events = b"", 0, []
-        self.deadline = time.monotonic() + PDF_TIMEOUT
+        self.timeout = float(os.environ.get("PUBCHECK_PDF_TIMEOUT") or PDF_TIMEOUT)
+        self.deadline = time.monotonic() + self.timeout
 
     def _read(self) -> dict:
         while b"\0" not in self._buf:
             left = self.deadline - time.monotonic()
             if left <= 0 or not select.select([self._r], [], [], left)[0]:
-                raise TimeoutError(f"no reply from the browser within {PDF_TIMEOUT}s")
+                raise TimeoutError(f"no reply from the browser within {self.timeout:g}s")
             chunk = os.read(self._r, 1 << 20)
             if not chunk:
                 raise RuntimeError("the browser closed the DevTools pipe")
@@ -498,10 +502,14 @@ class _DevTools:
         for fd in (self._w, self._r):
             os.close(fd)
         try:
-            self.proc.wait(timeout=10)
+            self.proc.wait(timeout=5)
         except subprocess.TimeoutExpired:
             self.proc.kill()
             self.proc.wait()
+        try:
+            os.killpg(self.proc.pid, signal.SIGKILL)   # stragglers in its session
+        except (ProcessLookupError, PermissionError):
+            pass
 
 
 def render_pdf(rec: dict, html_path: str, pdf_path: str) -> str | None:
