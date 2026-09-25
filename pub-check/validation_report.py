@@ -15,7 +15,7 @@ evidence the table exists to show. The class table caps each class at five
 findings and points at the JSON record for the rest.
 
 Usage:
-  validation_report.py <report.json> --md <out.md> [--html <out.html>]
+  validation_report.py <report.json> --md <out.md> [--html <out.html>] [--pdf <out.pdf>]
                        [--title <label>] [--exit-code N] [--date YYYY-MM-DD]
                        [--step-summary [--report-files <text>]]
 
@@ -23,18 +23,34 @@ Usage:
 --step-summary also appends the class table, and the condition table in a
 collapsed section, to $GITHUB_STEP_SUMMARY (stdout when that is unset).
 
+--pdf prints the HTML report to an A4 landscape PDF with headless Chrome or
+Chromium, driven over the DevTools pipe. No browser means no PDF and a
+warning on stderr, never a different exit status.
+
 Standard library only. Exit 0 on success, 2 when the input is not a pub-check
 --json report.
 """
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime
 import html
 import json
 import os
 import re
+import select
+import shutil
+import subprocess
 import sys
+import tempfile
+import time
+from pathlib import Path
+
+try:
+    import fcntl
+except ImportError:      # Windows: the PDF step reports itself skipped
+    fcntl = None
 
 SEV_ORDER = {"BLOCKER": 0, "WARN": 1, "INFO": 2}
 RENDER_CAP = 5          # findings shown per class in the class table
@@ -261,7 +277,7 @@ CSS = """
 :root{--ink:#0a2540;--accent:#2248e5;--muted:#6b7380;--alt:#f2f6fb;--border:#d5dae0;
 --bad:#b42318;--badbg:#fdecea;--warn:#8a5a00;--warnbg:#fff4d6;--good:#15803d;--goodbg:#e8f5ec;
 --na:#6b7380;--nabg:#f1f2f4;--bg:#fff}
-@media (prefers-color-scheme:dark){:root{--ink:#e6ebf2;--accent:#8aa2ff;--muted:#9aa3ae;
+@media screen and (prefers-color-scheme:dark){:root{--ink:#e6ebf2;--accent:#8aa2ff;--muted:#9aa3ae;
 --alt:#18212c;--border:#2c3643;--bad:#ff8a80;--badbg:#3a1714;--warn:#ffd27a;--warnbg:#3a2d0c;
 --good:#6fd394;--goodbg:#10301d;--na:#9aa3ae;--nabg:#222a33;--bg:#0f151c}}
 *{box-sizing:border-box}
@@ -285,6 +301,25 @@ td.PASS{color:var(--good);background:var(--goodbg)}td.BLOCKER{color:var(--bad);b
 td.WARN{color:var(--warn);background:var(--warnbg)}td.NA,td.INFO{color:var(--na);background:var(--nabg)}
 code{font-family:"JetBrains Mono",Menlo,monospace;font-size:12px}
 p.note{color:var(--muted)}
+@page{size:A4 landscape;margin:1.27cm}
+@media print{
+:root{--ink:#0a2540;--accent:#2248e5;--muted:#6b7380;--alt:#f2f6fb;--border:#d5dae0;
+--bad:#b42318;--badbg:#fdecea;--warn:#8a5a00;--warnbg:#fff4d6;--good:#15803d;--goodbg:#e8f5ec;
+--na:#6b7380;--nabg:#f1f2f4;--bg:#fff}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{padding:0;font-size:9pt}
+main{max-width:none}
+h1{font-size:15pt}h2{font-size:12pt;margin:16pt 0 6pt;break-after:avoid}
+p.note{break-after:avoid}
+.wrap{overflow:visible}
+table{font-size:8pt;line-height:1.3}
+th,td{padding:2.5pt 4pt}
+th{position:static;background:var(--ink);color:#fff}
+thead{display:table-header-group}
+tr{break-inside:avoid}
+td.t{min-width:9em}td.t.f{min-width:14em}
+code{font-size:7.5pt}
+}
 """
 
 
@@ -358,11 +393,169 @@ def render_summary(rec: dict, report_files: str | None) -> str:
     return text + "\n\n---\n"
 
 
+BROWSERS = ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome",
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/Applications/Chromium.app/Contents/MacOS/Chromium")
+PDF_TIMEOUT = 120  # seconds for the whole browser session
+
+
+def find_browser() -> str | None:
+    """A headless-capable Chrome or Chromium: $PUBCHECK_CHROME alone when it
+    is set, else the first of BROWSERS on PATH or at its absolute path.
+    GitHub's ubuntu-latest runners carry google-chrome."""
+    chosen = os.environ.get("PUBCHECK_CHROME")
+    for name in ((chosen,) if chosen else BROWSERS):
+        path = shutil.which(name) or (name if os.path.isabs(name) and os.access(name, os.X_OK)
+                                      else None)
+        if path:
+            return path
+    return None
+
+
+def footer_template(rec: dict) -> str:
+    """Chrome's print footer: the report title and date on the left, Page X
+    of Y on the right. Chrome fills the pageNumber and totalPages spans."""
+    e = html.escape
+    return ('<div style="width:100%;margin:0 1.27cm;padding-top:3px;border-top:1px solid #d5dae0;'
+            'font:7.5pt Inter,\'Helvetica Neue\',Arial,sans-serif;color:#6b7380;display:flex;'
+            'justify-content:space-between;-webkit-print-color-adjust:exact">'
+            f'<span>pub-check Validation Report: {e(rec["title"])} | {e(rec["date"])}</span>'
+            '<span>Page <span class="pageNumber"></span> of <span class="totalPages"></span>'
+            '</span></div>')
+
+
+class _DevTools:
+    """The Chrome DevTools protocol over --remote-debugging-pipe: the browser
+    reads NUL-terminated JSON commands on fd 3 and writes replies and events
+    on fd 4. A pipe needs no websocket, so this stays standard library."""
+
+    def __init__(self, browser: str, profile: str):
+        to_chrome, self._w = os.pipe()
+        self._r, from_chrome = os.pipe()
+
+        def wire():
+            # Move both ends clear of 3 and 4 first, so neither dup2 can
+            # overwrite the other; dup2 leaves the results inheritable.
+            a = fcntl.fcntl(to_chrome, fcntl.F_DUPFD, 10)
+            b = fcntl.fcntl(from_chrome, fcntl.F_DUPFD, 10)
+            os.dup2(a, 3)
+            os.dup2(b, 4)
+
+        args = [browser, "--headless=new", "--remote-debugging-pipe", "--disable-gpu",
+                "--no-first-run", "--no-default-browser-check", "--disable-extensions",
+                f"--user-data-dir={profile}"]
+        if sys.platform.startswith("linux"):
+            # Ubuntu 24.04 blocks the unprivileged user namespaces Chrome's
+            # sandbox needs. The page is our own escaped HTML with no script.
+            args.append("--no-sandbox")
+        self.proc = subprocess.Popen(args, preexec_fn=wire, close_fds=False,
+                                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                     stderr=subprocess.DEVNULL)
+        os.close(to_chrome)
+        os.close(from_chrome)
+        self._buf, self._next, self._events = b"", 0, []
+        self.deadline = time.monotonic() + PDF_TIMEOUT
+
+    def _read(self) -> dict:
+        while b"\0" not in self._buf:
+            left = self.deadline - time.monotonic()
+            if left <= 0 or not select.select([self._r], [], [], left)[0]:
+                raise TimeoutError(f"no reply from the browser within {PDF_TIMEOUT}s")
+            chunk = os.read(self._r, 1 << 20)
+            if not chunk:
+                raise RuntimeError("the browser closed the DevTools pipe")
+            self._buf += chunk
+        msg, self._buf = self._buf.split(b"\0", 1)
+        return json.loads(msg)
+
+    def call(self, method: str, session: str | None = None, **params) -> dict:
+        self._next += 1
+        msg = {"id": self._next, "method": method, "params": params}
+        if session:
+            msg["sessionId"] = session
+        os.write(self._w, json.dumps(msg).encode() + b"\0")
+        while True:
+            reply = self._read()
+            if reply.get("id") == self._next:
+                if "error" in reply:
+                    raise RuntimeError(f"{method}: {reply['error'].get('message')}")
+                return reply.get("result", {})
+            self._events.append(reply)
+
+    def wait_event(self, method: str, session: str) -> None:
+        while True:
+            for ev in self._events:
+                if ev.get("method") == method and ev.get("sessionId") == session:
+                    self._events.remove(ev)
+                    return
+            self._events.append(self._read())
+
+    def close(self) -> None:
+        try:
+            self.call("Browser.close")
+        except (OSError, RuntimeError, TimeoutError):
+            pass
+        for fd in (self._w, self._r):
+            os.close(fd)
+        try:
+            self.proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            self.proc.kill()
+            self.proc.wait()
+
+
+def render_pdf(rec: dict, html_path: str, pdf_path: str) -> str | None:
+    """Print the HTML report to an A4 landscape PDF with headless Chrome:
+    light theme whatever the system scheme, 1.27cm margins, header rows
+    repeated on every page, result colours kept, and a footer carrying the
+    title and Page X of Y. Returns None on success, else why no PDF was
+    written; a missing browser is a reason, never an exception."""
+    browser = find_browser()
+    if not browser:
+        return "no Chrome or Chromium found (set PUBCHECK_CHROME to one)"
+    if fcntl is None:
+        return "PDF printing needs a POSIX host (the DevTools pipe uses fds 3 and 4)"
+    with tempfile.TemporaryDirectory(prefix="pubcheck-chrome-") as profile:
+        try:
+            dt = _DevTools(browser, profile)
+        except OSError as exc:
+            return f"could not start {browser}: {exc}"
+        try:
+            target = dt.call("Target.createTarget", url="about:blank")["targetId"]
+            session = dt.call("Target.attachToTarget", targetId=target, flatten=True)["sessionId"]
+            dt.call("Page.enable", session)
+            dt.call("Emulation.setEmulatedMedia", session, media="print",
+                    features=[{"name": "prefers-color-scheme", "value": "light"}])
+            dt.call("Page.navigate", session, url=Path(html_path).resolve().as_uri())
+            dt.wait_event("Page.loadEventFired", session)
+            margin = 0.5  # inches: 1.27cm
+            pdf = dt.call("Page.printToPDF", session, landscape=True,
+                          paperWidth=11.69, paperHeight=8.27, marginTop=margin,
+                          marginBottom=margin, marginLeft=margin, marginRight=margin,
+                          printBackground=True, preferCSSPageSize=True,
+                          displayHeaderFooter=True, headerTemplate="<span></span>",
+                          footerTemplate=footer_template(rec))
+        except (OSError, RuntimeError, TimeoutError, KeyError, ValueError) as exc:
+            return f"{browser} could not print the report: {exc}"
+        finally:
+            dt.close()
+    data = base64.b64decode(pdf["data"])
+    if not data.startswith(b"%PDF-"):
+        return f"{browser} returned something that is not a PDF"
+    with open(pdf_path, "wb") as f:
+        f.write(data)
+    return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("report_json", help="output of oasis_pub_check.py --json")
     ap.add_argument("--md", required=True, help="write the Markdown report here")
     ap.add_argument("--html", default=None, help="also write a self-contained HTML report here")
+    ap.add_argument("--pdf", default=None,
+                    help="also print the HTML report to an A4 landscape PDF here with headless "
+                         "Chrome; skipped with a warning (exit status unchanged) when no "
+                         "browser is available")
     ap.add_argument("--title", default="", help="report heading; defaults to the target")
     ap.add_argument("--exit-code", type=int, default=None,
                     help="the gate's own exit code, recorded in the report")
@@ -392,6 +585,18 @@ def main() -> int:
     if args.html:
         with open(args.html, "w") as f:
             f.write(render_html(rec))
+    pdf_written = False
+    if args.pdf:
+        with tempfile.TemporaryDirectory(prefix="pubcheck-report-") as tmp:
+            page = args.html or os.path.join(tmp, "pubcheck-validation.html")
+            if not args.html:
+                with open(page, "w") as f:
+                    f.write(render_html(rec))
+            why = render_pdf(rec, page, args.pdf)
+        if why:
+            print(f"validation_report: warning: PDF not written: {why}", file=sys.stderr)
+        else:
+            pdf_written = True
     if args.step_summary:
         section = render_summary(rec, args.report_files)
         path = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -402,7 +607,8 @@ def main() -> int:
             print(section)
     print(f"validation report: {rec['total_checks']} conditions across "
           f"{rec['total_classes']} classes -> {args.md}"
-          + (f", {args.html}" if args.html else ""), file=sys.stderr)
+          + (f", {args.html}" if args.html else "")
+          + (f", {args.pdf}" if pdf_written else ""), file=sys.stderr)
     return 0
 
 

@@ -82,8 +82,8 @@ jobs:
 Inputs: `target` (required), `args` (e.g. `--json`), `python-version`,
 `install-poppler`, `report-dir` (default `pubcheck-report`; writes
 `pubcheck-report.txt` and `pubcheck-report.json` there, plus the full
-Validation Report as `pubcheck-validation.md` and `pubcheck-validation.html`;
-`''` to disable), `write-summary` (default `true`; writes a GitHub Step Summary
+Validation Report as `pubcheck-validation.md`, `pubcheck-validation.html` and
+`pubcheck-validation.pdf`; `''` to disable), `write-summary` (default `true`; writes a GitHub Step Summary
 carrying the verdict, the full findings list and the Validation Report's
 tables, so nobody has to open the raw log), and `summary-title` (labels that
 summary heading when the action is called more than once, in a matrix for
@@ -95,9 +95,17 @@ PASS, WARN, BLOCKER or NA, with the value the check pulled from the package
 and what it was compared against. NA rows say why a condition does not apply.
 
 Outputs: `exit-code`, `blockers`, `warnings`, `report-txt`, `report-json`,
-`report-validation-md` and `report-validation-html` (each path is empty when
-`report-dir` is `''`; the two validation paths are also empty if the report
-could not be rendered, which never changes the gate's own result). See
+`report-validation-md`, `report-validation-html` and `report-validation-pdf`
+(each path is empty when `report-dir` is `''`; the validation paths are also
+empty if the report could not be rendered, which never changes the gate's own
+result). The PDF is the HTML report printed by headless Chrome, which GitHub's
+Ubuntu runners carry as `google-chrome`: A4 landscape, 1.27cm margins, a light
+theme whatever the viewer's colour scheme, table headers repeated on every
+page, observed values wrapped rather than cut, and the report title with Page
+X of Y in the footer. GitHub shows it in the browser from the artifact or
+repository. Where no Chrome or Chromium is found (set `PUBCHECK_CHROME` to
+point at one), the PDF is skipped with a warning and `report-validation-pdf`
+is empty. See
 [`examples/consumer-workflow-matrix.yml`](examples/consumer-workflow-matrix.yml)
 for a multi-package caller that uploads the reports as a downloadable
 artifact. To also run it automatically on every push, set

@@ -26,6 +26,24 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+- Action: the full Validation Report is also written as
+  `pubcheck-validation.pdf`, exposed as the new output
+  `report-validation-pdf`. `validation_report.py --pdf` prints the HTML report
+  with headless Chrome over the DevTools pipe (standard library only): A4
+  landscape, 1.27cm margins, light theme regardless of the system colour
+  scheme, header rows repeated on every page, rows kept whole where they fit,
+  long observed values wrapped and never cut, PASS/WARN/BLOCKER/NA colours
+  kept, and a footer with the report title and Page X of Y. With no Chrome or
+  Chromium available the PDF is skipped with a warning; the exit-code
+  contract and the existing outputs are unchanged.
+- The HTML report's dark colour scheme now applies on screen only, so a
+  printed copy is always light.
+- CI: `tests/test_validation_report_pdf.py` reads the PDF's text layer and
+  requires every check class from `--list-checks` and every condition cell.
+  The test job and the action job run it with `REQUIRE_CHROME=1`, so a
+  missing browser fails there instead of skipping, and the action job also
+  checks the `report-validation-pdf` output.
+
 ### Fixed
 
 - **title-version** evaluated nothing on any CSAF package. It confirms the
