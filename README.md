@@ -17,6 +17,8 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
+**Bringing the gate into a TC repository: [docs/ADOPTING.md](docs/ADOPTING.md)**, three steps and about five minutes.
+
 Before OASIS publishes a work product to `docs.oasis-open.org`, TC
 Administration runs it through the publication acceptance tests.
 `oasis-pub-check` is those tests, packaged to run in your own CI. Run them
@@ -47,72 +49,18 @@ Work Product Manifest File.
 
 ### 2. In your TC repo on GitHub
 
-1. Copy [`examples/consumer-workflow.yml`](examples/consumer-workflow.yml) into
-   your TC repo as `.github/workflows/pub-check.yml`.
-2. Commit and push.
-3. In your repo on GitHub: **Actions → pub-check → Run workflow**, type your
-   package path (e.g. `work/v1.0/csd01`), and run.
+1. Add `.github/workflows/pub-check.yml`, a short workflow that calls this
+   repository as a pinned Action, with your package path as `target`.
+2. Optionally, serve the `pubcheck-reports` branch with GitHub Pages so every
+   report has a web address.
+3. Push. The job summary links the Validation Report as PDF, Markdown and
+   HTML. A blocker fails the build; warnings do not.
 
-A blocker fails the build; warnings do not. The workflow pulls `oasis-pub-check`
-from this repo as a pinned Action, so you copy nothing into your repo and get
-fixes by bumping the tag.
-
-If you would rather paste a step than copy the file, this is the minimum:
-
-```yaml
-name: pub-check
-on:
-  workflow_dispatch:
-    inputs:
-      target:
-        description: "stage dir or .zip"
-        required: true
-jobs:
-  pub-check:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write   # to publish the report files; read works, without the links
-    steps:
-      - uses: actions/checkout@v5
-      - uses: OASIS-Docs/publication-assurance@v1   # for production, pin to a full commit SHA
-        with:
-          target: ${{ inputs.target }}
-```
-
-Inputs: `target` (required), `args` (e.g. `--json`), `python-version`,
-`install-poppler`, `publish-branch` and `publish-token` (see
-[Finding the report](#finding-the-report)), `report-dir` (default `pubcheck-report`; writes
-`pubcheck-report.txt` and `pubcheck-report.json` there, plus the full
-Validation Report as `pubcheck-validation.md`, `pubcheck-validation.html` and
-`pubcheck-validation.pdf`; `''` to disable), `write-summary` (default `true`; writes a GitHub Step Summary
-carrying the verdict, the full findings list and the Validation Report's
-tables, so nobody has to open the raw log), and `summary-title` (labels that
-summary heading when the action is called more than once, in a matrix for
-example).
-
-The Validation Report is the one OASIS staff produce at intake: every check
-class the tool carries and every individual condition inside it, each marked
-PASS, WARN, BLOCKER or NA, with the value the check pulled from the package
-and what it was compared against. NA rows say why a condition does not apply.
-
-Outputs: `exit-code`, `blockers`, `warnings`, `report-txt`, `report-json`,
-the report URLs and `report-publish-note` (see
-[Finding the report](#finding-the-report)),
-`report-validation-md`, `report-validation-html` and `report-validation-pdf`
-(each path is empty when `report-dir` is `''`; the validation paths are also
-empty if the report could not be rendered, which never changes the gate's own
-result). The PDF is the HTML report printed by headless Chrome, which GitHub's
-Ubuntu runners carry as `google-chrome`: A4 landscape, 1.27cm margins, a light
-theme whatever the viewer's colour scheme, table headers repeated on every
-page, observed values wrapped rather than cut, and the report title with Page
-X of Y in the footer. GitHub shows it in the browser from the artifact or
-repository. Where no Chrome or Chromium is found (set `PUBCHECK_CHROME` to
-point at one), the PDF is skipped with a warning and `report-validation-pdf`
-is empty. See
-[`examples/consumer-workflow-matrix.yml`](examples/consumer-workflow-matrix.yml)
-for a multi-package caller that uploads the reports as a downloadable
-artifact. To also run it automatically on every push, set
-`PUB_CHECK_TARGET` in the copied workflow file and uncomment its `push:` trigger.
+**[docs/ADOPTING.md](docs/ADOPTING.md)** has the workflow to copy, each step
+in full, how to read the report, and the reference: every input and output,
+rendering Markdown before the gate, report-only runs, several documents in
+one repository, fork pull requests, pinning and upgrades, and
+troubleshooting.
 
 ### Finding the report
 
@@ -165,6 +113,7 @@ the branch.
 
 | File | Open it when |
 |---|---|
+| **[docs/ADOPTING.md](docs/ADOPTING.md)** | TC setting the gate up in its own repository: the three-step quick start, reading the report, and every option. |
 | **[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit gates, a worked example. **Start here.** |
 | **[pub-check/README.md](pub-check/README.md)** | The class-level summary of what it checks, with severities and the regression corpus. |
 | **[pub-check/CHECKS.md](pub-check/CHECKS.md)** | A check fired and you want the exact one. Full catalog, generated from the code. |
@@ -278,6 +227,7 @@ publication-assurance/
 │   ├── render_summary.py            #   the Step Summary renderer the Action calls
 │   ├── rules/                       #   oasis.rules.yaml, the criteria as data for nide
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
+├── docs/ADOPTING.md                 # Adoption guide: the gate in a TC's own repository
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
 ├── examples/                        # Worked example + the regression corpus
 │   ├── consumer-workflow.yml        #   the drop-in TC workflow (copy this)
@@ -376,4 +326,4 @@ The OASIS name and logo are trademarks of OASIS Open.
 
 ---
 
-**The documentation set:** [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)
+**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)
