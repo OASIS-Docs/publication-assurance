@@ -57,7 +57,6 @@ read [Markdown rendering before the gate](#markdown-rendering-before-the-gate).
 
 ### Step 1: Workflow file
 
-<!-- FINAL CHECK against validation-report-pdf: tag, inputs, permissions -->
 
 1. In the TC repository, create the file `.github/workflows/pub-check.yml`
    with the content below. On GitHub: **Add file > Create new file**, and
@@ -107,10 +106,15 @@ path is wrong: see [Troubleshooting](#troubleshooting).
 
 ### Step 2: Report page
 
-<!-- FINAL CHECK against validation-report-pdf: branch name, folder layout, Pages URL -->
 
 This step is optional and recommended. It gives every report a web
 address that anyone can open without downloading anything.
+
+Report publishing (the `pubcheck-reports` branch and the report links in
+Step 3) is in the release after v1.5.0. Until that release is cut, a
+workflow pinned to `@v1.5.0` skips this step, and Step 3's report files are
+in the `pubcheck-report` artifact at the bottom of the run's **Summary**
+page.
 
 The first run in Step 1 created a branch named `pubcheck-reports` that holds
 the reports: each run writes a folder, and `index.html` at the branch root
@@ -140,7 +144,6 @@ address; without it the HTML link opens the source view.
 
 ### Step 3: First report
 
-<!-- FINAL CHECK against validation-report-pdf: link labels, notice text, summary layout -->
 
 1. Push any commit, or open **Actions > pub-check > Run workflow** and
    select **Run workflow**.
@@ -167,8 +170,8 @@ address; without it the HTML link opens the source view.
 whose verdict reads `PUBLICATION-READY: zero blockers.` or
 `NOT publication-ready: N blocker(s).` The run is red when the report
 lists a blocker, or when no report could be produced (exit code `2`, a
-wrong `target` path); your own package goes green once its blockers
-are fixed. (The CSAF sample bundled with this repository stays red on one
+wrong `target` path); your own package goes green once the path is
+right and its blockers are fixed. (The CSAF sample bundled with this repository stays red on one
 blocker only staff can clear; see [Local runs](#local-runs).)
 
 To fix a blocker, edit the source, commit, and push. The next run checks
@@ -197,7 +200,6 @@ almost always because the `target` path is wrong.
 
 ### Check class table
 
-<!-- FINAL CHECK against validation-report-pdf: class result forms and the result line -->
 
 One row per check class, 59 rows, whether or not the class raised
 anything, plus a row for any finding that belongs to no registered class (its
@@ -240,13 +242,18 @@ observed value and the expected value side by side usually show the fix.
 ### NA reasons
 
 An NA row is a condition that does not apply, and its observed column
-says why. The common reasons:
+says why. The reasons:
 
 | NA reason | Meaning |
 |---|---|
 | `DOCX-render condition; this package carries no Word source` | The condition checks Word-authored packages only |
 | `ODT-source condition; this package carries no ODT source` | The condition checks ODT-authored packages only |
+| `markdown-source condition; this package carries no markdown source` | The condition checks Markdown-authored packages only |
+| `evaluated on the HTML-render row for this package` | The same rule was checked against the rendered HTML instead |
 | `evaluated on the markdown-source row for this package` | The same rule was checked against the Markdown, which is authoritative |
+| `no JSON schema files in the package` | The schema conditions have nothing to check |
+| `no PDF in the package, so there is nothing to read` | The PDF conditions have nothing to check |
+| `pdftotext (poppler) unavailable on this runner` | The runner had no poppler; leave `install-poppler` at `true` on `ubuntu-latest` |
 | `pdffonts unavailable or the package declares no font authority` | The runner had no poppler, or your HTML and CSS name no font family to compare against |
 | `no manifest.json in the package` | Add a manifest to enable the manifest checks ([Local runs](#local-runs) shows `--emit-manifest`) |
 | `no live-site result for this check (offline, unreachable, or nothing to probe)` | The condition compares the package with the live `docs.oasis-open.org` and got no answer: the run was offline (`PUB_CHECK_OFFLINE`), the site was unreachable, or there was nothing to look up |
@@ -278,7 +285,6 @@ with the run link.
 
 ### Action inputs
 
-<!-- FINAL CHECK against validation-report-pdf: publishing inputs -->
 
 All inputs except `target` are optional.
 
@@ -313,7 +319,6 @@ Set these with `env:` on the gate step.
 
 ### Report branch layout
 
-<!-- FINAL CHECK against validation-report-pdf: folder naming -->
 
 The `pubcheck-reports` branch shares no history with the code. Each run
 writes one folder, `<checked-branch>/<document>/`:
@@ -339,7 +344,6 @@ push against the latest state of the branch, up to ten times.
 
 ### Action outputs
 
-<!-- FINAL CHECK against validation-report-pdf: report-url-* and report-validation-pdf -->
 
 Read an output in a later step as
 `${{ steps.<step-id>.outputs.<name> }}`, which needs an `id:` on the gate
@@ -539,7 +543,6 @@ each artifact in the job summary.
 
 ### Fork pull requests and read-only tokens
 
-<!-- FINAL CHECK against validation-report-pdf: behaviour without write access -->
 
 A pull request opened from a fork runs with a read-only token, whatever
 the workflow's `permissions:` block says. GitHub does this so that code
@@ -669,7 +672,6 @@ those conditions report NA and the rest run unchanged.
 
 ### Troubleshooting
 
-<!-- FINAL CHECK against validation-report-pdf: the report-publishing and HTML-link rows -->
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -677,7 +679,7 @@ those conditions report NA and the rest run unchanged.
 | Run refused with "The job was not started because recent account payments have failed or your spending limit needs to be increased" | The account's Actions billing for a private repository: a failed payment, or the spending limit reached | The account owner fixes the payment or raises the spending limit, or the repository is made public |
 | No run appears after committing the workflow | The file is not at `.github/workflows/`, or Actions is disabled | Check the path; enable Actions under **Settings > Actions > General** |
 | `Unable to resolve action` | The tag in `uses:` does not exist | Use a tag from the [releases page](https://github.com/OASIS-Docs/publication-assurance/releases) |
-| Job summary has the findings but no class or condition tables | The action is older than v1.5.0, often through `@v1` | Pin to `@v1.5.0` or later |
+| Job summary has the findings but no class or condition tables | The action is older than v1.5.0, often through `@v1` | Pin to a release from v1.5.0 on |
 | Report publishing fails with a 403 or "permission denied" warning | The workflow token cannot write | Add `permissions: contents: write`; on a fork pull request this is expected, see [Fork pull requests](#fork-pull-requests-and-read-only-tokens) |
 | The notice reads "branch ... exists and was not created for pub-check reports" | `publish-branch` names a branch that already existed, such as `main` or `gh-pages` | Leave `publish-branch` at its default, or name a branch that does not exist yet |
 | `pubcheck-reports` is not in the Pages **Branch** list | The first run did not publish: it exited `2`, ran from a fork pull request, or had a read-only token. The `report-publish-note` output and the **Validation report** notice give the reason | Fix the cause (the target path, or `permissions: contents: write`), then run the workflow again |
