@@ -293,6 +293,14 @@ class PdfRenderer(PipelineStep):
             '--footer-font-name', 'Times',
             '--no-outline',
             '--print-media-type',
+            # Print CSS points at their size. Smart shrinking scales each
+            # document by its own content width (NIEM NDR v6.0 printed its
+            # 12pt body at 8pt), and at the default 96 dpi QtWebKit rounds a
+            # font to whole pixels (10pt printed 9.75pt). At 288 dpi every
+            # size in the print scale is whole device pixels. Measured on
+            # this build (0.12.6.1-2, patched Qt) by tests/test_pdf_type_scale.py.
+            '--disable-smart-shrinking',
+            '--dpi', '288',
             '--enable-local-file-access',
             '--load-error-handling', 'ignore',
             '--load-media-error-handling', 'ignore',
