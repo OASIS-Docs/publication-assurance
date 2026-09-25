@@ -76,6 +76,8 @@ Each version is anchored by a git tag on this repository.
   runs, several documents, fork pull requests, pinning, local runs,
   troubleshooting). The README quick start points to it. The example
   workflows pin `@v1.5.0`; the floating `v1` tag predates v1.4.0.
+  `tests/test_guide_pins_latest_release.py` fails when a release is cut
+  until every documented pin names it.
 
 ### Fixed
 
