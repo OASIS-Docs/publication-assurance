@@ -9,16 +9,18 @@ printed DMLex at 12pt. The PDF preprocessor now sets the scale in points under
 wkhtmltopdf prints those points at their size.
 
 The render test runs the real step 2 script, with the wkhtmltopdf build the
-step 2 workflow installs, on a copy of the CSAF v2.1 csd01 package (it renders
-at 244 pages; the corpus copy of its PDF has 249), and measures the PDF's text
+step 2 workflow installs, on copies of the CSAF v2.1 csd01 package (it renders
+at 244 pages; the corpus copy of its PDF has 249) and the CSAF v2.0 OS package
+(154 pages), and measures the PDF's text
 layer with PyMuPDF. It also requires every table row of the HTML to be in the
 PDF: with the print scale and no smart shrinking, the eight-column remediation
 matrix was wider than the column and wkhtmltopdf dropped its last column, which
 leaves no text anywhere for a position check to find. The
 CI job `pdf-render` installs both and sets REQUIRE_WKHTMLTOPDF=1, so there the
-test cannot skip. The package's link to the published stylesheet is pointed at
-.github/src/style.css, which differs from markdown-styles-v1.7.3.css only in
-whitespace, so the test does not depend on docs.oasis-open.org.
+test cannot skip. Each package's link to the published stylesheet is pointed
+at .github/src/style.css, which differs from markdown-styles-v1.7.3.css and
+v1.7.3a.css only in whitespace, so the test does not depend on
+docs.oasis-open.org for its styles.
 """
 
 from __future__ import annotations
@@ -126,6 +128,19 @@ def test_code_in_a_table_cell_can_break_after_underscores(tmp_path):
     assert len(code.find_all("wbr")) == 2, code
 
 
+def test_trailing_spaces_in_a_code_block_are_removed_and_words_are_not_joined(tmp_path):
+    """Under pre-wrap, trailing spaces hang past the block's edge (CSAF v2.0
+    OS, 'Supported digests'). A space before an inline element is not at a
+    line end and stays."""
+    from bs4 import BeautifulSoup
+    src, out = tmp_path / "in.html", tmp_path / "out.html"
+    src.write_text("<html><head></head><body><pre><code> -md4      \n -sha1   \n"
+                   "a <b>b</b>   </code></pre></body></html>", encoding="utf-8")
+    _preprocessor()(src, out).preprocess()
+    pre = BeautifulSoup(out.read_text(encoding="utf-8"), "html.parser").pre
+    assert pre.get_text() == " -md4\n -sha1\na b", repr(pre.get_text())
+
+
 def test_header_code_takes_the_header_colour():
     rule = print_rules()["th code"]
     assert "color: inherit" in rule and "background: transparent" in rule, rule
@@ -150,32 +165,44 @@ def _have_renderer():
     return shutil.which("wkhtmltopdf") is not None
 
 
+# (stage, stylesheet link in the package, rows the package's tables hold)
+PACKAGES = {
+    "csaf/v2.1/csd01": ("https://docs.oasis-open.org/styles/markdown-styles-v1.7.3.css", 100),
+    "csaf/v2.0/os": ("https://docs.oasis-open.org/templates/css/markdown-styles-v1.7.3a.css", 50),
+}
+
+
 @pytest.mark.skipif(not REQUIRED and not _have_renderer(),
                     reason="needs wkhtmltopdf, PyMuPDF and bs4; the pdf-render CI job has them")
-def test_a_real_package_prints_the_type_scale(tmp_path):
-    pkg = tmp_path / "csaf/v2.1/csd01"
-    shutil.copytree(CORPUS / "csaf/v2.1/csd01", pkg)
-    (pkg / "csaf-v2.1-csd01.pdf").unlink()
-    html = pkg / "csaf-v2.1-csd01.html"
+@pytest.mark.parametrize("stage", sorted(PACKAGES))
+def test_a_real_package_prints_the_type_scale(tmp_path, stage):
+    link, min_rows = PACKAGES[stage]
+    name = "csaf-" + "-".join(stage.split("/")[1:])
+    pkg = tmp_path / stage
+    shutil.copytree(CORPUS / stage, pkg)
+    for f in pkg.glob("*.pdf"):
+        f.unlink()
+    html = pkg / f"{name}.html"
     text = html.read_text(encoding="utf-8")
     rows = _table_rows(text)
-    link = "https://docs.oasis-open.org/styles/markdown-styles-v1.7.3.css"
     assert text.count(link) == 1
     shutil.copy(REPO_ROOT / ".github/src/style.css", pkg / ".style.css")
-    html.write_text(text.replace(link, ".style.css"), encoding="utf-8")
+    # A <base> would resolve the local stylesheet against docs.oasis-open.org.
+    text = re.sub(r"<base [^>]*>", "", text.replace(link, ".style.css"))
+    html.write_text(text, encoding="utf-8")
 
     r = subprocess.run(["bash", str(SCRIPT), str(pkg)], capture_output=True, text=True,
                        env={**os.environ, "PYTHON": sys.executable}, cwd=tmp_path)
     assert r.returncode == 0, r.stdout + r.stderr
-    m = measure(str(pkg / "csaf-v2.1-csd01.pdf"))
-    print("measured:", m)
+    m = measure(str(pkg / f"{name}.pdf"))
+    print("measured:", stage, m)
 
     assert m["pages"] > 100, m["pages"]
     assert m["body"] == 10.0, m["histogram"]["body"]
     assert m["code"] == 9.0, m["histogram"]["code"]
     assert m["footer"] == 8.0, m["histogram"]["footer"]
-    printed = pdf_text(str(pkg / "csaf-v2.1-csd01.pdf"))
-    assert len(rows) > 100, len(rows)
+    printed = pdf_text(str(pkg / f"{name}.pdf"))
+    assert len(rows) > min_rows, len(rows)
     missing = [r for r in rows if normalise(r) not in printed]
     assert missing == [], f"{len(missing)} of {len(rows)} table rows are not in the PDF: {missing}"
     assert m["outside_column"] == [], m["outside_column"]
