@@ -224,7 +224,7 @@ runs:
         python3 "$ACTION_PATH/pub-check/render_summary.py" \
           "$RUNNER_TEMP/oasis-pub-check.json" \
           --txt "$RUNNER_TEMP/oasis-pub-check.txt" \
-          --title "$SUMMARY_TITLE" \
+          --title="$SUMMARY_TITLE" \
           "${REPORT_DIR_ARGS[@]}"
         # The readable per-check tables, when the report rendered.
         if [ -f "$RUNNER_TEMP/pubcheck-validation.md" ]; then

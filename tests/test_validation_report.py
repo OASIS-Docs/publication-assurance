@@ -239,20 +239,61 @@ def test_an_unreadable_input_marks_the_rest_of_its_class_unevaluated(tmp_path):
 
 
 def test_a_summary_title_starting_with_a_dash_still_renders(tmp_path):
-    """Red-team round 2: action.yml passed --title "$SUMMARY_TITLE" and a
-    title such as --csd01 was rejected by the argument parser."""
-    (tmp_path / "r.json").write_text(
-        '{"target": "t", "blockers": 0, "observed": {}, "findings": [],'
-        ' "conditions": [{"check": "x", "sig": "s", "applies": "all",'
-        ' "condition": "c", "pulls": "p", "compares_to": "e"}]}')
-    steps = __import__("yaml").safe_load((REPO_ROOT / "action.yml").read_text())["runs"]["steps"]
-    script = next(s["run"] for s in steps if s.get("id") == "pubcheck")
-    call = script[script.index('python3 "$ACTION_PATH/pub-check/validation_report.py"'):]
-    call = call[:call.index("; then")]
-    env = {"PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin", "ACTION_PATH": str(REPO_ROOT),
-           "RUNNER_TEMP": str(tmp_path), "SUMMARY_TITLE": "--csd01", "exit_code": "0"}
-    (tmp_path / "oasis-pub-check.json").write_text((tmp_path / "r.json").read_text())
-    result = subprocess.run(["bash", "-c", call], env=env, capture_output=True, text=True)
-    assert result.returncode == 0, result.stderr
-    assert (tmp_path / "pubcheck-validation.md").read_text().startswith(
+    """Red-team rounds 2 and 3: action.yml passed --title "$SUMMARY_TITLE",
+    and a title such as --csd01 was rejected by the argument parser, first in
+    validation_report.py and then in render_summary.py, whose failure under
+    bash -e stopped the step before the validation tables were written.
+    Runs both of the action's own scripts as the runner does."""
+    import yaml
+    steps = yaml.safe_load((REPO_ROOT / "action.yml").read_text())["runs"]["steps"]
+    gate = next(s["run"] for s in steps if s.get("id") == "pubcheck")
+    summary = next(s["run"] for s in steps if s.get("name") == "Write step summary")
+    stage = stage_from_corpus(tmp_path / "pkg", CSAF_CSD01)
+    work, temp = tmp_path / "work", tmp_path / "runner-temp"
+    work.mkdir()
+    temp.mkdir()
+    out, step_summary = tmp_path / "github-output", tmp_path / "summary.md"
+    env = {"PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin",
+           "ACTION_PATH": str(REPO_ROOT), "TARGET": str(stage), "EXTRA_ARGS": "",
+           "REPORT_DIR": "pubcheck-report", "SUMMARY_TITLE": "--csd01",
+           "RUNNER_TEMP": str(temp), "GITHUB_OUTPUT": str(out),
+           "GITHUB_STEP_SUMMARY": str(step_summary), "PUB_CHECK_OFFLINE": "1"}
+    subprocess.run(["bash", "-c", gate], cwd=work, env=env, capture_output=True, text=True)
+    outputs = dict(line.split("=", 1) for line in out.read_text().splitlines())
+    assert (work / outputs["report_validation_md"]).read_text().startswith(
         "# Publication Validation Report (pub-check): --csd01")
+
+    env["EXIT_CODE"] = outputs["exit_code"]
+    result = subprocess.run(["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", summary],
+                            cwd=work, env=env, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "### Validation report: --csd01" in step_summary.read_text()
+
+
+def test_a_live_check_that_reached_the_site_is_not_marked_offline(tmp_path):
+    """Red-team round 3: on a live run where revision-collision recorded
+    nothing but stage-uri-live fetched four URIs and all retrieved, the row
+    read 'live-site probe could not run'."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 0,
+        "observed": {"x": {"previous_stage_urls": "https://example.org/a.html",
+                           "stage_uris_fetched": "4"}},
+        "findings": [], "conditions": [condition(requires="network")]})
+    rows = table_rows(md, "## All Individual Conditions")
+    assert rows[0][1] == "PASS", rows
+
+
+def test_a_stage_directory_that_could_not_be_scanned_is_not_pass(tmp_path):
+    """Red-team round 3: public-review-metadata said the live stage directory
+    'could not be scanned this run' and returned; its conditions read PASS,
+    one of them claiming the directory was scanned."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 0,
+        "observed": {"x": {"http_status": "403"}},
+        "findings": [{"severity": "INFO", "check": "x", "message":
+                      "csd01 underwent a TC public review but the live stage directory "
+                      "https://example.org/csd01/ could not be scanned this run (http "
+                      "status 403); cannot confirm whether the file is present."}],
+        "conditions": [condition(requires="network"), condition(sig="b", condition="d")]})
+    rows = table_rows(md, "## All Individual Conditions")
+    assert [r[1] for r in rows] == ["NA", "NA"], rows
