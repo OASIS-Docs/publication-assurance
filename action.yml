@@ -89,6 +89,10 @@ inputs:
     description: "Token used to push publish-branch and to read the repository's GitHub Pages settings."
     required: false
     default: ${{ github.token }}
+  fail-on-blockers:
+    description: "Whether a blocker fails the step. 'true' (default) is right for a working draft. 'false' runs report-only: blockers are reported, written and published exactly as before and raised as a ::warning annotation, and the step passes. Use it for a document that cannot change, such as a published OASIS Standard, or while a TC works through inherited findings. A target the gate cannot read (exit code 2) fails the step either way. The exit-code, blockers and warnings outputs are unchanged."
+    required: false
+    default: "true"
   summary-title:
     description: "Label for the Step Summary heading. Defaults to the target path -- set this when calling the action more than once (e.g. in a matrix) so each section is distinguishable."
     required: false
@@ -362,4 +366,15 @@ runs:
       shell: bash
       env:
         EXIT_CODE: ${{ steps.pubcheck.outputs.exit_code }}
-      run: exit "${EXIT_CODE}"
+        BLOCKERS: ${{ steps.pubcheck.outputs.blockers }}
+        FAIL_ON_BLOCKERS: ${{ inputs.fail-on-blockers }}
+        TARGET: ${{ inputs.target }}
+      run: |
+        # Report-only turns blockers (exit 1) into a warning. An unreadable
+        # target (exit 2) or an empty exit code always fails: a wrong path
+        # must never pass quietly.
+        if [ "${EXIT_CODE}" = "1" ] && [ "${FAIL_ON_BLOCKERS}" = "false" ]; then
+          echo "::warning title=oasis-pub-check (report only)::${BLOCKERS:-some} blocker(s) in ${TARGET}. The run passes because fail-on-blockers is false; see the Validation Report."
+          exit 0
+        fi
+        exit "${EXIT_CODE:-2}"

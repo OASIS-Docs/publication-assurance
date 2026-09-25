@@ -291,6 +291,7 @@ All inputs except `target` are optional.
 | `write-summary` | `true` | Writes the verdict, the findings and the report tables to the job summary |
 | `publish-branch` | `pubcheck-reports` | The branch the reports are committed to. `''` turns publishing off |
 | `publish-token` | `${{ github.token }}` | The token that pushes the report branch and reads the Pages settings |
+| `fail-on-blockers` | `true` | Whether a blocker fails the step. `false` runs report-only: the report is written and published as usual, a warning names the blocker count, and the step passes. A target the gate cannot read still fails. See [Gating and report-only runs](#gating-and-report-only-runs) |
 | `summary-title` | `''` (the target path is used) | Heading for this call's summary section, and the name of its folder on the report branch; set it when the action runs more than once in a job or matrix |
 
 ### Environment variables
@@ -459,23 +460,32 @@ the gate come from the same version.
 ### Gating and report-only runs
 
 By default a blocker fails the step, the job and the run. That is the
-right setting for a working draft. For a document that cannot change, such
-as a published OASIS Standard kept in the repository for reference, add
-`continue-on-error: true` to the gate step. The report is still written
-and published, the step still shows its failure, and the job and the run
-pass.
+right setting for a working draft the TC is ready to hold to the criteria.
+
+Set `fail-on-blockers: false` to run report-only. The report is written and
+published exactly as before, the job summary still lists every blocker, a
+warning annotation gives the count, and the step, the job and the run pass.
+Use it for a document that cannot change, such as a published OASIS Standard
+kept in the repository for reference, or for a draft while the TC works
+through findings it inherited and has not yet decided. A target the gate
+cannot read (a wrong `target:` path) fails the step in either mode.
 
 ```yaml
       - uses: OASIS-Docs/publication-assurance@v1.6.0
-        continue-on-error: true      # report only: findings never fail the job
         with:
           target: published/v1.0/os
+          fail-on-blockers: false    # report only: blockers never fail the run
 ```
 
 In a matrix the setting can come from the matrix entry, as in the DMLex
-workflow: `continue-on-error: ${{ !matrix.enforce }}`, with
-`enforce: true` on the draft and `enforce: false` on the published
-standard.
+workflow: `fail-on-blockers: ${{ matrix.enforce }}`, with `enforce: true`
+on a draft the TC gates and `enforce: false` on the published standard.
+Switch a draft to `true` once its blockers are resolved, so a new one
+cannot slip in.
+
+Releases before v1.7.0 have no `fail-on-blockers`; there, adding
+`continue-on-error: true` to the gate step passes the job and the run, but
+the step itself still shows as failed.
 
 Warnings never fail a run in either mode.
 
@@ -685,7 +695,8 @@ those conditions report NA and the rest run unchanged.
 | A matrix upload fails with `409` and "an artifact with this name already exists" | Two entries upload under one artifact name | Name each artifact from the matrix entry, as in [Several documents](#several-documents-in-one-repository) |
 | Two calls to the action in one job leave only the second's report files | The calls share one `report-dir` | Give each call its own `report-dir` |
 | Findings read `could not be reached ... (transport failure, not a 404)` | A network or site outage during the run | These are recorded as INFO, never as blockers, so the run needs no change. `PUB_CHECK_OFFLINE` (see [Environment variables](#environment-variables)) skips the live-site conditions, but it also hides real intake findings such as `revision-collision` and `public-review-metadata`, and intake always runs online: remove it once the site is back |
-| A published standard in the repository keeps the run red | Its findings cannot be fixed in a published document | Run it report-only, see [Gating and report-only runs](#gating-and-report-only-runs) |
+| A published standard in the repository keeps the run red | Its findings cannot be fixed in a published document | Set `fail-on-blockers: false` on its gate step, see [Gating and report-only runs](#gating-and-report-only-runs) |
+| A draft stays red on blockers the TC has not decided yet | The draft is gated while its findings are open | Run it report-only with `fail-on-blockers: false` until they are resolved, then set it back to `true` |
 | A finding you believe is wrong | A gap or error in the gate | See [Blocker ownership](#blocker-ownership) |
 
 ### Checks and their authorities

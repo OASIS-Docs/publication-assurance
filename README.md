@@ -56,7 +56,8 @@ Work Product Manifest File.
    GitHub Pages.
 3. **First report:** push, then open the report from the links in the job
    summary (PDF and Markdown; HTML once Pages is on). A blocker fails the
-   build; warnings do not.
+   build unless you run report-only (`fail-on-blockers: false`); warnings
+   never do.
 
 [docs/ADOPTING.md](docs/ADOPTING.md#quick-start) has the steps in full with
 the workflow to copy, how to read the report, and the reference: every
