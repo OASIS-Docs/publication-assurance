@@ -215,8 +215,8 @@ and points at the JSON record, `pubcheck-report.json`, which lists all of
 them.
 
 The header's result line counts the classes the same way, for example
-`44 of 54 evaluated check classes fully clean; 5 not evaluated; findings:
-0 blocker, 16 warning, 10 informational.`
+`45 of 54 evaluated check classes fully clean; 5 not evaluated; findings:
+0 blocker, 16 warning, 9 informational.`
 
 Read this table first. Every row that is not PASS or NA has a finding
 beside it that says what was found and, where the check knows, where.
