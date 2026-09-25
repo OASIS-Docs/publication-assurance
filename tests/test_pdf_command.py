@@ -101,7 +101,9 @@ def test_the_documented_command_matches_the_built_one(tmp_path):
         "--header-center", "--footer-line", "--footer-spacing", "4",
         "--footer-left", "--footer-center", "--footer-right",
         "--footer-font-size", "8", "--footer-font-name", "Times",
-        "--no-outline", "--print-media-type", "--enable-local-file-access",
+        "--no-outline", "--print-media-type",
+        "--disable-smart-shrinking", "--dpi", "288",
+        "--enable-local-file-access",
         "--load-error-handling", "ignore",
         "--load-media-error-handling", "ignore",
     ]
@@ -112,3 +114,13 @@ def test_the_documented_command_matches_the_built_one(tmp_path):
     for token in documented:
         assert token in cmd, f"{token} is not in the command the pipeline builds"
         assert token in block, f"{token} is missing from TRANSFORMS.md"
+
+
+def test_wkhtmltopdf_prints_css_points_at_their_size(tmp_path):
+    """Smart shrinking scaled NIEM NDR v6.0's 12pt body to 8pt, and at 96 dpi
+    a 10pt font rounds to 9.75pt. tests/test_pdf_type_scale.py measures the
+    result of these two flags on the real build."""
+    cmd = _render(tmp_path, PAGE.format(title="T", h1="T", year="2026")) \
+        .build_command(str(tmp_path / "spec.html"))
+    i = cmd.index("--print-media-type")
+    assert cmd[i + 1:i + 4] == ["--disable-smart-shrinking", "--dpi", "288"], cmd

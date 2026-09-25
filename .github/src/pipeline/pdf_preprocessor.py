@@ -145,7 +145,46 @@ class PdfPreprocessor(PipelineStep):
             widows: 2 !important;
         }
     }
-    
+
+    /* Print type scale, in points. The OASIS Markdown stylesheet sets screen
+       sizes only (12pt body and tables, 18pt h1), so the printed size was
+       whatever the renderer made of them: wkhtmltopdf shrank NIEM NDR v6.0
+       to an 8pt body and 6pt code, headless Chrome printed DMLex at 12pt.
+       These sizes match the OASIS DocBook and Word publications (DMLex v1.0
+       OS: 10pt body and code). !important where the code rules above are. */
+    @media print {
+        body { font-size: 10pt !important; line-height: 1.3 !important;
+               margin-left: 0 !important; margin-right: 0 !important; }
+        table { font-size: 9pt !important; }
+        th, td { padding: 2pt 3pt !important; }
+
+        h1big { font-size: 20pt !important; }
+        h1 { font-size: 16pt !important; }
+        h2 { font-size: 14pt !important; }
+        h3 { font-size: 12pt !important; }
+        h4 { font-size: 11pt !important; }
+        h5, h6 { font-size: 10pt !important; }
+
+        pre, .sourceCode, .highlight,
+        .json, .xml, .yaml, .bash, .shell, .python, .javascript, .http { font-size: 9pt !important; }
+        pre code { font-size: inherit !important; }
+        /* word-wrap is the spelling wkhtmltopdf's WebKit reads; it ignores
+           overflow-wrap: anywhere, so a long inline path ran past the right
+           margin (CSAF v2.1 csd01). Chrome takes the later overflow-wrap. No
+           side padding, so a broken span and a wide table fit the column. */
+        code { font-size: 9pt !important; padding-left: 0 !important; padding-right: 0 !important;
+               word-wrap: break-word !important; overflow-wrap: anywhere !important; }
+        table code, td code, th code { font-size: 8.5pt !important; }
+        h1 code, h2 code, h3 code, h4 code, h5 code, h6 code { font-size: 0.95em !important; }
+
+        /* A heading, or the caption line before an example, stays with what
+           follows it; a code block split by a page break keeps its border on
+           both halves. wkhtmltopdf reads the page-break-* spellings. */
+        h1, h2, h3, h4, h5, h6, h1big { page-break-after: avoid !important; break-after: avoid !important; }
+        p:has(+ pre), p:has(+ p > img) { page-break-after: avoid !important; break-after: avoid !important; }
+        pre { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+    }
+
     /* Figures: never wider than the line. DMLex v1.0's figures carried no
        width, so each printed at its natural size and the 1505pt UML diagram
        ran off the page. */

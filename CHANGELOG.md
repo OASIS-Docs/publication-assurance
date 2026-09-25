@@ -35,6 +35,22 @@ Each version is anchored by a git tag on this repository.
   gains the class table and, collapsed, the condition table. New outputs
   `report-validation-md` and `report-validation-html`. Existing outputs and
   the exit-code contract are unchanged; a rendering failure is a warning.
+- Pipeline: PDFs print the OASIS print type scale. The Markdown stylesheet
+  sets screen sizes only, so wkhtmltopdf's smart shrinking printed NIEM NDR
+  v6.0 PS01 at an 8pt body and 6pt code, and headless Chrome printed DMLex at
+  12pt. The PDF preprocessor now sets body 10pt, code 9pt, tables 9pt and
+  h1 to h6 at 16/14/12/11/10/10pt under `@media print`, keeps headings and
+  example captions with what follows, and keeps a split code block's border.
+  In print, inline code also carries `word-wrap: break-word` (the spelling
+  wkhtmltopdf's WebKit reads; it ignores `overflow-wrap: anywhere`) and no
+  side padding, and table cells are padded 2pt 3pt, so long inline paths and
+  the eight-column tables of CSAF v2.1 fit the A4 text column.
+  The renderer passes `--disable-smart-shrinking --dpi 288`, chosen by
+  rendering with the pinned wkhtmltopdf 0.12.6.1-2 build: without them the
+  scale printed at 7.8pt, and at 96 dpi 10pt rounds to 9.75pt. A new CI job,
+  `pdf-render`, renders the CSAF v2.1 csd01 package through the step 2 script
+  with that build and asserts body 10pt, code 9pt, footer 8pt and no text
+  outside the A4 column (`tests/test_pdf_type_scale.py`).
 - Pipeline (proposal 008): the step 2 workflow script now runs Stage 2 as
   TRANSFORMS.md documents it, `fix_html_for_pdf.py` then the renderer's A4
   argument vector. Before, it ran bare `wkhtmltopdf` on the HTML, so neither

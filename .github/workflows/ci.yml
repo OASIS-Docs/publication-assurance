@@ -126,3 +126,33 @@ jobs:
         with:
           name: pubcheck-report-csaf-v2.1-csd01
           path: pubcheck-report/
+
+  # The PDF type scale, measured on the renderer that makes the PDFs. The
+  # test job above has no wkhtmltopdf, so tests/test_pdf_type_scale.py's
+  # render test skips there; here REQUIRE_WKHTMLTOPDF=1 makes a skip a
+  # failure. The .deb is the one the step 2 workflow installs, and
+  # test_the_render_job_installs_the_workflow_s_wkhtmltopdf keeps them equal.
+  pdf-render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install wkhtmltopdf and fonts (as the step 2 workflow does)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xfonts-75dpi fonts-liberation fonts-dejavu
+          wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+          sudo apt-get install -y ./wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+          wkhtmltopdf --version
+
+      - name: Install test dependencies
+        run: python3 -m pip install pytest beautifulsoup4 PyYAML requests pymupdf
+
+      - name: Render a real package and measure its type sizes
+        env:
+          REQUIRE_WKHTMLTOPDF: "1"
+        run: pytest tests/test_pdf_type_scale.py tests/test_pdf_command.py -v -s
