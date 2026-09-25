@@ -191,3 +191,68 @@ def test_a_failed_render_leaves_no_earlier_report_in_report_dir(tmp_path):
     assert second["report_validation_md"] == "" and second["report_validation_html"] == ""
     assert not (work / "pubcheck-report" / "pubcheck-validation.md").exists()
     assert not (work / "pubcheck-report" / "pubcheck-validation.html").exists()
+
+
+def test_a_live_check_that_could_not_reach_the_site_is_not_pass(tmp_path):
+    """Red-team round 2: with the network down, stage-uri-live reported only
+    INFO 'could not be reached' and revision-collision recorded
+    '(unreachable)'; every live-site row read PASS."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 0,
+        "observed": {"revision-collision": {"http_status": "(unreachable)"},
+                     "x": {"previous_stage_urls": "https://example.org/a.html"}},
+        "findings": [{"severity": "INFO", "check": "x", "message":
+                      "Previous stage URI could not be reached to confirm it retrieves "
+                      "(transport failure, not a 404): https://example.org/a.html."}],
+        "conditions": [condition(requires="network"), condition(check="y", sig="s2")]})
+    rows = table_rows(md, "## All Individual Conditions")
+    assert [r[1] for r in rows] == ["NA", "PASS"], rows
+
+
+def test_document_text_quoted_in_a_finding_does_not_mark_a_check_unevaluated(tmp_path):
+    """Red-team round 2: an appendix heading 'Tests skipped in this release',
+    quoted in an INFO, turned a condition that scanned 374 headings into
+    'NA: not evaluated'. So did a file name such as skipped.html."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 0, "observed": {"x": {"headings_scanned": "374"}},
+        "findings": [
+            {"severity": "INFO", "check": "x", "message":
+             "Appendix/Annex heading 'Appendix Z. Tests skipped in this release' "
+             "carries no content-type label."},
+            {"severity": "INFO", "check": "x", "message": "Junk file skipped.html noted."}],
+        "conditions": [condition(sig="unrelated")]})
+    rows = table_rows(md, "## All Individual Conditions")
+    assert rows[0][1] == "PASS", rows
+
+
+def test_an_unreadable_input_marks_the_rest_of_its_class_unevaluated(tmp_path):
+    """Red-team round 2: a corrupt PDF raised one pdf-sync BLOCKER ('could
+    not read the PDF') and the check returned; its other conditions read
+    PASS although nothing was compared."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 1, "observed": {},
+        "findings": [{"severity": "BLOCKER", "check": "x",
+                      "message": "sig: pdftotext could not read the PDF (exit 1)"}],
+        "conditions": [condition(), condition(sig="other", condition="d")]})
+    rows = table_rows(md, "## All Individual Conditions")
+    assert [r[1] for r in rows] == ["BLOCKER", "NA"], rows
+
+
+def test_a_summary_title_starting_with_a_dash_still_renders(tmp_path):
+    """Red-team round 2: action.yml passed --title "$SUMMARY_TITLE" and a
+    title such as --csd01 was rejected by the argument parser."""
+    (tmp_path / "r.json").write_text(
+        '{"target": "t", "blockers": 0, "observed": {}, "findings": [],'
+        ' "conditions": [{"check": "x", "sig": "s", "applies": "all",'
+        ' "condition": "c", "pulls": "p", "compares_to": "e"}]}')
+    steps = __import__("yaml").safe_load((REPO_ROOT / "action.yml").read_text())["runs"]["steps"]
+    script = next(s["run"] for s in steps if s.get("id") == "pubcheck")
+    call = script[script.index('python3 "$ACTION_PATH/pub-check/validation_report.py"'):]
+    call = call[:call.index("; then")]
+    env = {"PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin", "ACTION_PATH": str(REPO_ROOT),
+           "RUNNER_TEMP": str(tmp_path), "SUMMARY_TITLE": "--csd01", "exit_code": "0"}
+    (tmp_path / "oasis-pub-check.json").write_text((tmp_path / "r.json").read_text())
+    result = subprocess.run(["bash", "-c", call], env=env, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / "pubcheck-validation.md").read_text().startswith(
+        "# Publication Validation Report (pub-check): --csd01")

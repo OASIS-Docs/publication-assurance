@@ -33,6 +33,7 @@ import datetime
 import html
 import json
 import os
+import re
 import sys
 
 SEV_ORDER = {"BLOCKER": 0, "WARN": 1, "INFO": 2}
@@ -71,8 +72,9 @@ def not_applicable(c: dict, observed: dict, has_md: bool, formats: str) -> str |
         return "NA: no JSON schema files in the package"
     if req == "manifest" and observed.get("manifest", {}).get("manifest_json") != "present":
         return "NA: no manifest.json in the package (noted as informational)"
-    if req == "network" and "revision-collision" not in observed:
-        return "NA: live-site probe skipped (offline)"
+    if req == "network" and observed.get("revision-collision", {}).get(
+            "http_status", "(unreachable)") == "(unreachable)":
+        return "NA: live-site probe could not run (offline or unreachable)"
     if req == "pdftotext" and "pdf-sync" not in observed and "pdf-cover" not in observed:
         return "NA: pdftotext (poppler) unavailable on this runner"
     if req == "pdffonts" and "pdf-fonts" not in observed:
@@ -80,15 +82,33 @@ def not_applicable(c: dict, observed: dict, has_md: bool, formats: str) -> str |
     return None
 
 
+# The checker's own words for "this was not evaluated on this package".
+NOT_EVALUATED = ("not evaluated", "skipped", "could not be reached", "could not confirm")
+UNREADABLE = ("could not read", "could not be read")
+
+
+def unquoted(msg: str) -> str:
+    """A finding message without the package text it quotes: quoted spans,
+    URLs and file names. A heading called 'Tests skipped in this release'
+    is the document talking, not the checker."""
+    msg = re.sub(r"https?://\S+", " ", msg)
+    msg = re.sub(r"'[^']*'|\"[^\"]*\"", " ", msg)
+    return re.sub(r"\S+\.[A-Za-z0-9]{1,5}\b", " ", msg).lower()
+
+
 def skipped_reason(check: str, findings: list[dict]) -> str | None:
     """The checker's own statement that it did not evaluate a class on this
-    package (an INFO finding saying "Not evaluated" or "... skipped"), or
-    None. A condition that was never evaluated must not read as PASS."""
+    package, or None: an INFO saying "Not evaluated", "... skipped", "could
+    not be reached" or "Could not confirm", or a finding of any severity
+    saying its input could not be read. A condition that was never
+    evaluated must not read as PASS."""
     for f in findings:
-        msg = f["message"]
-        if (f["severity"] == "INFO" and f["check"] == check
-                and ("not evaluated" in msg.lower() or "skipped" in msg.lower())):
-            return f"NA: not evaluated on this package: {msg}"
+        if f["check"] != check:
+            continue
+        text = unquoted(f["message"])
+        phrases = NOT_EVALUATED + UNREADABLE if f["severity"] == "INFO" else UNREADABLE
+        if any(p in text for p in phrases):
+            return f"NA: not evaluated on this package: {f['message']}"
     return None
 
 
