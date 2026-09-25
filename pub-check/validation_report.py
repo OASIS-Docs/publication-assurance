@@ -52,6 +52,16 @@ def class_inventory(conditions: list[dict]) -> list[dict]:
     return [{"check": k, "conditions": counts[k]} for k in sorted(counts)]
 
 
+def probed(obs: dict) -> bool:
+    """Whether a live-site check's own observation shows it reached the site:
+    an HTTP status other than '(unreachable)', or a non-zero count of fetched
+    URIs. Offline runs record neither."""
+    status = obs.get("http_status")
+    fetched = obs.get("stage_uris_fetched")
+    return (status not in (None, "", "(unreachable)")
+            or fetched not in (None, "", "0"))
+
+
 def not_applicable(c: dict, observed: dict, has_md: bool, formats: str) -> str | None:
     """Why a condition does not apply to this package, or None. NA is driven
     by the source formats the package carries and by absent prerequisites,
@@ -72,9 +82,8 @@ def not_applicable(c: dict, observed: dict, has_md: bool, formats: str) -> str |
         return "NA: no JSON schema files in the package"
     if req == "manifest" and observed.get("manifest", {}).get("manifest_json") != "present":
         return "NA: no manifest.json in the package (noted as informational)"
-    if req == "network" and observed.get("revision-collision", {}).get(
-            "http_status", "(unreachable)") == "(unreachable)":
-        return "NA: live-site probe could not run (offline or unreachable)"
+    if req == "network" and not probed(observed.get(c["check"], {})):
+        return "NA: live-site probe did not run (offline, unreachable, or nothing to probe)"
     if req == "pdftotext" and "pdf-sync" not in observed and "pdf-cover" not in observed:
         return "NA: pdftotext (poppler) unavailable on this runner"
     if req == "pdffonts" and "pdf-fonts" not in observed:
@@ -83,7 +92,8 @@ def not_applicable(c: dict, observed: dict, has_md: bool, formats: str) -> str |
 
 
 # The checker's own words for "this was not evaluated on this package".
-NOT_EVALUATED = ("not evaluated", "skipped", "could not be reached", "could not confirm")
+NOT_EVALUATED = ("not evaluated", "skipped", "could not be reached", "could not confirm",
+                 "could not be scanned")
 UNREADABLE = ("could not read", "could not be read")
 
 
@@ -99,7 +109,8 @@ def unquoted(msg: str) -> str:
 def skipped_reason(check: str, findings: list[dict]) -> str | None:
     """The checker's own statement that it did not evaluate a class on this
     package, or None: an INFO saying "Not evaluated", "... skipped", "could
-    not be reached" or "Could not confirm", or a finding of any severity
+    not be reached", "Could not confirm" or "could not be scanned", or a
+    finding of any severity
     saying its input could not be read. A condition that was never
     evaluated must not read as PASS."""
     for f in findings:
