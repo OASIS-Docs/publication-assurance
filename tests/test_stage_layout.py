@@ -191,7 +191,11 @@ def test_zip_errata_stem_beats_a_zip_filename_missing_it(tmp_path):
     assert d["observed"]["stage-name"]["stage_directory"] == "os"
     tv = [x for x in d["findings"] if x["check"] == "title-version" and "composition" in x["message"]]
     assert tv == [], tv
-    assert r.returncode == 0, d["findings"]
+    # The package is graded as the errata01 document it holds, and the
+    # misnamed zip itself is the one blocker (tests/test_package_identity.py).
+    blockers = [x["message"] for x in d["findings"] if x["severity"] == "BLOCKER"]
+    assert blockers == ["Delivery items do not share one basename: "
+                        "['csaf-v2.0-errata01-os', 'csaf-v2.0-os-x.zip']"], d["findings"]
 
 
 def test_zip_is_checked_under_its_publication_path(tmp_path):

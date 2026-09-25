@@ -192,9 +192,9 @@ Delivery items are named for the published stage, one basename, all formats pres
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
 | 36 | The stage directory contains delivery items at all | the file listing of the stage directory root | at least one delivery item (md/docx/odt/html/pdf) must be present | BLOCKER | all | - |
-| 37 | All delivery items share one basename | the set of delivery-item filename stems | exactly one distinct stem across md/docx/odt/html/pdf | BLOCKER | all | - |
+| 37 | All delivery items share one basename, and the stage directory and package zip hold only that document | the set of delivery-item filename stems, every other md/html/docx/odt document identifier in the stage directory root (comment-resolution-log and public-review-metadata side-files excepted), and the package zip's own name in zip mode when that name is itself a document identifier | exactly one distinct stem across md/docx/odt/html/pdf; another [WP-abbrev]-[version]-[stage] identifier, or a zip named for one, is a second package | BLOCKER | all | - |
 | 38 | Delivery filename carries no working token | the delivery filename stem | forbidden working tokens: draft, tmp, rc (files are named for the published stage) | BLOCKER | all | - |
-| 39 | Delivery filename ends in the stage suffix | the delivery filename stem | the stage directory name as a -&lt;stage&gt; suffix | BLOCKER | all | - |
+| 39 | Delivery filename ends in the stage suffix | the delivery filename stem, and the errataNN parent directory when there is one | the stage directory name as a -&lt;stage&gt; suffix, or -errataNN-&lt;stage&gt; inside an Errata directory | BLOCKER | all | - |
 | 40 | All required delivery formats are present | the set of delivery formats found in the package | the track's required set: html+pdf plus the authoritative source (md, docx, or odt) | BLOCKER | all | - |
 | 41 | An authoritative source artifact travels with the renderings | the set of source formats found in the package root | at least one authoritative source (.md, .docx, or .odt) expected beside HTML/PDF | WARN | all | - |
 
@@ -512,7 +512,7 @@ The stage token must be a current, correctly numbered stage per the Naming Direc
 |---|---|---|---|---|---|---|
 | 138 | Stage directory name, and an errataNN parent directory, carry a two-digit number | the stage directory name, and the parent directory name when it is an errata directory | valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4) | BLOCKER | all | - |
 | 139 | Stage token is not a retired abbreviation | the alphabetic prefix of the stage directory name | retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7 | BLOCKER | all | - |
-| 140 | Stage token is a recognized current stage | the alphabetic prefix of the stage directory name | valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata | BLOCKER | all | - |
+| 140 | Stage token (and an Errata parent directory) is a recognized current stage, in lower case, and os carries no revision number | the alphabetic prefix of the stage directory name, its digits, and the Errata parent directory name | valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata; lower case, and 'The os stage abbreviation is never used with a revision number' (naming-directives.txt 5.2) | BLOCKER | all | - |
 
 ### stage-token
 
