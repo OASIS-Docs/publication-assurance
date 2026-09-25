@@ -199,8 +199,8 @@ almost always because the `target` path is wrong.
 <!-- FINAL CHECK against validation-report-pdf: class result forms and the result line -->
 
 One row per check class, 59 rows, whether or not the class raised
-anything, plus a row with 0 conditions for any finding that belongs to no
-registered class. Each row gives the class result, the number of
+anything, plus a row for any finding that belongs to no registered class (its
+condition count reads 0). Each row gives the class result, the number of
 individual conditions inside the class, and up to five findings in full.
 
 | Result shown | Meaning |
