@@ -26,6 +26,16 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.6.0 - 2026-09-25
+
+MINOR: the Validation Report as a PDF, published with the Markdown and HTML
+to a `pubcheck-reports` branch and linked by full URL from the job summary;
+check classes that were not evaluated read NA; a clear error for an
+unreadable target; title-version resolves `<h1big>` cover titles; and the
+adoption guide, `docs/ADOPTING.md`.
+
 - Action: the full Validation Report is also written as
   `pubcheck-validation.pdf`, exposed as the new output
   `report-validation-pdf`. `validation_report.py --pdf` prints the HTML report
