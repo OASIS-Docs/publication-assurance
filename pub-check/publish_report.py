@@ -197,12 +197,13 @@ def render_index(root: str) -> str:
         if m.get("pdf"):
             links.append(f'<a href="{e(path)}/pubcheck-validation.pdf">PDF</a>')
         links.append(f'<a href="{e(path)}/">files</a>')
-        rows.append(f'<tr><td class="n">{e(m.get("published", ""))}</td>'
-                    f'<td class="t">{e(m.get("title", path))}<br><code>{e(path)}</code></td>'
+        # Links and result lead the row, so a phone shows them without scrolling.
+        rows.append(f'<tr><td class="t">{e(m.get("title", path))}<br>{" | ".join(links)}'
+                    f'<br><code>{e(path)}</code></td>'
                     f'<td class="r {"PASS" if ok else "BLOCKER"}">'
                     f'{"READY" if ok else "NOT READY"}</td>'
                     f'<td class="t">{e(m.get("verdict", ""))}</td>'
-                    f'<td class="n">{" | ".join(links)}</td></tr>')
+                    f'<td class="n">{e(m.get("published", ""))}</td></tr>')
     return "\n".join([
         "<!DOCTYPE html>", '<html lang="en"><head><meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
@@ -211,8 +212,8 @@ def render_index(root: str) -> str:
         f'<p class="note">Every report published to this branch, newest first: '
         f'{len(runs)} report folder(s). Each run replaces its own folder; the branch history '
         "keeps every earlier run.</p>",
-        '<div class="wrap"><table><thead><tr><th>Published (UTC)</th><th>Report</th>'
-        "<th>Result</th><th>Verdict</th><th>Open</th></tr></thead><tbody>",
+        '<div class="wrap"><table><thead><tr><th>Report</th><th>Result</th>'
+        "<th>Verdict</th><th>Published (UTC)</th></tr></thead><tbody>",
         *rows, "</tbody></table></div></main></body></html>", ""])
 
 
