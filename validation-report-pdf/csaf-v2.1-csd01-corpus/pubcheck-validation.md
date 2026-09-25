@@ -7,7 +7,7 @@
 **Blockers:** 1  
 **Gate exit code:** 1  
 
-**Result: NOT publication-ready: 1 blocker(s).** 47 of 59 check classes fully clean; findings: 1 blocker, 17 warning, 11 informational.
+**Result: NOT publication-ready: 1 blocker(s).** 45 of 57 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 17 warning, 11 informational.
 
 ## Check-by-Check Results
 
@@ -19,20 +19,20 @@ Every check class the tool carries is listed, whether or not it raised a finding
 | 2 | PASS | asset-refs | 1 | none |
 | 3 | PASS | authors | 4 | none |
 | 4 | PASS | boilerplate-dup | 1 | none |
-| 5 | PASS | case | 3 | none |
+| 5 | PASS (2 of 3 evaluated) | case | 3 | none |
 | 6 | PASS | comment-resolution-log | 2 | none |
 | 7 | WARN | conformance-structure | 9 | WARN: Conformance section (profile 'A program satisfies the "CSAF superseder" conformance profile if the program:') is not populated with numbered clauses: no clause identifiers were extracted. |
 | 8 | INFO | content-labels | 1 | INFO: Appendix/Annex heading 'Appendix A. Acknowledgments &lt;a id='acknowledgments'&gt;&lt;/a&gt;' (markdown line 11935) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt.<br>INFO: Appendix/Annex heading 'Appendix B. Revision History &lt;a id='revision-history'&gt;&lt;/a&gt;' (markdown line 12061) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt.<br>INFO: Appendix/Annex heading 'Appendix C. Guidance on the Size of CSAF Documents &lt;a id='guidance-on-the-size-of-csaf-documents'&gt;&lt;/a&gt;' (markdown line 12083) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt.<br>INFO: Appendix/Annex heading 'Appendix C. File Size &lt;a id='file-size'&gt;&lt;/a&gt;' (markdown line 12097) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt.<br>INFO: Appendix/Annex heading 'Appendix C. Array Length &lt;a id='array-length'&gt;&lt;/a&gt;' (markdown line 12110) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt.<br>... and 2 more findings of this class (full list in the JSON record) |
 | 9 | WARN | cover-hr | 1 | WARN: Horizontal rule between the OASIS logo and the title: the publication CSS treats &lt;hr/&gt; as a page break, which opens the PDF with a blank page. Harmless in other renderers; remove if publishing through the OASIS HTML-to-PDF path. |
 | 10 | WARN | date-sync | 2 | WARN: Copyright year 2022 does not match the document date year 2025. |
-| 11 | PASS | dead-lists | 3 | none |
+| 11 | PASS (2 of 3 evaluated) | dead-lists | 3 | none |
 | 12 | PASS | double-slash | 1 | none |
 | 13 | PASS | extension-conformance | 1 | none |
 | 14 | PASS | extension-count | 4 | none |
 | 15 | PASS | fence-collapse | 1 | none |
 | 16 | PASS | filenames | 6 | none |
-| 17 | WARN | front-matter | 12 | WARN: URL declares version v1.2 (package is v2.1): https://docs.oasis-open.org/csaf/csaf-cvrf/v1.2/cs01/csaf-cvrf-v1.2-cs01.html -- confirm this is an intentional external reference.<br>WARN: URL declares version v1.2 (package is v2.1): https://docs.oasis-open.org/csaf/csaf-cvrf/v1.2/csaf-cvrf-v1.2.html -- confirm this is an intentional external reference. |
-| 18 | PASS | generator | 1 | none |
+| 17 | WARN (9 of 12 evaluated) | front-matter | 12 | WARN: URL declares version v1.2 (package is v2.1): https://docs.oasis-open.org/csaf/csaf-cvrf/v1.2/cs01/csaf-cvrf-v1.2-cs01.html -- confirm this is an intentional external reference.<br>WARN: URL declares version v1.2 (package is v2.1): https://docs.oasis-open.org/csaf/csaf-cvrf/v1.2/csaf-cvrf-v1.2.html -- confirm this is an intentional external reference. |
+| 18 | NA | generator | 1 | NA: DOCX-render condition; this package carries no Word source |
 | 19 | PASS | html-anchors | 2 | none |
 | 20 | PASS | html-residue | 3 | none |
 | 21 | PASS | html-title | 2 | none |
@@ -40,20 +40,20 @@ Every check class the tool carries is listed, whether or not it raised a finding
 | 23 | PASS | junk-files | 2 | none |
 | 24 | PASS | link-mismatch | 2 | none |
 | 25 | PASS | logo | 1 | none |
-| 26 | INFO | manifest | 3 | INFO: No manifest.json in the package. Emit one (--emit-manifest or your own tool) and intake verification becomes automatic. |
+| 26 | INFO (0 of 3 evaluated) | manifest | 3 | INFO: No manifest.json in the package. Emit one (--emit-manifest or your own tool) and intake verification becomes automatic. |
 | 27 | WARN | md-links | 2 | WARN: Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/aggregator.json<br>WARN: Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/csaf.json<br>WARN: Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/meta.json<br>WARN: Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/provider.json<br>WARN: Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://www.oasis-open.org/committees/csaf/ipr.php<br>... and 5 more findings of this class (full list in the JSON record) |
 | 28 | PASS | member-uri | 1 | none |
 | 29 | PASS | multi-part-naming | 8 | none |
 | 30 | PASS | name-chars | 4 | none |
 | 31 | PASS | normdef-refs | 2 | none |
 | 32 | PASS | ns-segment | 2 | none |
-| 33 | PASS | odt-integrity | 6 | none |
+| 33 | NA | odt-integrity | 6 | NA: ODT-source condition; this package carries no ODT source |
 | 34 | PASS | package-refs | 1 | none |
 | 35 | PASS | pdf-cover | 2 | none |
-| 36 | INFO | pdf-fonts | 2 | INFO: Package declares no local font authority (no font-family in its HTML/CSS); font check skipped. |
+| 36 | INFO (0 of 2 evaluated) | pdf-fonts | 2 | INFO: Package declares no local font authority (no font-family in its HTML/CSS); font check skipped. |
 | 37 | PASS | pdf-legibility | 2 | none |
 | 38 | WARN | pdf-sync | 5 | WARN: PDF cites https://docs.oasis-open.org/csaf/csaf/v2.0/ (package is v2.1); expected only as a previous-stage reference -- confirm. |
-| 39 | PASS | previous-stage | 2 | none |
+| 39 | PASS (1 of 2 evaluated) | previous-stage | 2 | none |
 | 40 | BLOCKER | public-review-metadata | 3 | BLOCKER: csd01 underwent a TC public review (Tier 1 (a comment-resolution-log for this revision is already live)) but the live stage directory https://docs.oasis-open.org/csaf/csaf/v2.1/csd01/ does not carry the required companion file csaf-v2.1-csd01-public-review-metadata.html. Naming Directives v1.7 s5.2: 'Project Administration will publish an additional "public review metadata" file in the directory with the CSD or CND'; TC Handbook Naming: 'Work products undergoing public review must include a companion metadata file.' |
 | 41 | PASS | ref-rfc | 2 | none |
 | 42 | PASS | references-split | 2 | none |
@@ -68,8 +68,8 @@ Every check class the tool carries is listed, whether or not it raised a finding
 | 51 | PASS | template | 3 | none |
 | 52 | PASS | template-css | 2 | none |
 | 53 | PASS | title-oasis-prefix | 1 | none |
-| 54 | INFO | title-version | 3 | INFO: Not evaluated: blocked by an upstream html-residue defect (the document title does not resolve to exactly one matching &lt;h1&gt;). |
-| 55 | PASS | uri-alias | 9 | none |
+| 54 | INFO (0 of 3 evaluated) | title-version | 3 | INFO: Not evaluated: blocked by an upstream html-residue defect (the document title does not resolve to exactly one matching &lt;h1&gt;). |
+| 55 | PASS (6 of 9 evaluated) | uri-alias | 9 | none |
 | 56 | PASS | uri-chars | 1 | none |
 | 57 | PASS | version-naming | 3 | none |
 | 58 | PASS | vml-fallback | 1 | none |
