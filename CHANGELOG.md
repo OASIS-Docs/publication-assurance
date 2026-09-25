@@ -38,6 +38,9 @@ Each version is anchored by a git tag on this repository.
   duplicate-title finding now share one count over `<h1>` and `<h1big>`.
   title-version blames html-residue only when D1 has fired (more than one
   heading); when no heading carries the title it says so instead.
+  The shared count decodes entities in the heading text as the `<title>`
+  text already is, so a title carrying `&amp;` or `&nbsp;` still matches its
+  own heading.
 - **html-residue** D1 now counts `<h1big>` too, so a title rendered in both
   `<h1big>` and an `<h1>` (printed twice on the PDF cover) is a BLOCKER.
 - **title-oasis-prefix** used the same `<h1>`-only classification and
@@ -49,7 +52,9 @@ Each version is anchored by a git tag on this repository.
   Evaluating the CSAF titles exposed this: the published
   `csaf/v2.0/errata01/os` title "Common Security Advisory Framework Version
   2.0 Errata 01" would otherwise have been a composition BLOCKER. The suffix
-  is still a defect on any other package.
+  is still a defect on any other package. A package is an Errata package by
+  its own layout only (its stage directory or immediate parent is named
+  `errataNN`), and the suffix's number must equal that `NN`.
 
 Corpus effect (`PUB_CHECK_OFFLINE=1`, every stage package in `examples/`):
 the ten CSAF stage directories lose the title-version "Not evaluated" INFO
