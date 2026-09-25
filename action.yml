@@ -185,6 +185,26 @@ runs:
           | tee "$RUNNER_TEMP/oasis-pub-check.txt"
         exit_code="${PIPESTATUS[0]}"
 
+        # Exit 2: the target could not be read (almost always a wrong path).
+        # There is no JSON to count or render, so say so once, plainly, and
+        # stop here; the "Enforce gate result" step still fails with 2.
+        if [ "$exit_code" = 2 ]; then
+          echo "::error::oasis-pub-check could not read the target '${TARGET}' (exit code 2). The target path is relative to the repository root and case-sensitive."
+          echo "exit_code=2" >> "$GITHUB_OUTPUT"
+          for k in blockers warnings report_txt report_json report_validation_md report_validation_html report_validation_pdf; do
+            echo "${k}=" >> "$GITHUB_OUTPUT"
+          done
+          # Never leave an earlier call's reports beside this call's result.
+          if [ -n "$REPORT_DIR" ]; then
+            rm -f "$REPORT_DIR/pubcheck-report.txt" "$REPORT_DIR/pubcheck-report.json" \
+              "$REPORT_DIR/pubcheck-validation.md" "$REPORT_DIR/pubcheck-validation.html" \
+              "$REPORT_DIR/pubcheck-validation.pdf"
+          fi
+          rm -f "$RUNNER_TEMP/oasis-pub-check.json" "$RUNNER_TEMP/pubcheck-validation.md" \
+            "$RUNNER_TEMP/pubcheck-validation.html" "$RUNNER_TEMP/pubcheck-validation.pdf"
+          exit 0
+        fi
+
         # Second invocation, --json appended, purely to compute blockers/
         # warnings and to emit report.json. Idempotent if the caller's own
         # args already included --json. Its own exit code is not used --
@@ -207,11 +227,7 @@ runs:
         rm -f "$RUNNER_TEMP/pubcheck-validation.md" "$RUNNER_TEMP/pubcheck-validation.html" \
           "$RUNNER_TEMP/pubcheck-validation.pdf"
         validation_ok=0
-        # Exit 2: the target could not be read, so there is no report to
-        # render or publish, and every report path and URL output stays empty.
-        if [ "$exit_code" = 2 ]; then
-          echo "::notice::pub-check could not read the target; no validation report was rendered"
-        elif python3 "$ACTION_PATH/pub-check/validation_report.py" \
+        if python3 "$ACTION_PATH/pub-check/validation_report.py" \
             "$RUNNER_TEMP/oasis-pub-check.json" \
             --md "$RUNNER_TEMP/pubcheck-validation.md" \
             --html "$RUNNER_TEMP/pubcheck-validation.html" \
@@ -299,7 +315,17 @@ runs:
         SUMMARY_TITLE: ${{ inputs.summary-title }}
         REPORT_DIR: ${{ inputs.report-dir }}
         EXIT_CODE: ${{ steps.pubcheck.outputs.exit_code }}
+        TARGET: ${{ inputs.target }}
       run: |
+        if [ "$EXIT_CODE" = 2 ]; then
+          {
+            echo "## pub-check: ${SUMMARY_TITLE:-$TARGET}"
+            echo ""
+            echo "**The target could not be read (exit code 2).** No report was produced. Check that \`$TARGET\` exists in the checked-out repository; the path is relative to the repository root and case-sensitive."
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+        fi
         # The labelled report links first, so nobody has to scroll for them.
         if [ -s "$RUNNER_TEMP/pubcheck-links.md" ]; then
           cat "$RUNNER_TEMP/pubcheck-links.md" >> "$GITHUB_STEP_SUMMARY"

@@ -38,10 +38,13 @@ Three steps, about five minutes. You need write access to the TC
 repository and the path of the package you want checked.
 
 The package is a **stage directory**: the folder that holds one work
-product at one stage, laid out as it will be on `docs.oasis-open.org`, for
-example `work/v1.0/csd01` holding `mytc-v1.0-csd01.md`,
-`mytc-v1.0-csd01.html` and `mytc-v1.0-csd01.pdf`. A `.zip` of that folder
-also works. If your repository holds only Markdown and nothing renders it
+product at one stage, for example `work/v1.0/csd01` holding
+`mytc-v1.0-csd01.md`, `mytc-v1.0-csd01.html` and `mytc-v1.0-csd01.pdf`.
+Two folder names matter, because the gate checks them against the
+filenames and the cover URLs: the stage directory is named for the stage
+(`csd01`), and the folder that contains it is named for the version
+(`v1.0`). The folders above those (`work/` here) are up to you. A `.zip`
+of the stage directory also works. If your repository holds only Markdown and nothing renders it
 yet, finish the Quick start with the path where the rendered package will
 go, then read [Markdown rendering before the gate](#markdown-rendering-before-the-gate).
 
@@ -54,6 +57,9 @@ go, then read [Markdown rendering before the gate](#markdown-rendering-before-th
    type the path into the name box.
 2. Change the one line marked `EDIT` to the path of your package.
 3. Commit the file to your default branch.
+
+In a private repository the run uses the account's GitHub Actions minutes;
+public repositories run free.
 
 ```yaml
 name: pub-check
@@ -75,6 +81,13 @@ jobs:
       - uses: OASIS-Docs/publication-assurance@v1.5.0
         with:
           target: work/v1.0/csd01   # EDIT: your stage directory or package .zip
+
+      - uses: actions/upload-artifact@v4   # the report files, downloadable from the run page
+        if: always()
+        with:
+          name: pubcheck-report
+          path: pubcheck-report
+          if-no-files-found: ignore
 ```
 
 Committing the file starts the first run.
@@ -82,9 +95,9 @@ Committing the file starts the first run.
 **Success looks like:** the **Actions** tab lists a run named `pub-check`
 for your commit. It finishes in about a minute. A green tick means the
 package is publishable; a red cross means the gate found at least one
-blocker. Either result means the setup works. A red cross with
-`is not a directory` in the log means the `target` path is wrong: see
-[Troubleshooting](#troubleshooting).
+blocker. Either result means the setup works. A red cross with the
+annotation `oasis-pub-check could not read the target` means the `target`
+path is wrong: see [Troubleshooting](#troubleshooting).
 
 ### Step 2: Report page
 
@@ -122,7 +135,7 @@ Markdown links, which work in any repository.
    the run page.
 4. Open the report and read the verdict at the top.
 
-| Verdict | Meaning | What to do |
+| Result | Meaning | What to do |
 |---|---|---|
 | **PASS** | The condition was checked and met | Nothing |
 | **WARN** | Publishable, recorded for the record; often a must-fix before a later stage | Read it; fix it or be ready to explain it |
@@ -131,8 +144,12 @@ Markdown links, which work in any repository.
 | **INFO** | Recorded, no action required | Nothing |
 
 **Success looks like:** a report whose heading names your package, a
-**Result** line, a table of 59 check classes, and a table of all 173
-conditions. The run's red or green status matches the report: red if and
+verdict (`PUBLICATION-READY: zero blockers.` or
+`NOT publication-ready: 1 blocker(s).`), a table of 59 check classes, and a
+table of all 173 conditions. The job summary also carries the findings
+list, which ends with the same verdict in the form
+`1 blocker(s), 17 warning(s) -> NOT PUBLISHABLE`. The run's red or green
+status matches the report: red if and only if the report lists a blocker. The run's red or green status matches the report: red if and
 only if the report lists a blocker.
 
 To fix a blocker, edit the source, commit, and push. The next run checks
@@ -141,7 +158,9 @@ the new commit and publishes a new report.
 ## The Validation Report
 
 The report is the one OASIS staff produce at intake: the same code, the
-same conditions, the same layout. It has four parts.
+same conditions, the same layout. It has a header, the check class table
+and the condition table. The job summary shows the same two tables under
+the verdict; the header lines below are in the report files.
 
 ### Verdict
 
@@ -194,6 +213,7 @@ says why. The common reasons:
 | `evaluated on the markdown-source row for this package` | The same rule was checked against the Markdown, which is authoritative |
 | `pdffonts unavailable or the package declares no font authority` | The runner had no poppler, or your HTML and CSS name no font family to compare against |
 | `no manifest.json in the package` | Add a manifest to enable the manifest checks ([Local runs](#local-runs) shows `--emit-manifest`) |
+| `not evaluated on this package: ...` | Something earlier in the same package stopped this condition from running; the rest of the text names it. Fix that and the condition runs |
 
 A few conditions also need the network: they compare your package with
 the live `docs.oasis-open.org`. GitHub's runners have network access, so
@@ -431,17 +451,10 @@ publishing to the `pubcheck-reports` branch needs write access, so on a
 fork pull request the report is not published and the run says so in a
 warning; the gate result is unaffected.
 
-To keep the fork's reports, attach them to the run as an artifact:
-
-```yaml
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: pubcheck-report
-          path: pubcheck-report
-```
-
-The artifact appears under **Artifacts** at the bottom of the run page.
+The Quick start workflow's last step attaches the report files to the
+run as an artifact whatever the token allows, so a fork's reports are
+still available: they appear under **Artifacts** at the bottom of the run
+page as `pubcheck-report`.
 
 If the organisation or repository sets the default workflow token to
 read-only (**Settings > Actions > General > Workflow permissions**), the
@@ -510,7 +523,11 @@ python3 publication-assurance/pub-check/oasis_pub_check.py publication-assurance
 ```
 
 The last line is the verdict, for example
-`1 blocker(s), 17 warning(s) -> NOT PUBLISHABLE`. The exit status is the
+`1 blocker(s), 17 warning(s) -> NOT PUBLISHABLE`. That sample is the
+published CSAF v2.1 CSD01, and its one blocker is `public-review-metadata`,
+a file only OASIS staff can publish (see
+[Blocker ownership](#blocker-ownership)); with the network checks off it
+reports `0 blocker(s), 16 warning(s) -> publishable`. The exit status is the
 same as the action's: `0`, `1` or `2`.
 
 | Command | Result |
@@ -520,6 +537,7 @@ same as the action's: `0`, `1` or `2`.
 | `oasis_pub_check.py TARGET --emit-manifest` | Writes `manifest.json` and the `<stem>-manifest.txt` Work Product Manifest File into the stage directory, then checks it |
 | `oasis_pub_check.py --list-checks` | Every check class with its condition count, derived from the code |
 | `oasis_pub_check.py --help` | The options |
+| `PUB_CHECK_OFFLINE=1 oasis_pub_check.py TARGET` | Skips the conditions that compare the package with the live `docs.oasis-open.org`; they report NA |
 
 `--emit-manifest` writes into the stage directory, so run it on the
 directory you intend to submit. The checks read the directory's own name
@@ -530,8 +548,8 @@ The Validation Report the action publishes can be rendered locally from
 the `--json` record:
 
 ```bash
-python3 publication-assurance/pub-check/oasis_pub_check.py path/to/your/stage-dir --json > report.json
-python3 publication-assurance/pub-check/validation_report.py report.json --md report.md --html report.html
+python3 publication-assurance/pub-check/oasis_pub_check.py path/to/your/stage-dir --json > report.json; code=$?
+python3 publication-assurance/pub-check/validation_report.py report.json --md report.md --html report.html --exit-code "$code"
 ```
 
 Open `report.html` in a browser.
@@ -545,7 +563,8 @@ those conditions report NA and the rest run unchanged.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Run fails with `Error: ... is not a directory`, exit code 2, no report | `target` does not exist in the checked-out repository | Correct the path; it is relative to the repository root and case-sensitive on GitHub's runners |
+| Run fails with the annotation `oasis-pub-check could not read the target`, exit code 2, no report; the log says `... is not a directory` | `target` does not exist in the checked-out repository | Correct the path; it is relative to the repository root and case-sensitive on GitHub's runners |
+| Run refused with "The job was not started because recent account payments have failed or your spending limit needs to be increased" | A private repository has used up its account's Actions minutes | The account owner raises the spending limit, or the repository is public |
 | No run appears after committing the workflow | The file is not at `.github/workflows/`, or Actions is disabled | Check the path; enable Actions under **Settings > Actions > General** |
 | `Unable to resolve action` | The tag in `uses:` does not exist | Use a tag from the [releases page](https://github.com/OASIS-Docs/publication-assurance/releases) |
 | Job summary has the findings but no class or condition tables | The action is older than v1.5.0, often through `@v1` | Pin to `@v1.5.0` or later |

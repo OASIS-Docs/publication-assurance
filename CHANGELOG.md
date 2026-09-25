@@ -67,6 +67,16 @@ Each version is anchored by a git tag on this repository.
   missing browser fails there instead of skipping, and the action job also
   checks the `report-validation-pdf` output.
 
+### Added
+
+- Documentation: `docs/ADOPTING.md`, the adoption guide for a TC bringing
+  the gate into its own repository: a three-step quick start, how to read
+  the Validation Report and who owns each kind of blocker, and a reference
+  by task (inputs and outputs, Markdown rendering before the gate, report-only
+  runs, several documents, fork pull requests, pinning, local runs,
+  troubleshooting). The README quick start points to it. The example
+  workflows pin `@v1.5.0`; the floating `v1` tag predates v1.4.0.
+
 ### Fixed
 
 - **title-version** evaluated nothing on any CSAF package. It confirms the
@@ -96,6 +106,13 @@ Each version is anchored by a git tag on this repository.
   is still a defect on any other package. A package is an Errata package by
   its own layout only (its stage directory or immediate parent is named
   `errataNN`), and the suffix's number must equal that `NN`.
+- Composite action: a `target` the gate cannot read (exit 2, usually a
+  wrong path) now produces one error annotation naming the target and a
+  job summary saying no report was produced. Before, the step ran on
+  into three JSON tracebacks, and the summary step's own failure added an
+  "exit code 1" annotation beside the gate's exit code 2. Earlier report
+  files in `report-dir` are removed. Pinned by
+  `tests/test_action_bad_target.py`.
 
 Corpus effect (`PUB_CHECK_OFFLINE=1`, every stage package in `examples/`):
 the ten CSAF stage directories lose the title-version "Not evaluated" INFO
