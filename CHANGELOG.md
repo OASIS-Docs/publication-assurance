@@ -33,15 +33,16 @@ Each version is anchored by a git tag on this repository.
   version as the temp directory's parent (`T` on macOS): 31 or 32 false
   findings per CSAF zip. A flat zip is now placed under its publication path
   (`csaf-v2.0-errata01-os.zip` becomes `csaf/v2.0/errata01/os`). The path
-  comes from the delivery item's stem, preferring the stem that matches the
-  zip name and skipping auxiliary stems (`...-cs02-to-os-redline`,
-  `...-csd01-comments`), then from the zip name. A zip whose own folders
+  comes from the delivery item's stem, preferring a stem with nothing after
+  its stage token over auxiliary stems (`...-cs02-to-os-redline`,
+  `...-csd01-comments`), even when the zip is named for one, then from the
+  zip name. A zip whose own folders
   carry a `vN.N` path is left where it is, so a zip name contradicting its
   contents cannot hide a filenames mismatch. A subfolder keeps its own name,
   without repeating the WP-abbrev (`csaf/os/` in `csaf-v2.0-errata01-os.zip`
-  checks as `csaf/v2.0/errata01/os`). A zip whose name gives no layout is
-  checked under its own name, so messages name the zip, not the temp
-  directory. Path segments are limited to `[A-Za-z0-9._-]`, the move is
+  checks as `csaf/v2.0/errata01/os`). A flat zip whose names give no layout
+  is checked under its own name, so messages name the zip, not the temp
+  directory; a stage subfolder in such a zip keeps its own name. Path segments are limited to `[A-Za-z0-9._-]`, the move is
   confined to the sandbox, and zip entries are refused when they escape the
   extraction subdirectory.
 - **parse_stage** read a version root (`csaf/v2.0`, holding the

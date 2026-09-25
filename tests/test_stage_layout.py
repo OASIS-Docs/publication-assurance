@@ -284,3 +284,31 @@ def test_unparseable_zip_is_named_by_the_zip_not_the_temp_dir(tmp_path):
     msgs = [x["message"] for x in j["findings"]]
     assert not [m for m in msgs if "pub_check_" in m or "'raw'" in m], msgs
     assert "Stage 'delivery.zip' is not a recognized stage token." in msgs, msgs
+
+
+def test_unparseable_zip_keeps_its_own_stage_subfolder(tmp_path):
+    """Red team round 3: upload3.zip holding csd01/spec.* has no layout, and
+    the no-layout branch renamed the csd01 folder to the zip's name, a new
+    false stage-name BLOCKER. Only a flat zip is checked under its own name."""
+    src = tmp_path / "src" / "csd01"
+    src.mkdir(parents=True)
+    for ext in ("md", "html"):
+        shutil.copy(CSAF_V20 / "os" / f"csaf-v2.0-os.{ext}", src / f"spec.{ext}")
+    zpath = _zip_from_dir(tmp_path / "upload3.zip", tmp_path / "src")
+    _, j = _cli_json(zpath)
+    assert j["observed"]["stage-name"]["stage_directory"] == "csd01", j["observed"]["stage-name"]
+    assert _checks(j, "stage-name") == [], _checks(j, "stage-name")
+
+
+def test_zip_named_for_an_auxiliary_file_still_takes_the_delivery_stem(tmp_path):
+    """Red team round 3: csaf-v2.0-cs03-comments.zip holding the os delivery
+    and that cs03 comments file set the stage from the zip name."""
+    src = tmp_path / "src"
+    shutil.copytree(CSAF_V20 / "os", src)
+    for z in src.glob("*.zip"):
+        z.unlink()
+    (src / "csaf-v2.0-cs03-comments.md").write_text("# comments\n")
+    zpath = _zip_from_dir(tmp_path / "csaf-v2.0-cs03-comments.zip", src)
+    _, j = _cli_json(zpath)
+    assert j["observed"]["stage-name"]["stage_directory"] == "os", j["observed"]["stage-name"]
+    assert _checks(j, "stage-name", "filenames") == [], _checks(j, "stage-name", "filenames")
