@@ -26,7 +26,46 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+### Fixed
+
+- **Package zips** were checked from the temporary extraction directory, so
+  every path-derived check read the stage as `pub_check_xxxx` and the
+  version as the temp directory's parent (`T` on macOS): 31 or 32 false
+  findings per CSAF zip. A flat zip is now placed under its publication path
+  (`csaf-v2.0-errata01-os.zip` becomes `csaf/v2.0/errata01/os`). The path
+  comes from the delivery item's stem, preferring the stem that matches the
+  zip name and skipping auxiliary stems (`...-cs02-to-os-redline`,
+  `...-csd01-comments`), then from the zip name. A zip whose own folders
+  carry a `vN.N` path is left where it is, so a zip name contradicting its
+  contents cannot hide a filenames mismatch. A subfolder keeps its own name,
+  without repeating the WP-abbrev (`csaf/os/` in `csaf-v2.0-errata01-os.zip`
+  checks as `csaf/v2.0/errata01/os`). A zip whose name gives no layout is
+  checked under its own name, so messages name the zip, not the temp
+  directory. Path segments are limited to `[A-Za-z0-9._-]`, the move is
+  confined to the sandbox, and zip entries are refused when they escape the
+  extraction subdirectory.
+- **parse_stage** read a version root (`csaf/v2.0`, holding the
+  Latest-stage copies) with its TC directory as the version, so
+  version-naming, title-version and front-matter reported "package is
+  'csaf'". A target that is itself a `vN.N` directory is now its own
+  version. stage-name still refuses it as a stage.
+- **stage-name** now refuses a malformed Errata directory by name
+  (`Errata directory 'errata1' is missing its two-digit number`), and a
+  stage token with the wrong digit count (`csd1`) gets the two-digit message
+  instead of "not a recognized stage token". title-version no longer blames
+  the title for the directory's malformed number; it still requires the
+  title to cite the same Errata.
+- **title-oasis-prefix** tag-stripped the already entity-decoded `<title>`,
+  so a title such as `OASIS Foo &lt;Bar&gt; Version 2.0` lost `<Bar>`,
+  matched no heading, and its OASIS prefix went unreported.
+
+Corpus effect (`PUB_CHECK_OFFLINE=1`, every stage directory, version root
+and package zip in `examples/`): stage directories are unchanged. The CSAF
+and CVRF version roots lose their "package is 'csaf'" findings (2, 18 and
+24; `csaf/v2.1` gains two correct "package is v2.1" WARNs) and still exit 1
+on stage-name. The twelve zips lose 8 (CVRF) or 31 to 32 (CSAF) temp-path
+findings and gain what the matching stage directory reports; five CSAF zips
+go from exit 1 to exit 0.
 
 ## v1.6.0 - 2026-09-25
 

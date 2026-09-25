@@ -226,11 +226,15 @@ def auxiliary_files(stage_dir: str, items: dict[str, str]) -> list[str]:
 
 def parse_stage(stage_dir: str) -> tuple[str, str]:
     """Return (version, stage). The version is the nearest ancestor directory
-    matching vN.N, so errata paths (.../v2.0/errata01/os) parse correctly."""
+    matching vN.N (or the target itself, for a version root), so errata paths
+    (.../v2.0/errata01/os) parse correctly."""
     norm = os.path.normpath(stage_dir)
     stage = os.path.basename(norm)
     version = os.path.basename(os.path.dirname(norm))
-    probe = os.path.dirname(norm)
+    # A version root (.../csaf/v2.0, which holds the Latest-stage copies) is
+    # its own version directory; searching from its parent read the TC
+    # directory ('csaf') as the version. stage-name still refuses 'v2.0'.
+    probe = norm if re.fullmatch(r"v\d+(\.\d+)+", stage) else os.path.dirname(norm)
     while probe and os.path.basename(probe):
         if re.fullmatch(r"v\d+(\.\d+)+", os.path.basename(probe)):
             version = os.path.basename(probe)
@@ -256,12 +260,22 @@ def stage_urls_from_md(md_text: str, heading: str) -> list[str]:
 
 # ---------------------------------------------------------------- checks
 
-def check_stage_name(stage: str, f: Findings) -> None:
-    m = re.fullmatch(r"([a-z]+)(\d\d)?", stage)
+def check_stage_name(stage: str, f: Findings, errata_dir: str = "") -> None:
+    """`errata_dir` is the stage directory's parent when that parent is an
+    Errata directory (.../v2.0/errata01/os). naming-directives.txt Section 4
+    requires /errata01/ (perhaps /errata02/), so it carries the same
+    two-digit number a stage token does, and a malformed one is reported
+    against the directory, not against the title that cites it."""
+    m = re.fullmatch(r"([a-z]+)(\d*)", stage)
     prefix = m.group(1) if m else stage
-    if m and prefix in VALID_STAGE_PREFIXES and prefix != "os" and not m.group(2):
-        f.add(BLOCKER, "stage-name",
-              f"Stage '{stage}' is missing its two-digit number (e.g. {prefix}01).")
+    named = [("Stage", stage, m)]
+    if errata_dir:
+        named.append(("Errata directory", errata_dir, re.fullmatch(r"(errata)(\d*)", errata_dir)))
+    for label, name, nm in named:
+        pfx = nm.group(1) if nm else name
+        if nm and pfx in VALID_STAGE_PREFIXES and pfx != "os" and len(nm.group(2)) != 2:
+            f.add(BLOCKER, "stage-name",
+                  f"{label} '{name}' is missing its two-digit number (e.g. {pfx}01).")
     if prefix in RETIRED_STAGE_TOKENS:
         f.add(BLOCKER, "stage-name",
               f"Stage '{stage}' uses a retired/invalid stage token. Current naming: a document "
@@ -3638,6 +3652,13 @@ def check_title_version(html_text: str, version: str, stage: str,
             r"(?:\.\s*Part\s+\d+:\s+.+?)?\s+(?:Plus\s+)?Errata\s+(?P<enum>\d{2})", after)
         if m_tail_errata and m_tail_errata.group("enum") == errata_number:
             tail_ok = True
+        elif len(errata_number) not in (0, 2):
+            # errata1 / errata001: stage-name refuses the directory itself,
+            # so the title is judged only on whether it cites the same Errata.
+            m_loose = re.fullmatch(
+                r"(?:\.\s*Part\s+\d+:\s+.+?)?\s+(?:Plus\s+)?Errata\s+(?P<enum>\d+)", after)
+            if m_loose and int(m_loose.group("enum")) == int(errata_number):
+                tail_ok = True
     if not (punct_ok and word_ok and tail_ok):
         comp_sev = BLOCKER if track == "standards" else WARN
         note = (
@@ -3752,7 +3773,9 @@ def _h1_title_match_info(html_text: str, title: str):
     flat = re.sub(r"\s+", " ", html_text)
     h1s_raw = [m.group(2) for m in _TITLE_HEADING_RE.finditer(flat)]  # <h1> and <h1big>
     h1s = [_norm_h1_text(h) for h in h1s_raw]
-    title_norm = _norm_h1_text(title)
+    # The <title> arrives entity-decoded, so tag-stripping it would delete
+    # decoded text such as '<Bar>'; only its whitespace is collapsed.
+    title_norm = re.sub(r"\s+", " ", title).strip()
     tl = title_norm.lower()
     exact = [h for h in h1s if h.lower() == tl]
     if len(exact) == 1:
@@ -6552,7 +6575,9 @@ def run(stage_dir: str, f: Findings) -> None:
     version, stage = parse_stage(stage_dir)
     f.observe("stage-name", stage_directory=stage)
     f.observe("version-naming", version_directory=version)
-    check_stage_name(stage, f)
+    _errata_parent = os.path.basename(os.path.dirname(os.path.normpath(stage_dir)))
+    check_stage_name(stage, f,
+                     errata_dir=_errata_parent if re.fullmatch(r"errata\d*", _errata_parent) else "")
     items = find_delivery_items(stage_dir, ("md", "docx", "odt", "html", "pdf"))
     if not items:
         f.add(BLOCKER, "filenames", f"No delivery items found in {stage_dir}")
@@ -6655,7 +6680,6 @@ def run(stage_dir: str, f: Findings) -> None:
     # (.../v2.0/errata01/os, .../v2.0/errata01/csd01) -- never any more
     # distant ancestor, which would accept an unrelated package that merely
     # happens to sit somewhere under a folder named errataNN.
-    _errata_parent = os.path.basename(os.path.dirname(os.path.normpath(stage_dir)))
     _m_errata = re.fullmatch(r"errata(\d+)", stage) or re.fullmatch(r"errata(\d+)", _errata_parent)
     check_title_version(html_text, version, stage, is_word, f,
                         errata=_m_errata.group(1) if _m_errata else "")
@@ -6699,6 +6723,44 @@ def run(stage_dir: str, f: Findings) -> None:
     check_manifest(stage_dir, f)
 
 
+def _safe_path_segment(segment: str) -> bool:
+    """True when `segment` is safe to use as one component of a path built
+    inside tmp/pkg: non-empty, no '.' or '..' traversal, and no character
+    outside a plain filename charset. Guards a zip filename or directory name
+    engineered to compose a path ('..-v2.0-os.zip') from escaping tmp/pkg."""
+    return bool(segment) and segment not in (".", "..") and bool(re.fullmatch(r"[A-Za-z0-9._-]+", segment))
+
+
+def zip_stage_layout(zip_path: str, names: list[str]) -> tuple[str, str, str, str] | None:
+    """Parse the docs.oasis-open.org path a package zip publishes under:
+    '<abbrev>-v<N.N>[-errataNN]-<stage>[-<part>]' becomes
+    (abbrev, ver, errata, stage), errata '' when absent. Tried against a
+    root-level delivery item's stem first, then (only if no root item has the
+    shape) the zip's own filename stem: a zip can be renamed without renaming
+    what it holds, so 'csaf-v2.0-os-x.zip' holding the errata01/os corpus
+    must read its errata segment from csaf-v2.0-errata01-os.md, not lose it
+    to a stray '-x' tail parsed off the zip's own name. Every stage, version
+    and errata determination reads path segments, and the temporary
+    extraction directory has none of them, so main() composes the result
+    into the package's real publication path. Returns None when no stem has
+    that shape, or when a captured segment is unsafe to use as a path
+    component."""
+    stage_re = "|".join(sorted(VALID_STAGE_PREFIXES | RETIRED_STAGE_TOKENS, key=len, reverse=True))
+    shape = re.compile(r"(?P<abbrev>.+?)-(?P<ver>v\d+(?:\.\d+)+)(?:-(?P<errata>errata\d*))?"
+                       rf"-(?P<stage>(?:{stage_re})\d*)(?:-.+)?")
+    root_stems = sorted({os.path.splitext(os.path.basename(n))[0] for n in names
+                         if "/" not in n.strip("/") and n.lower().endswith((".md", ".html", ".docx", ".odt"))})
+    stems = root_stems + [os.path.splitext(os.path.basename(zip_path))[0]]
+    for stem in stems:
+        m = shape.fullmatch(stem)
+        if not m:
+            continue
+        parts = (m.group("abbrev"), m.group("ver"), m.group("errata") or "", m.group("stage"))
+        if all(_safe_path_segment(p) for p in parts if p):
+            return parts
+    return None
+
+
 def locate_stage_dir(root: str) -> str:
     """Inside an extracted zip, find the deepest dir holding the delivery items."""
     for dirpath, _dirs, files in os.walk(root):
@@ -6706,6 +6768,45 @@ def locate_stage_dir(root: str) -> str:
         if {"md", "html"} <= exts:
             return dirpath
     return root
+
+
+def zip_pkg_destination(raw: str, located: str,
+                        layout: tuple[str, str, str, str] | None) -> str | None:
+    """Where main() should move an extracted zip's located stage directory
+    so path-derived checks read real segments, relative to tmp/pkg, or None
+    to leave it where extraction already put it under `raw`. `located` is
+    locate_stage_dir()'s result; `layout` is zip_stage_layout()'s parsed
+    (abbrev, ver, errata, stage), or None when no stem had that shape.
+
+    A flat zip (delivery items at its own root) has no inner path of its own,
+    so it is placed at abbrev/ver/errata/stage entirely from `layout`, as
+    before. A zip whose own internal path already carries a vN.N segment
+    (csaf/v2.0/cs03/csaf-v2.0-os.*, from a zip misnamed csaf-v2.0-os.zip) is
+    left alone: that path already carries its own layout (parse_stage walks
+    ancestors for it), and renaming it to match a contradicting zip filename
+    hid a stage-name/filenames mismatch that should have been a blocker. Any
+    other case -- a bare subfolder such as 'csd01/' -- is placed at
+    abbrev/ver/<its own subpath>, keeping the zip's own directory names, with
+    the parsed errata inserted only when that subpath is a single segment
+    that is not itself an errata directory (so a genuinely errata-scoped
+    subfolder is not double-nested under errata twice)."""
+    rel = os.path.relpath(located, raw)
+    rel_parts = [] if rel == os.curdir else rel.split(os.sep)
+    if any(re.fullmatch(r"v\d+(?:\.\d+)+", p) for p in rel_parts):
+        return None
+    if not layout:
+        return None
+    abbrev, ver, errata, stage = layout
+    if rel == os.curdir:
+        parts = [abbrev, ver, errata, stage]
+    elif len(rel_parts) == 1 and not re.fullmatch(r"errata\d*", rel_parts[0]):
+        parts = [abbrev, ver, errata] + rel_parts
+    else:
+        parts = [abbrev, ver] + rel_parts
+    parts = [p for p in parts if p]
+    if not all(_safe_path_segment(p) for p in parts):
+        return None
+    return os.path.join(*parts)
 
 
 # ---------------------------------------------------- condition registry
@@ -6727,9 +6828,9 @@ def locate_stage_dir(root: str) -> str:
 CONDITION_DOCS: list[dict] = [
     # stage-name
     dict(check="stage-name", sig="is missing its two-digit number", applies="all",
-         condition="Stage directory name carries a two-digit revision number",
-         pulls="the stage directory name",
-         compares_to="valid stage prefixes must carry a two-digit suffix (csd01, never bare csd)"),
+         condition="Stage directory name, and an errataNN parent directory, carry a two-digit number",
+         pulls="the stage directory name, and the parent directory name when it is an errata directory",
+         compares_to="valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4)"),
     dict(check="stage-name", sig="uses a retired/invalid stage token", applies="all",
          condition="Stage token is not a retired abbreviation",
          pulls="the alphabetic prefix of the stage directory name",
@@ -7400,16 +7501,31 @@ def main() -> int:
         try:
             with zipfile.ZipFile(target) as z:
                 for name in z.namelist():
-                    dest = os.path.realpath(os.path.join(tmp, name))
-                    if not dest.startswith(os.path.realpath(tmp) + os.sep):
+                    dest = os.path.realpath(os.path.join(tmp, "raw", name))
+                    if not dest.startswith(os.path.realpath(os.path.join(tmp, "raw")) + os.sep):
                         print(f"error: zip entry escapes extraction dir: {name}",
                               file=sys.stderr)
                         return 2
-                z.extractall(tmp)
+                z.extractall(os.path.join(tmp, "raw"))
+                layout = zip_stage_layout(target, z.namelist())
         except zipfile.BadZipFile as e:
             print(f"error: not a readable zip: {e}", file=sys.stderr)
             return 2
-        target = locate_stage_dir(tmp)
+        raw = os.path.join(tmp, "raw")
+        target = locate_stage_dir(raw)
+        dest = zip_pkg_destination(raw, target, layout)
+        if dest is not None:
+            # Move the package under its publication path so the stage,
+            # version and errata checks read real segments, not the temp dir.
+            staged = os.path.realpath(os.path.join(tmp, "pkg", dest))
+            pkg_root = os.path.realpath(os.path.join(tmp, "pkg"))
+            if staged == pkg_root or staged.startswith(pkg_root + os.sep):
+                os.makedirs(os.path.dirname(staged), exist_ok=True)
+                os.rename(target, staged)
+                target = staged
+            # else: dest resolved outside tmp/pkg despite passing the segment
+            # check; leave target as the located dir extraction already put
+            # it under, rather than rename across the boundary.
     if not os.path.isdir(target):
         print(f"error: {target} is not a directory", file=sys.stderr)
         return 2
