@@ -116,7 +116,7 @@ the branch.
 | File | Open it when |
 |---|---|
 | **[docs/ADOPTING.md](docs/ADOPTING.md)** | TC setting the gate up in its own repository: the three-step quick start, reading the report, and every option. |
-| **[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit gates, a worked example. **Start here.** |
+| **[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit gates, a worked example. **Start here for the review model.** |
 | **[pub-check/README.md](pub-check/README.md)** | The class-level summary of what it checks, with severities and the regression corpus. |
 | **[pub-check/CHECKS.md](pub-check/CHECKS.md)** | A check fired and you want the exact one. Full catalog, generated from the code. |
 | **[TRANSFORMS.md](TRANSFORMS.md)** | Building from Markdown and want the pipeline command by command. |
