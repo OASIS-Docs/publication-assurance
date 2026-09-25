@@ -145,13 +145,14 @@ address; without it the HTML link opens the source view.
 1. Push any commit, or open **Actions > pub-check > Run workflow** and
    select **Run workflow**.
 2. In the **Actions** tab, select the run. Its **Summary** page opens.
-3. Scroll to the **pub-check** section of the summary. It starts with the
-   report links: the PDF and the Markdown report (both open in GitHub),
-   the folder holding this run's files, and the HTML report, which opens
-   as a web page once Step 2 is done and as HTML source before that.
-   Higher on the same page, under **Annotations**, a notice titled
-   **Validation report** carries one link: the HTML report when Pages
-   serves it, otherwise the PDF.
+3. Scroll to the block headed **Validation report:** followed by your
+   document's title. Under the verdict are the report links:
+   **HTML report (opens in browser)** once Step 2 is done, or
+   **HTML (source view)** before that; **PDF (opens in GitHub)**;
+   **Markdown**; **All files for this run**; and the PDF pinned to the
+   commit that published it. Higher on the same page, under
+   **Annotations**, a notice titled **Validation report** carries one
+   link: the HTML report when Pages serves it, otherwise the PDF.
 4. Open the report and read the verdict at the top.
 
 | Result | Meaning | What to do |
