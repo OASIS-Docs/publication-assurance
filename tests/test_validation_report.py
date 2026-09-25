@@ -297,3 +297,18 @@ def test_a_stage_directory_that_could_not_be_scanned_is_not_pass(tmp_path):
         "conditions": [condition(requires="network"), condition(sig="b", condition="d")]})
     rows = table_rows(md, "## All Individual Conditions")
     assert [r[1] for r in rows] == ["NA", "NA"], rows
+
+
+def test_a_stage_uri_answering_403_or_5xx_is_not_pass(tmp_path):
+    """Red-team round 4: a Previous-stage URI answering HTTP 503 raised only
+    INFO 'returned HTTP 503 (not a definitive 404)', and the condition
+    'Every Previous-stage and Latest-stage URI actually retrieves' read PASS."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 0,
+        "observed": {"x": {"stage_uris_fetched": "4"}},
+        "findings": [{"severity": "INFO", "check": "x", "message":
+                      "Previous stage URI returned HTTP 503 (not a definitive 404): "
+                      "https://example.org/a.html. Confirm in a browser."}],
+        "conditions": [condition(requires="network")]})
+    rows = table_rows(md, "## All Individual Conditions")
+    assert rows[0][1] == "NA", rows
