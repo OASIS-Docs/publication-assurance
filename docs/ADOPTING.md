@@ -196,13 +196,27 @@ almost always because the `target` path is wrong.
 
 ### Check class table
 
+<!-- FINAL CHECK against validation-report-pdf: class result forms and the result line -->
+
 One row per check class, 59 rows, whether or not the class raised
-anything. Each row gives the class result (the most severe finding in
-the class; PASS when it has none; NA when none of its conditions
-applied), the number of individual conditions inside the class, and up
-to five findings in full. A class with more findings says how many more
+anything, plus a row with 0 conditions for any finding that belongs to no
+registered class. Each row gives the class result, the number of
+individual conditions inside the class, and up to five findings in full.
+
+| Result shown | Meaning |
+|---|---|
+| `PASS` | Every condition in the class was evaluated and none raised a finding |
+| `PASS (9 of 12 evaluated)` | No finding; some conditions did not apply (NA) |
+| `WARN`, `BLOCKER` or `INFO`, with the same count when some conditions were NA | The most severe finding in the class. A finding always outranks NA, so a class can read `INFO (0 of 3 evaluated)` |
+| `NA` | No condition in the class applied and it raised nothing; the Findings cell gives the reason |
+
+ A class with more findings says how many more
 and points at the JSON record, `pubcheck-report.json`, which lists all of
 them.
+
+The header's result line counts the classes the same way, for example
+`44 of 54 evaluated check classes fully clean; 5 not evaluated; findings:
+0 blocker, 16 warning, 10 informational.`
 
 Read this table first. Every row that is not PASS or NA has a finding
 beside it that says what was found and, where the check knows, where.
@@ -341,11 +355,12 @@ step.
 | `report-url-html` | The HTML report on GitHub Pages when Pages serves the report branch, otherwise its source view on GitHub |
 | `report-publish-note` | `published`, or the reason the report was not published |
 
-The path outputs are empty when `report-dir` is `''` and when the exit code
-is `2`. The Validation Report paths are also empty when that report could
-not be rendered, and the PDF path when the runner has no Chrome; neither
-changes the gate's result. Every `report-url-*` output is empty when
-nothing was published.
+The path outputs are empty when `report-dir` is `''`. When the exit code
+is `2` (the target could not be read) every Validation Report path, every
+`report-url-*` output and `report-publish-note` are empty. The Validation
+Report paths are also empty when that report could not be rendered, and
+the PDF path when the runner has no Chrome; neither changes the gate's
+result. Every `report-url-*` output is empty when nothing was published.
 
 An example that posts the blocker count as a notice:
 
