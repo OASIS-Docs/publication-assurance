@@ -83,7 +83,7 @@ def not_applicable(c: dict, observed: dict, has_md: bool, formats: str) -> str |
     if req == "manifest" and observed.get("manifest", {}).get("manifest_json") != "present":
         return "NA: no manifest.json in the package (noted as informational)"
     if req == "network" and not probed(observed.get(c["check"], {})):
-        return "NA: live-site probe did not run (offline, unreachable, or nothing to probe)"
+        return "NA: no live-site result for this check (offline, unreachable, or nothing to probe)"
     if req == "pdftotext" and "pdf-sync" not in observed and "pdf-cover" not in observed:
         return "NA: pdftotext (poppler) unavailable on this runner"
     if req == "pdffonts" and "pdf-fonts" not in observed:
@@ -93,7 +93,7 @@ def not_applicable(c: dict, observed: dict, has_md: bool, formats: str) -> str |
 
 # The checker's own words for "this was not evaluated on this package".
 NOT_EVALUATED = ("not evaluated", "skipped", "could not be reached", "could not confirm",
-                 "could not be scanned")
+                 "could not be scanned", "not a definitive 404")
 UNREADABLE = ("could not read", "could not be read")
 
 
@@ -109,7 +109,8 @@ def unquoted(msg: str) -> str:
 def skipped_reason(check: str, findings: list[dict]) -> str | None:
     """The checker's own statement that it did not evaluate a class on this
     package, or None: an INFO saying "Not evaluated", "... skipped", "could
-    not be reached", "Could not confirm" or "could not be scanned", or a
+    not be reached", "Could not confirm", "could not be scanned" or "not a
+    definitive 404" (a 403 or 5xx), or a
     finding of any severity
     saying its input could not be read. A condition that was never
     evaluated must not read as PASS."""
