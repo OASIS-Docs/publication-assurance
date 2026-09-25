@@ -62,11 +62,6 @@
       "message": "Document-wide blanket example content-type statement found (no unlabeled example heading needed it): \"All examples in this document are informative\""
     },
     {
-      "severity": "INFO",
-      "check": "title-version",
-      "message": "Not evaluated: blocked by an upstream html-residue defect (the document title does not resolve to exactly one matching <h1>)."
-    },
-    {
       "severity": "BLOCKER",
       "check": "public-review-metadata",
       "message": "csd01 underwent a TC public review (Tier 1 (a comment-resolution-log for this revision is already live)) but the live stage directory https://docs.oasis-open.org/csaf/csaf/v2.1/csd01/ does not carry the required companion file csaf-v2.1-csd01-public-review-metadata.html. Naming Directives v1.7 s5.2: 'Project Administration will publish an additional \"public review metadata\" file in the directory with the CSD or CND'; TC Handbook Naming: 'Work products undergoing public review must include a companion metadata file.'"
@@ -480,7 +475,7 @@
       "sig": "<h1> elements",
       "applies": "all",
       "condition": "The document title appears in exactly one H1",
-      "pulls": "the count of <h1> elements matching the title text",
+      "pulls": "the count of <h1> and <h1big> (cover-title) elements matching the title text",
       "compares_to": "exactly 1 (more renders the title twice on the PDF cover, lint D1)",
       "severity": "BLOCKER"
     },
@@ -1306,8 +1301,8 @@
       "check": "title-version",
       "sig": "Version composition does not follow the required",
       "applies": "all",
-      "condition": "The title's Version token is composed as '<name/identifier> Version <number>' with no forbidden punctuation before it and only a sanctioned continuation after it",
-      "pulls": "the characters immediately preceding and following the rightmost 'Version <n>' token in the resolved title, and the stage token's track classification",
+      "condition": "The title's Version token is composed as '<name/identifier> Version <number>' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: <part title>' suffix; on a package whose own stage directory or immediate parent is named errataNN, also an 'Errata NN' or 'Plus Errata NN' suffix whose number matches the package's own errata number, per naming-directives.txt Section 4's separate Errata construction)",
+      "pulls": "the characters immediately preceding and following the rightmost 'Version <n>' token in the resolved title, the stage token's track classification, and the package's own Errata number derived from its stage directory layout",
       "compares_to": "naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -> BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -> WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification)",
       "severity": "BLOCKER/WARN"
     },
@@ -1835,12 +1830,17 @@
     },
     "title-version": {
       "stage": "csd01",
+      "track": "standards",
+      "pkg_version": "2.1",
       "title_source": "HTML <title>/<h1>",
       "title_text": "Common Security Advisory Framework Version 2.1",
-      "evaluated": "no"
+      "version_tokens_found": "1"
     },
     "title-oasis-prefix": {
-      "title_source": "not applicable -- html-residue D1 classification is 'ambiguous': 0 <h1> element(s) exactly matching the <title> text out of 13 <h1> element(s) total (need exactly 1 matching, or exactly 1 <h1> total as a fallback)"
+      "title_source": "Common Security Advisory Framework Version 2.1",
+      "track": "standards",
+      "track_confidence": "confirmed",
+      "title_match": "exact"
     },
     "authors": {
       "work_product_type": "committee specification draft"

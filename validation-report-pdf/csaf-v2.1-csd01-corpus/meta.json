@@ -2,12 +2,12 @@
   "folder": "validation-report-pdf/csaf-v2.1-csd01-corpus",
   "pdf": true,
   "publication_ready": false,
-  "published": "2026-09-25 09:56:19",
-  "published_at": "2026-09-25T09:56:19.217785+00:00",
+  "published": "2026-09-25 10:00:41",
+  "published_at": "2026-09-25T10:00:41.820610+00:00",
   "ref": "validation-report-pdf",
-  "run_url": "https://github.com/OASIS-Docs/publication-assurance/actions/runs/36121170454",
-  "source_sha": "731545e46350e92dd9c9e5a7f2751097604a4a34",
+  "run_url": "https://github.com/OASIS-Docs/publication-assurance/actions/runs/36121547706",
+  "source_sha": "6cbb3b1d5d3cc36628a521ef768337808d7b89f5",
   "target": "examples/csaf/v2.1/csd01",
   "title": "CSAF v2.1 CSD01 (corpus)",
-  "verdict": "NOT publication-ready: 1 blocker(s). 45 of 57 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 17 warning, 11 informational."
+  "verdict": "NOT publication-ready: 1 blocker(s). 46 of 57 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 17 warning, 10 informational."
 }

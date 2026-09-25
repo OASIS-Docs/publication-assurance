@@ -18,7 +18,6 @@
 [INFO   ] content-labels Appendix/Annex heading 'Appendix C. Array Length <a id='array-length'></a>' (markdown line 12110) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt.
 [INFO   ] content-labels Appendix/Annex heading 'Appendix C. String Length <a id='string-length'></a>' (markdown line 12210) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt.
 [INFO   ] content-labels Document-wide blanket example content-type statement found (no unlabeled example heading needed it): "All examples in this document are informative"
-[INFO   ] title-version Not evaluated: blocked by an upstream html-residue defect (the document title does not resolve to exactly one matching <h1>).
 [INFO   ] pdf-fonts     Package declares no local font authority (no font-family in its HTML/CSS); font check skipped.
 [INFO   ] manifest      No manifest.json in the package. Emit one (--emit-manifest or your own tool) and intake verification becomes automatic.
 
