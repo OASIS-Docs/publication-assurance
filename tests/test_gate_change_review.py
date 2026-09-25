@@ -8,11 +8,14 @@ makes it a condition of merge. Any PR that touches the checker must carry an
 `## Adversarial review` section in its body, naming at least one test node id
 that the PR adds or modifies, or saying `not applicable: <reason>`.
 
-The fixtures are this repository's own history. e1196cf..2dc6783 is PR #9's
-range: it changed the checker and added
+The fixtures are this repository's own history, found by commit subject
+(see by_subject) because commit IDs change when history is rewritten. PR #9's
+range runs from "pub-check: accept a cited directory that ships" to "Key the
+first-stage exemption on the version root": it changed the checker and added
 tests/test_stage_uri_live_first_stage.py, whose
 test_a_mis_cited_previous_stage_does_not_hide_a_broken_latest pins the
-reviewer's counterexample. 204a4a1 changed a test and no checker code.
+reviewer's counterexample. "Say in the count test's failure what a false
+positive looks like" changed a test and no checker code.
 """
 
 from __future__ import annotations
@@ -39,11 +42,27 @@ def have(rev):
                           capture_output=True).returncode == 0
 
 
+def by_subject(subject):
+    """Full SHA of the one commit on HEAD's history with exactly this subject.
+
+    None when absent or not unique, which skips the module.
+    """
+    out = subprocess.run(["git", "-C", str(REPO_ROOT), "log", "--format=%H%x00%s", "HEAD"],
+                         capture_output=True, text=True)
+    hits = [ln.split("\0", 1)[0] for ln in out.stdout.splitlines()
+            if ln.split("\0", 1)[-1] == subject]
+    return hits[0] if len(hits) == 1 else None
+
+
+PR9_BASE = by_subject("pub-check: accept a cited directory that ships (package-refs)")
+PR9_HEAD = by_subject("Key the first-stage exemption on the version root; let inline code wrap in PDFs")
+DOCS_ONLY = by_subject("Say in the count test's failure what a false positive looks like")
+
 pytestmark = pytest.mark.skipif(
-    not all(have(r) for r in ("e1196cf", "2dc6783", "204a4a1")),
+    not all(r and have(r) for r in (PR9_BASE, PR9_HEAD, DOCS_ONLY)),
     reason="needs full history: CI checks out with fetch-depth 0")
 
-PR9 = ("e1196cf", "2dc6783")
+PR9 = (PR9_BASE, PR9_HEAD)
 PINNED = ("tests/test_stage_uri_live_first_stage.py::"
           "test_a_mis_cited_previous_stage_does_not_hide_a_broken_latest")
 
@@ -104,7 +123,7 @@ def test_one_bad_node_id_among_good_ones_fails():
 
 
 def test_a_pr_that_does_not_touch_the_checker_needs_nothing():
-    ok, why = verdict("Docs only.", ("204a4a1^", "204a4a1"))
+    ok, why = verdict("Docs only.", (f"{DOCS_ONLY}^", DOCS_ONLY))
     assert ok and "does not change" in why
 
 
