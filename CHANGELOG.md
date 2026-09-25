@@ -26,6 +26,13 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+- Pipeline: the PDF preprocessor removes trailing spaces from each line of a
+  code block. Under `pre-wrap` they hang past the block's edge, and CSAF v2.0
+  OS's space-aligned "Supported digests" listing ran 0.6pt past the right
+  margin on whitespace alone. The `pdf-render` CI job now renders CSAF v2.0
+  OS as well as v2.1 csd01 and holds both to the type scale, the table-row
+  completeness check and the text column.
+
 - Composite action: `report-dir` now also receives the full Validation
   Report, `pubcheck-validation.md` and `pubcheck-validation.html`, rendered
   by the new `pub-check/validation_report.py` from the same `--json` run.
