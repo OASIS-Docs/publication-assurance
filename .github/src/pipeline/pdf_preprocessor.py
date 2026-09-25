@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import sys
 from pathlib import Path
 
@@ -155,8 +156,15 @@ class PdfPreprocessor(PipelineStep):
     @media print {
         body { font-size: 10pt !important; line-height: 1.3 !important;
                margin-left: 0 !important; margin-right: 0 !important; }
-        table { font-size: 9pt !important; }
-        th, td { padding: 2pt 3pt !important; }
+        /* A table never runs past the column: wkhtmltopdf clips what does
+           not fit, and dropped the last column of CSAF v2.1's eight-column
+           remediation matrix. Cells may break long words, and code in a cell
+           breaks after _ / . - (<wbr> from preprocess()), so its columns can
+           narrow. th code takes the header's white on blue. */
+        table { font-size: 9pt !important; width: 100% !important; max-width: 100% !important; }
+        th, td { padding: 2pt 3pt !important; word-wrap: break-word !important; }
+        th code, td code { white-space: normal !important; word-wrap: break-word !important; }
+        th code { color: inherit !important; background: transparent !important; border: none !important; }
 
         h1big { font-size: 20pt !important; }
         h1 { font-size: 16pt !important; }
@@ -177,11 +185,12 @@ class PdfPreprocessor(PipelineStep):
         table code, td code, th code { font-size: 8.5pt !important; }
         h1 code, h2 code, h3 code, h4 code, h5 code, h6 code { font-size: 0.95em !important; }
 
-        /* A heading, or the caption line before an example, stays with what
-           follows it; a code block split by a page break keeps its border on
-           both halves. wkhtmltopdf reads the page-break-* spellings. */
-        h1, h2, h3, h4, h5, h6, h1big { page-break-after: avoid !important; break-after: avoid !important; }
-        p:has(+ pre), p:has(+ p > img) { page-break-after: avoid !important; break-after: avoid !important; }
+        /* A heading, or the caption line before an example (tagged
+           keep-with-next by preprocess(), since wkhtmltopdf has no :has()),
+           stays with what follows it; a code block split by a page break
+           keeps its border on both halves. wkhtmltopdf reads page-break-*. */
+        h1, h2, h3, h4, h5, h6, h1big,
+        .keep-with-next { page-break-after: avoid !important; break-after: avoid !important; }
         pre { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
     }
 
@@ -242,11 +251,50 @@ class PdfPreprocessor(PipelineStep):
                 if not code.get('class'):
                     code['class'] = ['inline-code']
 
+        self.tag_print_layout(soup)
+
         # Write preprocessed HTML to output file
         with open(self.output_file, 'w', encoding='utf-8') as f:
             f.write(str(soup))
 
         logger.info(f"HTML preprocessing completed successfully: {self.output_file}")
+
+    @staticmethod
+    def tag_print_layout(soup: BeautifulSoup) -> None:
+        """Add the classes the print stylesheet keys on.
+
+        ``keep-with-next`` goes on a paragraph directly before a code block or
+        before a paragraph holding only an image (an example or figure
+        caption); code in a table cell gets a ``<wbr>`` after each _ / . -.
+        """
+        def add(tag, name):
+            classes = tag.get('class', [])
+            if name not in classes:
+                tag['class'] = classes + [name]
+
+        def lone_image(tag):
+            return (tag.name == 'p' and tag.find('img') is not None
+                    and not tag.get_text(strip=True))
+
+        for tag in soup.find_all(['pre', 'p']):
+            if tag.name == 'p' and not lone_image(tag):
+                continue
+            prev = tag.find_previous_sibling()
+            if prev is not None and prev.name == 'p' and not lone_image(prev):
+                add(prev, 'keep-with-next')
+
+        # Code in a table cell may break after _ / . - (a <wbr>, which adds no
+        # character to the text), so a column of identifiers can narrow.
+        for code in soup.select('td code, th code'):
+            for text in list(code.find_all(string=True)):
+                parts = [p for p in re.split(r'(?<=[_/.\-])', str(text)) if p]
+                if len(parts) < 2:
+                    continue
+                for i, part in enumerate(parts):
+                    if i:
+                        text.insert_before(soup.new_tag('wbr'))
+                    text.insert_before(part)
+                text.extract()
 
     def run(self) -> None:
         """Execute the preprocessing stage (alias for :meth:`preprocess`)."""
