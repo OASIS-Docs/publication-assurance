@@ -29,22 +29,6 @@ and each run publishes a Validation Report you can open in a browser.
 | [Checks and their authorities](#checks-and-their-authorities) | You want the rule behind a finding |
 | [Terms](#terms) | A GitHub word in this guide is unfamiliar |
 
-## Terms
-
-| Term | Meaning |
-|---|---|
-| Workflow | A YAML file under `.github/workflows/` that tells GitHub Actions what to run and when |
-| Run, job, step | One execution of a workflow; a job is a set of steps on one machine; a step is one command or action |
-| Runner | The GitHub-hosted machine that runs a job |
-| Job summary | The page of results a job writes, shown on the run's **Summary** page |
-| Artifact | A file set attached to a run, downloadable from the bottom of the run's **Summary** page |
-| Workflow token | The credential GitHub gives each run; `permissions:` sets what it may do |
-| Matrix | One job definition run once per entry in a list, for example once per document |
-| Exit code | The number a program ends with: `0` publishable, `1` blockers, `2` the target could not be read |
-| Annotation | A message pinned to a run, listed under **Annotations** on its **Summary** page |
-| GitHub Pages | GitHub's web hosting for a repository branch; here it serves the reports as web pages |
-| TCADMIN | The OASIS TC Administration issue tracker, where TCs ask staff for publication and other actions |
-
 ## Quick start
 
 Three steps, about five minutes. You need write access to the TC
@@ -694,3 +678,19 @@ those conditions report NA and the rest run unchanged.
 
 Questions: michael.coletta@oasis-open.org. Findings you believe are
 wrong: see [Blocker ownership](#blocker-ownership).
+
+## Terms
+
+| Term | Meaning |
+|---|---|
+| Workflow | A YAML file under `.github/workflows/` that tells GitHub Actions what to run and when |
+| Run, job, step | One execution of a workflow; a job is a set of steps on one machine; a step is one command or action |
+| Runner | The GitHub-hosted machine that runs a job |
+| Job summary | The page of results a job writes, shown on the run's **Summary** page |
+| Artifact | A file set attached to a run, downloadable from the bottom of the run's **Summary** page |
+| Workflow token | The credential GitHub gives each run; `permissions:` sets what it may do |
+| Matrix | One job definition run once per entry in a list, for example once per document |
+| Exit code | The number a program ends with: `0` publishable, `1` blockers, `2` the target could not be read |
+| Annotation | A message pinned to a run, listed under **Annotations** on its **Summary** page |
+| GitHub Pages | GitHub's web hosting for a repository branch; here it serves the reports as web pages |
+| TCADMIN | The OASIS TC Administration issue tracker, where TCs ask staff for publication and other actions |
