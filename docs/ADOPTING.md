@@ -82,7 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: OASIS-Docs/publication-assurance@v1.5.0
+      - uses: OASIS-Docs/publication-assurance@v1.6.0
         with:
           target: work/v1.0/csd01   # EDIT: your stage directory or package .zip
 
@@ -106,15 +106,8 @@ path is wrong: see [Troubleshooting](#troubleshooting).
 
 ### Step 2: Report page
 
-
 This step is optional and recommended. It gives every report a web
 address that anyone can open without downloading anything.
-
-Report publishing (the `pubcheck-reports` branch and the report links in
-Step 3) is in the release after v1.5.0. Until that release is cut, a
-workflow pinned to `@v1.5.0` skips this step, and Step 3's report files are
-in the `pubcheck-report` artifact at the bottom of the run's **Summary**
-page.
 
 The first run in Step 1 created a branch named `pubcheck-reports` that holds
 the reports: each run writes a folder, and `index.html` at the branch root
@@ -310,7 +303,7 @@ Set these with `env:` on the gate step.
 | `PUBCHECK_CHROME` | Path of the browser that prints the PDF report. Unset, the action finds Chrome or Chromium itself, as on `ubuntu-latest`; with none, no PDF is written |
 
 ```yaml
-      - uses: OASIS-Docs/publication-assurance@v1.5.0
+      - uses: OASIS-Docs/publication-assurance@v1.6.0
         env:
           PUB_CHECK_OFFLINE: '1'   # only while docs.oasis-open.org is unreachable
         with:
@@ -377,7 +370,7 @@ An example that posts the blocker count as a notice:
 
 ```yaml
       - id: gate
-        uses: OASIS-Docs/publication-assurance@v1.5.0
+        uses: OASIS-Docs/publication-assurance@v1.6.0
         with:
           target: work/v1.0/csd01
 
@@ -433,7 +426,7 @@ permissions:
 
 env:
   PANDOC_VERSION: 3.8.2.1
-  PA_REF: v1.5.0          # the release render.sh clones
+  PA_REF: v1.6.0          # the release render.sh clones
 
 jobs:
   render-and-gate:
@@ -455,7 +448,7 @@ jobs:
         run: tools/publication-assurance/render.sh dmlex-v1.1 dmlex-v1.1/schemas _publication
 
       - name: OASIS publication gate
-        uses: OASIS-Docs/publication-assurance@v1.5.0
+        uses: OASIS-Docs/publication-assurance@v1.6.0
         with:
           target: _publication/lexidma/dmlex/v1.1/wd01
 ```
@@ -473,7 +466,7 @@ and published, the step still shows its failure, and the job and the run
 pass.
 
 ```yaml
-      - uses: OASIS-Docs/publication-assurance@v1.5.0
+      - uses: OASIS-Docs/publication-assurance@v1.6.0
         continue-on-error: true      # report only: findings never fail the job
         with:
           target: published/v1.0/os
@@ -521,7 +514,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: OASIS-Docs/publication-assurance@v1.5.0
+      - uses: OASIS-Docs/publication-assurance@v1.6.0
         with:
           target: ${{ matrix.package.target }}
           summary-title: ${{ matrix.package.name }}
@@ -569,14 +562,14 @@ the report is not published and the rest of the run is unchanged. Setting
 
 ### Version pinning and upgrades
 
-Pin the action to a full release tag, such as `@v1.5.0`. The releases,
+Pin the action to a full release tag, such as `@v1.6.0`. The releases,
 with what each changed, are on the
 [releases page](https://github.com/OASIS-Docs/publication-assurance/releases)
 and in [CHANGELOG.md](../CHANGELOG.md).
 
 | Reference | Behaviour |
 |---|---|
-| `@v1.5.0` | A fixed release. Recommended |
+| `@v1.6.0` | A fixed release. Recommended |
 | `@<40-character commit SHA>` | Fixed and immune to a tag being moved. Use it where your organisation requires SHA pinning |
 | `@v1` | Not recommended. This tag is not moved on each release and currently points to a build older than v1.4.0, without the Validation Report |
 | `@main` | Unreleased code. Never for a TC workflow |
@@ -584,7 +577,7 @@ and in [CHANGELOG.md](../CHANGELOG.md).
 To find the SHA of a release:
 
 ```bash
-git ls-remote https://github.com/OASIS-Docs/publication-assurance 'refs/tags/v1.5.0^{}'
+git ls-remote https://github.com/OASIS-Docs/publication-assurance 'refs/tags/v1.6.0^{}'
 ```
 
 To upgrade:
@@ -616,7 +609,7 @@ library, so it runs anywhere Python 3.10 or later does. The same code runs
 in the action.
 
 ```bash
-git clone --depth 1 --branch v1.5.0 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.6.0 https://github.com/OASIS-Docs/publication-assurance
 python3 publication-assurance/pub-check/oasis_pub_check.py path/to/your/stage-dir
 ```
 
