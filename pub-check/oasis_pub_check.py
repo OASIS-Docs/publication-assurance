@@ -175,6 +175,42 @@ def strip_code_blocks(text: str, kind: str) -> str:
     return text
 
 
+_PACKAGE_STEM_RE = None
+
+
+def parse_package_stem(stem: str) -> tuple[str, str, str, str] | None:
+    """(abbrev, version, errata, stage) from a document identifier
+    '[WP-abbrev]-[version-id][-errataNN]-[stage-abbrev][revisionNumber][-...]'
+    (naming-directives.txt Section 4), errata '' when absent; None when the
+    stem does not have that shape. The tail after the stage takes filename
+    characters only, so a browser's 'name (1)' copy is not re-read with
+    'errata01' as its stage. Retired stage tokens parse too, so the
+    stage-name check can still report them."""
+    global _PACKAGE_STEM_RE
+    if _PACKAGE_STEM_RE is None:
+        stage_re = "|".join(sorted(VALID_STAGE_PREFIXES | RETIRED_STAGE_TOKENS,
+                                   key=len, reverse=True))
+        _PACKAGE_STEM_RE = re.compile(
+            r"(?P<abbrev>.+?)-(?P<ver>v\d+(?:\.\d+)+)(?:-(?P<errata>errata\d*))?"
+            rf"-(?P<stage>(?:{stage_re})\d*)(?P<tail>-[A-Za-z0-9._-]+)?")
+    m = _PACKAGE_STEM_RE.fullmatch(stem)
+    if not m:
+        return None
+    # When '-errataNN-<stage>' cannot be read (x-v1.0-errata01-csd01_fixed),
+    # the regex falls back to errataNN as the stage with the rest as a tail,
+    # which names a document that is not there. An errata token is the
+    # stage only when nothing follows it (csaf-v2.0-errata01).
+    if m.group("stage").startswith("errata") and m.group("tail"):
+        return None
+    return m.group("abbrev"), m.group("ver"), m.group("errata") or "", m.group("stage")
+
+
+# Side-files that legitimately name ANOTHER stage than the package's own:
+# a comment-resolution log or public-review metadata file for an earlier
+# review can travel with a later stage.
+_OTHER_STAGE_SIDEFILE = re.compile(r"-(?:comment-resolution-log|public-review-metadata)$")
+
+
 def find_delivery_items(stage_dir: str,
                         exts: tuple[str, ...] = ("md", "html", "pdf")) -> dict[str, str]:
     """Map extension -> path for the DELIVERY items in dir root.
@@ -276,13 +312,22 @@ def check_stage_name(stage: str, f: Findings, errata_dir: str = "") -> None:
         if nm and pfx in VALID_STAGE_PREFIXES and pfx != "os" and len(nm.group(2)) != 2:
             f.add(BLOCKER, "stage-name",
                   f"{label} '{name}' is missing its two-digit number (e.g. {pfx}01).")
-    if prefix in RETIRED_STAGE_TOKENS:
-        f.add(BLOCKER, "stage-name",
-              f"Stage '{stage}' uses a retired/invalid stage token. Current naming: a document "
-              f"in public review keeps its stage name (csd stays csd). Valid: "
-              f"{', '.join(sorted(VALID_STAGE_PREFIXES))} + two digits.")
-    elif prefix not in VALID_STAGE_PREFIXES:
-        f.add(BLOCKER, "stage-name", f"Stage '{stage}' is not a recognized stage token.")
+        if label == "Stage" and pfx in RETIRED_STAGE_TOKENS:
+            f.add(BLOCKER, "stage-name",
+                  f"Stage '{stage}' uses a retired/invalid stage token. Current naming: a document "
+                  f"in public review keeps its stage name (csd stays csd). Valid: "
+                  f"{', '.join(sorted(VALID_STAGE_PREFIXES))} + two digits.")
+        elif pfx not in VALID_STAGE_PREFIXES or (pfx == "os" and nm.group(2)):
+            # naming-directives.txt 5.2: stage abbreviations are lower case,
+            # and 'The os stage abbreviation is never used with a revision number.'
+            hint = (" The os stage abbreviation is never used with a revision number."
+                    if nm and pfx == "os" else
+                    f" Stage abbreviations are lower case"
+                    f" ({'os' if re.fullmatch(r'os\d+', name.lower()) else name.lower()})."
+                    if name != name.lower() and re.fullmatch(r"[a-z]+\d*", name.lower())
+                    and re.match(r"[a-z]+", name.lower()).group(0) in VALID_STAGE_PREFIXES
+                    else "")
+            f.add(BLOCKER, "stage-name", f"{label} '{name}' is not a recognized stage token.{hint}")
 
 
 def check_version_naming(version: str, stem: str, f: Findings) -> None:
@@ -398,23 +443,57 @@ def check_odt(path: str, rel: str, f: Findings) -> None:
 
 
 def check_filenames(items: dict[str, str], stage: str, f: Findings,
-                    required: tuple[str, ...] = ("md", "html", "pdf")) -> str:
+                    required: tuple[str, ...] = ("md", "html", "pdf"),
+                    stage_dir: str = "", errata_dir: str = "",
+                    package_zip: str = "") -> str:
     """Delivery items must be <base>-<stage>.<ext>. Returns <base>-<stage>.
     `required` is the track's format set: (md, html, pdf) on the markdown
-    track, (docx, html, pdf) on the DOCX-native track."""
+    track, (docx, html, pdf) on the DOCX-native track.
+
+    Inside an errataNN directory the stem ends in -errataNN-<stage>
+    (csaf-v2.0-errata01-os). A second package's document identifier in the
+    same stage directory (a different WP-abbrev, version, errata or stage,
+    read with parse_package_stem), or a package zip whose name is itself a
+    different document identifier, joins the basename set, because the
+    checks below grade only one of them. A zip name that is not a document
+    identifier at all is not compared."""
     stems = {os.path.splitext(os.path.basename(p))[0] for p in items.values()}
     f.observe("filenames", stems=stems)
-    if len(stems) > 1:
-        f.add(BLOCKER, "filenames", f"Delivery items do not share one basename: {sorted(stems)}")
     stem = sorted(stems)[0] if stems else ""
+    mine = parse_package_stem(stem) if len(stems) == 1 else None
+    others = set()
+    if mine and stage_dir and os.path.isdir(stage_dir):
+        for name in os.listdir(stage_dir):
+            other, ext = os.path.splitext(name)
+            if (ext.lower() in (".md", ".html", ".docx", ".odt")
+                    and os.path.isfile(os.path.join(stage_dir, name))
+                    and not _OTHER_STAGE_SIDEFILE.search(other)):
+                parts = parse_package_stem(other)
+                if parts and parts != mine:
+                    others.add(other)
+    if mine and package_zip:
+        zstem = os.path.splitext(os.path.basename(package_zip))[0]
+        zparts = parse_package_stem(zstem)
+        # A name that is not a document identifier at all (package.zip, a
+        # browser's "name (1).zip", a version root's kmip-spec-v3.0.zip)
+        # says nothing about the contents; one naming another document does.
+        if zparts and zparts != mine:
+            others.add(zstem + ".zip")
+    if others:
+        f.observe("filenames", other_document_identifiers=others)
+    if len(stems | others) > 1:
+        f.add(BLOCKER, "filenames", f"Delivery items do not share one basename: {sorted(stems | others)}")
     for bad in ("draft", "tmp", "rc"):
         if re.search(rf"[-_.]{bad}\d*$", stem) or f"-{bad}-" in stem:
             f.add(BLOCKER, "filenames",
                   f"Delivery filename '{stem}' carries a working token ('{bad}'); files must be "
                   f"named for the stage being published (…-{stage}.md/.html/.pdf).")
-    if stem and not stem.endswith(f"-{stage}"):
+    ending = (f"{errata_dir.lower()}-{stage}" if re.fullmatch(r"errata\d{2}", errata_dir, re.I)
+              else stage)
+    if stem and not stem.endswith(f"-{ending}"):
         f.add(BLOCKER, "filenames",
-              f"Delivery filename '{stem}' does not end in '-{stage}' (the stage directory name).")
+              f"Delivery filename '{stem}' does not end in '-{ending}' (the stage directory name"
+              f"{', under its Errata directory' if ending != stage else ''}).")
     missing = set(required) - set(items)
     if missing:
         f.add(BLOCKER, "filenames", f"Missing delivery format(s): {', '.join(sorted(missing))}")
@@ -6566,7 +6645,7 @@ def check_ns_segment(md_text: str, html_text: str, f: Findings) -> None:
                       f"namespace identifiers, not retrievable documents.")
 
 
-def run(stage_dir: str, f: Findings) -> None:
+def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
     """Output-centric validation. All roads lead to HTML and PDF: whatever the
     authoring format (Markdown, Word, DocBook/XML, LaTeX, ...), the published
     form is HTML + PDF at the canonical URLs, so the bulk of the gate runs on
@@ -6576,8 +6655,8 @@ def run(stage_dir: str, f: Findings) -> None:
     f.observe("stage-name", stage_directory=stage)
     f.observe("version-naming", version_directory=version)
     _errata_parent = os.path.basename(os.path.dirname(os.path.normpath(stage_dir)))
-    check_stage_name(stage, f,
-                     errata_dir=_errata_parent if re.fullmatch(r"errata\d*", _errata_parent) else "")
+    _errata_dir = _errata_parent if re.fullmatch(r"errata\d*", _errata_parent, re.I) else ""
+    check_stage_name(stage, f, errata_dir=_errata_dir)
     items = find_delivery_items(stage_dir, ("md", "docx", "odt", "html", "pdf"))
     if not items:
         f.add(BLOCKER, "filenames", f"No delivery items found in {stage_dir}")
@@ -6596,7 +6675,8 @@ def run(stage_dir: str, f: Findings) -> None:
         required.append("docx")      # Word-track contract preserves the source
     elif "odt" in items:
         required.append("odt")       # ODT-track contract preserves the source
-    stem = check_filenames(items, stage, f, required=tuple(required))
+    stem = check_filenames(items, stage, f, required=tuple(required), stage_dir=stage_dir,
+                           errata_dir=_errata_dir, package_zip=package_zip)
     f.observe("filenames", delivery_files=[os.path.basename(p) for p in items.values()],
               formats_present=sorted(items), required_formats=sorted(required))
     f.observe("version-naming", delivery_stem=stem)
@@ -6680,7 +6760,7 @@ def run(stage_dir: str, f: Findings) -> None:
     # (.../v2.0/errata01/os, .../v2.0/errata01/csd01) -- never any more
     # distant ancestor, which would accept an unrelated package that merely
     # happens to sit somewhere under a folder named errataNN.
-    _m_errata = re.fullmatch(r"errata(\d+)", stage) or re.fullmatch(r"errata(\d+)", _errata_parent)
+    _m_errata = re.fullmatch(r"errata(\d+)", stage) or re.fullmatch(r"errata(\d+)", _errata_parent, re.I)
     check_title_version(html_text, version, stage, is_word, f,
                         errata=_m_errata.group(1) if _m_errata else "")
     check_frontmatter_title_oasis_prefix(html_text, stage, f)
@@ -6761,10 +6841,9 @@ def zip_stage_layout(zip_path: str, names: list[str]) -> tuple[str, str, str, st
         return (bool(m and m.group("tail")), stem != zip_stem, -root_files.count(stem), stem)
     stems = sorted(root_stems, key=rank) + [zip_stem]
     for stem in stems:
-        m = shape.fullmatch(stem)
-        if not m:
+        parts = parse_package_stem(stem)
+        if not parts:
             continue
-        parts = (m.group("abbrev"), m.group("ver"), m.group("errata") or "", m.group("stage"))
         if all(_safe_path_segment(p) for p in parts if p):
             return parts
     return None
@@ -6848,9 +6927,9 @@ CONDITION_DOCS: list[dict] = [
          pulls="the alphabetic prefix of the stage directory name",
          compares_to="retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7"),
     dict(check="stage-name", sig="is not a recognized stage token", applies="all",
-         condition="Stage token is a recognized current stage",
-         pulls="the alphabetic prefix of the stage directory name",
-         compares_to="valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata"),
+         condition="Stage token (and an Errata parent directory) is a recognized current stage, in lower case, and os carries no revision number",
+         pulls="the alphabetic prefix of the stage directory name, its digits, and the Errata parent directory name",
+         compares_to="valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata; lower case, and 'The os stage abbreviation is never used with a revision number' (naming-directives.txt 5.2)"),
     # version-naming
     dict(check="version-naming", sig="does not match the vN.N convention", applies="all",
          condition="Version directory matches the vN.N(.N) convention",
@@ -6875,17 +6954,17 @@ CONDITION_DOCS: list[dict] = [
          pulls="the file listing of the stage directory root",
          compares_to="at least one delivery item (md/docx/odt/html/pdf) must be present"),
     dict(check="filenames", sig="do not share one basename", applies="all",
-         condition="All delivery items share one basename",
-         pulls="the set of delivery-item filename stems",
-         compares_to="exactly one distinct stem across md/docx/odt/html/pdf"),
+         condition="All delivery items share one basename, and the stage directory and package zip hold only that document",
+         pulls="the set of delivery-item filename stems, every other md/html/docx/odt document identifier in the stage directory root (comment-resolution-log and public-review-metadata side-files excepted), and the package zip's own name in zip mode when that name is itself a document identifier",
+         compares_to="exactly one distinct stem across md/docx/odt/html/pdf; another [WP-abbrev]-[version]-[stage] identifier, or a zip named for one, is a second package"),
     dict(check="filenames", sig="carries a working token", applies="all",
          condition="Delivery filename carries no working token",
          pulls="the delivery filename stem",
          compares_to="forbidden working tokens: draft, tmp, rc (files are named for the published stage)"),
     dict(check="filenames", sig="does not end in '-", applies="all",
          condition="Delivery filename ends in the stage suffix",
-         pulls="the delivery filename stem",
-         compares_to="the stage directory name as a -<stage> suffix"),
+         pulls="the delivery filename stem, and the errataNN parent directory when there is one",
+         compares_to="the stage directory name as a -<stage> suffix, or -errataNN-<stage> inside an Errata directory"),
     dict(check="filenames", sig="Missing delivery format(s)", applies="all",
          condition="All required delivery formats are present",
          pulls="the set of delivery formats found in the package",
@@ -7557,7 +7636,7 @@ def main() -> int:
         print(f"wrote {emit_manifest(target, version, stage)}")
         print(f"wrote {emit_manifest_txt(target, version, stage)}")
 
-    run(target, f)
+    run(target, f, package_zip=os.path.abspath(args.target) if tmp else "")
 
     if args.json:
         print(json.dumps({"target": args.target, "findings": f.items,

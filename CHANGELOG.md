@@ -24,6 +24,43 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
+## Unreleased
+
+- **Package identity**: five naming gaps that passed with no finding.
+  - **filenames**: a package filed under an `errataNN` directory must carry
+    that Errata in its stem (`...-errata01-os`); a plain `csaf-v2.0-os`
+    package under `errata01/os` is now a BLOCKER.
+  - **filenames**: a second document identifier in one stage directory (a
+    different WP-abbrev, version, Errata or stage), or a package zip whose
+    name is itself a different document identifier, joins "Delivery items
+    do not share one basename". Only one package was graded before. A
+    comment-resolution log or public-review metadata file naming an earlier
+    stage is not a second package, an `errataNN` token is read as the stage
+    only when nothing follows it (so `...-errata01-csd01_fixed` is not
+    re-read as a stage-`errata01` document), and a zip name that is no document
+    identifier (`package.zip`, a browser's `name (1).zip`, a version root's
+    `kmip-spec-v3.0.zip`) is not compared.
+  - The cover URL's WP-abbrev directory is deliberately not compared with
+    the filename: published KMIP v1.x packages are `kmip-spec-v1.4-os.*`
+    under `.../kmip/spec/v1.4/os/`, so that rule put 381 false BLOCKERs on
+    them.
+  - **stage-name**: `os01` is refused ("The os stage abbreviation is never
+    used with a revision number", naming-directives.txt 5.2), and an
+    upper-case stage or Errata directory (`CSD01`, `Errata01`) is refused
+    with its lower-case form named. title-version reads an upper-case
+    Errata parent's number, so the title is not blamed for the directory.
+  - No finding changes on any stage directory, version root or zip in
+    `examples/`. Across 870 local targets (examples/ plus the kmip,
+    pkcs11-docs, legaldocml, legalxml-courtfiling, niemopen, virtio and dps
+    trees) no exit code changes; three targets gain the one-basename
+    BLOCKER, each a real second identifier (`niem-ndr-v6.0-os` beside
+    `ndr-v6.0-os` in the stage directory and in its zip, and a zip named
+    `akn-core-...` holding `legaldocml-akn-core-...`), and each already had
+    other BLOCKERs.
+- **title-oasis-prefix** tag-stripped the already entity-decoded `<title>`,
+  so a title such as `OASIS Foo &lt;Bar&gt; Version 2.0` lost `<Bar>`, matched
+  no heading, and its OASIS prefix went unreported.
+
 ## v1.7.0 - 2026-09-25
 
 MINOR: report-only runs with the new `fail-on-blockers` action input, and
