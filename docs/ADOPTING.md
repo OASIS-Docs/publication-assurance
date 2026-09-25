@@ -19,6 +19,8 @@ and each run publishes a Validation Report you can open in a browser.
 | [The Validation Report](#the-validation-report) | A run has finished and you want to know what it says |
 | [Blocker ownership](#blocker-ownership) | A blocker may not be the TC's to fix, or looks wrong |
 | [Action inputs](#action-inputs) and [outputs](#action-outputs) | You want to change a default or use a result in a later step |
+| [Environment variables](#environment-variables) | You need offline runs or a specific browser for the PDF |
+| [Report branch layout](#report-branch-layout) | You want to know where each report is kept |
 | [Markdown rendering before the gate](#markdown-rendering-before-the-gate) | Your repository holds Markdown sources, not a rendered package |
 | [Gating and report-only runs](#gating-and-report-only-runs) | A blocker should not fail the build, for example on a published standard |
 | [Several documents in one repository](#several-documents-in-one-repository) | The TC publishes more than one work product from this repository |
@@ -27,11 +29,12 @@ and each run publishes a Validation Report you can open in a browser.
 | [Local runs](#local-runs) | You want the verdict on your own machine before pushing |
 | [Troubleshooting](#troubleshooting) | Something did not work as described |
 | [Checks and their authorities](#checks-and-their-authorities) | You want the rule behind a finding |
-| [Terms](#terms) | A GitHub word in this guide is unfamiliar |
+| [Terms](#terms) | A term in this guide is unfamiliar |
 
 ## Quick start
 
-Three steps, about five minutes. You need write access to the TC
+Three steps, about five minutes. GitHub terms are defined under
+[Terms](#terms). You need write access to the TC
 repository and the path of the package you want checked.
 
 The package is a **stage directory**: the folder that holds one work
@@ -72,6 +75,7 @@ on:
 
 permissions:
   contents: write   # lets the action publish the report to the pubcheck-reports branch
+  # pages: read    # uncomment in a private repository that uses Step 2
 
 jobs:
   pub-check:
@@ -127,11 +131,12 @@ opens the report as a web page, at
 `https://<owner>.github.io/<repo>/<checked-branch>/<document>/pubcheck-validation.html`.
 The action never turns Pages on by itself.
 
-In a private repository, also add `pages: read` under `permissions:` in
-the workflow file, so the action can find the Pages address; without it
-the HTML link opens the source view. GitHub Pages is free for public repositories. A private repository needs a
-paid GitHub plan for Pages; without it, skip this step and use the PDF and
-Markdown links, which work in any repository.
+GitHub Pages is free for public repositories. A private repository needs
+a paid GitHub plan for Pages; without it, skip this step and use the PDF
+and Markdown links, which work in any repository. A private repository
+with Pages also needs `pages: read` under `permissions:` in the workflow
+file (the commented line in Step 1), so the action can find the Pages
+address; without it the HTML link opens the source view.
 
 ### Step 3: First report
 
@@ -230,7 +235,7 @@ says why. The common reasons:
 | `pdffonts unavailable or the package declares no font authority` | The runner had no poppler, or your HTML and CSS name no font family to compare against |
 | `no manifest.json in the package` | Add a manifest to enable the manifest checks ([Local runs](#local-runs) shows `--emit-manifest`) |
 | `no live-site result for this check (offline, unreachable, or nothing to probe)` | The condition compares the package with the live `docs.oasis-open.org` and got no answer: the run was offline (`PUB_CHECK_OFFLINE`), the site was unreachable, or there was nothing to look up |
-| `not evaluated on this package: ...` | Something earlier in the same package stopped this condition from running; the rest of the text names it. Fix that and the condition runs. If the class it names shows PASS, report it as a finding believed wrong (see [Blocker ownership](#blocker-ownership)) |
+| `not evaluated on this package: ...` | Something earlier in the same package stopped this condition from running; the rest of the text names it. Fix that and the condition runs. If the class it names shows PASS or NA, report it as a finding believed wrong (see [Blocker ownership](#blocker-ownership)) |
 
 A few conditions also need the network: they compare your package with
 the live `docs.oasis-open.org`. GitHub's runners have network access, so
@@ -308,7 +313,8 @@ hyphens. Each folder holds `pubcheck-validation.pdf`, `.md` and `.html`,
 `pubcheck-report.json` and `.txt`, and `meta.json`. A later run of the same
 branch and document replaces the folder; the branch's own history keeps
 every earlier run. The branch root holds `index.html`, every folder newest
-first with its verdict, and `.nojekyll`.
+first with its verdict, and `.nojekyll` (which tells Pages to serve the
+files as they are).
 
 ### Action outputs
 
