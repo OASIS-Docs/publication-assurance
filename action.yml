@@ -132,7 +132,7 @@ outputs:
     description: "The PDF URL pinned to the report commit's SHA, so the link for this run never changes when later runs replace the folder. Empty when nothing was published or no PDF was produced."
     value: ${{ steps.publish.outputs.report_url_pdf_pinned }}
   report-publish-note:
-    description: "'published', or the reason the report files were not published (publishing off, a fork pull request, a token without contents: write)."
+    description: "'published', or the reason the report files were not published (publishing off, a fork pull request, a token without contents: write). Empty when the gate exits 2 (the target could not be read): nothing is published."
     value: ${{ steps.publish.outputs.report_publish_note }}
   report-validation-pdf:
     description: "Path to the same Validation Report as an A4 landscape PDF, printed with headless Chrome (light theme, header rows repeated on every page, title and Page X of Y in the footer). Empty if report-dir was set to '', the report could not be rendered, or no Chrome/Chromium was available; a missing PDF is a warning and never changes the gate's result."
@@ -174,6 +174,9 @@ runs:
         SUMMARY_TITLE: ${{ inputs.summary-title }}
       run: |
         set +o errexit
+        # A matrix of calls shares RUNNER_TEMP: never let the previous call's
+        # report links reach this call's summary.
+        rm -f "$RUNNER_TEMP/pubcheck-links.md"
 
         # Primary invocation: exactly the command every prior release ran,
         # with the caller's own args, teed to a temp file so its exit code
@@ -204,7 +207,11 @@ runs:
         rm -f "$RUNNER_TEMP/pubcheck-validation.md" "$RUNNER_TEMP/pubcheck-validation.html" \
           "$RUNNER_TEMP/pubcheck-validation.pdf"
         validation_ok=0
-        if python3 "$ACTION_PATH/pub-check/validation_report.py" \
+        # Exit 2: the target could not be read, so there is no report to
+        # render or publish, and every report path and URL output stays empty.
+        if [ "$exit_code" = 2 ]; then
+          echo "::notice::pub-check could not read the target; no validation report was rendered"
+        elif python3 "$ACTION_PATH/pub-check/validation_report.py" \
             "$RUNNER_TEMP/oasis-pub-check.json" \
             --md "$RUNNER_TEMP/pubcheck-validation.md" \
             --html "$RUNNER_TEMP/pubcheck-validation.html" \
@@ -257,10 +264,12 @@ runs:
         echo "oasis-pub-check exit code: ${exit_code}"
 
     # Commit this run's report files to publish-branch and state their full
-    # URLs. Never fails the gate: a reason is recorded instead.
+    # URLs. Never fails the gate: a reason is recorded instead. Skipped when
+    # the target could not be read (exit 2): there is no report to publish,
+    # and every URL output and the publish note stay empty.
     - name: Publish the report files
       id: publish
-      if: always()
+      if: always() && steps.pubcheck.outputs.exit_code != '2'
       continue-on-error: true
       shell: bash
       env:
