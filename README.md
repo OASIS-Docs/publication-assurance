@@ -66,48 +66,13 @@ upgrades, and troubleshooting.
 
 ### Finding the report
 
-After the gate runs, the action commits the run's report files to the branch
-named by `publish-branch` (default `pubcheck-reports`) and links them with
-full https://github.com URLs. The job needs `permissions: contents: write`;
-`pages: read` is optional and lets the action see whether GitHub Pages serves
-the branch.
-
-- **Where the links appear.** At the top of the run's summary, in a block
-  headed "Validation report:" and the summary title: "HTML report (opens in browser)" when
-  Pages serves the branch, "PDF (opens in GitHub)", "Markdown", the HTML
-  source view when Pages does not, "All files for this run", and the PDF
-  pinned to the report commit. The verdict sits under the heading. The same
-  first link is a notice annotation titled "Validation report" on the run
-  page and in the pull request's checks, and the URLs are the outputs
-  `report-url-html`, `report-url-pdf`, `report-url-md`, `report-url-folder`
-  and `report-url-pdf-pinned`.
-- **The branch.** `pubcheck-reports` is created as an orphan on first use,
-  so it shares no history with code branches, and the action touches no
-  other branch. Each run writes
-  `<ref>/<slug>/` (the pull request's head branch or the pushed ref, then
-  `summary-title` or the target, lowercased with other characters turned
-  to `-`): `pubcheck-validation.pdf`, `.md`, `.html`, `pubcheck-report.json`,
-  `pubcheck-report.txt` and `meta.json`. A later run replaces its own folder;
-  the branch history keeps every run. `index.html` at the branch root lists
-  every folder, newest first, with its verdict.
-- **URL shapes.**
-  `https://github.com/<owner>/<repo>/blob/pubcheck-reports/<ref>/<slug>/pubcheck-validation.pdf`
-  (GitHub shows the PDF in the browser; `.md` renders too),
-  `https://github.com/<owner>/<repo>/tree/pubcheck-reports/<ref>/<slug>` for
-  the folder, and `blob/<commit sha>/...` for the pinned PDF.
-- **The HTML report as a page.** GitHub's file view shows `.html` as source.
-  To open it rendered, turn on Pages once: Settings > Pages > Deploy from a
-  branch > `pubcheck-reports` / (root). The report is then at
-  `https://<owner>.github.io/<repo>/<ref>/<slug>/pubcheck-validation.html`
-  and the index at `https://<owner>.github.io/<repo>/`; the action detects
-  this and puts the HTML link first. It never turns Pages on itself.
-- **When nothing is published.** With `publish-branch: ""`, a token without
-  `contents: write`, or a pull request from a fork (whose token is always
-  read-only), nothing is pushed, the gate result is unchanged, the summary
-  says why, and it links the run page, where an uploaded artifact is listed.
-  A caller that uploads `report-dir` with `actions/upload-artifact` can add
-  the step's `artifact-url` output to its own summary for a direct link.
-  `report-publish-note` carries `published` or the reason.
+Each run commits its report files to the `pubcheck-reports` branch and
+opens the job summary with labelled links to them (PDF, Markdown, the
+run's folder, and the HTML report, which renders as a page once GitHub
+Pages serves the branch). Where the links appear, the branch layout, the
+URL shapes and what happens when nothing is published:
+[docs/ADOPTING.md](docs/ADOPTING.md#step-3-first-report) and its
+[Report branch layout](docs/ADOPTING.md#report-branch-layout).
 
 ---
 
