@@ -265,7 +265,8 @@ class PdfPreprocessor(PipelineStep):
 
         ``keep-with-next`` goes on a paragraph directly before a code block or
         before a paragraph holding only an image (an example or figure
-        caption); code in a table cell gets a ``<wbr>`` after each _ / . -.
+        caption); code in a table cell gets a ``<wbr>`` after each _ / . -;
+        trailing spaces are removed from each line of a code block.
         """
         def add(tag, name):
             classes = tag.get('class', [])
@@ -282,6 +283,21 @@ class PdfPreprocessor(PipelineStep):
             prev = tag.find_previous_sibling()
             if prev is not None and prev.name == 'p' and not lone_image(prev):
                 add(prev, 'keep-with-next')
+
+        # Trailing spaces in a code block print nothing, but under pre-wrap
+        # they hang past the block's edge: CSAF v2.0 OS's space-aligned
+        # "Supported digests" listing ran 0.6pt past the right margin on
+        # whitespace alone.
+        # A string's own end is a line end only when the next string in the
+        # block starts a new line, or there is none.
+        for pre in soup.find_all('pre'):
+            strings = list(pre.find_all(string=True))
+            for i, text in enumerate(strings):
+                at_line_end = i + 1 == len(strings) or str(strings[i + 1]).startswith('\n')
+                pattern = r'[ \t]+(?=\n)|[ \t]+$' if at_line_end else r'[ \t]+(?=\n)'
+                stripped = re.sub(pattern, '', str(text))
+                if stripped != str(text):
+                    text.replace_with(stripped)
 
         # Code in a table cell may break after _ / . - (a <wbr>, which adds no
         # character to the text), so a column of identifiers can narrow.
