@@ -12,6 +12,8 @@
 # and uncomment the push / pull_request triggers.
 #
 # Any blocker fails the build; warnings do not.
+# To report without failing (a published standard, or a draft whose findings
+# the TC has not decided yet), add  fail-on-blockers: false  to the gate step.
 
 name: pub-check
 

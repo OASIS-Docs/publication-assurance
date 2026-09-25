@@ -26,6 +26,17 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+### Added
+
+- **`fail-on-blockers`** action input (default `true`). `false` runs the gate
+  report-only: blockers are reported, written and published as before, a
+  `::warning` gives the count, and the step passes. An unreadable target
+  (exit code 2) still fails. Before this a TC could only add
+  `continue-on-error`, which passed the job but left the step failed, and a
+  draft whose only blockers were inherited and awaiting a TC decision (DMLex
+  v1.1 wd01) turned every run red. The `exit-code`, `blockers` and `warnings`
+  outputs are unchanged. Pinned by `tests/test_action_fail_on_blockers.py`.
+
 ### Fixed
 
 - **Package zips** were checked from the temporary extraction directory, so
