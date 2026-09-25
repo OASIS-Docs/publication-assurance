@@ -26,7 +26,38 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+### Fixed
+
+- **title-version** evaluated nothing on any CSAF package. It confirms the
+  `<title>` text against exactly one title heading, and counted only `<h1>`;
+  the CSAF markdown template renders its cover title in `<h1big>`, the
+  cover-title element the OASIS markdown stylesheet defines. The count was
+  zero on all ten CSAF stage directories in `examples/`, and each run reported
+  "Not evaluated: blocked by an upstream html-residue defect" while
+  html-residue had raised nothing. title-version and html-residue's D1
+  duplicate-title finding now share one count over `<h1>` and `<h1big>`.
+  title-version blames html-residue only when D1 has fired (more than one
+  heading); when no heading carries the title it says so instead.
+- **html-residue** D1 now counts `<h1big>` too, so a title rendered in both
+  `<h1big>` and an `<h1>` (printed twice on the PDF cover) is a BLOCKER.
+- **title-oasis-prefix** used the same `<h1>`-only classification and
+  skipped every CSAF package as "ambiguous"; it now resolves the `<h1big>`
+  cover title.
+- **title-version** accepts an `Errata NN` or `Plus Errata NN` suffix after
+  the Version token on a package inside an `errataNN` directory
+  (naming-directives.txt Section 4 gives Errata their own construction).
+  Evaluating the CSAF titles exposed this: the published
+  `csaf/v2.0/errata01/os` title "Common Security Advisory Framework Version
+  2.0 Errata 01" would otherwise have been a composition BLOCKER. The suffix
+  is still a defect on any other package.
+
+Corpus effect (`PUB_CHECK_OFFLINE=1`, every stage package in `examples/`):
+the ten CSAF stage directories lose the title-version "Not evaluated" INFO
+and now evaluate with no finding, and no exit code changes. The two CSAF
+version roots (`csaf/v2.0`, `csaf/v2.1`, which hold the Latest-stage copies,
+not a stage package) already exit 1; they now also carry title-version
+BLOCKERs because `parse_stage` reads their version as `csaf`. The CVRF and
+EOX packages are unchanged.
 
 ## v1.5.0 - 2026-09-25
 

@@ -544,6 +544,34 @@ def check_residue(md_text: str, html_text: str, f: Findings) -> None:
                   f"before publication; this block was not removed.")
 
 
+# The elements a rendered document title can occupy: <h1>, and <h1big>, the
+# cover-title element the OASIS markdown stylesheet defines (style.css,
+# "h1big") and the CSAF markdown template renders its cover title into.
+# `<h1\b` alone never matches <h1big>, so a D1 count or a title resolution
+# that looked only at <h1> saw zero title headings on every CSAF package.
+# Section headings are <h1> too, but never share the title's text.
+_TITLE_HEADING_RE = re.compile(r"<(h1big|h1)\b[^>]*>(.*?)</\1>", re.I | re.S)
+
+
+def _html_title(html_text: str) -> str:
+    """The <title> text exactly as check_html reads it: HTMLParser with
+    entities decoded, whitespace collapsed."""
+    p = _AnchorParser()
+    p.feed(html_text)
+    return " ".join(p.title.split())
+
+
+def _title_heading_count(html_text: str, title: str) -> int:
+    """How many <h1>/<h1big> elements carry `title` as their text. The one
+    count behind both html-residue's D1 duplicate-title finding (more than
+    one) and title-version's title resolution (exactly one), so the two
+    cannot disagree about the same document."""
+    flat = re.sub(r"\s+", " ", html_text)
+    norm = lambda s: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", s)).strip().lower()
+    return sum(1 for m in _TITLE_HEADING_RE.finditer(flat)
+               if norm(m.group(2)) == title.lower())
+
+
 def check_html(html_text: str, stem: str, f: Findings,
                anchor_severity: str = BLOCKER) -> None:
     """`anchor_severity` is BLOCKER on the markdown track (the author controls
@@ -575,14 +603,12 @@ def check_html(html_text: str, stem: str, f: Findings,
         f.add(BLOCKER, "html-residue",
               f"CI runner path leaked into the HTML: {m} (lint D3).")
     if title:
-        flat = re.sub(r"\s+", " ", html_text)
-        h1s = re.findall(r"<h1\b[^>]*>(.*?)</h1>", flat, re.I | re.S)
-        norm = lambda s: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", s)).strip().lower()
-        dup = sum(1 for h in h1s if norm(h) == title.lower())
+        dup = _title_heading_count(html_text, title)
         if dup > 1:
             f.add(BLOCKER, "html-residue",
-                  f"Document title appears in {dup} <h1> elements; the PDF cover "
-                  f"renders the title twice (lint D1).")
+                  f"Document title appears in {dup} <h1> elements (counting the "
+                  f"<h1big> cover-title element); the PDF cover renders the title "
+                  f"twice (lint D1).")
     missing = sorted({h for h in p.internal_hrefs if h not in p.ids})
     for h in missing[:20]:
         hint = (" (stale Word TOC field: the bookmark is absent from the source DOCX; "
@@ -3460,27 +3486,16 @@ def _version_token_matches(text: str) -> list:
     return out
 
 
-def _resolve_html_title(html_text: str) -> tuple[str, bool]:
-    """The <title> element text and whether it names exactly one matching
-    <h1> (mirrors check_html's html-residue duplicate-title detection, so a
-    dependent check can defer to that resolution instead of independently
-    guessing 'the first' H1 when the upstream check has not passed). The
-    <h1> comparison intentionally does NOT decode entities beyond tag
-    stripping -- it mirrors check_html's own norm() verbatim so the two
-    stay in lockstep; only the extracted <title> text (used for Version-
-    token matching below) gets whitespace-entity normalization."""
-    m = re.search(r"<title[^>]*>(.*?)</title>", html_text, re.I | re.S)
-    if not m:
-        return "", False
-    title = re.sub(r"&nbsp;|&#160;", " ", m.group(1))
-    title = re.sub(r"\s+", " ", title).strip()
+def _resolve_html_title(html_text: str) -> tuple[str, int]:
+    """The <title> text and how many <h1>/<h1big> title headings carry it.
+    Both come from the helpers check_html's html-residue D1 finding uses
+    (_html_title, _title_heading_count), so a count above one here is
+    exactly the state in which D1 has raised its BLOCKER, and a count of
+    one is a title that resolves unambiguously to the rendered heading."""
+    title = _html_title(html_text)
     if not title:
-        return "", False
-    flat = re.sub(r"\s+", " ", html_text)
-    h1s = re.findall(r"<h1\b[^>]*>(.*?)</h1>", flat, re.I | re.S)
-    norm = lambda s: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", s)).strip().lower()
-    dup = sum(1 for h in h1s if norm(h) == title.lower())
-    return title, dup == 1
+        return "", 0
+    return title, _title_heading_count(html_text, title)
 
 
 def _docx_cover_title(html_text: str) -> str:
@@ -3517,7 +3532,7 @@ def _docx_cover_title(html_text: str) -> str:
     return ""
 
 def check_title_version(html_text: str, version: str, stage: str,
-                        is_word: bool, f: Findings) -> None:
+                        is_word: bool, f: Findings, errata: bool = False) -> None:
     """AC-FRONTMATTER-10 (naming-directives.txt 5.1 + Section 7): the
     rendered cover-page title must incorporate the package's own Version
     identifier and, for Standards Track Work Products, must compose it as
@@ -3529,7 +3544,15 @@ def check_title_version(html_text: str, version: str, stage: str,
     matching every other stage/version-consuming check in this file (e.g.
     check_stage_name, check_version_naming), which likewise trust that
     contract rather than re-guard against an input shape that cannot
-    reach this call site."""
+    reach this call site.
+
+    `errata` marks a package inside an errataNN directory. naming-
+    directives.txt Section 4 states the construction rules are 'slightly
+    different ... for the Errata drafts and final format versions', and an
+    Errata title carries its Errata number after the Version token (CSAF
+    'Common Security Advisory Framework Version 2.0 Errata 01'; the
+    complete-incorporating-errata form reads '... Plus Errata 03'). That
+    suffix is accepted on an Errata package only."""
     stage_l = stage.lower()
     m_stage = re.match(r"[a-z]+", stage_l)
     prefix = m_stage.group(0) if m_stage else stage_l
@@ -3544,15 +3567,18 @@ def check_title_version(html_text: str, version: str, stage: str,
         title_text = _docx_cover_title(html_text) if html_text else ""
         source = "DOCX cover title paragraph"
     else:
-        title_text, unique = _resolve_html_title(html_text) if html_text else ("", False)
+        title_text, headings = _resolve_html_title(html_text) if html_text else ("", 0)
         source = "HTML <title>/<h1>"
-        if title_text and not unique:
+        if title_text and headings != 1:
             f.observe("title-version", stage=stage, title_source=source,
-                      title_text=title_text, evaluated="no")
-            f.add(INFO, "title-version",
-                  "Not evaluated: blocked by an upstream html-residue defect "
-                  "(the document title does not resolve to exactly one "
-                  "matching <h1>).")
+                      title_text=title_text, title_headings=headings, evaluated="no")
+            if headings > 1:
+                reason = ("blocked by the html-residue D1 finding (the document "
+                          f"title appears in {headings} <h1>/<h1big> headings).")
+            else:
+                reason = ("the <title> text matches no <h1> or <h1big> heading, so "
+                          "the rendered cover-page title cannot be identified.")
+            f.add(INFO, "title-version", "Not evaluated: " + reason)
             return
 
     if not title_text:
@@ -3593,6 +3619,9 @@ def check_title_version(html_text: str, version: str, stage: str,
     word_ok = title_text[m.start("word"):m.end("word")] == "Version"
     after = title_text[m.end("num"):]
     tail_ok = after == "" or re.fullmatch(r"\.\s*Part\s+\d+:\s+.+", after) is not None
+    if errata or prefix == "errata":
+        tail_ok = tail_ok or re.fullmatch(
+            r"(?:\.\s*Part\s+\d+:\s+.+?)?\s+(?:Plus\s+)?Errata\s+\d{2}", after) is not None
     if not (punct_ok and word_ok and tail_ok):
         comp_sev = BLOCKER if track == "standards" else WARN
         note = (
@@ -3675,7 +3704,9 @@ def _h1_title_match_info(html_text: str, title: str):
     lint and this check need -- factored out so the two checks' notion of
     'the H1(s) matching the title' cannot silently drift apart on a future
     edit to one but not the other (verify.json MAJOR: 'helper-reuse';
-    adversary MINOR: 'idiom / duplicated logic'). check_html's own D1 finding
+    adversary MINOR: 'idiom / duplicated logic'). '<h1>' throughout means
+    <h1> or the <h1big> cover-title element (_TITLE_HEADING_RE), the same
+    element set D1 counts. check_html's own D1 finding
     only fires when 2+ H1s exactly match <title> (dup > 1); it is silent on
     the 0-match case, which is NOT the same as 'no ambiguity' -- a template
     that appends a trailing suffix to <title> alone (e.g. '<Real Title> |
@@ -3703,7 +3734,7 @@ def _h1_title_match_info(html_text: str, title: str):
         -- genuinely undecidable either way; no fallback preference guessed.
     """
     flat = re.sub(r"\s+", " ", html_text)
-    h1s_raw = re.findall(r"<h1\b[^>]*>(.*?)</h1>", flat, re.I | re.S)
+    h1s_raw = [m.group(2) for m in _TITLE_HEADING_RE.finditer(flat)]  # <h1> and <h1big>
     h1s = [_norm_h1_text(h) for h in h1s_raw]
     title_norm = _norm_h1_text(title)
     tl = title_norm.lower()
@@ -6603,7 +6634,9 @@ def run(stage_dir: str, f: Findings) -> None:
     check_references_split(stage, md_text, html_text, f)
     check_content_labels(md_text, html_text, stage, f)
     check_stage_token(md_text, html_text, stage, f)
-    check_title_version(html_text, version, stage, is_word, f)
+    check_title_version(html_text, version, stage, is_word, f,
+                        errata=any(re.fullmatch(r"errata\d+", seg)
+                                   for seg in os.path.normpath(stage_dir).split(os.sep)))
     check_frontmatter_title_oasis_prefix(html_text, stage, f)
     check_authors(md_text, is_word, is_odt, f)
     check_name_chars(stage_dir, version, stage, stem, f)
@@ -6831,7 +6864,7 @@ CONDITION_DOCS: list[dict] = [
          compares_to="the /home/runner/ path prefix must not occur (lint D3)"),
     dict(check="html-residue", sig="<h1> elements", applies="all",
          condition="The document title appears in exactly one H1",
-         pulls="the count of <h1> elements matching the title text",
+         pulls="the count of <h1> and <h1big> (cover-title) elements matching the title text",
          compares_to="exactly 1 (more renders the title twice on the PDF cover, lint D1)"),
     # html-anchors
     dict(check="html-anchors", sig="has no matching anchor in the HTML", applies="all",
@@ -7162,7 +7195,7 @@ CONDITION_DOCS: list[dict] = [
     dict(check='stage-token', sig='embeds a stage-abbreviation token', applies='all', condition="Latest-stage URL's filename embeds no stage-abbreviation/revision token at all", pulls='the filename-stem-position stage-abbreviation token (if any) extracted from the Latest-stage URL', compares_to="naming-directives.txt 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', an absolute prohibition independent of whether the token matches the current stage"),
     dict(check='title-version', sig='does not incorporate a Version identifier', applies='all', condition="The rendered cover-page title incorporates the package's own Version identifier", pulls='the resolved cover-page title text (HTML <title>/<h1> on the markdown track, the MsoTitle-styled or first non-empty non-logo cover paragraph on the DOCX-native track)', compares_to="naming-directives.txt 5.1: 'A Version identifier must also be incorporated into a Work Product name/title'"),
     dict(check='title-version', sig="cites a different Version than the package's own Version identifier", applies='all', condition="The Version cited in the title agrees with the package's own Version identifier", pulls="the numeric run of the rightmost 'Version <n>' token in the resolved title", compares_to="the package's own Version identifier (the version directory segment, with a leading 'v' stripped per naming-directives.txt Section 4's [version-id] grammar)"),
-    dict(check='title-version', sig='Version composition does not follow the required', applies='all', condition="The title's Version token is composed as '<name/identifier> Version <number>' with no forbidden punctuation before it and only a sanctioned continuation after it", pulls="the characters immediately preceding and following the rightmost 'Version <n>' token in the resolved title, and the stage token's track classification", compares_to="naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -> BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -> WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification)", severity='BLOCKER/WARN'),
+    dict(check='title-version', sig='Version composition does not follow the required', applies='all', condition="The title's Version token is composed as '<name/identifier> Version <number>' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: <part title>' suffix; on a package inside an errataNN directory, also an 'Errata NN' or 'Plus Errata NN' suffix, per naming-directives.txt Section 4's separate Errata construction)", pulls="the characters immediately preceding and following the rightmost 'Version <n>' token in the resolved title, and the stage token's track classification", compares_to="naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -> BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -> WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification)", severity='BLOCKER/WARN'),
     dict(check='title-oasis-prefix', sig="Work Product title begins with 'OASIS'", applies='all', condition="The Work Product title (the <h1> identified by _h1_title_match_info's 'exact' or 'singular-related-fallback' classification) does not begin with the word 'OASIS'", pulls="the <h1> text identified by _h1_title_match_info: either the single <h1> exactly matching the rendered <title> text (the same match check_html's own D1 lint uses for its duplicate-title finding), or, when no exact match exists, the document's sole <h1> when it shares a prefix relationship with <title> (e.g. a trailing brand suffix on <title> alone), flagged lower-confidence in that case", compares_to='naming-directives.txt s7: \'Preferably, a title should not begin with the name "OASIS" except on the recommendation of Project Administration for special cases.\' Section 7\'s lead sentence track-scopes this to BLOCKER (Standards Track, must-observe) / WARN (Non-Standards Track, should-follow with an additional alternate-construction escape valve).', severity='BLOCKER/WARN'),
     dict(check='authors', sig='No Authors section or byline found', applies='md', condition='A Technical Report/Technical Report Draft names its Authors on the cover page (heading or title-block byline)', pulls="a '## Authors'/'## Author(s)' heading (scoped to the front-matter window through Abstract), or a 'by <Name>' title-block byline (scoped to the title/type-label window), on a package whose cover-adjacent type label is Technical Report or Technical Report Draft", compares_to="TC Handbook, Technical Reports: 'A Technical Report has one or more named Authors ... recorded on the cover page'"),
     dict(check='authors', sig='Authors section is empty or placeholder-only', applies='md', condition='The Authors heading/byline is not empty or placeholder-only (tbd/n/a/none), including list/task/blockquote-dressed variants', pulls='each line under the Authors heading (or the byline content), with list/task/blockquote markup and whitespace stripped', compares_to='at least one non-placeholder named entry must remain'),
