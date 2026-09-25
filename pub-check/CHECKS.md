@@ -242,7 +242,7 @@ Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths.
 |---|---|---|---|---|---|---|
 | 57 | No stale pandoc title-block header in the HTML | the HTML body | the &lt;header id="title-block-header"&gt; element must be absent (lint D2) | BLOCKER | all | - |
 | 58 | No CI runner paths in HTML hrefs or srcs | every href/src attribute in the HTML | the /home/runner/ path prefix must not occur (lint D3) | BLOCKER | all | - |
-| 59 | The document title appears in exactly one H1 | the count of &lt;h1&gt; elements matching the title text | exactly 1 (more renders the title twice on the PDF cover, lint D1) | BLOCKER | all | - |
+| 59 | The document title appears in exactly one H1 | the count of &lt;h1&gt; and &lt;h1big&gt; (cover-title) elements matching the title text | exactly 1 (more renders the title twice on the PDF cover, lint D1) | BLOCKER | all | - |
 
 ### html-title
 
@@ -575,7 +575,7 @@ The cover-page title must carry the package's own Version identifier, composed f
 |---|---|---|---|---|---|---|
 | 152 | The rendered cover-page title incorporates the package's own Version identifier | the resolved cover-page title text (HTML &lt;title&gt;/&lt;h1&gt; on the markdown track, the MsoTitle-styled or first non-empty non-logo cover paragraph on the DOCX-native track) | naming-directives.txt 5.1: 'A Version identifier must also be incorporated into a Work Product name/title' | BLOCKER | all | - |
 | 153 | The Version cited in the title agrees with the package's own Version identifier | the numeric run of the rightmost 'Version &lt;n&gt;' token in the resolved title | the package's own Version identifier (the version directory segment, with a leading 'v' stripped per naming-directives.txt Section 4's [version-id] grammar) | BLOCKER | all | - |
-| 154 | The title's Version token is composed as '&lt;name/identifier&gt; Version &lt;number&gt;' with no forbidden punctuation before it and only a sanctioned continuation after it | the characters immediately preceding and following the rightmost 'Version &lt;n&gt;' token in the resolved title, and the stage token's track classification | naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -&gt; BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -&gt; WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification) | BLOCKER/WARN | all | - |
+| 154 | The title's Version token is composed as '&lt;name/identifier&gt; Version &lt;number&gt;' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: &lt;part title&gt;' suffix; on a package inside an errataNN directory, also an 'Errata NN' or 'Plus Errata NN' suffix, per naming-directives.txt Section 4's separate Errata construction) | the characters immediately preceding and following the rightmost 'Version &lt;n&gt;' token in the resolved title, and the stage token's track classification | naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -&gt; BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -&gt; WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification) | BLOCKER/WARN | all | - |
 
 ### uri-alias
 
