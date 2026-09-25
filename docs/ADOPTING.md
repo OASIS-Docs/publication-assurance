@@ -208,13 +208,14 @@ almost always because the `target` path is wrong.
 ### Check class table
 
 One row per check class, 59 rows, whether or not the class raised
-anything. Each row gives the class result (PASS, or the most severe
-finding in the class), the number of individual conditions inside the class, and up
+anything. Each row gives the class result (the most severe finding in
+the class; PASS when it has none; NA when none of its conditions
+applied), the number of individual conditions inside the class, and up
 to five findings in full. A class with more findings says how many more
 and points at the JSON record, `pubcheck-report.json`, which lists all of
 them.
 
-Read this table first. Every row that is not PASS has a finding
+Read this table first. Every row that is not PASS or NA has a finding
 beside it that says what was found and, where the check knows, where.
 
 ### Condition table
@@ -244,6 +245,7 @@ says why. The common reasons:
 | `evaluated on the markdown-source row for this package` | The same rule was checked against the Markdown, which is authoritative |
 | `pdffonts unavailable or the package declares no font authority` | The runner had no poppler, or your HTML and CSS name no font family to compare against |
 | `no manifest.json in the package` | Add a manifest to enable the manifest checks ([Local runs](#local-runs) shows `--emit-manifest`) |
+| `no live-site result for this check (offline, unreachable, or nothing to probe)` | The condition compares the package with the live `docs.oasis-open.org` and got no answer: the run was offline (`PUB_CHECK_OFFLINE`), the site was unreachable, or there was nothing to look up |
 | `not evaluated on this package: ...` | Something earlier in the same package stopped this condition from running; the rest of the text names it. Fix that and the condition runs. If the class it names shows PASS, report it as a finding believed wrong (see [Blocker ownership](#blocker-ownership)) |
 
 A few conditions also need the network: they compare your package with
@@ -599,7 +601,9 @@ same as the action's: `0`, `1` or `2`.
 | `oasis_pub_check.py --help` | The options |
 | `PUB_CHECK_OFFLINE=1 oasis_pub_check.py TARGET` | Skips the conditions that compare the package with the live `docs.oasis-open.org`; they report NA |
 
-The same setting works in a workflow, on the gate step:
+The same setting works in a workflow, on the gate step. Use it only while
+the site is unreachable: the conditions it skips run at intake whatever
+the setting.
 
 ```yaml
       - uses: OASIS-Docs/publication-assurance@v1.5.0
@@ -654,7 +658,7 @@ those conditions report NA and the rest run unchanged.
 | Matrix summaries are headed with paths, not document names | `summary-title` is not set | Set `summary-title` per matrix entry |
 | A matrix upload fails with `409` and "an artifact with this name already exists" | Two entries upload under one artifact name | Name each artifact from the matrix entry, as in [Several documents](#several-documents-in-one-repository) |
 | Two calls to the action in one job leave only the second's report files | The calls share one `report-dir` | Give each call its own `report-dir` |
-| Findings read `could not be reached ... (transport failure, not a 404)` | A network or site outage during the run | These are recorded as INFO, never as blockers. To skip the live-site conditions, set `PUB_CHECK_OFFLINE`, as shown under [Local runs](#local-runs) |
+| Findings read `could not be reached ... (transport failure, not a 404)` | A network or site outage during the run | These are recorded as INFO, never as blockers, so the run needs no change. `PUB_CHECK_OFFLINE` (see [Local runs](#local-runs)) skips the live-site conditions, but it also hides real intake findings such as `revision-collision` and `public-review-metadata`, and intake always runs online: remove it once the site is back |
 | A published standard in the repository keeps the run red | Its findings cannot be fixed in a published document | Run it report-only, see [Gating and report-only runs](#gating-and-report-only-runs) |
 | A finding you believe is wrong | A gap or error in the gate | See [Blocker ownership](#blocker-ownership) |
 
