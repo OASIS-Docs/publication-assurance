@@ -35,7 +35,9 @@ Each version is anchored by a git tag on this repository.
   long observed values wrapped and never cut, PASS/WARN/BLOCKER/NA colours
   kept, and a footer with the report title and Page X of Y. With no Chrome or
   Chromium available the PDF is skipped with a warning; the exit-code
-  contract and the existing outputs are unchanged.
+  contract and the existing outputs are unchanged. A browser that does not
+  answer within 120 seconds (`PUBCHECK_PDF_TIMEOUT` overrides) is ended with
+  every process it started, and the PDF is skipped the same way.
 - The HTML report's dark colour scheme now applies on screen only, so a
   printed copy is always light.
 - CI: `tests/test_validation_report_pdf.py` reads the PDF's text layer and
