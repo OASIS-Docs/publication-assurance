@@ -562,12 +562,15 @@ def _html_title(html_text: str) -> str:
 
 
 def _title_heading_count(html_text: str, title: str) -> int:
-    """How many <h1>/<h1big> elements carry `title` as their text. The one
-    count behind both html-residue's D1 duplicate-title finding (more than
-    one) and title-version's title resolution (exactly one), so the two
-    cannot disagree about the same document."""
+    """How many <h1>/<h1big> elements carry `title` as their text, entities
+    decoded on the heading side too (title arrives already decoded via
+    _html_title's HTMLParser) so an entity-bearing title like 'Foo &amp;
+    Bar' still matches its own duplicated heading. The one count behind
+    both html-residue's D1 duplicate-title finding (more than one) and
+    title-version's title resolution (exactly one), so the two cannot
+    disagree about the same document."""
     flat = re.sub(r"\s+", " ", html_text)
-    norm = lambda s: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", s)).strip().lower()
+    norm = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s))).strip().lower()
     return sum(1 for m in _TITLE_HEADING_RE.finditer(flat)
                if norm(m.group(2)) == title.lower())
 
@@ -3532,7 +3535,7 @@ def _docx_cover_title(html_text: str) -> str:
     return ""
 
 def check_title_version(html_text: str, version: str, stage: str,
-                        is_word: bool, f: Findings, errata: bool = False) -> None:
+                        is_word: bool, f: Findings, errata: str = "") -> None:
     """AC-FRONTMATTER-10 (naming-directives.txt 5.1 + Section 7): the
     rendered cover-page title must incorporate the package's own Version
     identifier and, for Standards Track Work Products, must compose it as
@@ -3546,13 +3549,19 @@ def check_title_version(html_text: str, version: str, stage: str,
     contract rather than re-guard against an input shape that cannot
     reach this call site.
 
-    `errata` marks a package inside an errataNN directory. naming-
+    `errata` carries the package's own Errata number (two digits, e.g.
+    '01'; empty when the package is not an Errata package). naming-
     directives.txt Section 4 states the construction rules are 'slightly
     different ... for the Errata drafts and final format versions', and an
     Errata title carries its Errata number after the Version token (CSAF
     'Common Security Advisory Framework Version 2.0 Errata 01'; the
     complete-incorporating-errata form reads '... Plus Errata 03'). That
-    suffix is accepted on an Errata package only."""
+    suffix is accepted only on an Errata package, and only with the
+    matching number -- 'Errata 07' in an errata01 package is still a
+    composition defect. When the caller passes no `errata` and the stage
+    token itself is the errataNN segment (a package whose stage_dir is
+    itself .../errataNN, with no further stage subdirectory), the number
+    is derived from that token."""
     stage_l = stage.lower()
     m_stage = re.match(r"[a-z]+", stage_l)
     prefix = m_stage.group(0) if m_stage else stage_l
@@ -3560,6 +3569,11 @@ def check_title_version(html_text: str, version: str, stage: str,
         f.observe("title-version", stage=stage,
                   evaluated="no (Working Draft is not a Work Product)")
         return
+
+    errata_number = errata
+    if not errata_number and prefix == "errata":
+        m_errata_stage = re.match(r"errata(\d+)", stage_l)
+        errata_number = m_errata_stage.group(1) if m_errata_stage else ""
 
     pkg_version = version[1:] if version.startswith("v") else version
 
@@ -3619,9 +3633,11 @@ def check_title_version(html_text: str, version: str, stage: str,
     word_ok = title_text[m.start("word"):m.end("word")] == "Version"
     after = title_text[m.end("num"):]
     tail_ok = after == "" or re.fullmatch(r"\.\s*Part\s+\d+:\s+.+", after) is not None
-    if errata or prefix == "errata":
-        tail_ok = tail_ok or re.fullmatch(
-            r"(?:\.\s*Part\s+\d+:\s+.+?)?\s+(?:Plus\s+)?Errata\s+\d{2}", after) is not None
+    if errata_number or prefix == "errata":
+        m_tail_errata = re.fullmatch(
+            r"(?:\.\s*Part\s+\d+:\s+.+?)?\s+(?:Plus\s+)?Errata\s+(?P<enum>\d{2})", after)
+        if m_tail_errata and m_tail_errata.group("enum") == errata_number:
+            tail_ok = True
     if not (punct_ok and word_ok and tail_ok):
         comp_sev = BLOCKER if track == "standards" else WARN
         note = (
@@ -6634,9 +6650,15 @@ def run(stage_dir: str, f: Findings) -> None:
     check_references_split(stage, md_text, html_text, f)
     check_content_labels(md_text, html_text, stage, f)
     check_stage_token(md_text, html_text, stage, f)
+    # A package is an Errata package only by its OWN layout: the stage
+    # directory's own name (.../v2.0/errata01) or its immediate parent
+    # (.../v2.0/errata01/os, .../v2.0/errata01/csd01) -- never any more
+    # distant ancestor, which would accept an unrelated package that merely
+    # happens to sit somewhere under a folder named errataNN.
+    _errata_parent = os.path.basename(os.path.dirname(os.path.normpath(stage_dir)))
+    _m_errata = re.fullmatch(r"errata(\d+)", stage) or re.fullmatch(r"errata(\d+)", _errata_parent)
     check_title_version(html_text, version, stage, is_word, f,
-                        errata=any(re.fullmatch(r"errata\d+", seg)
-                                   for seg in os.path.normpath(stage_dir).split(os.sep)))
+                        errata=_m_errata.group(1) if _m_errata else "")
     check_frontmatter_title_oasis_prefix(html_text, stage, f)
     check_authors(md_text, is_word, is_odt, f)
     check_name_chars(stage_dir, version, stage, stem, f)
@@ -7195,7 +7217,7 @@ CONDITION_DOCS: list[dict] = [
     dict(check='stage-token', sig='embeds a stage-abbreviation token', applies='all', condition="Latest-stage URL's filename embeds no stage-abbreviation/revision token at all", pulls='the filename-stem-position stage-abbreviation token (if any) extracted from the Latest-stage URL', compares_to="naming-directives.txt 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', an absolute prohibition independent of whether the token matches the current stage"),
     dict(check='title-version', sig='does not incorporate a Version identifier', applies='all', condition="The rendered cover-page title incorporates the package's own Version identifier", pulls='the resolved cover-page title text (HTML <title>/<h1> on the markdown track, the MsoTitle-styled or first non-empty non-logo cover paragraph on the DOCX-native track)', compares_to="naming-directives.txt 5.1: 'A Version identifier must also be incorporated into a Work Product name/title'"),
     dict(check='title-version', sig="cites a different Version than the package's own Version identifier", applies='all', condition="The Version cited in the title agrees with the package's own Version identifier", pulls="the numeric run of the rightmost 'Version <n>' token in the resolved title", compares_to="the package's own Version identifier (the version directory segment, with a leading 'v' stripped per naming-directives.txt Section 4's [version-id] grammar)"),
-    dict(check='title-version', sig='Version composition does not follow the required', applies='all', condition="The title's Version token is composed as '<name/identifier> Version <number>' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: <part title>' suffix; on a package inside an errataNN directory, also an 'Errata NN' or 'Plus Errata NN' suffix, per naming-directives.txt Section 4's separate Errata construction)", pulls="the characters immediately preceding and following the rightmost 'Version <n>' token in the resolved title, and the stage token's track classification", compares_to="naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -> BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -> WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification)", severity='BLOCKER/WARN'),
+    dict(check='title-version', sig='Version composition does not follow the required', applies='all', condition="The title's Version token is composed as '<name/identifier> Version <number>' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: <part title>' suffix; on a package whose own stage directory or immediate parent is named errataNN, also an 'Errata NN' or 'Plus Errata NN' suffix whose number matches the package's own errata number, per naming-directives.txt Section 4's separate Errata construction)", pulls="the characters immediately preceding and following the rightmost 'Version <n>' token in the resolved title, the stage token's track classification, and the package's own Errata number derived from its stage directory layout", compares_to="naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -> BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -> WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification)", severity='BLOCKER/WARN'),
     dict(check='title-oasis-prefix', sig="Work Product title begins with 'OASIS'", applies='all', condition="The Work Product title (the <h1> identified by _h1_title_match_info's 'exact' or 'singular-related-fallback' classification) does not begin with the word 'OASIS'", pulls="the <h1> text identified by _h1_title_match_info: either the single <h1> exactly matching the rendered <title> text (the same match check_html's own D1 lint uses for its duplicate-title finding), or, when no exact match exists, the document's sole <h1> when it shares a prefix relationship with <title> (e.g. a trailing brand suffix on <title> alone), flagged lower-confidence in that case", compares_to='naming-directives.txt s7: \'Preferably, a title should not begin with the name "OASIS" except on the recommendation of Project Administration for special cases.\' Section 7\'s lead sentence track-scopes this to BLOCKER (Standards Track, must-observe) / WARN (Non-Standards Track, should-follow with an additional alternate-construction escape valve).', severity='BLOCKER/WARN'),
     dict(check='authors', sig='No Authors section or byline found', applies='md', condition='A Technical Report/Technical Report Draft names its Authors on the cover page (heading or title-block byline)', pulls="a '## Authors'/'## Author(s)' heading (scoped to the front-matter window through Abstract), or a 'by <Name>' title-block byline (scoped to the title/type-label window), on a package whose cover-adjacent type label is Technical Report or Technical Report Draft", compares_to="TC Handbook, Technical Reports: 'A Technical Report has one or more named Authors ... recorded on the cover page'"),
     dict(check='authors', sig='Authors section is empty or placeholder-only', applies='md', condition='The Authors heading/byline is not empty or placeholder-only (tbd/n/a/none), including list/task/blockquote-dressed variants', pulls='each line under the Authors heading (or the byline content), with list/task/blockquote markup and whitespace stripped', compares_to='at least one non-placeholder named entry must remain'),
