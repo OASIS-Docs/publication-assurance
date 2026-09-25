@@ -328,3 +328,96 @@ def test_a_package_without_a_pdf_is_not_blamed_on_the_toolchain(tmp_path):
     rows = table_rows(md, "## All Individual Conditions")
     assert [r[1] for r in rows] == ["NA", "NA"], rows
     assert all("no PDF in the package" in r[4] for r in rows), rows
+
+
+def render_all(tmp_path, data: dict) -> tuple[str, str, str]:
+    """The Markdown report, the HTML report and the step summary for one run:
+    the three surfaces the class table is printed on (the PDF is the HTML)."""
+    import json
+    (tmp_path / "r.json").write_text(json.dumps(data))
+    md, page, summary = tmp_path / "o.md", tmp_path / "o.html", tmp_path / "summary.md"
+    result = subprocess.run([sys.executable, str(REPORT), str(tmp_path / "r.json"),
+                             "--md", str(md), "--html", str(page), "--step-summary"],
+                            capture_output=True, text=True,
+                            env={"PATH": "/usr/bin:/bin", "GITHUB_STEP_SUMMARY": str(summary)})
+    assert result.returncode == 0, result.stderr
+    return md.read_text(), page.read_text(), summary.read_text()
+
+
+def class_results(text: str) -> dict[str, list[str]]:
+    return {r[2]: r for r in table_rows(text, "Check-by-Check Results" if "## Check" in text
+                                        else "| # | Result | Check class")}
+
+
+def test_a_class_whose_every_condition_is_na_reads_na_with_its_reason(tmp_path):
+    """Adoption walkthrough: with PUB_CHECK_OFFLINE=1, public-review-metadata
+    and revision-collision read 'PASS | 3 | none' in the class table while
+    every one of their conditions was NA. A class that checked nothing is NA
+    and says why, in the report and in the step summary."""
+    md, page, summary = render_all(tmp_path, {
+        "target": "t", "blockers": 0,
+        "observed": {"revision-collision": {"http_status": "(unreachable)"}},
+        "findings": [],
+        "conditions": [condition(check="x", sig="a", requires="network"),
+                       condition(check="x", sig="b", requires="network"),
+                       condition(check="y", sig="d")]})
+    for text in (md, summary):
+        rows = class_results(text)
+        assert rows["x"][1] == "NA", rows
+        assert "no live-site result" in rows["x"][4], rows
+        assert rows["y"][1] == "PASS", rows
+    assert '<td class="r NA">NA</td><td><code>x</code>' in page
+
+
+def test_a_partly_evaluated_class_says_how_much_was_evaluated(tmp_path):
+    """Offline CSAF v2.1: uri-alias ran 6 of its 9 conditions and read a bare
+    PASS, as though all nine had been compared."""
+    md, _, _ = render_all(tmp_path, {
+        "target": "t", "blockers": 0, "observed": {},
+        "findings": [{"severity": "WARN", "check": "w", "message": "sig: bad"}],
+        "conditions": [condition(check="x", sig="a", requires="network"),
+                       condition(check="x", sig="b"), condition(check="x", sig="c"),
+                       condition(check="w", sig="other", requires="network"),
+                       condition(check="w")]})
+    rows = class_results(md)
+    assert rows["x"][1] == "PASS (2 of 3 evaluated)", rows
+    assert rows["w"][1] == "WARN (1 of 2 evaluated)", rows
+
+
+def test_a_finding_outranks_an_all_na_class(tmp_path):
+    """No NA reason may hide a finding: a class whose conditions all read NA
+    but which raised a WARN reads WARN."""
+    md, _, _ = render_all(tmp_path, {
+        "target": "t", "blockers": 0, "observed": {},
+        "findings": [{"severity": "WARN", "check": "x", "message": "unmatched text"}],
+        "conditions": [condition(requires="network")]})
+    rows = class_results(md)
+    assert rows["x"][1].split()[0] == "WARN", rows
+    assert "unmatched text" in rows["x"][4], rows
+
+
+def test_the_summary_line_counts_only_evaluated_classes_as_clean(tmp_path):
+    """Offline CSAF v2.1 said '49 of 59 check classes fully clean' while five
+    of the 49 had evaluated nothing."""
+    md, page, summary = render_all(tmp_path, {
+        "target": "t", "blockers": 0,
+        "observed": {"revision-collision": {"http_status": "(unreachable)"}},
+        "findings": [{"severity": "INFO", "check": "z", "message": "noted"}],
+        "conditions": [condition(check="x", requires="network"),
+                       condition(check="y"), condition(check="z")]})
+    line = "1 of 2 evaluated check classes fully clean; 1 not evaluated;"
+    assert line in md and line in page and line in summary, md
+
+
+def test_a_finding_under_a_class_with_no_conditions_appears_in_the_class_table(tmp_path):
+    """csaf-cvrf v1.2 cs01: the 'track' INFO (Word-authored package) belongs
+    to a class with no registered conditions and appeared in no table."""
+    md, page, summary = render_all(tmp_path, {
+        "target": "t", "blockers": 0, "observed": {},
+        "findings": [{"severity": "INFO", "check": "track", "message": "Word-authored package"}],
+        "conditions": [condition()]})
+    for text in (md, summary):
+        rows = class_results(text)
+        assert rows["track"][1] == "INFO" and rows["track"][3] == "0", rows
+        assert "Word-authored package" in rows["track"][4], rows
+    assert "<code>track</code>" in page

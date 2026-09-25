@@ -183,24 +183,53 @@ def build_record(data: dict, title: str, exit_code: int | None, date: str) -> di
     by_class: dict[str, list[dict]] = {}
     for f in data["findings"]:
         by_class.setdefault(f["check"], []).append(f)
+    detail = condition_rows(data)
+    evaluated: dict[str, int] = {}
+    na_reasons: dict[str, list[str]] = {}
+    for r in detail:
+        if r["result"] == "NA":
+            if r["observed"] not in na_reasons.setdefault(r["check"], []):
+                na_reasons[r["check"]].append(r["observed"])
+        else:
+            evaluated[r["check"]] = evaluated.get(r["check"], 0) + 1
+    # A finding under a class with no registered conditions still gets a row.
+    inventory = class_inventory(data["conditions"])
+    known = {item["check"] for item in inventory}
+    inventory += [{"check": k, "conditions": 0} for k in sorted(set(by_class) - known)]
     classes = []
-    for item in class_inventory(data["conditions"]):
-        fs = sorted(by_class.get(item["check"], []), key=lambda f: SEV_ORDER.get(f["severity"], 9))
-        classes.append({"check": item["check"], "conditions": item["conditions"],
-                        "result": fs[0]["severity"] if fs else "PASS",
+    for item in inventory:
+        name, total = item["check"], item["conditions"]
+        fs = sorted(by_class.get(name, []), key=lambda f: SEV_ORDER.get(f["severity"], 9))
+        done = evaluated.get(name, 0)
+        # A finding outranks NA. A class none of whose conditions applied was
+        # not checked: NA with the reason, not PASS. A partly evaluated class
+        # says how much of it was.
+        if fs:
+            result = fs[0]["severity"]
+        elif total and not done:
+            result = "NA"
+        else:
+            result = "PASS"
+        if result != "NA" and done < total:
+            result += f" ({done} of {total} evaluated)"
+        classes.append({"check": name, "conditions": total, "result": result,
+                        "na_reasons": na_reasons.get(name, []) if result == "NA" else [],
                         "findings": [{"severity": f["severity"], "message": f["message"]}
                                      for f in fs]})
     sev = {s: sum(1 for f in data["findings"] if f["severity"] == s)
            for s in ("BLOCKER", "WARN", "INFO")}
+    checked = [c for c in classes if c["result"] != "NA"]
     return {
         "title": title or data.get("target", "package"),
         "target": data.get("target", ""),
         "date": date, "tool": TOOL, "exit_code": exit_code,
         "total_checks": len(data["conditions"]), "total_classes": len(classes),
-        "classes_clean": sum(1 for c in classes if not c["findings"]),
+        "classes_evaluated": len(checked),
+        "classes_not_evaluated": len(classes) - len(checked),
+        "classes_clean": sum(1 for c in checked if not c["findings"]),
         "blockers": sev["BLOCKER"], "severity_counts": sev,
         "publication_ready": sev["BLOCKER"] == 0,
-        "classes": classes, "condition_detail": condition_rows(data),
+        "classes": classes, "condition_detail": detail,
     }
 
 
@@ -219,8 +248,8 @@ def verdict(rec: dict) -> str:
 
 def result_line(rec: dict) -> str:
     sc = rec["severity_counts"]
-    return (f"{rec['classes_clean']} of {rec['total_classes']} check classes fully clean; "
-            f"findings: {sc['BLOCKER']} blocker, {sc['WARN']} warning, "
+    return (f"{rec['classes_clean']} of {rec['classes_evaluated']} evaluated check classes "
+            f"fully clean; {rec['classes_not_evaluated']} not evaluated; findings: {sc['BLOCKER']} blocker, {sc['WARN']} warning, "
             f"{sc['INFO']} informational.")
 
 
@@ -233,10 +262,16 @@ def md_cell(text: object) -> str:
             .replace("\r", "").replace("\n", "<br>"))
 
 
+def class_notes(c: dict) -> list[str]:
+    """The Findings cell of the class table: the findings, or for a class
+    that was not evaluated, why."""
+    return capped(c["findings"]) or c["na_reasons"]
+
+
 def md_class_table(rec: dict) -> list[str]:
     lines = ["| # | Result | Check class | Conditions | Findings |", "|---|---|---|---|---|"]
     for i, c in enumerate(rec["classes"], 1):
-        msgs = "<br>".join(md_cell(m) for m in capped(c["findings"])) or "none"
+        msgs = "<br>".join(md_cell(m) for m in class_notes(c)) or "none"
         lines.append(f"| {i} | {c['result']} | {md_cell(c['check'])} | {c['conditions']} | {msgs} |")
     return lines
 
@@ -353,7 +388,7 @@ def render_html(rec: dict) -> str:
             '<div class="wrap"><table><thead><tr><th>#</th><th>Result</th><th>Check class</th>'
             "<th>Cond.</th><th>Findings</th></tr></thead><tbody>"]
     for i, c in enumerate(rec["classes"], 1):
-        msgs = "<br>".join(e(m) for m in capped(c["findings"])) or "none"
+        msgs = "<br>".join(e(m) for m in class_notes(c)) or "none"
         out.append(f'<tr><td class="n">{i}</td><td class="r {result_class(c["result"])}">{e(c["result"])}'
                    f"</td><td><code>{e(c['check'])}</code></td><td class=\"n\">{c['conditions']}</td>"
                    f'<td class="t f">{msgs}</td></tr>')
