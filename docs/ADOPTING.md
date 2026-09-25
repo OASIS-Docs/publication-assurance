@@ -79,7 +79,7 @@ jobs:
         with:
           target: work/v1.0/csd01   # EDIT: your stage directory or package .zip
 
-      - uses: actions/upload-artifact@v4   # the report files, downloadable from the run page
+      - uses: actions/upload-artifact@v7   # the report files, downloadable from the run page
         if: always()
         with:
           name: pubcheck-report
@@ -143,11 +143,17 @@ Markdown links, which work in any repository.
 
 **Success looks like:** a report whose heading names your package, a
 verdict (`PUBLICATION-READY: zero blockers.` or
-`NOT publication-ready: 1 blocker(s).`), a table of 59 check classes, and a
+`NOT publication-ready: N blocker(s).`), a table of 59 check classes, and a
 table of all 173 conditions. The job summary also carries the findings
 list, which ends with the same verdict in the form
-`1 blocker(s), 17 warning(s) -> NOT PUBLISHABLE`. The run's red or green
+`N blocker(s), M warning(s) -> NOT PUBLISHABLE`. The run's red or green
 status matches the report: red if and only if the report lists a blocker.
+
+A TC's own package goes green once its blockers are fixed. The CSAF
+sample bundled with this repository (`examples/csaf/v2.1/csd01`) is the
+exception: it stays red on one staff-side blocker, `public-review-metadata`,
+which no edit to the package can clear. Use your own package for the first
+run.
 
 To fix a blocker, edit the source, commit, and push. The next run checks
 the new commit and publishes a new report.
@@ -210,7 +216,7 @@ says why. The common reasons:
 | `evaluated on the markdown-source row for this package` | The same rule was checked against the Markdown, which is authoritative |
 | `pdffonts unavailable or the package declares no font authority` | The runner had no poppler, or your HTML and CSS name no font family to compare against |
 | `no manifest.json in the package` | Add a manifest to enable the manifest checks ([Local runs](#local-runs) shows `--emit-manifest`) |
-| `not evaluated on this package: ...` | Something earlier in the same package stopped this condition from running; the rest of the text names it. Fix that and the condition runs |
+| `not evaluated on this package: ...` | Something earlier in the same package stopped this condition from running; the rest of the text names it. Fix that and the condition runs. If the class it names shows PASS, report it to TC Administration |
 
 A few conditions also need the network: they compare your package with
 the live `docs.oasis-open.org`. GitHub's runners have network access, so
@@ -342,7 +348,7 @@ jobs:
   render-and-gate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install pandoc and BeautifulSoup
         run: |
@@ -563,7 +569,7 @@ those conditions report NA and the rest run unchanged.
 | Symptom | Cause | Fix |
 |---|---|---|
 | Run fails with the annotation `oasis-pub-check could not read the target`, exit code 2, no report; the log says `... is not a directory` | `target` does not exist in the checked-out repository | Correct the path; it is relative to the repository root and case-sensitive on GitHub's runners |
-| Run refused with "The job was not started because recent account payments have failed or your spending limit needs to be increased" | A private repository has used up its account's Actions minutes | The account owner raises the spending limit, or the repository is public |
+| Run refused with "The job was not started because recent account payments have failed or your spending limit needs to be increased" | The account's Actions billing for a private repository: a failed payment, or the spending limit reached | The account owner fixes the payment or raises the spending limit, or the repository is made public |
 | No run appears after committing the workflow | The file is not at `.github/workflows/`, or Actions is disabled | Check the path; enable Actions under **Settings > Actions > General** |
 | `Unable to resolve action` | The tag in `uses:` does not exist | Use a tag from the [releases page](https://github.com/OASIS-Docs/publication-assurance/releases) |
 | Job summary has the findings but no class or condition tables | The action is older than v1.5.0, often through `@v1` | Pin to `@v1.5.0` or later |
