@@ -33,9 +33,9 @@ and each run publishes a Validation Report you can open in a browser.
 
 ## Quick start
 
-Three steps, about five minutes. GitHub terms are defined under
-[Terms](#terms). You need write access to the TC
-repository and the path of the package you want checked.
+Three steps, about five minutes. You need write access to the TC
+repository and the path of the package you want checked. GitHub terms are
+defined under [Terms](#terms).
 
 The package is a **stage directory**: the folder that holds one work
 product at one stage, with its Markdown, HTML and PDF, for example
