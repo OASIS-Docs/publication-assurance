@@ -81,6 +81,14 @@ inputs:
     description: "Append a GitHub Step Summary section (verdict + full ordered findings list) for this target. Set to 'false' to skip."
     required: false
     default: "true"
+  publish-branch:
+    description: "Branch of the calling repository that receives this run's report files (PDF, Markdown, HTML, JSON, text) under <ref>/<slug>/, so the summary and a ::notice annotation can link them as full https://github.com URLs. Created as an orphan branch on first use; no other branch is touched. Needs `permissions: contents: write`; without it (or on a pull request from a fork) nothing is pushed, the summary says why, and the gate is unaffected. Set to '' to turn publishing off."
+    required: false
+    default: "pubcheck-reports"
+  publish-token:
+    description: "Token used to push publish-branch and to read the repository's GitHub Pages settings."
+    required: false
+    default: ${{ github.token }}
   summary-title:
     description: "Label for the Step Summary heading. Defaults to the target path -- set this when calling the action more than once (e.g. in a matrix) so each section is distinguishable."
     required: false
@@ -108,6 +116,24 @@ outputs:
   report-validation-html:
     description: "Path to the same Validation Report as one self-contained HTML page. Empty if report-dir was set to '' or the report could not be rendered."
     value: ${{ steps.pubcheck.outputs.report_validation_html }}
+  report-url-pdf:
+    description: "Full https://github.com URL of this run's Validation Report PDF on publish-branch, which opens in GitHub's browser view. Empty when nothing was published (see report-publish-note)."
+    value: ${{ steps.publish.outputs.report_url_pdf }}
+  report-url-md:
+    description: "Full URL of the Markdown Validation Report on publish-branch (rendered by GitHub). Empty when nothing was published."
+    value: ${{ steps.publish.outputs.report_url_md }}
+  report-url-html:
+    description: "The HTML Validation Report as a rendered page when GitHub Pages serves publish-branch from its root; otherwise its blob (source) URL. Empty when nothing was published."
+    value: ${{ steps.publish.outputs.report_url_html }}
+  report-url-folder:
+    description: "Full URL of this run's report folder on publish-branch. Empty when nothing was published."
+    value: ${{ steps.publish.outputs.report_url_folder }}
+  report-url-pdf-pinned:
+    description: "The PDF URL pinned to the report commit's SHA, so the link for this run never changes when later runs replace the folder. Empty when nothing was published or no PDF was produced."
+    value: ${{ steps.publish.outputs.report_url_pdf_pinned }}
+  report-publish-note:
+    description: "'published', or the reason the report files were not published (publishing off, a fork pull request, a token without contents: write)."
+    value: ${{ steps.publish.outputs.report_publish_note }}
   report-validation-pdf:
     description: "Path to the same Validation Report as an A4 landscape PDF, printed with headless Chrome (light theme, header rows repeated on every page, title and Page X of Y in the footer). Empty if report-dir was set to '', the report could not be rendered, or no Chrome/Chromium was available; a missing PDF is a warning and never changes the gate's result."
     value: ${{ steps.pubcheck.outputs.report_validation_pdf }}
@@ -230,6 +256,32 @@ runs:
 
         echo "oasis-pub-check exit code: ${exit_code}"
 
+    # Commit this run's report files to publish-branch and state their full
+    # URLs. Never fails the gate: a reason is recorded instead.
+    - name: Publish the report files
+      id: publish
+      if: always()
+      continue-on-error: true
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        PUBLISH_BRANCH: ${{ inputs.publish-branch }}
+        PUBLISH_TOKEN: ${{ inputs.publish-token }}
+        SUMMARY_TITLE: ${{ inputs.summary-title }}
+      run: |
+        # A matrix of calls shares RUNNER_TEMP: clear the previous call's block.
+        rm -f "$RUNNER_TEMP/pubcheck-links.md"
+        # The files, as the gate step left them in RUNNER_TEMP.
+        mkdir -p "$RUNNER_TEMP/pubcheck-publish"
+        rm -f "$RUNNER_TEMP/pubcheck-publish/"*
+        for f in oasis-pub-check.json oasis-pub-check.txt pubcheck-validation.md \
+                 pubcheck-validation.html pubcheck-validation.pdf; do
+          if [ -f "$RUNNER_TEMP/$f" ]; then cp "$RUNNER_TEMP/$f" "$RUNNER_TEMP/pubcheck-publish/$f"; fi
+        done
+        python3 "$ACTION_PATH/pub-check/publish_report.py" \
+          --files "$RUNNER_TEMP/pubcheck-publish" --branch "$PUBLISH_BRANCH" \
+          --title="$SUMMARY_TITLE" --links-md "$RUNNER_TEMP/pubcheck-links.md"
+
     - name: Write step summary
       if: always() && inputs.write-summary == 'true'
       shell: bash
@@ -239,6 +291,10 @@ runs:
         REPORT_DIR: ${{ inputs.report-dir }}
         EXIT_CODE: ${{ steps.pubcheck.outputs.exit_code }}
       run: |
+        # The labelled report links first, so nobody has to scroll for them.
+        if [ -s "$RUNNER_TEMP/pubcheck-links.md" ]; then
+          cat "$RUNNER_TEMP/pubcheck-links.md" >> "$GITHUB_STEP_SUMMARY"
+        fi
         REPORT_DIR_ARGS=()
         if [ -n "$REPORT_DIR" ]; then
           REPORT_DIR_ARGS=(--report-dir "$REPORT_DIR")
