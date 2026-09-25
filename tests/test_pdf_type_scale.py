@@ -150,7 +150,8 @@ def test_the_pdf_copy_drops_base_href_and_keeps_its_links(tmp_path):
     base = "https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html"
     page = (f'<html><head><base href="{base}"/><link href="style.css" rel="stylesheet"/>'
             '</head><body><a id="f" href="#s1">s</a><a id="r" href="schemas/x.json">x</a>'
-            '<a id="m" href="mailto:a@b.c">m</a><img src="images/a.png"/></body></html>')
+            '<a id="m" href="mailto:a@b.c">m</a><a id="p" href="//www.oasis-open.org/x">p</a>'
+            '<img src="images/a.png"/></body></html>')
     src, out = tmp_path / "in.html", tmp_path / "out.html"
     src.write_text(page, encoding="utf-8")
     _preprocessor()(src, out).preprocess()
@@ -160,6 +161,7 @@ def test_the_pdf_copy_drops_base_href_and_keeps_its_links(tmp_path):
     assert soup.find(id="r")["href"] == \
         "https://docs.oasis-open.org/csaf/csaf/v2.0/os/schemas/x.json"
     assert soup.find(id="m")["href"] == "mailto:a@b.c"
+    assert soup.find(id="p")["href"] == "https://www.oasis-open.org/x"
     assert soup.find("link")["href"] == "style.css" and soup.img["src"] == "images/a.png"
     assert "<base" in src.read_text(encoding="utf-8"), "the source HTML must keep its base"
 
