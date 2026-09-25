@@ -84,6 +84,8 @@ def not_applicable(c: dict, observed: dict, has_md: bool, formats: str) -> str |
         return "NA: no manifest.json in the package (noted as informational)"
     if req == "network" and not probed(observed.get(c["check"], {})):
         return "NA: no live-site result for this check (offline, unreachable, or nothing to probe)"
+    if req in ("pdftotext", "pdffonts") and "pdf" not in {t.strip() for t in formats.split(",")}:
+        return "NA: no PDF in the package, so there is nothing to read"
     if req == "pdftotext" and "pdf-sync" not in observed and "pdf-cover" not in observed:
         return "NA: pdftotext (poppler) unavailable on this runner"
     if req == "pdffonts" and "pdf-fonts" not in observed:

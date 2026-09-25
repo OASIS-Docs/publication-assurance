@@ -312,3 +312,17 @@ def test_a_stage_uri_answering_403_or_5xx_is_not_pass(tmp_path):
         "conditions": [condition(requires="network")]})
     rows = table_rows(md, "## All Individual Conditions")
     assert rows[0][1] == "NA", rows
+
+
+def test_a_package_without_a_pdf_is_not_blamed_on_the_toolchain(tmp_path):
+    """Red-team round 5: a package with no PDF gave every PDF condition the
+    reason 'pdftotext (poppler) unavailable on this runner', which is false."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 1,
+        "observed": {"filenames": {"formats_present": "html, md"}},
+        "findings": [{"severity": "BLOCKER", "check": "filenames",
+                      "message": "Missing delivery format(s): pdf"}],
+        "conditions": [condition(requires="pdftotext"), condition(requires="pdffonts", sig="f")]})
+    rows = table_rows(md, "## All Individual Conditions")
+    assert [r[1] for r in rows] == ["NA", "NA"], rows
+    assert all("no PDF in the package" in r[4] for r in rows), rows
