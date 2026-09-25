@@ -28,7 +28,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from validation_report import md_code, md_text  # noqa: E402
 
 
 def build_section(report: dict, title: str, txt_body: str | None,
@@ -41,22 +45,26 @@ def build_section(report: dict, title: str, txt_body: str | None,
     label = title or report.get("target", "package")
 
     lines = [
-        f"## pub-check: {label}",
+        f"## pub-check: {md_text(label)}",
         "",
-        f"Target: `{report.get('target', '')}`",
+        f"Target: {md_code(report.get('target', ''))}",
         "",
         f"**{blockers} blocker(s), {warnings} warning(s), {infos} info "
         f"-> {verdict}**",
         "",
     ]
     if txt_body:
+        # Findings quote package text: the fence must outlast any backtick
+        # run in it, or a quoted ``` would end the block and render the rest.
+        run = max((len(m) for m in re.findall(r"`+", txt_body)), default=0)
+        fence = "`" * max(3, run + 1)
         lines += [
             "<details>",
             "<summary>Full findings list (ordered)</summary>",
             "",
-            "```",
+            fence,
             txt_body.rstrip("\n"),
-            "```",
+            fence,
             "",
             "</details>",
             "",
@@ -65,7 +73,7 @@ def build_section(report: dict, title: str, txt_body: str | None,
         txt_path = f"{report_dir}/pubcheck-report.txt"
         json_path = f"{report_dir}/pubcheck-report.json"
         lines += [
-            f"**Report files:** `{txt_path}`, `{json_path}` (written on the "
+            f"**Report files:** {md_code(txt_path)}, {md_code(json_path)} (written on the "
             "runner). If this workflow uploads them as a build artifact, a "
             "follow-up step below states the download link directly; "
             "otherwise check this run's Artifacts section.",
