@@ -141,6 +141,29 @@ def test_trailing_spaces_in_a_code_block_are_removed_and_words_are_not_joined(tm
     assert pre.get_text() == " -md4\n -sha1\na b", repr(pre.get_text())
 
 
+def test_the_pdf_copy_drops_base_href_and_keeps_its_links(tmp_path):
+    """CSAF v2.0 OS carries <base href> to the live site, so its relative
+    stylesheet and images were fetched from docs.oasis-open.org. The PDF copy
+    drops it; the published HTML keeps it; a relative link is made absolute
+    first, and a fragment link stays internal."""
+    from bs4 import BeautifulSoup
+    base = "https://docs.oasis-open.org/csaf/csaf/v2.0/os/csaf-v2.0-os.html"
+    page = (f'<html><head><base href="{base}"/><link href="style.css" rel="stylesheet"/>'
+            '</head><body><a id="f" href="#s1">s</a><a id="r" href="schemas/x.json">x</a>'
+            '<a id="m" href="mailto:a@b.c">m</a><img src="images/a.png"/></body></html>')
+    src, out = tmp_path / "in.html", tmp_path / "out.html"
+    src.write_text(page, encoding="utf-8")
+    _preprocessor()(src, out).preprocess()
+    soup = BeautifulSoup(out.read_text(encoding="utf-8"), "html.parser")
+    assert soup.find("base") is None
+    assert soup.find(id="f")["href"] == "#s1"
+    assert soup.find(id="r")["href"] == \
+        "https://docs.oasis-open.org/csaf/csaf/v2.0/os/schemas/x.json"
+    assert soup.find(id="m")["href"] == "mailto:a@b.c"
+    assert soup.find("link")["href"] == "style.css" and soup.img["src"] == "images/a.png"
+    assert "<base" in src.read_text(encoding="utf-8"), "the source HTML must keep its base"
+
+
 def test_header_code_takes_the_header_colour():
     rule = print_rules()["th code"]
     assert "color: inherit" in rule and "background: transparent" in rule, rule
@@ -187,8 +210,7 @@ def test_a_real_package_prints_the_type_scale(tmp_path, stage):
     rows = _table_rows(text)
     assert text.count(link) == 1
     shutil.copy(REPO_ROOT / ".github/src/style.css", pkg / ".style.css")
-    # A <base> would resolve the local stylesheet against docs.oasis-open.org.
-    text = re.sub(r"<base [^>]*>", "", text.replace(link, ".style.css"))
+    text = text.replace(link, ".style.css")
     html.write_text(text, encoding="utf-8")
 
     r = subprocess.run(["bash", str(SCRIPT), str(pkg)], capture_output=True, text=True,

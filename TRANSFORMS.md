@@ -113,6 +113,10 @@ wkhtmltopdf \
   .spec-pdf.html spec.pdf
 ```
 
+The preprocessor also removes any `<base href>` from the PDF copy, after
+making relative hyperlinks absolute against it, so stylesheets and images
+load from the package being rendered and not from the live site.
+
 The injected CSS also caps every image at the line width
 (`img { max-width: 100%; height: auto; }`), so a figure with no width of its
 own prints inside the margins instead of at its natural size.

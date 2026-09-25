@@ -26,6 +26,14 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+- Pipeline: the PDF preprocessor removes `<base href>` from the PDF copy (the
+  published HTML keeps it). CSAF v2.0 OS points its base at the live site, so
+  a step 2 render fetched its relative stylesheet and images from
+  docs.oasis-open.org: wrong for a package not yet published, and it hid a
+  missing local file. Relative hyperlinks other than `#fragment` are made
+  absolute against the base first, so the PDF links where the published page
+  does. The render test no longer strips the base itself.
+
 - Pipeline: the PDF preprocessor removes trailing spaces from each line of a
   code block. Under `pre-wrap` they hang past the block's edge, and CSAF v2.0
   OS's space-aligned "Supported digests" listing ran 0.6pt past the right

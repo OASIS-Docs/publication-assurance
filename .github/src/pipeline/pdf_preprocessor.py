@@ -30,6 +30,7 @@ import logging
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urljoin, urlsplit
 
 from bs4 import BeautifulSoup
 
@@ -234,6 +235,8 @@ class PdfPreprocessor(PipelineStep):
             else:
                 soup.insert(0, head)
 
+        self.drop_base(soup)
+
         # Add targeted CSS for code formatting
         # Note: Appending rather than prepending to preserve existing CSS precedence
         style_tag = soup.new_tag('style')
@@ -258,6 +261,32 @@ class PdfPreprocessor(PipelineStep):
             f.write(str(soup))
 
         logger.info(f"HTML preprocessing completed successfully: {self.output_file}")
+
+    @staticmethod
+    def drop_base(soup: BeautifulSoup) -> None:
+        """Remove ``<base href>`` from the PDF copy, never the published HTML.
+
+        CSAF v2.0 OS carries ``<base href="https://docs.oasis-open.org/...">``,
+        so wkhtmltopdf fetched its relative stylesheets and images from the
+        live site: wrong for a package not yet published, and it hid a
+        missing local file. Relative hyperlinks other than ``#fragment`` are
+        first made absolute against the base, so the PDF's links still point
+        where the published document's do; resources then resolve beside the
+        file being rendered.
+        """
+        base = soup.find('base', href=True)
+        if base is None:
+            for extra in soup.find_all('base'):
+                extra.decompose()
+            return
+        root = base['href']
+        for a in soup.find_all('a', href=True):
+            href = a['href'].strip()
+            if href and not href.startswith('#') and not urlsplit(href).scheme \
+                    and not href.startswith('//'):
+                a['href'] = urljoin(root, href)
+        for extra in soup.find_all('base'):
+            extra.decompose()
 
     @staticmethod
     def tag_print_layout(soup: BeautifulSoup) -> None:
