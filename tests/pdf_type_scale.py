@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+import unicodedata
 from collections import Counter
 
 MM = 72 / 25.4
@@ -34,7 +35,8 @@ def measure(pdf_path: str) -> dict:
     outside = []
     for page in doc:
         page_w, page_h = page.rect.width, page.rect.height
-        for block in page.get_text("dict")["blocks"]:
+        # Unclipped, so text laid out beyond the page edge is still seen.
+        for block in page.get_text("dict", clip=fitz.INFINITE_RECT())["blocks"]:
             for line in block.get("lines", []):
                 for span in line["spans"]:
                     text = span["text"].strip()
@@ -65,6 +67,22 @@ def measure(pdf_path: str) -> dict:
         "histogram": {k: dict(c.most_common(5)) for k, c in sizes.items()},
     })
     return out
+
+
+def normalise(text: str) -> str:
+    """Text with every space, line break, soft hyphen and zero-width
+    character removed and ligatures expanded, so a cell that wrapped over
+    lines compares equal to its source."""
+    text = unicodedata.normalize("NFKC", text)
+    return re.sub(r"[\s\u00ad\u200b\u2060]+", "", text)
+
+
+def pdf_text(pdf_path: str) -> str:
+    """The whole text layer of the PDF, normalised."""
+    import pymupdf as fitz
+
+    doc = fitz.open(pdf_path)
+    return normalise("".join(page.get_text("text", clip=fitz.INFINITE_RECT()) for page in doc))
 
 
 if __name__ == "__main__":

@@ -9,8 +9,12 @@ printed DMLex at 12pt. The PDF preprocessor now sets the scale in points under
 wkhtmltopdf prints those points at their size.
 
 The render test runs the real step 2 script, with the wkhtmltopdf build the
-step 2 workflow installs, on a copy of the CSAF v2.1 csd01 package (249 pages
-in its published form), and measures the PDF's text layer with PyMuPDF. The
+step 2 workflow installs, on a copy of the CSAF v2.1 csd01 package (it renders
+at 244 pages; the corpus copy of its PDF has 249), and measures the PDF's text
+layer with PyMuPDF. It also requires every table row of the HTML to be in the
+PDF: with the print scale and no smart shrinking, the eight-column remediation
+matrix was wider than the column and wkhtmltopdf dropped its last column, which
+leaves no text anywhere for a position check to find. The
 CI job `pdf-render` installs both and sets REQUIRE_WKHTMLTOPDF=1, so there the
 test cannot skip. The package's link to the published stylesheet is pointed at
 .github/src/style.css, which differs from markdown-styles-v1.7.3.css only in
@@ -28,7 +32,7 @@ import sys
 import pytest
 
 from conftest import CORPUS, REPO_ROOT
-from pdf_type_scale import measure
+from pdf_type_scale import measure, normalise, pdf_text
 
 SOURCE = (REPO_ROOT / ".github/src/pipeline/pdf_preprocessor.py").read_text()
 SCRIPT = REPO_ROOT / ".github/scripts/step_2_convert_html_to_pdf_V2_0.sh"
@@ -65,8 +69,66 @@ def test_the_pdf_stylesheet_sets_the_print_type_scale():
 
 def test_headings_stay_with_what_follows():
     rules = print_rules()
-    sel = "h1, h2, h3, h4, h5, h6, h1big"
+    sel = "h1, h2, h3, h4, h5, h6, h1big, .keep-with-next"
     assert sel in rules and "page-break-after: avoid" in rules[sel], rules.get(sel)
+
+
+def _preprocessor():
+    """Load pipeline.pdf_preprocessor by path, as test_pdf_command.py loads
+    the renderer."""
+    import importlib.util
+    import types
+    pytest.importorskip("bs4", reason="the preprocessor needs bs4, which CI installs")
+    if "pipeline" not in sys.modules:
+        pkg = types.ModuleType("pipeline")
+        pkg.__path__ = [str(REPO_ROOT / ".github/src/pipeline")]
+        sys.modules["pipeline"] = pkg
+    spec = importlib.util.spec_from_file_location(
+        "pipeline.pdf_preprocessor", REPO_ROOT / ".github/src/pipeline/pdf_preprocessor.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module.PdfPreprocessor
+
+
+CAPTIONS = """<html><head></head><body>
+<p id="eg">Example 1:</p>
+<pre><code>{ }</code></pre>
+<p id="fig">Figure 2: the model</p>
+<p><img src="model.png"/></p>
+<p id="plain">Plain paragraph.</p>
+<p id="next">Followed by text.</p>
+<table><tr><th><code>no_fix_planned</code></th><td>allowed</td></tr></table>
+</body></html>"""
+
+
+def test_captions_are_kept_with_what_follows_in_the_preprocessed_html(tmp_path):
+    """wkhtmltopdf has no :has(), so the preprocessor tags the paragraph."""
+    from bs4 import BeautifulSoup
+    src, out = tmp_path / "in.html", tmp_path / "out.html"
+    src.write_text(CAPTIONS, encoding="utf-8")
+    _preprocessor()(src, out).preprocess()
+    soup = BeautifulSoup(out.read_text(encoding="utf-8"), "html.parser")
+    kept = {p["id"] for p in soup.select("p.keep-with-next")}
+    assert kept == {"eg", "fig"}, kept
+    css = soup.find_all("style")[-1].string
+    assert re.search(r"\.keep-with-next\s*\{[^}]*page-break-after:\s*avoid", css), css
+    assert ":has(" not in re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+
+
+def test_code_in_a_table_cell_can_break_after_underscores(tmp_path):
+    from bs4 import BeautifulSoup
+    src, out = tmp_path / "in.html", tmp_path / "out.html"
+    src.write_text(CAPTIONS, encoding="utf-8")
+    _preprocessor()(src, out).preprocess()
+    code = BeautifulSoup(out.read_text(encoding="utf-8"), "html.parser").select_one("th code")
+    assert code.get_text() == "no_fix_planned"
+    assert len(code.find_all("wbr")) == 2, code
+
+
+def test_header_code_takes_the_header_colour():
+    rule = print_rules()["th code"]
+    assert "color: inherit" in rule and "background: transparent" in rule, rule
 
 
 def test_the_render_job_installs_the_workflow_s_wkhtmltopdf():
@@ -96,6 +158,7 @@ def test_a_real_package_prints_the_type_scale(tmp_path):
     (pkg / "csaf-v2.1-csd01.pdf").unlink()
     html = pkg / "csaf-v2.1-csd01.html"
     text = html.read_text(encoding="utf-8")
+    rows = _table_rows(text)
     link = "https://docs.oasis-open.org/styles/markdown-styles-v1.7.3.css"
     assert text.count(link) == 1
     shutil.copy(REPO_ROOT / ".github/src/style.css", pkg / ".style.css")
@@ -111,4 +174,18 @@ def test_a_real_package_prints_the_type_scale(tmp_path):
     assert m["body"] == 10.0, m["histogram"]["body"]
     assert m["code"] == 9.0, m["histogram"]["code"]
     assert m["footer"] == 8.0, m["histogram"]["footer"]
+    printed = pdf_text(str(pkg / "csaf-v2.1-csd01.pdf"))
+    assert len(rows) > 100, len(rows)
+    missing = [r for r in rows if normalise(r) not in printed]
+    assert missing == [], f"{len(missing)} of {len(rows)} table rows are not in the PDF: {missing}"
     assert m["outside_column"] == [], m["outside_column"]
+
+
+def _table_rows(html: str) -> list[str]:
+    """Each table row's text, its cells in order. A row is printed left to
+    right, so a row whose last cell was dropped no longer matches."""
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, "html.parser")
+    rows = ["".join(c.get_text() for c in tr.find_all(["td", "th"]))
+            for tr in soup.select("table tr")]
+    return [r for r in rows if normalise(r)]
