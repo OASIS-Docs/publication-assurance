@@ -13,15 +13,11 @@ in a TC's own GitHub repository. After setup, every push checks your
 package against the same 173 conditions TC Administration runs at intake,
 and each run publishes a Validation Report you can open in a browser.
 
-The guide is layered. The [Quick start](#quick-start) is enough for most
-TCs. [The Validation Report](#the-validation-report) explains what the
-results mean. [Reference](#reference) covers everything else, organised by
-task, for when you need it.
-
 | Section | Read it when |
 |---|---|
 | [Quick start](#quick-start) | You are setting the gate up for the first time |
 | [The Validation Report](#the-validation-report) | A run has finished and you want to know what it says |
+| [Blocker ownership](#blocker-ownership) | A blocker may not be the TC's to fix, or looks wrong |
 | [Action inputs](#action-inputs) and [outputs](#action-outputs) | You want to change a default or use a result in a later step |
 | [Markdown rendering before the gate](#markdown-rendering-before-the-gate) | Your repository holds Markdown sources, not a rendered package |
 | [Gating and report-only runs](#gating-and-report-only-runs) | A blocker should not fail the build, for example on a published standard |
@@ -32,21 +28,39 @@ task, for when you need it.
 | [Troubleshooting](#troubleshooting) | Something did not work as described |
 | [Checks and their authorities](#checks-and-their-authorities) | You want the rule behind a finding |
 
+| Term | Meaning |
+|---|---|
+| Workflow | A YAML file under `.github/workflows/` that tells GitHub Actions what to run and when |
+| Run, job, step | One execution of a workflow; a job is a set of steps on one machine; a step is one command or action |
+| Runner | The GitHub-hosted machine that runs a job |
+| Job summary | The page of results a job writes, shown on the run's **Summary** page |
+| Artifact | A file set attached to a run, downloadable from the bottom of the run's **Summary** page |
+| Workflow token | The credential GitHub gives each run; `permissions:` sets what it may do |
+| Matrix | One job definition run once per entry in a list, for example once per document |
+| Exit code | The number a program ends with: `0` publishable, `1` blockers, `2` the target could not be read |
+
 ## Quick start
 
 Three steps, about five minutes. You need write access to the TC
 repository and the path of the package you want checked.
 
 The package is a **stage directory**: the folder that holds one work
-product at one stage, for example `work/v1.0/csd01` holding
-`mytc-v1.0-csd01.md`, `mytc-v1.0-csd01.html` and `mytc-v1.0-csd01.pdf`.
-Two folder names matter, because the gate checks them against the
-filenames and the cover URLs: the stage directory is named for the stage
-(`csd01`), and the folder that contains it is named for the version
-(`v1.0`). The folders above those (`work/` here) are up to you. A `.zip`
-of the stage directory also works. If your repository holds only Markdown and nothing renders it
-yet, finish the Quick start with the path where the rendered package will
-go, then read [Markdown rendering before the gate](#markdown-rendering-before-the-gate).
+product at one stage, with its Markdown, HTML and PDF, for example
+`work/v1.0/csd01` holding `mytc-v1.0-csd01.md`, `mytc-v1.0-csd01.html` and
+`mytc-v1.0-csd01.pdf`. The gate checks two of the folder names against the
+filenames and the cover URLs:
+
+| Folder | Example | Rule |
+|---|---|---|
+| Stage directory | `csd01` | Named for the stage and revision |
+| Its parent | `v1.0` | Named for the version |
+| Anything above | `work/` | Your choice |
+
+A `.zip` of the stage directory also works.
+
+If the repository holds only Markdown and nothing renders it yet, finish
+the Quick start with the path where the rendered package will go, then
+read [Markdown rendering before the gate](#markdown-rendering-before-the-gate).
 
 ### Step 1: Workflow file
 
@@ -105,7 +119,9 @@ This step is optional and recommended. It gives every report a web
 address that anyone can open without downloading anything.
 
 The first run in Step 1 created a branch named `pubcheck-reports` that holds
-the reports. To serve it as a web page:
+the reports. If the **Branch** list in step 3 below does not offer it, that
+run did not publish: see [Troubleshooting](#troubleshooting). To serve the
+branch as a web page:
 
 1. In the repository on GitHub, open **Settings > Pages**.
 2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
@@ -126,11 +142,11 @@ Markdown links, which work in any repository.
 
 1. Push any commit, or open **Actions > pub-check > Run workflow** and
    select **Run workflow**.
-2. Open the run, then the `pub-check` job.
-3. At the top of the job summary, below the job's steps, are the report
-   links: **PDF**, **Markdown**, **Folder** and, once Step 2 is done,
-   **HTML**. The same links appear as a notice under **Annotations** on
-   the run page.
+2. In the **Actions** tab, select the run. Its **Summary** page opens.
+3. Scroll to the **pub-check** section of the summary. It starts with the
+   report links: **PDF**, **Markdown**, **Folder** and, once Step 2 is
+   done, **HTML**. The same links appear as a notice under
+   **Annotations**, higher on the same page.
 4. Open the report and read the verdict at the top.
 
 | Result | Meaning | What to do |
@@ -141,29 +157,25 @@ Markdown links, which work in any repository.
 | **NA** | The condition does not apply to this package; the report says why | Nothing, unless the reason is wrong for your package |
 | **INFO** | Recorded, no action required | Nothing |
 
-**Success looks like:** a report whose heading names your package, a
-verdict (`PUBLICATION-READY: zero blockers.` or
-`NOT publication-ready: N blocker(s).`), a table of 59 check classes, and a
-table of all 173 conditions. The job summary also carries the findings
-list, which ends with the same verdict in the form
-`N blocker(s), M warning(s) -> NOT PUBLISHABLE`. The run's red or green
-status matches the report: red if and only if the report lists a blocker.
-
-A TC's own package goes green once its blockers are fixed. The CSAF
-sample bundled with this repository (`examples/csaf/v2.1/csd01`) is the
-exception: it stays red on one staff-side blocker, `public-review-metadata`,
-which no edit to the package can clear. Use your own package for the first
-run.
+**Success looks like:** a report whose heading names your package and
+whose verdict reads `PUBLICATION-READY: zero blockers.` or
+`NOT publication-ready: N blocker(s).`. The run is red when the report
+lists a blocker, or when no report could be produced (exit code `2`, a
+wrong `target` path); your own package goes green once its blockers
+are fixed. (The CSAF sample bundled with this repository stays red on one
+blocker only staff can clear; see [Local runs](#local-runs).)
 
 To fix a blocker, edit the source, commit, and push. The next run checks
 the new commit and publishes a new report.
 
 ## The Validation Report
 
-The report is the one OASIS staff produce at intake: the same code, the
-same conditions, the same layout. It has a header, the check class table
-and the condition table. The job summary shows the same two tables under
-the verdict; the header lines below are in the report files.
+It is the report OASIS staff produce at intake, from the same code. It has
+a header, a table of the 59 check classes and a table of all 173
+conditions. The job summary shows the same two tables, above them the
+findings list, which ends with the verdict in a second form,
+`N blocker(s), M warning(s) -> NOT PUBLISHABLE`. The header lines described
+below are in the report files.
 
 ### Verdict
 
@@ -227,7 +239,10 @@ these run in CI.
 Almost every blocker is in the TC's own content, and the TC fixes it in
 its source. A few concern things only OASIS staff can do or decide. Raise
 those with TC Administration (a TCADMIN ticket, or
-michael.coletta@oasis-open.org), quoting the finding.
+michael.coletta@oasis-open.org), quoting the finding. A finding you believe
+is wrong goes to an issue on
+[OASIS-Docs/publication-assurance](https://github.com/OASIS-Docs/publication-assurance/issues)
+with the run link.
 
 | Finding | Whose | Why |
 |---|---|---|
@@ -235,7 +250,7 @@ michael.coletta@oasis-open.org), quoting the finding.
 | `member-uri`: a member-only (Kavi) URL is cited | TC, with staff help | The TC replaces the citation; staff can supply a public URL for the cited document |
 | `public-review-metadata`: a reviewed stage lacks its public-review metadata file | TC Administration | Project Administration publishes that file (Naming Directives v1.7 s5.2) |
 | `revision-collision` (WARN): the stage is already live | TC, with staff confirmation | A new submission takes the next revision number; ignore it when re-checking the published package itself |
-| Any finding you believe is wrong | TC Administration | Report it with the run link; false positives are fixed in the gate, not worked around in the document |
+| Any finding you believe is wrong | TC Administration | An issue on the repository, as above; false positives are fixed in the gate, not worked around in the document |
 
 ## Reference
 
@@ -248,12 +263,12 @@ All inputs except `target` are optional.
 | Input | Default | Meaning |
 |---|---|---|
 | `target` | (required) | Stage directory or package `.zip`, relative to the repository root after checkout |
-| `args` | `''` | Extra flags passed to the gate, for example `--emit-manifest` |
+| `args` | `''` | Extra flags passed to the gate, for example `--emit-manifest`. `--json` is not needed: the action always writes `pubcheck-report.json`, and `--json` here turns `pubcheck-report.txt` into JSON too |
 | `python-version` | `3.x` | Python version the gate runs on |
 | `install-poppler` | `true` | Installs `pdftotext` and `pdffonts` on Linux runners for the PDF cross-checks. Without them those conditions report NA |
 | `report-dir` | `pubcheck-report` | Where the report files are written in the job's working directory. `''` writes none |
 | `write-summary` | `true` | Writes the verdict, the findings and the report tables to the job summary |
-| `summary-title` | the target path | Heading for this call's summary section; set it when the action runs more than once in a job or matrix |
+| `summary-title` | `''` (the target path is used) | Heading for this call's summary section; set it when the action runs more than once in a job or matrix |
 
 ### Action outputs
 
@@ -266,8 +281,8 @@ step.
 | Output | Content |
 |---|---|
 | `exit-code` | `0` publishable, `1` blockers present, `2` target unreadable. This is what fails the step |
-| `blockers` | Number of BLOCKER findings |
-| `warnings` | Number of WARN findings |
+| `blockers` | Number of BLOCKER findings; empty when the exit code is `2` |
+| `warnings` | Number of WARN findings; empty when the exit code is `2` |
 | `report-txt` | Path to the plain-text findings list |
 | `report-json` | Path to the full `--json` record |
 | `report-validation-md` | Path to the Validation Report in Markdown |
@@ -397,9 +412,10 @@ Warnings never fail a run in either mode.
 
 ### Several documents in one repository
 
-Use a matrix, one entry per package. Give each entry its own
-`summary-title`, so the job summaries are distinguishable, and its own
-`report-dir`, so the reports do not overwrite each other.
+Use a matrix, one entry per package. Each entry runs as its own job on its
+own runner. Give each entry its own `summary-title`, so its summary is
+headed with the document's name rather than its path, and its own artifact
+name, because artifact names must be unique within a run.
 
 ```yaml
 name: pub-check
@@ -433,13 +449,21 @@ jobs:
         with:
           target: ${{ matrix.package.target }}
           summary-title: ${{ matrix.package.name }}
-          report-dir: pubcheck-report-${{ matrix.package.id }}
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: pubcheck-report-${{ matrix.package.id }}
+          path: pubcheck-report
+          if-no-files-found: ignore
 ```
 
+`report-dir` matters only when one job calls the action more than once:
+give each call its own, or the second call's files replace the first's.
+
 [`examples/consumer-workflow-matrix.yml`](../examples/consumer-workflow-matrix.yml)
-extends this with a manual override for a single target and an
-`upload-artifact` step that attaches each package's report files to the
-run.
+extends this with a manual override for a single target and a link to
+each artifact in the job summary.
 
 ### Fork pull requests and read-only tokens
 
@@ -557,7 +581,9 @@ python3 publication-assurance/pub-check/validation_report.py report.json \
   --md report.md --html report.html --exit-code "$code"
 ```
 
-Open `report.html` in a browser.
+Open `report.html` in a browser. If the first command exits `2` (the
+target could not be read), `report.json` holds no report and the second
+command has nothing to render: correct the path first.
 
 The PDF conditions use `pdftotext` and `pdffonts` from poppler when they
 are installed (`brew install poppler` on macOS,
@@ -565,6 +591,8 @@ are installed (`brew install poppler` on macOS,
 those conditions report NA and the rest run unchanged.
 
 ### Troubleshooting
+
+<!-- FINAL CHECK against validation-report-pdf: the report-publishing and HTML-link rows -->
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -578,10 +606,12 @@ those conditions report NA and the rest run unchanged.
 | PDF conditions all NA with `pdffonts unavailable` | poppler is missing: `install-poppler: false`, or a macOS or Windows runner | Leave `install-poppler` at `true` and use `ubuntu-latest` |
 | `public-review-metadata` blocker | The metadata file is published by Project Administration | Raise it with TC Administration; see [Blocker ownership](#blocker-ownership) |
 | `revision-collision` warning | The stage you are checking is already live | Expected when re-checking a published package; a new submission takes the next revision number |
-| Matrix summaries all have the same heading | `summary-title` is not set | Set `summary-title` per matrix entry |
-| Matrix reports overwrite each other | The entries share one `report-dir` | Give each entry its own `report-dir` |
+| Matrix summaries are headed with paths, not document names | `summary-title` is not set | Set `summary-title` per matrix entry |
+| A matrix upload fails with `409` and "an artifact with this name already exists" | Two entries upload under one artifact name | Name each artifact from the matrix entry, as in [Several documents](#several-documents-in-one-repository) |
+| Two calls to the action in one job leave only the second's report files | The calls share one `report-dir` | Give each call its own `report-dir` |
+| Findings read `could not be reached ... (transport failure, not a 404)` | A network or site outage during the run | These are recorded as INFO, never as blockers. To skip the live-site conditions, set `env: PUB_CHECK_OFFLINE: '1'` on the gate step |
 | A published standard in the repository keeps the run red | Its findings cannot be fixed in a published document | Run it report-only, see [Gating and report-only runs](#gating-and-report-only-runs) |
-| A finding you believe is wrong | A gap or error in the gate | Open an issue on [OASIS-Docs/publication-assurance](https://github.com/OASIS-Docs/publication-assurance/issues) with the run link |
+| A finding you believe is wrong | A gap or error in the gate | See [Blocker ownership](#blocker-ownership) |
 
 ### Checks and their authorities
 
@@ -595,5 +625,5 @@ those conditions report NA and the rest run unchanged.
 | [examples/eox-core-v1.0-csd01/](../examples/eox-core-v1.0-csd01/README.md) | A Validation Report from a real publication |
 | [CHANGELOG.md](../CHANGELOG.md) | Every release, with the checks it added or changed |
 
-Questions and false positives: michael.coletta@oasis-open.org, or an issue
-on [OASIS-Docs/publication-assurance](https://github.com/OASIS-Docs/publication-assurance/issues).
+Questions: michael.coletta@oasis-open.org. Findings you believe are
+wrong: see [Blocker ownership](#blocker-ownership).

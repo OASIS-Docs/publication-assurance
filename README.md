@@ -37,7 +37,7 @@ target could not be read. Two ways to run it:
 ### 1. On your machine
 
 ```bash
-git clone https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.5.0 https://github.com/OASIS-Docs/publication-assurance
 python3 publication-assurance/pub-check/oasis_pub_check.py <package>
 ```
 
@@ -49,18 +49,20 @@ Work Product Manifest File.
 
 ### 2. In your TC repo on GitHub
 
-1. Add `.github/workflows/pub-check.yml`, a short workflow that calls this
-   repository as a pinned Action, with your package path as `target`.
-2. Optionally, serve the `pubcheck-reports` branch with GitHub Pages so every
-   report has a web address.
-3. Push. The job summary links the Validation Report as PDF, Markdown and
-   HTML. A blocker fails the build; warnings do not.
+1. **Workflow file:** add `.github/workflows/pub-check.yml`, a short
+   workflow that calls this repository as a pinned Action, with your
+   package path as `target`.
+2. **Report page** (optional): serve the `pubcheck-reports` branch with
+   GitHub Pages.
+3. **First report:** push, then open the report from the links in the job
+   summary (PDF and Markdown; HTML once Pages is on). A blocker fails the
+   build; warnings do not.
 
-**[docs/ADOPTING.md](docs/ADOPTING.md)** has the workflow to copy, each step
-in full, how to read the report, and the reference: every input and output,
-rendering Markdown before the gate, report-only runs, several documents in
-one repository, fork pull requests, pinning and upgrades, and
-troubleshooting.
+[docs/ADOPTING.md](docs/ADOPTING.md#quick-start) has the steps in full with
+the workflow to copy, how to read the report, and the reference: every
+input and output, Markdown rendering before the gate, report-only runs,
+several documents in one repository, fork pull requests, pinning and
+upgrades, and troubleshooting.
 
 ### Finding the report
 
@@ -153,7 +155,7 @@ correction round in that work, and is calibrated against a regression corpus of
 submissions in their original received form, and against a known-bad release
 candidate whose blocker set TC Administration had already established by hand.
 
-## Where the criteria come from
+## Criteria sources
 
 ![How a criterion is sourced from policy](assets/authority.png?v=173)
 
@@ -162,7 +164,7 @@ trace to a verbatim clause in the governing corpus; the rest are operational
 rules from correction rounds. The full criterion-to-clause map, with the exact
 quoted text and its source, is [`AUTHORITIES.md`](pub-check/AUTHORITIES.md).
 
-**The evidence ships with it.** The corpus itself is
+**The policy corpus is in this repository.** It is
 [`pub-check/corpus/`](pub-check/corpus/): 25 source pages fetched on 21 July
 2026, each with its sha256 in `MANIFEST.json`, alongside the condition-to-criterion
 map (`crosswalk.json`) and the criteria (`criteria.yaml`). You do not have to
@@ -171,7 +173,7 @@ take the catalog's word for any of it, and neither does CI:
 a verbatim substring of the page it cites, and every crosswalk entry against the
 tool's own registry, on every run.
 
-## Where the gate sits: validation and audit
+## Gate position: validation and audit
 
 ![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=173)
 
