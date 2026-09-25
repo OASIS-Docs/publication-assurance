@@ -43,8 +43,13 @@ Each version is anchored by a git tag on this repository.
   example captions with what follows, and keeps a split code block's border.
   In print, inline code also carries `word-wrap: break-word` (the spelling
   wkhtmltopdf's WebKit reads; it ignores `overflow-wrap: anywhere`) and no
-  side padding, and table cells are padded 2pt 3pt, so long inline paths and
-  the eight-column tables of CSAF v2.1 fit the A4 text column.
+  side padding. Tables are held to the column: cells break long words, code
+  in a cell breaks after `_ / . -` (a `<wbr>` the preprocessor inserts), and
+  code in a header cell takes the header's white on blue. Without this,
+  wkhtmltopdf dropped the last column of CSAF v2.1's eight-column remediation
+  matrix. The caption line before a code block or a lone image is tagged
+  `keep-with-next` in the DOM, since wkhtmltopdf has no `:has()`. The render
+  test also requires every table row of the HTML to appear in the PDF.
   The renderer passes `--disable-smart-shrinking --dpi 288`, chosen by
   rendering with the pinned wkhtmltopdf 0.12.6.1-2 build: without them the
   scale printed at 7.8pt, and at 96 dpi 10pt rounds to 9.75pt. A new CI job,
