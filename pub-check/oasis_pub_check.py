@@ -6747,10 +6747,19 @@ def zip_stage_layout(zip_path: str, names: list[str]) -> tuple[str, str, str, st
     component."""
     stage_re = "|".join(sorted(VALID_STAGE_PREFIXES | RETIRED_STAGE_TOKENS, key=len, reverse=True))
     shape = re.compile(r"(?P<abbrev>.+?)-(?P<ver>v\d+(?:\.\d+)+)(?:-(?P<errata>errata\d*))?"
-                       rf"-(?P<stage>(?:{stage_re})\d*)(?:-.+)?")
-    root_stems = sorted({os.path.splitext(os.path.basename(n))[0] for n in names
-                         if "/" not in n.strip("/") and n.lower().endswith((".md", ".html", ".docx", ".odt"))})
-    stems = root_stems + [os.path.splitext(os.path.basename(zip_path))[0]]
+                       rf"-(?P<stage>(?:{stage_re})\d*)(?P<tail>-.+)?")
+    zip_stem = os.path.splitext(os.path.basename(zip_path))[0]
+    root_files = [os.path.splitext(os.path.basename(n))[0] for n in names
+                  if "/" not in n.strip("/") and n.lower().endswith((".md", ".html", ".pdf", ".docx", ".odt"))]
+    root_stems = {os.path.splitext(os.path.basename(n))[0] for n in names
+                  if "/" not in n.strip("/") and n.lower().endswith((".md", ".html", ".docx", ".odt"))}
+    # The delivery stem, not an auxiliary file beside it: the one the zip is
+    # named for, then one with nothing after its stage token (a redline or
+    # comments file carries a tail), then the stem most root files share.
+    def rank(stem):
+        m = shape.fullmatch(stem)
+        return (stem != zip_stem, bool(m and m.group("tail")), -root_files.count(stem), stem)
+    stems = sorted(root_stems, key=rank) + [zip_stem]
     for stem in stems:
         m = shape.fullmatch(stem)
         if not m:
@@ -6797,6 +6806,9 @@ def zip_pkg_destination(raw: str, located: str,
     if not layout:
         return None
     abbrev, ver, errata, stage = layout
+    if rel_parts and rel_parts[0] == abbrev:
+        rel_parts = rel_parts[1:]   # csaf/os/ inside csaf-v2.0-...zip
+        rel = os.path.join(*rel_parts) if rel_parts else os.curdir
     if rel == os.curdir:
         parts = [abbrev, ver, errata, stage]
     elif len(rel_parts) == 1 and not re.fullmatch(r"errata\d*", rel_parts[0]):
@@ -7526,6 +7538,16 @@ def main() -> int:
             # else: dest resolved outside tmp/pkg despite passing the segment
             # check; leave target as the located dir extraction already put
             # it under, rather than rename across the boundary.
+        elif layout is None and not any(re.fullmatch(r"v\d+(?:\.\d+)+", seg)
+                                         for seg in os.path.relpath(target, raw).split(os.sep)):
+            # No stem gives a layout: check under the zip's own name, so the
+            # stage and version messages name the zip, not the temp directory.
+            zname = os.path.basename(args.target)
+            if zname not in ("", ".", "..") and os.sep not in zname:
+                staged = os.path.join(tmp, "pkg", zname, zname)
+                os.makedirs(os.path.dirname(staged), exist_ok=True)
+                os.rename(target, staged)
+                target = staged
     if not os.path.isdir(target):
         print(f"error: {target} is not a directory", file=sys.stderr)
         return 2
