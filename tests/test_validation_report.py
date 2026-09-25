@@ -421,3 +421,34 @@ def test_a_finding_under_a_class_with_no_conditions_appears_in_the_class_table(t
         assert rows["track"][1] == "INFO" and rows["track"][3] == "0", rows
         assert "Word-authored package" in rows["track"][4], rows
     assert "<code>track</code>" in page
+
+
+def test_an_unreadable_target_leaves_every_report_output_empty_and_publishes_nothing(tmp_path):
+    """Exit 2 (the target could not be read) has no report: the validation
+    paths are empty, no earlier call's report links reach this call's step
+    summary, and the publish step, whose outputs are the report URLs and the
+    publish note, does not run. Runs the gate step's own script."""
+    import yaml
+    steps = yaml.safe_load((REPO_ROOT / "action.yml").read_text())["runs"]["steps"]
+    script = next(s["run"] for s in steps if s.get("id") == "pubcheck")
+    publish = next(s for s in steps if s.get("id") == "publish")
+    assert "steps.pubcheck.outputs.exit_code != '2'" in publish["if"], publish["if"]
+
+    work, temp = tmp_path / "work", tmp_path / "runner-temp"
+    work.mkdir()
+    temp.mkdir()
+    (temp / "pubcheck-links.md").write_text("links from the previous call")
+    (temp / "pubcheck-validation.md").write_text("report from the previous call")
+    out = tmp_path / "github-output"
+    out.write_text("")
+    env = {"PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin",
+           "ACTION_PATH": str(REPO_ROOT), "TARGET": str(tmp_path / "missing" / "v9.9" / "csd99"),
+           "EXTRA_ARGS": "", "REPORT_DIR": "pubcheck-report", "SUMMARY_TITLE": "",
+           "RUNNER_TEMP": str(temp), "GITHUB_OUTPUT": str(out), "PUB_CHECK_OFFLINE": "1"}
+    subprocess.run(["bash", "-c", script], cwd=work, env=env, capture_output=True, text=True)
+    outputs = dict(line.split("=", 1) for line in out.read_text().splitlines())
+    assert outputs["exit_code"] == "2", outputs
+    for key in ("report_validation_md", "report_validation_html", "report_validation_pdf"):
+        assert outputs[key] == "", outputs
+    assert not (temp / "pubcheck-links.md").exists()
+    assert not (temp / "pubcheck-validation.md").exists()
