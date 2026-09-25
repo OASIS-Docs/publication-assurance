@@ -62,7 +62,7 @@ jobs:
       - name: Upload pub-check report (${{ matrix.package.id }})
         if: always()
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pubcheck-report-${{ matrix.package.id }}
           path: pubcheck-report-${{ matrix.package.id }}
@@ -72,7 +72,7 @@ jobs:
       # paths on the runner but has no way to know this workflow uploads
       # them as a build artifact -- that only happens here, one step later.
       # State the direct download link so nobody has to hunt the Artifacts
-      # section: upload-artifact@v4 exposes artifact-url as a step output.
+      # section: upload-artifact exposes artifact-url as a step output.
       - name: Note artifact location in summary
         if: always() && steps.upload.outcome == 'success'
         shell: bash
