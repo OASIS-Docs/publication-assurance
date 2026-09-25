@@ -247,9 +247,10 @@ def pages_site(api: str, repo: str, token: str, branch: str) -> tuple[str | None
 def links_block(title: str, verdict: str, urls: dict, note: str, pages_why: str,
                 branch: str, run_url: str) -> str:
     """The summary block: labelled links first, the verdict under them."""
-    lines = [f"### Validation report: {title}", "", f"**{verdict}**", ""]
+    md = validation_report.md_text
+    lines = [f"### Validation report: {md(title)}", "", f"**{verdict}**", ""]
     if not urls:
-        return "\n".join(lines + [f"Report not published: {note}. The report files for this "
+        return "\n".join(lines + [f"Report not published: {md(note)}. The report files for this "
                                   f"run are on the [run page]({run_url}) under Artifacts "
                                   "when the workflow uploads `report-dir`.", "", ""])
     if urls.get("html_page"):
@@ -258,7 +259,7 @@ def links_block(title: str, verdict: str, urls: dict, note: str, pages_why: str,
               "- PDF: not produced on this runner (no headless Chrome)",
               f"- [Markdown]({urls['md']})"]
     if not urls.get("html_page"):
-        lines.append(f"- [HTML (source view)]({urls['html_blob']}). {pages_why}; to open it as a "
+        lines.append(f"- [HTML (source view)]({urls['html_blob']}). {md(pages_why)}; to open it as a "
                      f"page: {PAGES_HOWTO.format(branch=branch)}.")
     lines += [f"- [All files for this run]({urls['folder']})"]
     if urls.get("pdf_pinned"):

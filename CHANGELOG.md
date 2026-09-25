@@ -81,6 +81,14 @@ Each version is anchored by a git tag on this repository.
 
 ### Fixed
 
+- Action: text a run supplies (`summary-title`, the target, finding text,
+  the publish note) is shown literally in the step summary and the Markdown
+  report. HTML becomes entities, Markdown emphasis, code, link and
+  strikethrough markers are escaped, `$`, `@` and `#` are wrapped so GitHub
+  makes no math, mention or issue link of them, `://` and `www.` are broken
+  so no bare URL is linked, and code spans and the findings fence outlast
+  any backtick run inside them. The report-links heading had put the title in
+  unescaped.
 - **title-version** evaluated nothing on any CSAF package. It confirms the
   `<title>` text against exactly one title heading, and counted only `<h1>`;
   the CSAF markdown template renders its cover title in `<h1big>`, the

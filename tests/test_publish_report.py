@@ -239,3 +239,68 @@ def test_a_multi_line_reason_stays_one_workflow_command(tmp_path, files, remote)
     lines = [l for l in r.stdout.splitlines() if l.startswith("::")]
     assert len(lines) == 1 and lines[0].startswith("::notice title=Validation report::"), r.stdout
     assert "\n" not in out["report_publish_note"]
+
+
+PAYLOAD = ("**pwned** <img src=x onerror=alert(1)> $x$ @octocat #1 "
+           "https://evil.example www.evil.example")
+
+
+def assert_inert(text: str) -> None:
+    """The payload is shown literally: no raw tag, no live emphasis, and none
+    of GitHub's text-to-link or math conversions (a mention, an issue link, a
+    bare URL, $...$), which a backslash does not stop."""
+    assert "<img" not in text, text
+    assert "**pwned**" not in text, text
+    assert "&lt;img src=x onerror=alert(1)&gt;" in text, text
+    assert "\\*\\*pwned\\*\\*" in text, text
+    for live in ("$x$", "@octocat", "#1", "https://evil", "www.evil"):
+        assert live not in text, (live, text)
+    for inert in ("<span>$</span>x<span>$</span>", "<span>@</span>octocat", "<span>#</span>1",
+                  "https\\://evil.example", "www\\.evil.example"):
+        assert inert in text, (inert, text)
+
+
+def test_a_hostile_title_reaches_every_step_summary_block_as_plain_text(files, tmp_path):
+    """Review of PR 22: links_block() put the summary title (summary-title,
+    else the target, which a pull request controls) into the step-summary
+    heading unescaped, so Markdown and HTML in it rendered. Runs the three
+    scripts that write to the step summary, as action.yml does."""
+    report_json = files / "oasis-pub-check.json"
+    links = tmp_path / "links.md"
+    env = {"PATH": os.environ["PATH"]}
+    result = subprocess.run([sys.executable, str(PUBLISH), "--files", str(files), "--branch", "",
+                             f"--title={PAYLOAD}", "--links-md", str(links)],
+                            capture_output=True, text=True, env=env)
+    assert result.returncode == 0, result.stderr
+    assert_inert(links.read_text())
+
+    summary = tmp_path / "summary.md"
+    env["GITHUB_STEP_SUMMARY"] = str(summary)
+    result = subprocess.run([sys.executable, str(REPORT), str(report_json), "--md",
+                             str(tmp_path / "v.md"), f"--title={PAYLOAD}", "--step-summary",
+                             "--report-files", PAYLOAD], capture_output=True, text=True, env=env)
+    assert result.returncode == 0, result.stderr
+    assert_inert(summary.read_text())
+    assert_inert((tmp_path / "v.md").read_text().split("## Check-by-Check", 1)[0])
+
+    data = json.loads(report_json.read_text())
+    data["target"] = PAYLOAD + " `x`"
+    data["findings"].append({"severity": "INFO", "check": "x", "message": "quoted ``` fence"})
+    hostile = tmp_path / "hostile.json"
+    hostile.write_text(json.dumps(data))
+    txt = tmp_path / "findings.txt"
+    txt.write_text("INFO quoted ```\n<img src=x onerror=alert(1)>\n")
+    summary.write_text("")
+    result = subprocess.run([sys.executable, str(REPO_ROOT / "pub-check" / "render_summary.py"),
+                             str(hostile), "--txt", str(txt)],
+                            capture_output=True, text=True, env=env)
+    assert result.returncode == 0, result.stderr
+    section = summary.read_text()
+    heading = section.split("\n", 1)[0]
+    assert heading.startswith("## pub-check: "), heading
+    assert_inert(heading)
+    assert f"`` {PAYLOAD} `x` ``" in section, section
+    fence = section.split("<summary>Full findings list (ordered)</summary>\n\n", 1)[1].split("\n")[0]
+    assert fence == "````", fence
+    # The whole findings text sits inside the one fenced block.
+    assert section.split(fence + "\n")[1] == txt.read_text(), section

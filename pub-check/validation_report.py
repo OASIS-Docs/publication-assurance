@@ -253,13 +253,43 @@ def result_line(rec: dict) -> str:
             f"{sc['INFO']} informational.")
 
 
+MD_INLINE = "\\`*_[]~|"   # characters that open inline Markdown or end a table cell
+
+
+def md_escape(text: object) -> str:
+    """Package- or caller-supplied text shown literally in GitHub Markdown:
+    emphasis, code, link and strikethrough markers are backslash-escaped,
+    and HTML such as <img onerror=...> becomes entities, not markup.
+    GitHub also turns text into math ($...$), mentions and issue links (@,
+    #) and links (http://, www., name@host), none of which a backslash
+    stops (checked against GitHub's own renderer): $, @ and # each go in a
+    <span>, and the ':' of '://' and the '.' of 'www.' are escaped."""
+    s = "".join("\\" + ch if ch in MD_INLINE else ch for ch in str(text))
+    s = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    s = re.sub(r":(?=//)", r"\\:", s)
+    s = re.sub(r"(?i)\b(www)\.", r"\1\\.", s)
+    return re.sub(r"[$@#]", lambda m: f"<span>{m.group()}</span>", s)
+
+
+def md_text(text: object) -> str:
+    """md_escape on one line, for a heading or a sentence."""
+    return " ".join(md_escape(text).split())
+
+
+def md_code(text: object) -> str:
+    """Text as a Markdown code span, with a backtick fence longer than any
+    backtick run inside it, so the text cannot close the span."""
+    s = " ".join(str(text).split())
+    run = max((len(m) for m in re.findall(r"`+", s)), default=0)
+    fence = "`" * (run + 1)
+    return f"{fence} {s} {fence}"
+
+
 def md_cell(text: object) -> str:
     """A value safe inside one Markdown table cell: a literal pipe would end
     the cell, a newline would end the row, and package text such as
     <details> would be rendered as markup."""
-    return (str(text).replace("\\", "\\\\").replace("|", "\\|")
-            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            .replace("\r", "").replace("\n", "<br>"))
+    return md_escape(text).replace("\r", "").replace("\n", "<br>")
 
 
 def class_notes(c: dict) -> list[str]:
@@ -286,8 +316,8 @@ def md_condition_table(rec: dict) -> list[str]:
 
 
 def render_md(rec: dict) -> str:
-    lines = [f"# Publication Validation Report (pub-check): {rec['title']}", ""]
-    fields = [("Target", f"`{rec['target']}`"), ("Validation date", rec["date"]),
+    lines = [f"# Publication Validation Report (pub-check): {md_text(rec['title'])}", ""]
+    fields = [("Target", md_code(rec["target"])), ("Validation date", rec["date"]),
               ("Tool", rec["tool"]),
               ("Coverage", f"{rec['total_checks']} individual checks across "
                            f"{rec['total_classes']} check classes, all run"),
@@ -412,19 +442,19 @@ def render_summary(rec: dict, report_files: str | None) -> str:
     """The step-summary section: verdict, class table, and the condition
     table collapsed. The condition table is left out, with a pointer to the
     report file, when it would push the summary past GitHub's size limit."""
-    lines = [f"### Validation report: {rec['title']}", "",
+    lines = [f"### Validation report: {md_text(rec['title'])}", "",
              f"**{verdict(rec)}** {result_line(rec)} "
              f"{rec['total_checks']} individual checks across {rec['total_classes']} "
              "check classes, all run.", ""]
     if report_files:
-        lines += [f"**Full report files:** {report_files}", ""]
+        lines += [f"**Full report files:** {md_text(report_files)}", ""]
     lines += md_class_table(rec)
     detail = ["", "<details>",
               f"<summary>All {rec['total_checks']} individual conditions: observed vs "
               "expected</summary>", ""] + md_condition_table(rec) + ["", "</details>"]
     text = "\n".join(lines + detail)
     if len(text.encode("utf-8")) > SUMMARY_LIMIT:
-        where = report_files or "the validation report files"
+        where = md_text(report_files) if report_files else "the validation report files"
         lines += ["", f"The condition table is too large for a step summary; it is in {where}."]
         text = "\n".join(lines)
     return text + "\n\n---\n"
