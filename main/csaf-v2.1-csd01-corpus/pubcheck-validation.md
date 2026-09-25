@@ -81,7 +81,7 @@ Every one of the 173 individual conditions, with the value the check pulled from
 
 | # | Result | Check | Condition verified | Value pulled (observed) | Compared against |
 |---|---|---|---|---|---|
-| 1 | PASS | stage-name | Stage directory name carries a two-digit revision number | stage\_directory: csd01 | valid stage prefixes must carry a two-digit suffix (csd01, never bare csd) |
+| 1 | PASS | stage-name | Stage directory name, and an errataNN parent directory, carry a two-digit number | stage\_directory: csd01 | valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4) |
 | 2 | PASS | stage-name | Stage token is not a retired abbreviation | stage\_directory: csd01 | retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7 |
 | 3 | PASS | stage-name | Stage token is a recognized current stage | stage\_directory: csd01 | valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata |
 | 4 | PASS | version-naming | Version directory matches the vN.N(.N) convention | version\_directory: v2.1; delivery\_stem: csaf-v2.1-csd01 | the Naming Directives version-segment pattern vN.N(.N), e.g. v1.0, v2.0.1 |

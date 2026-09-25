@@ -148,9 +148,9 @@
       "check": "stage-name",
       "sig": "is missing its two-digit number",
       "applies": "all",
-      "condition": "Stage directory name carries a two-digit revision number",
-      "pulls": "the stage directory name",
-      "compares_to": "valid stage prefixes must carry a two-digit suffix (csd01, never bare csd)",
+      "condition": "Stage directory name, and an errataNN parent directory, carry a two-digit number",
+      "pulls": "the stage directory name, and the parent directory name when it is an errata directory",
+      "compares_to": "valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4)",
       "severity": "BLOCKER"
     },
     {
