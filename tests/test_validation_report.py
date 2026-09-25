@@ -189,8 +189,10 @@ def test_a_failed_render_leaves_no_earlier_report_in_report_dir(tmp_path):
 
     second = call(str(tmp_path / "missing" / "v9.9" / "csd99"))
     assert second["report_validation_md"] == "" and second["report_validation_html"] == ""
+    assert second["report_validation_pdf"] == ""
     assert not (work / "pubcheck-report" / "pubcheck-validation.md").exists()
     assert not (work / "pubcheck-report" / "pubcheck-validation.html").exists()
+    assert not (work / "pubcheck-report" / "pubcheck-validation.pdf").exists()
 
 
 def test_a_live_check_that_could_not_reach_the_site_is_not_pass(tmp_path):

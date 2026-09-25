@@ -52,7 +52,11 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install pytest beautifulsoup4 PyYAML requests
 
+      # google-chrome ships on ubuntu-latest, so the Validation Report PDF
+      # test must run here: REQUIRE_CHROME=1 turns its skip into a failure.
       - name: Run pytest
+        env:
+          REQUIRE_CHROME: "1"
         run: pytest tests/ -v
 
       # The registry/AST parity assertion inside --list-checks is the tool's
@@ -107,11 +111,12 @@ jobs:
           JSON: ${{ steps.gate.outputs.report-json }}
           VMD: ${{ steps.gate.outputs.report-validation-md }}
           VHTML: ${{ steps.gate.outputs.report-validation-html }}
+          VPDF: ${{ steps.gate.outputs.report-validation-pdf }}
         run: |
           set -eu
           echo "gate exit code: $EXIT_CODE"
           case "$EXIT_CODE" in 0|1) ;; *) echo "unexpected gate exit $EXIT_CODE"; exit 1;; esac
-          for f in "$TXT" "$JSON" "$VMD" "$VHTML"; do
+          for f in "$TXT" "$JSON" "$VMD" "$VHTML" "$VPDF"; do
             test -n "$f" || { echo "an output path is empty"; exit 1; }
             test -s "$f" || { echo "missing or empty: $f"; exit 1; }
           done
@@ -119,6 +124,21 @@ jobs:
           rows=$(sed -n '/^## Check-by-Check Results/,/^## /p' "$VMD" | grep -cE '^\| [0-9]+ \|')
           echo "classes in --list-checks: $classes; class rows in the report: $rows"
           test "$classes" -gt 0 && test "$classes" = "$rows"
+          head -c 5 "$VPDF" | grep -q '%PDF-'
+          text=$(pdftotext "$VPDF" - | tr -d '[:space:]')
+          missing=0
+          for c in $(python3 pub-check/oasis_pub_check.py --list-checks | sed -nE 's/^  ([a-z0-9-]+) +[0-9]+$/\1/p'); do
+            case "$text" in *"$c"*) ;; *) echo "class missing from the PDF: $c"; missing=1;; esac
+          done
+          test "$missing" = 0
+
+      # The same job that runs the action runs the PDF test, and may not skip it.
+      - name: Test the Validation Report PDF on this runner
+        env:
+          REQUIRE_CHROME: "1"
+        run: |
+          python3 -m pip install pytest PyYAML
+          pytest tests/test_validation_report_pdf.py -v -rs
 
       - name: Upload the reports
         if: always()

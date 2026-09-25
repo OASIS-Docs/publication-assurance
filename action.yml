@@ -38,7 +38,9 @@
 # pubcheck-report.txt / pubcheck-report.json are written under report-dir
 # (default "pubcheck-report") for the caller to upload as an artifact if it
 # wants a downloadable copy. The same directory also receives the full
-# Validation Report, pubcheck-validation.md and pubcheck-validation.html:
+# Validation Report, pubcheck-validation.md, pubcheck-validation.html and
+# (where headless Chrome is available, as on GitHub's Ubuntu runners)
+# pubcheck-validation.pdf:
 # every check class and every individual condition with its result, the value
 # observed and what it was compared against, which is the report OASIS staff
 # produce at intake. The Step Summary carries its tables too. All of this is
@@ -72,7 +74,7 @@ inputs:
     required: false
     default: "true"
   report-dir:
-    description: "Directory (relative to the caller's working directory) to write pubcheck-report.txt, pubcheck-report.json and the full Validation Report (pubcheck-validation.md and .html). Set to '' to skip writing report files."
+    description: "Directory (relative to the caller's working directory) to write pubcheck-report.txt, pubcheck-report.json and the full Validation Report (pubcheck-validation.md, .html and, where headless Chrome is available, .pdf). Set to '' to skip writing report files."
     required: false
     default: "pubcheck-report"
   write-summary:
@@ -106,6 +108,9 @@ outputs:
   report-validation-html:
     description: "Path to the same Validation Report as one self-contained HTML page. Empty if report-dir was set to '' or the report could not be rendered."
     value: ${{ steps.pubcheck.outputs.report_validation_html }}
+  report-validation-pdf:
+    description: "Path to the same Validation Report as an A4 landscape PDF, printed with headless Chrome (light theme, header rows repeated on every page, title and Page X of Y in the footer). Empty if report-dir was set to '', the report could not be rendered, or no Chrome/Chromium was available; a missing PDF is a warning and never changes the gate's result."
+    value: ${{ steps.pubcheck.outputs.report_validation_pdf }}
 
 runs:
   using: "composite"
@@ -170,14 +175,21 @@ runs:
         # only the findings), rendered from the --json run above. A rendering
         # failure is a warning, never a change to the gate's exit code.
         # A matrix of calls shares RUNNER_TEMP: clear the previous call's copy.
-        rm -f "$RUNNER_TEMP/pubcheck-validation.md" "$RUNNER_TEMP/pubcheck-validation.html"
+        rm -f "$RUNNER_TEMP/pubcheck-validation.md" "$RUNNER_TEMP/pubcheck-validation.html" \
+          "$RUNNER_TEMP/pubcheck-validation.pdf"
         validation_ok=0
         if python3 "$ACTION_PATH/pub-check/validation_report.py" \
             "$RUNNER_TEMP/oasis-pub-check.json" \
             --md "$RUNNER_TEMP/pubcheck-validation.md" \
             --html "$RUNNER_TEMP/pubcheck-validation.html" \
+            --pdf "$RUNNER_TEMP/pubcheck-validation.pdf" \
             --title="$SUMMARY_TITLE" --exit-code "$exit_code"; then
           validation_ok=1
+          # The PDF needs headless Chrome (google-chrome on GitHub's Ubuntu
+          # runners). Without one the renderer skips it and says why above.
+          if [ ! -s "$RUNNER_TEMP/pubcheck-validation.pdf" ]; then
+            echo "::warning::pub-check validation report PDF not written (no headless Chrome or Chromium); the Markdown and HTML reports are unaffected"
+          fi
         else
           echo "::warning::pub-check validation report could not be rendered; the findings reports are unaffected"
         fi
@@ -193,17 +205,27 @@ runs:
             cp "$RUNNER_TEMP/pubcheck-validation.html" "$REPORT_DIR/pubcheck-validation.html"
             echo "report_validation_md=${REPORT_DIR}/pubcheck-validation.md" >> "$GITHUB_OUTPUT"
             echo "report_validation_html=${REPORT_DIR}/pubcheck-validation.html" >> "$GITHUB_OUTPUT"
+            if [ -s "$RUNNER_TEMP/pubcheck-validation.pdf" ]; then
+              cp "$RUNNER_TEMP/pubcheck-validation.pdf" "$REPORT_DIR/pubcheck-validation.pdf"
+              echo "report_validation_pdf=${REPORT_DIR}/pubcheck-validation.pdf" >> "$GITHUB_OUTPUT"
+            else
+              rm -f "$REPORT_DIR/pubcheck-validation.pdf"
+              echo "report_validation_pdf=" >> "$GITHUB_OUTPUT"
+            fi
           else
             # Never leave an earlier call's report beside this call's findings.
-            rm -f "$REPORT_DIR/pubcheck-validation.md" "$REPORT_DIR/pubcheck-validation.html"
+            rm -f "$REPORT_DIR/pubcheck-validation.md" "$REPORT_DIR/pubcheck-validation.html" \
+              "$REPORT_DIR/pubcheck-validation.pdf"
             echo "report_validation_md=" >> "$GITHUB_OUTPUT"
             echo "report_validation_html=" >> "$GITHUB_OUTPUT"
+            echo "report_validation_pdf=" >> "$GITHUB_OUTPUT"
           fi
         else
           echo "report_txt=" >> "$GITHUB_OUTPUT"
           echo "report_json=" >> "$GITHUB_OUTPUT"
           echo "report_validation_md=" >> "$GITHUB_OUTPUT"
           echo "report_validation_html=" >> "$GITHUB_OUTPUT"
+          echo "report_validation_pdf=" >> "$GITHUB_OUTPUT"
         fi
 
         echo "oasis-pub-check exit code: ${exit_code}"
@@ -230,7 +252,11 @@ runs:
         if [ -f "$RUNNER_TEMP/pubcheck-validation.md" ]; then
           FILES_ARGS=()
           if [ -n "$REPORT_DIR" ]; then
-            FILES_ARGS=(--report-files "$REPORT_DIR/pubcheck-validation.md and $REPORT_DIR/pubcheck-validation.html")
+            FILES="$REPORT_DIR/pubcheck-validation.md and $REPORT_DIR/pubcheck-validation.html"
+            if [ -s "$REPORT_DIR/pubcheck-validation.pdf" ]; then
+              FILES="$REPORT_DIR/pubcheck-validation.md, $REPORT_DIR/pubcheck-validation.html and $REPORT_DIR/pubcheck-validation.pdf"
+            fi
+            FILES_ARGS=(--report-files "$FILES")
           fi
           python3 "$ACTION_PATH/pub-check/validation_report.py" \
             "$RUNNER_TEMP/oasis-pub-check.json" \
