@@ -255,7 +255,7 @@ says why. The reasons:
 | `no PDF in the package, so there is nothing to read` | The PDF conditions have nothing to check |
 | `pdftotext (poppler) unavailable on this runner` | The runner had no poppler; leave `install-poppler` at `true` on `ubuntu-latest` |
 | `pdffonts unavailable or the package declares no font authority` | The runner had no poppler, or your HTML and CSS name no font family to compare against |
-| `no manifest.json in the package` | Add a manifest to enable the manifest checks ([Local runs](#local-runs) shows `--emit-manifest`) |
+| `no manifest.json in the package (noted as informational)` | Add a manifest to enable the manifest checks ([Local runs](#local-runs) shows `--emit-manifest`) |
 | `no live-site result for this check (offline, unreachable, or nothing to probe)` | The condition compares the package with the live `docs.oasis-open.org` and got no answer: the run was offline (`PUB_CHECK_OFFLINE`), the site was unreachable, or there was nothing to look up |
 | `not evaluated on this package: ...` | Something earlier in the same package stopped this condition from running; the rest of the text names it. Fix that and the condition runs. If the class it names shows PASS or NA, report it as a finding believed wrong (see [Blocker ownership](#blocker-ownership)) |
 
