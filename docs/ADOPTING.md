@@ -58,9 +58,6 @@ go, then read [Markdown rendering before the gate](#markdown-rendering-before-th
 2. Change the one line marked `EDIT` to the path of your package.
 3. Commit the file to your default branch.
 
-In a private repository the run uses the account's GitHub Actions minutes;
-public repositories run free.
-
 ```yaml
 name: pub-check
 
@@ -90,7 +87,8 @@ jobs:
           if-no-files-found: ignore
 ```
 
-Committing the file starts the first run.
+Committing the file starts the first run. In a private repository the run
+uses the account's GitHub Actions minutes; public repositories run free.
 
 **Success looks like:** the **Actions** tab lists a run named `pub-check`
 for your commit. It finishes in about a minute. A green tick means the
@@ -149,8 +147,7 @@ verdict (`PUBLICATION-READY: zero blockers.` or
 table of all 173 conditions. The job summary also carries the findings
 list, which ends with the same verdict in the form
 `1 blocker(s), 17 warning(s) -> NOT PUBLISHABLE`. The run's red or green
-status matches the report: red if and only if the report lists a blocker. The run's red or green status matches the report: red if and
-only if the report lists a blocker.
+status matches the report: red if and only if the report lists a blocker.
 
 To fix a blocker, edit the source, commit, and push. The next run checks
 the new commit and publishes a new report.
@@ -548,8 +545,10 @@ The Validation Report the action publishes can be rendered locally from
 the `--json` record:
 
 ```bash
-python3 publication-assurance/pub-check/oasis_pub_check.py path/to/your/stage-dir --json > report.json; code=$?
-python3 publication-assurance/pub-check/validation_report.py report.json --md report.md --html report.html --exit-code "$code"
+python3 publication-assurance/pub-check/oasis_pub_check.py path/to/your/stage-dir --json > report.json
+code=$?
+python3 publication-assurance/pub-check/validation_report.py report.json \
+  --md report.md --html report.html --exit-code "$code"
 ```
 
 Open `report.html` in a browser.
