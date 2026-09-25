@@ -1,0 +1,193 @@
+"""The full Validation Report covers every check the tool carries.
+
+pub-check/validation_report.py turns one --json run into the per-check report
+the composite action publishes beside the findings list. Its value is
+completeness: a TC reading it must see every check class and every individual
+condition, including the ones that passed or did not apply. These tests read
+the RENDERED report files, not the record behind them, and compare them with
+the inventory --list-checks prints, which is derived from the checker's AST.
+"""
+
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+from collections import Counter
+from pathlib import Path
+
+import pytest
+
+from conftest import CORPUS, REPO_ROOT, run_cli, stage_from_corpus
+
+REPORT = REPO_ROOT / "pub-check" / "validation_report.py"
+CSAF_CSD01 = CORPUS / "csaf" / "v2.1" / "csd01"
+
+
+def list_checks() -> dict[str, int]:
+    """Class name -> condition count, as --list-checks prints it."""
+    result = run_cli("--list-checks")
+    assert result.returncode == 0, result.stderr
+    inventory = {m.group(1): int(m.group(2))
+                 for m in re.finditer(r"(?m)^  ([a-z0-9-]+)\s+(\d+)$", result.stdout)}
+    total = re.search(r"(\d+) individual checks across (\d+) check classes", result.stdout)
+    assert total, result.stdout
+    assert len(inventory) == int(total.group(2)), "could not parse every class line"
+    assert sum(inventory.values()) == int(total.group(1))
+    return inventory
+
+
+def table_rows(md: str, heading: str) -> list[list[str]]:
+    """The body rows of the first table under `heading`, split into cells on
+    unescaped pipes."""
+    section = md.split(heading, 1)[1]
+    rows = []
+    for line in section.splitlines():
+        if re.match(r"^\| \d+ \|", line):
+            rows.append([c.strip() for c in re.split(r"(?<!\\)\|", line)[1:-1]])
+        elif rows and not line.startswith("|"):
+            break
+    return rows
+
+
+@pytest.fixture(scope="module")
+def report(tmp_path_factory):
+    tmp = tmp_path_factory.mktemp("validation")
+    stage = stage_from_corpus(tmp / "pkg", CSAF_CSD01)
+    gate = run_cli("--json", str(stage))
+    assert gate.returncode in (0, 1), gate.stderr
+    (tmp / "r.json").write_text(gate.stdout)
+    md, html = tmp / "pubcheck-validation.md", tmp / "pubcheck-validation.html"
+    result = subprocess.run(
+        [sys.executable, str(REPORT), str(tmp / "r.json"), "--md", str(md),
+         "--html", str(html), "--exit-code", str(gate.returncode)],
+        capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    return md.read_text(), html.read_text()
+
+
+def test_every_check_class_and_condition_appears_exactly_once(report):
+    md, html = report
+    inventory = list_checks()
+
+    classes = [row[2] for row in table_rows(md, "## Check-by-Check Results")]
+    assert Counter(classes) == Counter(inventory.keys()), (
+        f"class table differs from --list-checks: missing "
+        f"{sorted(set(inventory) - set(classes))}, duplicated "
+        f"{sorted(k for k, n in Counter(classes).items() if n > 1)}, extra "
+        f"{sorted(set(classes) - set(inventory))}")
+
+    conditions = table_rows(md, "## All Individual Conditions")
+    assert len(conditions) == sum(inventory.values())
+    assert Counter(row[2] for row in conditions) == Counter(inventory), (
+        "condition table's per-class counts differ from --list-checks")
+    assert all(row[1].split(" ")[0] in {"PASS", "WARN", "BLOCKER", "NA"} for row in conditions)
+    assert all(len(row) == 6 for row in conditions), "a cell value broke the table"
+
+    html_classes = re.findall(r'<td><code>([a-z0-9-]+)</code></td><td class="n">\d+</td>', html)
+    assert Counter(html_classes) == Counter(inventory.keys())
+
+
+def test_a_pipe_in_an_observed_value_stays_inside_its_cell(tmp_path):
+    """Observed values and finding messages are free text from the package.
+    A literal pipe must not split a Markdown table cell."""
+    data = ('{"target": "t", "blockers": 1, "observed": {"x": {"k": "a|b"}},'
+            ' "findings": [{"severity": "BLOCKER", "check": "x", "message": "sig p|q"}],'
+            ' "conditions": [{"check": "x", "sig": "sig", "applies": "all",'
+            ' "condition": "c", "pulls": "p", "compares_to": "e|f"}]}')
+    (tmp_path / "r.json").write_text(data)
+    md = tmp_path / "o.md"
+    result = subprocess.run([sys.executable, str(REPORT), str(tmp_path / "r.json"),
+                             "--md", str(md)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    rows = table_rows(md.read_text(), "## All Individual Conditions")
+    assert len(rows) == 1 and len(rows[0]) == 6, rows
+    assert rows[0][1] == "BLOCKER" and "p\\|q" in rows[0][4]
+
+
+def render(tmp_path, data: dict) -> str:
+    import json
+    (tmp_path / "r.json").write_text(json.dumps(data))
+    md = tmp_path / "o.md"
+    result = subprocess.run([sys.executable, str(REPORT), str(tmp_path / "r.json"),
+                             "--md", str(md)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    return md.read_text()
+
+
+def condition(**kw) -> dict:
+    return {"check": "x", "sig": "sig", "applies": "all", "condition": "c",
+            "pulls": "p", "compares_to": "e", **kw}
+
+
+def test_a_blocker_is_never_hidden_behind_an_na_reason(tmp_path):
+    """Red-team counterexample: a Previous-stage URI 404 fired a BLOCKER in
+    stage-uri-live while revision-collision, which the network NA rule looks
+    for, had skipped silently. The row read 'NA: live-site probe skipped'."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 1, "observed": {},
+        "findings": [{"severity": "BLOCKER", "check": "x", "message": "sig: HTTP 404"}],
+        "conditions": [condition(requires="network")]})
+    rows = table_rows(md, "## All Individual Conditions")
+    assert rows[0][1] == "BLOCKER", rows
+
+
+def test_a_condition_the_checker_did_not_evaluate_is_not_pass(tmp_path):
+    """Red-team counterexample: title-version emitted only INFO 'Not
+    evaluated: blocked by an upstream html-residue defect', and all three of
+    its conditions read PASS."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 0, "observed": {"x": {"k": "v"}},
+        "findings": [{"severity": "INFO", "check": "x",
+                      "message": "Not evaluated: blocked by an upstream defect."}],
+        "conditions": [condition(), condition(sig="other", condition="d")]})
+    rows = table_rows(md, "## All Individual Conditions")
+    assert [r[1] for r in rows] == ["NA", "NA"], rows
+    assert "Not evaluated" in rows[0][4]
+
+
+def test_package_markup_in_a_finding_is_not_rendered(tmp_path):
+    """Red-team counterexample: a file named with <details> collapsed the rest
+    of its class cell behind a toggle in the rendered Markdown."""
+    md = render(tmp_path, {
+        "target": "t", "blockers": 1, "observed": {},
+        "findings": [{"severity": "BLOCKER", "check": "x", "message": "sig in <details>.html"}],
+        "conditions": [condition()]})
+    body = md.split("## Check-by-Check Results", 1)[1]
+    assert "<details>" not in body
+    assert "&lt;details&gt;.html" in body
+
+
+def test_a_failed_render_leaves_no_earlier_report_in_report_dir(tmp_path):
+    """Red-team counterexample: two action calls in one job share report-dir.
+    When the second call's report cannot be rendered, the first call's
+    pubcheck-validation.md/.html must not survive beside its findings.
+    Runs the gate step's own script from action.yml."""
+    import yaml
+    steps = yaml.safe_load((REPO_ROOT / "action.yml").read_text())["runs"]["steps"]
+    script = next(s["run"] for s in steps if s.get("id") == "pubcheck")
+    stage = stage_from_corpus(tmp_path / "pkg", CSAF_CSD01)
+    work, temp = tmp_path / "work", tmp_path / "runner-temp"
+    work.mkdir()
+    temp.mkdir()
+
+    def call(target: str) -> dict:
+        out = tmp_path / "github-output"
+        out.write_text("")
+        env = {"PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin",
+               "ACTION_PATH": str(REPO_ROOT), "TARGET": target, "EXTRA_ARGS": "",
+               "REPORT_DIR": "pubcheck-report", "SUMMARY_TITLE": "",
+               "RUNNER_TEMP": str(temp), "GITHUB_OUTPUT": str(out),
+               "PUB_CHECK_OFFLINE": "1"}
+        subprocess.run(["bash", "-c", script], cwd=work, env=env,
+                       capture_output=True, text=True)
+        return dict(line.split("=", 1) for line in out.read_text().splitlines())
+
+    first = call(str(stage))
+    assert first["report_validation_md"] == "pubcheck-report/pubcheck-validation.md"
+    assert (work / first["report_validation_md"]).stat().st_size > 0
+
+    second = call(str(tmp_path / "missing" / "v9.9" / "csd99"))
+    assert second["report_validation_md"] == "" and second["report_validation_html"] == ""
+    assert not (work / "pubcheck-report" / "pubcheck-validation.md").exists()
+    assert not (work / "pubcheck-report" / "pubcheck-validation.html").exists()

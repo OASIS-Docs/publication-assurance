@@ -26,6 +26,15 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+- Composite action: `report-dir` now also receives the full Validation
+  Report, `pubcheck-validation.md` and `pubcheck-validation.html`, rendered
+  by the new `pub-check/validation_report.py` from the same `--json` run.
+  It lists every check class and every individual condition with its result
+  (PASS/WARN/BLOCKER/NA), the observed value and what it was compared
+  against, matching the report staff produce at intake. The Step Summary
+  gains the class table and, collapsed, the condition table. New outputs
+  `report-validation-md` and `report-validation-html`. Existing outputs and
+  the exit-code contract are unchanged; a rendering failure is a warning.
 - Pipeline (proposal 008): the step 2 workflow script now runs Stage 2 as
   TRANSFORMS.md documents it, `fix_html_for_pdf.py` then the renderer's A4
   argument vector. Before, it ran bare `wkhtmltopdf` on the HTML, so neither
