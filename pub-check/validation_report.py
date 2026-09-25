@@ -277,7 +277,8 @@ dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{border:1px solid var(--border);padding:5px 7px;text-align:left;vertical-align:top}
 th,td.n,td.r,td code{white-space:nowrap}
-td.t{overflow-wrap:anywhere;min-width:16ch}
+td.t{overflow-wrap:anywhere;min-width:12em}
+td.t.f{min-width:18em}
 th{background:var(--alt);position:sticky;top:0}
 td.r{font-weight:600;white-space:nowrap}
 td.PASS{color:var(--good);background:var(--goodbg)}td.BLOCKER{color:var(--bad);background:var(--badbg)}
@@ -318,7 +319,7 @@ def render_html(rec: dict) -> str:
         msgs = "<br>".join(e(m) for m in capped(c["findings"])) or "none"
         out.append(f'<tr><td class="n">{i}</td><td class="r {result_class(c["result"])}">{e(c["result"])}'
                    f"</td><td><code>{e(c['check'])}</code></td><td class=\"n\">{c['conditions']}</td>"
-                   f'<td class="t">{msgs}</td></tr>')
+                   f'<td class="t f">{msgs}</td></tr>')
     out += ["</tbody></table></div>",
             "<h2>All Individual Conditions: Observed vs Expected</h2>",
             f'<p class="note">Every one of the {rec["total_checks"]} individual conditions, '
@@ -330,7 +331,7 @@ def render_html(rec: dict) -> str:
     for i, r in enumerate(rec["condition_detail"], 1):
         out.append(f'<tr><td class="n">{i}</td><td class="r {result_class(r["result"])}">{e(r["result"])}'
                    f"</td><td><code>{e(r['check'])}</code></td><td class=\"t\">{e(r['condition'])}</td>"
-                   f'<td class="t">{e(r["observed"])}</td><td class="t">{e(r["compares_to"])}</td></tr>')
+                   f'<td class="t f">{e(r["observed"])}</td><td class="t">{e(r["compares_to"])}</td></tr>')
     out += ["</tbody></table></div></main></body></html>"]
     return "\n".join(out) + "\n"
 
