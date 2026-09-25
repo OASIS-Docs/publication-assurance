@@ -29,7 +29,10 @@ on:
         required: false
 
 permissions:
-  contents: read
+  # write lets the action publish the report to the pubcheck-reports branch
+  # and link it; with read the gate runs the same and the summary says why
+  # nothing was published.
+  contents: write
 
 jobs:
   pub-check:

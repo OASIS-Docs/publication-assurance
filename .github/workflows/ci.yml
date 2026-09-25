@@ -103,6 +103,9 @@ jobs:
         with:
           target: examples/csaf/v2.1/csd01
           summary-title: "CSAF v2.1 CSD01 (corpus)"
+          # The publish path is tested by the publish job; here it is off,
+          # and the outputs must say so.
+          publish-branch: ""
 
       - name: Check the action's report outputs
         env:
@@ -112,8 +115,13 @@ jobs:
           VMD: ${{ steps.gate.outputs.report-validation-md }}
           VHTML: ${{ steps.gate.outputs.report-validation-html }}
           VPDF: ${{ steps.gate.outputs.report-validation-pdf }}
+          NOTE: ${{ steps.gate.outputs.report-publish-note }}
+          URL_PDF: ${{ steps.gate.outputs.report-url-pdf }}
         run: |
           set -eu
+          echo "publish note: $NOTE"
+          test "$NOTE" = 'publishing is off (`publish-branch` is empty)'
+          test -z "$URL_PDF"
           echo "gate exit code: $EXIT_CODE"
           case "$EXIT_CODE" in 0|1) ;; *) echo "unexpected gate exit $EXIT_CODE"; exit 1;; esac
           for f in "$TXT" "$JSON" "$VMD" "$VHTML" "$VPDF"; do
@@ -146,6 +154,43 @@ jobs:
         with:
           name: pubcheck-report-csaf-v2.1-csd01
           path: pubcheck-report/
+
+  # The report links a reader follows. This job runs the action with
+  # publishing on, as a TC workflow with contents: write does, then requests
+  # every URL it stated without a token and reads the published PDF back.
+  # A pull request from a fork has a read-only token and cannot publish, so
+  # the job runs only for this repository's own branches.
+  publish:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run the action with publishing on
+        id: gate
+        uses: ./
+        continue-on-error: true
+        with:
+          target: examples/csaf/v2.1/csd01
+          summary-title: "CSAF v2.1 CSD01 (corpus)"
+
+      - name: Open every published report URL
+        env:
+          NOTE: ${{ steps.gate.outputs.report-publish-note }}
+          URL_PDF: ${{ steps.gate.outputs.report-url-pdf }}
+          URL_MD: ${{ steps.gate.outputs.report-url-md }}
+          URL_HTML: ${{ steps.gate.outputs.report-url-html }}
+          URL_FOLDER: ${{ steps.gate.outputs.report-url-folder }}
+          URL_PINNED: ${{ steps.gate.outputs.report-url-pdf-pinned }}
+        run: |
+          set -eu
+          echo "publish note: $NOTE"
+          test "$NOTE" = published
+          python3 .github/scripts/check_published_report.py --pdf "$URL_PDF" --md "$URL_MD" \
+            --folder "$URL_FOLDER" --pinned "$URL_PINNED" --html "$URL_HTML" --html-wait 300
 
   # The PDF type scale, measured on the renderer that makes the PDFs. The
   # test job above has no wkhtmltopdf, so tests/test_pdf_type_scale.py's

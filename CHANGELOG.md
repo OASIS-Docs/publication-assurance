@@ -38,6 +38,27 @@ Each version is anchored by a git tag on this repository.
   contract and the existing outputs are unchanged. A browser that does not
   answer within 120 seconds (`PUBCHECK_PDF_TIMEOUT` overrides) is ended with
   every process it started, and the PDF is skipped the same way.
+- Action: report links a workflow user finds at once. After the gate, the
+  new `pub-check/publish_report.py` commits the run's PDF, Markdown, HTML,
+  JSON and text to the `publish-branch` input's branch (default
+  `pubcheck-reports`, an orphan created on first use; `''` turns it off)
+  under `<ref>/<slug>/`, rebuilds a root `index.html`, and retries with
+  random backoff when concurrent matrix jobs race. The step summary opens
+  with a labelled block of full https://github.com links (PDF, Markdown,
+  folder, the PDF pinned to the report commit, and the HTML as a rendered
+  page when GitHub Pages serves the branch, else its source view with how to
+  turn Pages on), a `::notice` titled "Validation report" carries the first
+  link, and new outputs `report-url-pdf`, `report-url-md`, `report-url-html`,
+  `report-url-folder`, `report-url-pdf-pinned` and `report-publish-note`
+  expose them. A fork pull request, a read-only token or publishing turned
+  off never fails the gate: the summary states the reason and links the run
+  page. New input `publish-token` (default `github.token`). The example
+  workflows now grant `contents: write`.
+- CI: a `publish` job runs the action with `contents: write`, requests every
+  stated URL without a token and requires HTTP 200, and reads the published
+  PDF back from raw.githubusercontent.com to check all check classes are in
+  its text layer; the `action` job runs with publishing off and checks the
+  stated reason.
 - The HTML report's dark colour scheme now applies on screen only, so a
   printed copy is always light.
 - CI: `tests/test_validation_report_pdf.py` reads the PDF's text layer and
