@@ -24,7 +24,10 @@ Versioning follows the publisher-toolkit convention:
 
 Each version is anchored by a git tag on this repository.
 
-## Unreleased
+## v1.7.0 - 2026-09-25
+
+MINOR: report-only runs with the new `fail-on-blockers` action input, and
+package zips checked under their publication path.
 
 ### Added
 
