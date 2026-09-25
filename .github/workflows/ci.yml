@@ -81,3 +81,48 @@ jobs:
       # is testable everywhere. The PNGs are rendered from those sources by
       # rsvg-convert, whose output is not byte-stable across versions, so they
       # are regenerated and eyeballed at release time rather than diffed here.
+
+  # The composite action is what TCs run, and nothing else in CI runs it. This
+  # job calls it on a corpus package exactly as a TC workflow does, then
+  # asserts every report file it promises exists and that the Validation
+  # Report lists every check class --list-checks prints. The gate's own
+  # result on this package is not the question here, so the step may fail.
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run the action on a corpus package
+        id: gate
+        uses: ./
+        continue-on-error: true
+        with:
+          target: examples/csaf/v2.1/csd01
+          summary-title: "CSAF v2.1 CSD01 (corpus)"
+
+      - name: Check the action's report outputs
+        env:
+          EXIT_CODE: ${{ steps.gate.outputs.exit-code }}
+          TXT: ${{ steps.gate.outputs.report-txt }}
+          JSON: ${{ steps.gate.outputs.report-json }}
+          VMD: ${{ steps.gate.outputs.report-validation-md }}
+          VHTML: ${{ steps.gate.outputs.report-validation-html }}
+        run: |
+          set -eu
+          echo "gate exit code: $EXIT_CODE"
+          case "$EXIT_CODE" in 0|1) ;; *) echo "unexpected gate exit $EXIT_CODE"; exit 1;; esac
+          for f in "$TXT" "$JSON" "$VMD" "$VHTML"; do
+            test -n "$f" || { echo "an output path is empty"; exit 1; }
+            test -s "$f" || { echo "missing or empty: $f"; exit 1; }
+          done
+          classes=$(python3 pub-check/oasis_pub_check.py --list-checks | grep -cE '^  [a-z0-9-]+ +[0-9]+$')
+          rows=$(sed -n '/^## Check-by-Check Results/,/^## /p' "$VMD" | grep -cE '^\| [0-9]+ \|')
+          echo "classes in --list-checks: $classes; class rows in the report: $rows"
+          test "$classes" -gt 0 && test "$classes" = "$rows"
+
+      - name: Upload the reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pubcheck-report-csaf-v2.1-csd01
+          path: pubcheck-report/

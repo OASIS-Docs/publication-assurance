@@ -37,8 +37,13 @@
 # the verdict and full findings list (no need to open raw logs), and
 # pubcheck-report.txt / pubcheck-report.json are written under report-dir
 # (default "pubcheck-report") for the caller to upload as an artifact if it
-# wants a downloadable copy. Both are purely additive -- set report-dir: ""
-# and/or write-summary: "false" to opt back out; target/args/python-version/
+# wants a downloadable copy. The same directory also receives the full
+# Validation Report, pubcheck-validation.md and pubcheck-validation.html:
+# every check class and every individual condition with its result, the value
+# observed and what it was compared against, which is the report OASIS staff
+# produce at intake. The Step Summary carries its tables too. All of this is
+# purely additive -- set report-dir: "" and/or write-summary: "false" to opt
+# back out; target/args/python-version/
 # install-poppler and the exit-code gate contract are unchanged from earlier
 # releases.
 
@@ -67,7 +72,7 @@ inputs:
     required: false
     default: "true"
   report-dir:
-    description: "Directory (relative to the caller's working directory) to write pubcheck-report.txt and pubcheck-report.json. Set to '' to skip writing report files."
+    description: "Directory (relative to the caller's working directory) to write pubcheck-report.txt, pubcheck-report.json and the full Validation Report (pubcheck-validation.md and .html). Set to '' to skip writing report files."
     required: false
     default: "pubcheck-report"
   write-summary:
@@ -95,6 +100,12 @@ outputs:
   report-json:
     description: "Path to the --json findings report. Empty if report-dir was set to ''."
     value: ${{ steps.pubcheck.outputs.report_json }}
+  report-validation-md:
+    description: "Path to the full Validation Report in Markdown: every check class and every individual condition with its result (PASS/WARN/BLOCKER/NA), the value observed and what it was compared against. Empty if report-dir was set to '' or the report could not be rendered."
+    value: ${{ steps.pubcheck.outputs.report_validation_md }}
+  report-validation-html:
+    description: "Path to the same Validation Report as one self-contained HTML page. Empty if report-dir was set to '' or the report could not be rendered."
+    value: ${{ steps.pubcheck.outputs.report_validation_html }}
 
 runs:
   using: "composite"
@@ -129,6 +140,7 @@ runs:
         TARGET: ${{ inputs.target }}
         EXTRA_ARGS: ${{ inputs.args }}
         REPORT_DIR: ${{ inputs.report-dir }}
+        SUMMARY_TITLE: ${{ inputs.summary-title }}
       run: |
         set +o errexit
 
@@ -154,15 +166,44 @@ runs:
         echo "blockers=${blockers}" >> "$GITHUB_OUTPUT"
         echo "warnings=${warnings}" >> "$GITHUB_OUTPUT"
 
+        # The full Validation Report (every check class and condition, not
+        # only the findings), rendered from the --json run above. A rendering
+        # failure is a warning, never a change to the gate's exit code.
+        # A matrix of calls shares RUNNER_TEMP: clear the previous call's copy.
+        rm -f "$RUNNER_TEMP/pubcheck-validation.md" "$RUNNER_TEMP/pubcheck-validation.html"
+        validation_ok=0
+        if python3 "$ACTION_PATH/pub-check/validation_report.py" \
+            "$RUNNER_TEMP/oasis-pub-check.json" \
+            --md "$RUNNER_TEMP/pubcheck-validation.md" \
+            --html "$RUNNER_TEMP/pubcheck-validation.html" \
+            --title "$SUMMARY_TITLE" --exit-code "$exit_code"; then
+          validation_ok=1
+        else
+          echo "::warning::pub-check validation report could not be rendered; the findings reports are unaffected"
+        fi
+
         if [ -n "$REPORT_DIR" ]; then
           mkdir -p "$REPORT_DIR"
           cp "$RUNNER_TEMP/oasis-pub-check.txt" "$REPORT_DIR/pubcheck-report.txt"
           cp "$RUNNER_TEMP/oasis-pub-check.json" "$REPORT_DIR/pubcheck-report.json"
           echo "report_txt=${REPORT_DIR}/pubcheck-report.txt" >> "$GITHUB_OUTPUT"
           echo "report_json=${REPORT_DIR}/pubcheck-report.json" >> "$GITHUB_OUTPUT"
+          if [ "$validation_ok" = 1 ]; then
+            cp "$RUNNER_TEMP/pubcheck-validation.md" "$REPORT_DIR/pubcheck-validation.md"
+            cp "$RUNNER_TEMP/pubcheck-validation.html" "$REPORT_DIR/pubcheck-validation.html"
+            echo "report_validation_md=${REPORT_DIR}/pubcheck-validation.md" >> "$GITHUB_OUTPUT"
+            echo "report_validation_html=${REPORT_DIR}/pubcheck-validation.html" >> "$GITHUB_OUTPUT"
+          else
+            # Never leave an earlier call's report beside this call's findings.
+            rm -f "$REPORT_DIR/pubcheck-validation.md" "$REPORT_DIR/pubcheck-validation.html"
+            echo "report_validation_md=" >> "$GITHUB_OUTPUT"
+            echo "report_validation_html=" >> "$GITHUB_OUTPUT"
+          fi
         else
           echo "report_txt=" >> "$GITHUB_OUTPUT"
           echo "report_json=" >> "$GITHUB_OUTPUT"
+          echo "report_validation_md=" >> "$GITHUB_OUTPUT"
+          echo "report_validation_html=" >> "$GITHUB_OUTPUT"
         fi
 
         echo "oasis-pub-check exit code: ${exit_code}"
@@ -174,6 +215,7 @@ runs:
         ACTION_PATH: ${{ github.action_path }}
         SUMMARY_TITLE: ${{ inputs.summary-title }}
         REPORT_DIR: ${{ inputs.report-dir }}
+        EXIT_CODE: ${{ steps.pubcheck.outputs.exit_code }}
       run: |
         REPORT_DIR_ARGS=()
         if [ -n "$REPORT_DIR" ]; then
@@ -184,6 +226,19 @@ runs:
           --txt "$RUNNER_TEMP/oasis-pub-check.txt" \
           --title "$SUMMARY_TITLE" \
           "${REPORT_DIR_ARGS[@]}"
+        # The readable per-check tables, when the report rendered.
+        if [ -f "$RUNNER_TEMP/pubcheck-validation.md" ]; then
+          FILES_ARGS=()
+          if [ -n "$REPORT_DIR" ]; then
+            FILES_ARGS=(--report-files "$REPORT_DIR/pubcheck-validation.md and $REPORT_DIR/pubcheck-validation.html")
+          fi
+          python3 "$ACTION_PATH/pub-check/validation_report.py" \
+            "$RUNNER_TEMP/oasis-pub-check.json" \
+            --md "$RUNNER_TEMP/pubcheck-validation.md" \
+            --title "$SUMMARY_TITLE" --exit-code "$EXIT_CODE" --step-summary \
+            "${FILES_ARGS[@]}" \
+            || echo "::warning::validation tables could not be added to the step summary"
+        fi
 
     - name: Enforce gate result
       if: always()
