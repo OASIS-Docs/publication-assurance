@@ -176,7 +176,7 @@ runs:
             "$RUNNER_TEMP/oasis-pub-check.json" \
             --md "$RUNNER_TEMP/pubcheck-validation.md" \
             --html "$RUNNER_TEMP/pubcheck-validation.html" \
-            --title "$SUMMARY_TITLE" --exit-code "$exit_code"; then
+            --title="$SUMMARY_TITLE" --exit-code "$exit_code"; then
           validation_ok=1
         else
           echo "::warning::pub-check validation report could not be rendered; the findings reports are unaffected"
@@ -235,7 +235,7 @@ runs:
           python3 "$ACTION_PATH/pub-check/validation_report.py" \
             "$RUNNER_TEMP/oasis-pub-check.json" \
             --md "$RUNNER_TEMP/pubcheck-validation.md" \
-            --title "$SUMMARY_TITLE" --exit-code "$EXIT_CODE" --step-summary \
+            --title="$SUMMARY_TITLE" --exit-code "$EXIT_CODE" --step-summary \
             "${FILES_ARGS[@]}" \
             || echo "::warning::validation tables could not be added to the step summary"
         fi
