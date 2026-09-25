@@ -26,6 +26,15 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.5.0 - 2026-09-25
+
+MINOR: a new check class (`pdf-legibility`) and a new `image-policy`
+condition, the full Validation Report in the composite action, and PDFs
+printed at the OASIS print type scale (body 10pt, code 9pt, footer 8pt) on
+both wkhtmltopdf and Chrome.
+
 - Pipeline: the PDF preprocessor removes `<base href>` from the PDF copy (the
   published HTML keeps it). CSAF v2.0 OS points its base at the live site, so
   a step 2 render fetched its relative stylesheet and images from
