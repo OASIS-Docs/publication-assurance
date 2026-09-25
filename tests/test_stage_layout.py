@@ -232,3 +232,55 @@ def test_zip_entry_escaping_the_extraction_dir_is_refused(tmp_path):
     r = run_cli(str(bad))
     assert r.returncode == 2, (r.stdout, r.stderr)
     assert "escapes extraction dir" in r.stderr
+
+
+def _cli_json(target):
+    import os
+    import subprocess
+    import sys
+    from conftest import PUB_CHECK
+    r = subprocess.run([sys.executable, str(PUB_CHECK), str(target), "--json"],
+                       capture_output=True, text=True,
+                       env={**os.environ, "PUB_CHECK_OFFLINE": "1"})
+    return r.returncode, json.loads(r.stdout)
+
+
+def test_zip_layout_skips_auxiliary_stems_beside_the_delivery(tmp_path):
+    """Red team round 2 (P6): a redline and a comments file sort before
+    csaf-v2.0-os at the zip root, and the first root stem set the layout, so
+    the package checked as stage cs02 and failed filenames."""
+    src = tmp_path / "src"
+    shutil.copytree(CSAF_V20 / "os", src)
+    for z in src.glob("*.zip"):
+        z.unlink()
+    (src / "csaf-v2.0-cs02-to-os-redline.html").write_text("<html></html>")
+    (src / "csaf-v2.0-csd01-comments.md").write_text("# comments\n")
+    zpath = _zip_from_dir(tmp_path / "csaf-v2.0-os.zip", src)
+    _, j = _cli_json(zpath)
+    assert j["observed"]["stage-name"]["stage_directory"] == "os", j["observed"]["stage-name"]
+    assert _checks(j, "stage-name", "filenames") == [], _checks(j, "stage-name", "filenames")
+
+
+def test_zip_subfolder_repeating_the_wp_abbrev_keeps_its_errata(tmp_path):
+    """Red team round 2 (P3b): csaf-v2.0-errata01-os.zip holding csaf/os/...
+    was placed at csaf/v2.0/csaf/os, dropping errata01, and title-version
+    blamed the correct 'Errata 01' title."""
+    zpath = _zip_from_dir(tmp_path / "csaf-v2.0-errata01-os.zip", CSAF_ERRATA_OS, "csaf/os/")
+    _, j = _cli_json(zpath)
+    assert j["observed"]["stage-name"]["stage_directory"] == "os"
+    assert j["observed"]["version-naming"]["version_directory"] == "v2.0"
+    assert _checks(j, "title-version", "stage-name", "filenames") == [], j["findings"]
+
+
+def test_unparseable_zip_is_named_by_the_zip_not_the_temp_dir(tmp_path):
+    """Red team round 2 (P8): a zip whose name and contents give no layout
+    was checked from tmp/raw, so messages named 'raw' and 'pub_check_xxxx'."""
+    src = tmp_path / "src"
+    src.mkdir()
+    for ext in ("md", "html"):
+        shutil.copy(CSAF_V20 / "os" / f"csaf-v2.0-os.{ext}", src / f"spec.{ext}")
+    zpath = _zip_from_dir(tmp_path / "delivery.zip", src)
+    _, j = _cli_json(zpath)
+    msgs = [x["message"] for x in j["findings"]]
+    assert not [m for m in msgs if "pub_check_" in m or "'raw'" in m], msgs
+    assert "Stage 'delivery.zip' is not a recognized stage token." in msgs, msgs
