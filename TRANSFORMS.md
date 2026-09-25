@@ -106,6 +106,7 @@ wkhtmltopdf \
   --footer-right "[date] - Page [page] of [topage]" \
   --footer-font-size 8 --footer-font-name Times \
   --no-outline --print-media-type \
+  --disable-smart-shrinking --dpi 288 \
   --enable-local-file-access \
   --load-error-handling ignore \
   --load-media-error-handling ignore \
@@ -115,6 +116,14 @@ wkhtmltopdf \
 The injected CSS also caps every image at the line width
 (`img { max-width: 100%; height: auto; }`), so a figure with no width of its
 own prints inside the margins instead of at its natural size.
+
+The injected CSS also sets the print type scale in points: body 10pt, code
+blocks and inline code 9pt, tables 9pt (code in tables 8.5pt), h1 16pt, h2
+14pt, h3 12pt, h4 11pt, h5 and h6 10pt, matching the OASIS DocBook and Word
+publications. `--disable-smart-shrinking --dpi 288` makes wkhtmltopdf print
+those points at their size; without them it scales each document by its own
+content width, and rounds fonts to whole pixels at 96 dpi. Headless Chrome
+prints the same sizes with no flags. The footer is 8pt.
 
 `.github/scripts/step_2_convert_html_to_pdf_V2_0.sh`, which the step 2
 workflow runs, performs both commands: `fix_html_for_pdf.py` writes a hidden
