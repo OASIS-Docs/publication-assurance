@@ -70,6 +70,25 @@ def test_second_package_in_one_stage_directory_is_flagged(tmp_path, monkeypatch)
             in _msgs(f, "filenames")), f.items
 
 
+def test_a_different_document_with_a_tail_is_still_a_second_package(tmp_path, monkeypatch):
+    """Red team, PR 31: exempting every tailed stem let a genuinely different
+    document (other-doc-v1.0-os-part1-core) through. Only an auxiliary file of
+    the package's own document is exempt."""
+    stage = _copy(CSAF_V20 / "os", tmp_path / "csaf" / "v2.0" / "os")
+    (stage / "other-doc-v1.0-os-part1-core.md").write_text("# other\n")
+    f = _run(stage, monkeypatch)
+    assert [m for m in _msgs(f, "filenames")
+            if "share one basename" in m and "other-doc-v1.0-os-part1-core" in m], f.items
+
+
+def test_the_packages_own_redline_and_comments_are_not_a_second_package(tmp_path, monkeypatch):
+    stage = _copy(CSAF_V20 / "os", tmp_path / "csaf" / "v2.0" / "os")
+    (stage / "csaf-v2.0-cs02-to-os-redline.html").write_text("<html></html>")
+    (stage / "csaf-v2.0-csd01-comments.md").write_text("# comments\n")
+    f = _run(stage, monkeypatch)
+    assert not [m for m in _msgs(f, "filenames") if "share one basename" in m], f.items
+
+
 def test_an_earlier_reviews_side_file_is_not_a_second_package(tmp_path, monkeypatch):
     """A comment-resolution log for an earlier review names another stage
     and is not a second package."""
