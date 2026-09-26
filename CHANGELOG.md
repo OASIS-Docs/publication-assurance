@@ -304,6 +304,27 @@ both wkhtmltopdf and Chrome.
   the real script on the CSAF v2.1 csd01 package against a stub renderer. No
   TC consumes this workflow; publisher-toolkit's step 2 has the same gap and
   is raised separately.
+- New tool `pub-check/advance_stage.py` (proposal 005): cuts the next stage
+  of an OASIS Markdown spec. It rewrites the title version, the stage line
+  and date, the This/Previous/Latest stage blocks, the citation (regenerated
+  from its fields), every URL under the old stage path and the Notices
+  copyright years, with a count asserted for each. It is a dry run unless
+  `--write` is given, never overwrites, and refuses rather than guesses (its
+  refusal rules are in `pub-check/README.md`). On the full DMLex v1.0 OS
+  source (lexidma 83827ff), cutting v1.1 wd01 reproduces the hand-cut
+  edition except for its two copyright years, which the tool updates and
+  the hand cut missed, and its two `.pdf.pdf` typo fixes, which are content
+  edits. Cutting CSAF v2.0 cs01 to cs02 reproduces the published cs02's
+  This, Previous and Latest stage blocks exactly. An independent verification
+  found a Previous stage block that dropped the `.md (Authoritative)` line, a
+  cut that reused an existing stage, and refusals of legitimate CSAF and OData
+  front matter. Each is now a test. A second round found OData cuts that
+  left stale references to the old stage (a wrapped URL, a file name in a
+  code sample, a sibling work product's path): anything outside the Previous
+  stage block that still names the source's stage is now listed and refused
+  unless `--leave-stale` is given. Multi-part specs with files in a stage
+  subdirectory are refused. Pinned by `tests/test_advance_stage.py`. No check
+  added.
 - New check class `pdf-legibility` (proposal 002), two conditions: the PDF's
   body text is measured as the median word height over every portrait page
   (`pdftotext -bbox`) and compared with the body size

@@ -255,6 +255,53 @@ and re-runs when the body is edited. Its rule lives in
 first draft of PR #9 passed its own tests and CI while hiding a broken Latest
 URI, and only a voluntary review found it.
 
+## Cutting the next stage
+
+A Markdown specification carries its stage in its text: the title version, the
+stage line and date, the This/Previous/Latest stage blocks, the citation, every
+URL under its own stage path, and the Notices copyright year.
+`advance_stage.py` rewrites exactly those sites and reports how many times it
+found each one:
+
+```bash
+python3 pub-check/advance_stage.py dmlex-v1.0-os.md --to csd01 --version 1.1 \
+        --previous source --date 2026-10-01           # dry run: diff + site table
+python3 pub-check/advance_stage.py ... --write        # creates dmlex-v1.1-csd01.md
+```
+
+It leaves prose, typos and the Status wording alone, and it regenerates the
+citation from its fields. It refuses, and writes nothing, in any of these cases:
+
+- the source is not a clean committed file;
+- the stage is retired, unknown or misnumbered;
+- the stage goes backwards, reuses a stage that exists, leaves an OASIS
+  Standard, reaches os other than from cs, or changes track (a new draft after
+  cs01 must be csd02 or later);
+- the new version is not of the form X.Y or does not come after the old one;
+- the front matter is not the OASIS Markdown shape (a NIEM Project Note, for
+  example), or the spec keeps its files in a subdirectory of the stage
+  (multi-part specs such as OData);
+- a site is found an unexpected number of times;
+- the version changes without `--previous source|none`;
+- the target is a Working Draft without `--unpublished-ok`;
+- anything outside the Previous stage block still names the source's stage
+  (a URL wrapped across lines, the file name in a code sample, a sibling work
+  product's path). It lists each line; `--leave-stale` writes the cut anyway
+  and prints them.
+
+Limits: a spec whose Previous stage convention is the prior approved stage
+(OData) needs its Previous block edited by hand, since `--previous` offers
+only this document's stage or N/A. A draft after an approved stage must be
+numbered above the highest draft its Previous stage cites, or above the
+approved stage's number when it cites none. Every URL under the source's stage
+path is treated as a self-reference and moved, so a history table that cites
+the source stage by URL must be checked by eye. The stale scan reads a line at
+a time and does not decode percent-encoding, so a URL wrapped exactly at a
+slash, or written as `v2.1%2Fcsd01`, is not seen.
+
+Its stage vocabulary is imported from `oasis_pub_check.py`. Stage the result
+and run the gate on it.
+
 ## Scope and track detection
 
 The gate measures the output, which is the same contract for every TC:
