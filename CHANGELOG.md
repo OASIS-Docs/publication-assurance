@@ -26,6 +26,13 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.8.0 - 2026-09-26
+
+MINOR: five package-identity conditions in `filenames` and `stage-name` (errata stem, a
+second package or a zip named for another document, os01, upper-case stage directories).
+
 - **Package identity**: five naming gaps that passed with no finding.
   - **filenames**: a package filed under an `errataNN` directory must carry
     that Errata in its stem (`...-errata01-os`); a plain `csaf-v2.0-os`
