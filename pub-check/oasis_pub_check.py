@@ -469,11 +469,13 @@ def check_filenames(items: dict[str, str], stage: str, f: Findings,
                     and os.path.isfile(os.path.join(stage_dir, name))
                     and not _OTHER_STAGE_SIDEFILE.search(other)):
                 parts = parse_package_stem(other)
-                # An auxiliary file names a document and then says what it is
-                # (-cs02-to-os-redline, -csd01-comments, -DIFF): a tail after
-                # the stage. A second package's name is its identifier alone.
-                tailed = parts and _PACKAGE_STEM_RE.fullmatch(other).group("tail")
-                if parts and parts != mine and not tailed:
+                # An auxiliary file of THIS document names it and then says what
+                # it is (-cs02-to-os-redline, -csd01-comments, -DIFF): the same
+                # WP-abbrev, version and errata, with a tail after the stage.
+                # A different document with a tail is still a second package.
+                aux = (parts and parts[:3] == mine[:3]
+                       and _PACKAGE_STEM_RE.fullmatch(other).group("tail"))
+                if parts and parts != mine and not aux:
                     others.add(other)
     if mine and package_zip:
         zstem = os.path.splitext(os.path.basename(package_zip))[0]
