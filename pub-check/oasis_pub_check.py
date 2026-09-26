@@ -469,7 +469,11 @@ def check_filenames(items: dict[str, str], stage: str, f: Findings,
                     and os.path.isfile(os.path.join(stage_dir, name))
                     and not _OTHER_STAGE_SIDEFILE.search(other)):
                 parts = parse_package_stem(other)
-                if parts and parts != mine:
+                # An auxiliary file names a document and then says what it is
+                # (-cs02-to-os-redline, -csd01-comments, -DIFF): a tail after
+                # the stage. A second package's name is its identifier alone.
+                tailed = parts and _PACKAGE_STEM_RE.fullmatch(other).group("tail")
+                if parts and parts != mine and not tailed:
                     others.add(other)
     if mine and package_zip:
         zstem = os.path.splitext(os.path.basename(package_zip))[0]
@@ -477,7 +481,11 @@ def check_filenames(items: dict[str, str], stage: str, f: Findings,
         # A name that is not a document identifier at all (package.zip, a
         # browser's "name (1).zip", a version root's kmip-spec-v3.0.zip)
         # says nothing about the contents; one naming another document does.
-        if zparts and zparts != mine:
+        # A zip named after a file the package carries (its cs03 comments file)
+        # names that file, not another document.
+        inner = ({os.path.splitext(n)[0] for n in os.listdir(stage_dir)}
+                 if stage_dir and os.path.isdir(stage_dir) else set())
+        if zparts and zparts != mine and zstem not in inner:
             others.add(zstem + ".zip")
     if others:
         f.observe("filenames", other_document_identifiers=others)
