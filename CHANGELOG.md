@@ -26,7 +26,9 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+- Release process: a `move-v1` workflow moves the floating `v1` tag to each v1.x.y
+  release when it is published (it sat at v1.4.0 for four releases), with a manual
+  dispatch to point it at a named release. The adoption guide's `@v1` row now says so.
 
 ## v1.8.0 - 2026-09-26
 

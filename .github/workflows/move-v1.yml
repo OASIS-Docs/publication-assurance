@@ -1,0 +1,49 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
+
+# Move the floating major tag `v1` to each v1.x.y release when it is
+# published, so a workflow pinned `@v1` runs the newest v1 release. The tag
+# sat at v1.4.0 for four releases before this existed.
+#
+# workflow_dispatch moves it to a named release by hand (for example to put
+# it back after a bad release).
+
+name: move-v1
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to point v1 at, e.g. v1.8.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Point v1 at the release
+        env:
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          set -euo pipefail
+          case "$TAG" in
+            v1.*.*) ;;
+            *) echo "::notice::$TAG is not a v1.x.y release; v1 left where it is"; exit 0 ;;
+          esac
+          target=$(git rev-parse "$TAG^{commit}")
+          before=$(git ls-remote origin refs/tags/v1 | cut -f1)
+          git tag -f v1 "$target"
+          git push --force-with-lease=refs/tags/v1:"$before" origin refs/tags/v1
+          after=$(git ls-remote origin refs/tags/v1 | cut -f1)
+          test "$after" = "$target"
+          echo "v1: ${before:0:7} -> ${after:0:7} ($TAG)" | tee -a "$GITHUB_STEP_SUMMARY"

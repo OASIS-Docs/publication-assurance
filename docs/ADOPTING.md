@@ -581,7 +581,7 @@ and in [CHANGELOG.md](../CHANGELOG.md).
 |---|---|
 | `@v1.8.0` | A fixed release. Recommended |
 | `@<40-character commit SHA>` | Fixed and immune to a tag being moved. Use it where your organisation requires SHA pinning |
-| `@v1` | Not recommended. This tag is not moved on each release and currently points to a build older than v1.4.0, without the Validation Report |
+| `@v1` | Moves to each new v1 release when it is published. Convenient, but a MINOR release can add a finding without any change on your side |
 | `@main` | Unreleased code. Never for a TC workflow |
 
 To find the SHA of a release:
@@ -682,7 +682,7 @@ those conditions report NA and the rest run unchanged.
 | Run refused with "The job was not started because recent account payments have failed or your spending limit needs to be increased" | The account's Actions billing for a private repository: a failed payment, or the spending limit reached | The account owner fixes the payment or raises the spending limit, or the repository is made public |
 | No run appears after committing the workflow | The file is not at `.github/workflows/`, or Actions is disabled | Check the path; enable Actions under **Settings > Actions > General** |
 | `Unable to resolve action` | The tag in `uses:` does not exist | Use a tag from the [releases page](https://github.com/OASIS-Docs/publication-assurance/releases) |
-| Job summary has the findings but no class or condition tables | The action is older than v1.5.0, often through `@v1` | Pin to a release from v1.5.0 on |
+| Job summary has the findings but no class or condition tables | The action is older than v1.5.0 | Pin to a release from v1.5.0 on |
 | Report publishing fails with a 403 or "permission denied" warning | The workflow token cannot write | Add `permissions: contents: write`; on a fork pull request this is expected, see [Fork pull requests](#fork-pull-requests-and-read-only-tokens) |
 | The notice reads "branch ... exists and was not created for pub-check reports" | `publish-branch` names a branch that already existed, such as `main` or `gh-pages` | Leave `publish-branch` at its default, or name a branch that does not exist yet |
 | `pubcheck-reports` is not in the Pages **Branch** list | The first run did not publish: it exited `2`, ran from a fork pull request, or had a read-only token. The `report-publish-note` output and the **Validation report** notice give the reason | Fix the cause (the target path, or `permissions: contents: write`), then run the workflow again |
