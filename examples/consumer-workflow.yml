@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: OASIS-Docs/publication-assurance@v1.7.0   # a release tag; or pin to its full commit SHA
+      - uses: OASIS-Docs/publication-assurance@v1.8.0   # a release tag; or pin to its full commit SHA
         with:
           # Manual runs use the box you type; automatic runs use PUB_CHECK_TARGET.
           target: ${{ github.event.inputs.target || env.PUB_CHECK_TARGET }}

@@ -37,7 +37,7 @@ target could not be read. Two ways to run it:
 ### 1. On your machine
 
 ```bash
-git clone --depth 1 --branch v1.7.0 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.8.0 https://github.com/OASIS-Docs/publication-assurance
 python3 publication-assurance/pub-check/oasis_pub_check.py <package>
 ```
 
