@@ -166,9 +166,9 @@
       "check": "stage-name",
       "sig": "is not a recognized stage token",
       "applies": "all",
-      "condition": "Stage token is a recognized current stage",
-      "pulls": "the alphabetic prefix of the stage directory name",
-      "compares_to": "valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata",
+      "condition": "Stage token (and an Errata parent directory) is a recognized current stage, in lower case, and os carries no revision number",
+      "pulls": "the alphabetic prefix of the stage directory name, its digits, and the Errata parent directory name",
+      "compares_to": "valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata; lower case, and 'The os stage abbreviation is never used with a revision number' (naming-directives.txt 5.2)",
       "severity": "BLOCKER"
     },
     {
@@ -221,9 +221,9 @@
       "check": "filenames",
       "sig": "do not share one basename",
       "applies": "all",
-      "condition": "All delivery items share one basename",
-      "pulls": "the set of delivery-item filename stems",
-      "compares_to": "exactly one distinct stem across md/docx/odt/html/pdf",
+      "condition": "All delivery items share one basename, and the stage directory and package zip hold only that document",
+      "pulls": "the set of delivery-item filename stems, every other md/html/docx/odt document identifier in the stage directory root (comment-resolution-log and public-review-metadata side-files excepted), and the package zip's own name in zip mode when that name is itself a document identifier",
+      "compares_to": "exactly one distinct stem across md/docx/odt/html/pdf; another [WP-abbrev]-[version]-[stage] identifier, or a zip named for one, is a second package",
       "severity": "BLOCKER"
     },
     {
@@ -240,8 +240,8 @@
       "sig": "does not end in '-",
       "applies": "all",
       "condition": "Delivery filename ends in the stage suffix",
-      "pulls": "the delivery filename stem",
-      "compares_to": "the stage directory name as a -<stage> suffix",
+      "pulls": "the delivery filename stem, and the errataNN parent directory when there is one",
+      "compares_to": "the stage directory name as a -<stage> suffix, or -errataNN-<stage> inside an Errata directory",
       "severity": "BLOCKER"
     },
     {
