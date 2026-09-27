@@ -916,7 +916,7 @@ def check_html_code_sync(md_text: str, html_text: str, f: Findings) -> None:
                   f"differs from the Markdown source: the HTML publishes code the TC did not approve.")
 
 
-_TOC_ENTRY = re.compile(r"^\s*((?:\d+(?:\.\d+)*|Appendix [A-Z]|[A-Z](?:\.\d+)+)\.?\s+\S.*?)\s*$")
+_TOC_ENTRY = re.compile(r"^\s*((?:\d+(?:\.\d+)*|Appendix [A-Z]|[A-Z](?:\.\d+)+|[A-Z](?=\s+[A-Z]))\.?\s+\S.*?)\s*$")
 _TOC_NUMBER = re.compile(r"(?:(?:\s*\.){2,}\s*|\s{2,})(\d+)\s*$")
 
 
@@ -3283,6 +3283,8 @@ EXAMPLE_HEADING_RE = re.compile(
 
 APPENDIX_HEADING_RE = re.compile(r"(?i)^(appendix|annex)\b")
 
+TRAILING_ANCHOR_RE = re.compile(r"(?:\s*(?:<a\b[^>]*>\s*</a>|<span\b[^>]*>\s*</span>|\{#[^}]*\}))+\s*$", re.I)
+
 _DASH_TRANSLATE = str.maketrans({
     "‐": "-",  # hyphen
     "‑": "-",  # non-breaking hyphen
@@ -3513,6 +3515,9 @@ def check_content_labels(md_text: str, html_text: str, stage: str, f: Findings) 
             stack.pop()
         ancestor_labeled = any(labeled for _lvl, labeled in stack)
         title = STRIP_HEADING_NUM_RE.sub("", raw_title, count=1).strip()
+        # An anchor after the heading text ("... (Informative) <a id='x'></a>",
+        # or pandoc's "{#x}") is not part of the title the label ends.
+        title = TRAILING_ANCHOR_RE.sub("", title).strip()
         if EXAMPLE_HEADING_RE.match(title):
             kind = "example"
         elif APPENDIX_HEADING_RE.match(title):

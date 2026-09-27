@@ -196,11 +196,46 @@ def test_a_hidden_section_keeps_its_number_as_the_stylesheet_does(tmp_path):
     assert "# 2 Two" in md and "# 3 Three" in md and "Section 3" in md and "One" not in md
 
 
-def test_lettered_or_continued_lists_stop_the_conversion(tmp_path):
-    for attrs in ("numeration='loweralpha'", "continuation='continues'"):
-        r, _ = _article(tmp_path, f"<section id='s'><title>S</title><orderedlist {attrs}>"
-                                  "<listitem><para>a</para></listitem></orderedlist></section>")
-        assert r.returncode == 1 and "UNHANDLED" in r.stderr, attrs
+def test_a_continued_list_stops_the_conversion(tmp_path):
+    r, _ = _article(tmp_path, "<section id='s'><title>S</title><orderedlist continuation='continues'>"
+                              "<listitem><para>a</para></listitem></orderedlist></section>")
+    assert r.returncode == 1 and "UNHANDLED" in r.stderr
+
+
+def _ol(items, inner="", attrs=""):
+    return (f"<orderedlist {attrs}>" + "".join(f"<listitem><para>{x}</para>" + (inner if k == 0 else "")
+                                              + "</listitem>" for k, x in enumerate(items)) + "</orderedlist>")
+
+
+def test_nested_lists_are_numbered_as_the_docbook_stylesheet_numbers_them(tmp_path):
+    """DMLex section 2 prints 1., a., i. by nesting, and its text says "as per
+    point c. above": numbered 1., 2., 3. the reference points at nothing. The
+    words were identical, so only the numbering showed it (Sep 2026)."""
+    inner = _ol(["deep", "deeper"])
+    body = _ol(["top", "next"], _ol(["first", "second", "third"], inner))
+    r, md = _article(tmp_path, f"<section id='s'><title>S</title>{body}"
+                               f"{_ol(['cap one', 'cap two'], attrs=chr(32) + 'numeration=\'upperalpha\'')}</section>")
+    assert r.returncode == 0, r.stderr
+    for marker in ("1. top", "   a. first", "   c. third", "      i. deep", "      ii. deeper", "2. next",
+                   "A.  cap one", "B.  cap two"):
+        assert "\n" + marker in md, marker
+    if shutil.which("pandoc"):
+        html = subprocess.run(["pandoc", "-f", "markdown+autolink_bare_uris-implicit_figures", "-t", "html"],
+                              input=md, capture_output=True, text=True).stdout
+        assert re.findall(r'<ol type="(\w)"', html) == ["1", "a", "i", "A"]
+
+
+def test_an_appendix_lists_one_level_deeper_in_the_contents(tmp_path):
+    """The stylesheet counts an appendix's levels from its first section:
+    A.1.1.1 is in the contents, 1.1.1.1 is not (DMLex lists A.2.2.1 but not 3.2.1.1)."""
+    def nest(tag, title, depth):
+        return (f"<{tag} id='{title}{depth}'><title>{title} {depth}</title><para>x</para>"
+                + (nest("section", title, depth + 1) if depth < 4 else "") + f"</{tag}>")
+    r, md = _article(tmp_path, nest("section", "Body", 1) + nest("appendix", "Annex", 1))
+    assert r.returncode == 0, r.stderr
+    toc = md.split("# Table of Contents")[1].split("---")[0]
+    assert "[1.1.1 Body 3]" in toc and "Body 4" not in toc
+    assert "[A.1.1.1 Annex 4]" in toc
 
 
 def test_characters_markdown_would_read_as_markup_are_escaped(tmp_path):

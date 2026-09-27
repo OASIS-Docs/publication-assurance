@@ -4,8 +4,9 @@
 # Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Verify a Markdown edition of a specification against its published HTML.
 
-Both sides are reduced to their visible text: the Markdown through pandoc
-(GFM to HTML), the published HTML by stripping tags. Each becomes a sequence
+Both sides are reduced to their visible text: the Markdown through pandoc,
+with the reader the pipeline's step 1 publishes with (markdown, bare URIs
+linked, no implicit figures), the published HTML by stripping tags. Each becomes a sequence
 of normalised tokens and difflib aligns them. Every region where the two
 disagree is reported in full with context, so a reviewer sees exactly which
 words the conversion dropped, added or changed.
@@ -33,7 +34,10 @@ reason is refused; a rule that accepted nothing fails the run.
 {"kind": "link", "published": URL or "", "markdown": URL or ""} accepts a
 difference in the external link targets.
 
-Tables and lists are compared by shape: the number of list items, and each
+Tables and lists are compared by shape: the number of list items, the
+numbering of each ordered list in order (1, a, i, A, I: a list numbered
+1., 2. where the publication has a., b. changes what "point c. above"
+refers to, and its words are the same), and each
 data table (two or more rows, two or more cells in a row) cell by cell, row
 by row. A table flattened into paragraphs keeps its words and loses its
 shape, so the word comparison alone would pass it.
@@ -43,6 +47,9 @@ targets as a set; struck-through and hidden markup by count.
 
 Rule kinds: text (default), heading, link, and image (a changed image source,
 {"kind": "image", "published": SRC, "markdown": SRC}).
+
+The generated tables of contents are left out of the word comparison and
+compared on their own, entry by entry, as the headings they list.
 
 Usage: verify_md.py SPEC.md PUBLISHED.html|URL [--root DIR] [--allow FILE]... [--json OUT] [--rendered HTML]
 Exit 0 when every check passes, 1 when any fails, 2 when the input cannot be read.
@@ -57,6 +64,10 @@ import subprocess
 import sys
 import urllib.parse
 import urllib.request
+
+
+# The reader the pipeline's step 1 converts with (.github/src/pipeline/html_converter.py).
+READER = 'markdown+autolink_bare_uris-implicit_figures'
 
 
 def cf_decode(hexstr):
@@ -90,7 +101,7 @@ def pandoc_version():
         fail('pandoc is not installed; pandoc 3.x is required')
     v = r.stdout.split('\n', 1)[0].split()[-1]
     if int(v.split('.')[0]) < 3:
-        fail(f'pandoc {v} found; pandoc 3.x is required (older releases parse GFM differently)')
+        fail(f'pandoc {v} found; pandoc 3.x is required (older releases parse Markdown differently)')
     return v
 
 
@@ -102,6 +113,38 @@ def balanced_end(h, start, tag):
         if depth == 0:
             return start + t.end()
     return None
+
+
+def toc_html(h):
+    """The generated table of contents: DocBook's div.toc, or the Markdown
+    template's list after its "Table of Contents" heading. '' when there is none."""
+    m = re.search(r'<div class="toc">', h)
+    if m:
+        end = balanced_end(h, m.start(), 'div')
+        return h[m.start():end] if end else ''
+    m = re.search(r'<h1[^>]*>Table of Contents</h1>\s*', h)
+    if m and re.match(r'<ul\b', h[m.end():]):
+        end = balanced_end(h, m.end(), 'ul')
+        return h[m.end():end] if end else ''
+    return ''
+
+
+def toc_entries(h):
+    """Each contents entry's text, its section number and label normalised as
+    the heading comparison normalises them."""
+    out = []
+    for t in re.findall(r'<a\b[^>]*>(.*?)</a>', toc_html(h), re.S):
+        t = re.sub(r'\s+', ' ', html.unescape(re.sub('<[^>]+>', '', t))).strip()
+        t = re.sub(r'^Appendix ([A-Z])\.?\s', r'\1 ', re.sub(r'^(\d+(?:\.\d+)*)\.(\s)', r'\1\2', t))
+        if t:
+            out.append(' '.join(tokens(t)).lower())
+    return out
+
+
+def list_numbering(h):
+    """Each ordered list's numbering type, in document order ('1' when unset)."""
+    return [m.group(1) if (m := re.search(r'\btype="([^"]+)"', a)) else '1'
+            for a in re.findall(r'<ol\b([^>]*)>', h, re.I)]
 
 
 def strip_toc(h):
@@ -159,7 +202,7 @@ def external_links(h, base=None):
 
 def md_to_html(md_path):
     try:
-        r = subprocess.run(['pandoc', '--preserve-tabs', '-f', 'gfm', '-t', 'html', md_path],
+        r = subprocess.run(['pandoc', '--preserve-tabs', '-f', READER, '-t', 'html', md_path],
                            capture_output=True, text=True)
     except FileNotFoundError:
         fail('pandoc is not installed; pandoc 3.x is required')
@@ -210,7 +253,7 @@ def load_rules(path):
     for i, r in enumerate(rules):
         if not isinstance(r, dict) or not str(r.get('reason', '')).strip():
             fail(f'allow rule {i} in {path} has no reason: {r}')
-        if r.get('kind', 'text') not in ('text', 'heading', 'link', 'image'):
+        if r.get('kind', 'text') not in ('text', 'heading', 'link', 'image', 'footer'):
             fail(f'allow rule {i} in {path} has an unknown kind: {r}')
         if 'published' not in r or ('markdown' not in r and r.get('kind') != 'heading'):
             fail(f'allow rule {i} in {path} needs "published" and "markdown": {r}')
@@ -230,7 +273,7 @@ def main():
     ap.add_argument('--allow', action='append', default=[],
                     help='JSON list of accepted deviations {published, markdown, reason}; may be repeated')
     ap.add_argument('--rendered', help='compare this HTML rendering of SPEC.md (the pipeline\'s step 1 '
-                    'output) instead of reading SPEC.md with pandoc\'s GFM reader')
+                    'output) instead of reading SPEC.md with pandoc')
     a = ap.parse_args()
 
     try:
@@ -333,6 +376,11 @@ def main():
     missing_imgs = [p for p in imgs if not re.match(r'https?://', p)
                     and not os.path.exists(os.path.join(root, p))]
 
+    pub_numbering, md_numbering = list_numbering(pub_body), list_numbering(md_body)
+    pub_toc, md_toc = toc_entries(pub), toc_entries(md_html)
+    toc_diffs = [{'published': pub_toc[i1:i2], 'markdown': md_toc[j1:j2]}
+                 for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, pub_toc, md_toc, autojunk=False).get_opcodes()
+                 if op != 'equal']
     pub_items, pub_tables = shapes(pub_body)
     md_items, md_tables = shapes(md_body)
     pub_hidden, md_hidden = hidden(pub_body), hidden(md_body)
@@ -370,6 +418,9 @@ def main():
         'images_missing_on_disk': missing_imgs,
         'external_links_published': len(pl), 'external_links_differing': link_diffs,
         'list_items_published': pub_items, 'list_items_markdown': md_items,
+        'list_numbering_published': ''.join(pub_numbering), 'list_numbering_markdown': ''.join(md_numbering),
+        'contents_entries_published': len(pub_toc), 'contents_entries_markdown': len(md_toc),
+        'contents_differing': toc_diffs,
         'tables_published': pub_tables, 'tables_markdown': md_tables,
         'hidden_or_struck_published': pub_hidden, 'hidden_or_struck_markdown': md_hidden,
         'empty': empty, 'pandoc': pandoc,
@@ -393,6 +444,7 @@ def main():
     ok = (not diffs and not missing_heads and not broken and not code_mismatch
           and not missing_imgs and imgs == pub_imgs and not empty and not link_diffs
           and pub_items == md_items and pub_tables == md_tables and pub_hidden == md_hidden
+          and pub_numbering == md_numbering and not toc_diffs
           and not report['allow_rules_unused'])
     print('\nRESULT:', 'PASS' if ok else 'FAIL')
     return 0 if ok else 1
