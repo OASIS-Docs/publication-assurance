@@ -165,3 +165,106 @@ def test_a_footer_rule_accepts_a_different_running_line(tmp_path):
             "markdown": rep["running_lines_only_rendered"][0], "reason": "the document's own copyright sign"}
     r, rep = verify(tmp_path, ren_src, pub, [rule])
     assert r.returncode == 0, r.stdout
+
+
+# The comparison itself, on pages given as lines: each case isolates one rule.
+# The first four are the adversarial review's counterexamples (Sep 2026), each
+# of which printed RESULT: PASS before the rule was tightened.
+sys.path.insert(0, str(REPO_ROOT / "verify"))
+import verify_pdf as VP  # noqa: E402
+
+BASE = ["The client waits and then retries the request.", "The timeout is 30 seconds with 5 retries.",
+        "The client MUST NOT retry. The server MUST cache the response."]
+OTHER = ["Each lexicographic resource holds entries and their senses.",
+         "A sense carries definitions, examples and translations.",
+         "Relations link entries from other resources as well."]
+
+
+def pages(*bodies, footer="widget-v1.0-csd01   1 May 2026"):
+    """Pages of body lines, each ending with the two running footer lines. A
+    single body gets a second page of other text: a running line needs two
+    pages, and text that repeats on every page would itself read as one."""
+    if len(bodies) == 1:
+        bodies = bodies + (OTHER,)
+    n = len(bodies)
+    return [list(b) + [footer, f"Standards Track Work Product   Copyright OASIS Open 2026.   Page {k} of {n}"]
+            for k, b in enumerate(bodies, 1)]
+
+
+def run_pages(pub, ren, rules=()):
+    rep = VP.compare(pub, ren, list(rules))
+    return VP.passed(rep), rep
+
+
+def test_swapped_numbers_are_a_difference_not_a_reordering():
+    ok, rep = run_pages(pages(BASE), pages([BASE[0], "The timeout is 5 seconds with 30 retries.", BASE[2]]))
+    assert not ok and rep["diff_regions"] >= 1
+
+
+def test_a_moved_not_is_a_difference():
+    ok, _ = run_pages(pages(BASE), pages([BASE[0], BASE[1], "The client MUST retry. The server MUST NOT cache the response."]))
+    assert not ok
+
+
+def test_a_lost_minus_sign_is_a_difference_but_a_line_end_hyphen_is_wrapping():
+    ok, _ = run_pages(pages(["The offset is -1 from the start."]), pages(["The offset is 1 from the start."]))
+    assert not ok
+    ok, _ = run_pages(pages(["The offset is -", "1 from the start."]), pages(["The offset is 1 from the start."]))
+    assert not ok, "a hyphen that ends a line before a digit is a minus sign, not a word break"
+    ok, rep = run_pages(pages(["The data model is vali-", "dated by the schema."]),
+                        pages(["The data model is validated by the schema."]))
+    assert ok and rep["line_wrap_regions"] == 1
+
+
+def test_a_footer_with_the_wrong_version_or_date_is_a_difference():
+    ok, rep = run_pages(pages(BASE), pages(BASE, footer="widget-v2.0-csd02   9 May 2024"))
+    assert not ok and rep["running_lines_only_rendered"] == ["widget-v2.0-csd02 9 May 2024"]
+    ok, rep = run_pages(pages(BASE, OTHER), pages(BASE, OTHER[:2], OTHER[2:]))
+    assert ok, "page numbers and the page count may differ"
+
+
+def test_every_rendered_page_must_carry_the_running_line():
+    ren = pages(BASE, OTHER, BASE[::-1])
+    ren[1] = ren[1][:-2]
+    ok, rep = run_pages(pages(BASE, OTHER, BASE[::-1]), ren)
+    assert not ok and rep["rendered_pages_without_running_line"] == [2]
+
+
+def test_a_block_moved_unchanged_is_counted_and_a_changed_one_is_not():
+    cap = "Example 12. Relational database layout"
+    ok, rep = run_pages(pages([cap] + BASE), pages(BASE[:1] + [cap] + BASE[1:]))
+    assert ok and rep["moved_blocks"] == 1
+    ok, _ = run_pages(pages([cap] + BASE), pages(BASE[:1] + ["Example 13. Relational database layout"] + BASE[1:]))
+    assert not ok
+
+
+def test_bullets_and_ligatures_are_layout():
+    ok, _ = run_pages(pages(["\u2022 the definition of a sense"]), pages(["the de\ufb01nition of a sense"]))
+    assert ok
+    ok, _ = run_pages(pages(["the definition of a sense"]), pages(["the defintion of a sense"]))
+    assert not ok
+
+
+def test_a_wrapped_contents_entry_carries_its_number_on_its_last_line():
+    toc = ["Table of Contents", "1 Introduction ........ 2", "2 Tracking of changes made during the publishing",
+           "process after Public Reviews ........ 3", "3 Conformance ........ 4"]
+    body = ["1 Introduction", "2 Tracking of changes made during the publishing process after Public Reviews",
+            "3 Conformance"]
+    ok, rep = run_pages(pages(toc, body), pages(toc, body))
+    assert ok and rep["contents_numbered_published"] == 3
+    unnumbered = toc[:3] + ["process after Public Reviews"] + toc[4:]
+    ok, rep = run_pages(pages(toc, body), pages(unnumbered, body))
+    assert not ok and rep["contents_numbered_rendered"] == 2
+
+
+def test_a_declared_region_compares_characters_not_order():
+    fig = ["Figure 1", "core@title: 0..1   core@uri: 0..1", "entry   sense   example"]
+    moved = ["Figure 1", "entry   sense   example", "core@uri: 0..1   core@title: 0..1"]
+    region = {"kind": "region", "from": "Figure 1", "to": "Next section", "reason": "regenerated diagram"}
+    ok, _ = run_pages(pages(fig + ["Next section"] + BASE), pages(moved + ["Next section"] + BASE))
+    assert not ok, "without the region, reordered labels are differences"
+    ok, rep = run_pages(pages(fig + ["Next section"] + BASE), pages(moved + ["Next section"] + BASE), [region])
+    assert ok and rep["regions_compared"] == 1
+    changed = ["Figure 1", "entry   sense   example", "core@uri: 0..1   core@title: 1..1"]
+    ok, _ = run_pages(pages(fig + ["Next section"] + BASE), pages(changed + ["Next section"] + BASE), [region])
+    assert not ok, "inside the region a changed multiplicity still counts"

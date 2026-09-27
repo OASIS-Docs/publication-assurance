@@ -73,7 +73,7 @@ def test_make_writes_one_image_per_pair_and_the_brief(made):
     rendered = [p["rendered_page"] for p in k["pairs"]]
     assert len(rendered) == len(set(rendered)), "the planted page must not also appear untouched"
     brief = (out / "PROMPT.md").read_text(encoding="utf-8")
-    assert all(p["pair"] in brief for p in k["pairs"]) and "Copy the first" in brief
+    assert all(p["pair"] in brief for p in k["pairs"]) and "Copy 5 lines" in brief
     assert "planted" not in brief.lower() and k["planted_pair"] not in (out / "PROMPT.md").read_text().split("pairs:")[0]
 
 
@@ -113,7 +113,7 @@ def test_an_unanswered_pair_or_too_few_lines_is_incomplete(tmp_path, made):
     r = grade(tmp_path, key, review[1:] if review[0]["pair"] != k["planted_pair"] else review[:1] + review[2:])
     assert r.returncode == 1 and "not answered" in r.stdout
     r = grade(tmp_path, key, review)
-    assert r.returncode == 1 and "fewer than 5" in r.stdout
+    assert r.returncode == 1 and "fewer than 3" in r.stdout
 
 
 def test_a_re_run_of_the_rejected_pairs_completes_the_review(tmp_path, made):
@@ -126,3 +126,45 @@ def test_a_re_run_of_the_rejected_pairs_completes_the_review(tmp_path, made):
     assert run("grade", key, tmp_path / "first.json").returncode == 1
     r = run("grade", key, tmp_path / "first.json", tmp_path / "rerun.json")
     assert r.returncode == 0, r.stdout
+
+
+# The adversarial review's counterexamples against the grader (Sep 2026):
+# each was ACCEPTED before the rule was tightened.
+
+def test_short_or_generic_lines_are_not_evidence(tmp_path, made):
+    k, _, key, pub, ren = made
+    for fake in (["1", "2", "3", "a", "b"],
+                 ["Copyright", "OASIS Open", "Work Product", "Standards Track Work Product", "Page 1"]):
+        review = honest(k, pub, ren)
+        for x in review:
+            x["left_lines"] = x["right_lines"] = fake
+        r = grade(tmp_path, key, review)
+        assert r.returncode == 1 and "show the page was read" in r.stdout, fake
+
+
+def test_a_word_written_about_every_pair_names_no_fault(tmp_path, made):
+    k, _, key, pub, ren = made
+    review = honest(k, pub, ren, planted_says="page numbers differ between the editions")
+    for x in review:
+        x["differences"] = ["page numbers differ between the editions"]
+    r = grade(tmp_path, key, review)
+    assert r.returncode == 1 and "MISSED" in r.stdout
+
+
+def test_a_key_beside_the_pairs_folder_is_allowed(tmp_path, made):
+    """OUT_DIR-key/ is not inside OUT_DIR, whatever its name starts with."""
+    _, _, _, pub, ren = made
+    (tmp_path / "p2-key").mkdir()
+    r = run("make", ren, pub, tmp_path / "p2", "--key", tmp_path / "p2-key" / "key.json", "--sample", 1, "--seed", 1)
+    assert r.returncode == 0, r.stderr
+
+
+def test_short_words_that_are_on_the_page_are_still_not_evidence():
+    """Real words under eight letters prove nothing about reading the page;
+    a line of text does. Tested on the rule itself, with no common text."""
+    sys.path.insert(0, str(REPO_ROOT / "render"))
+    import review_pairs as R
+    assert R.evidence(["entry", "sense", "example", "label", "{"], set()) == []
+    assert R.evidence(["Each part refers to exactly one widget.", "Each part refers to exactly one widget."],
+                      set()) == ["eachpartreferstoexactlyonewidget"], "a line counts once"
+    assert R.evidence(["Standards Track Work Product"], {"standardstrackworkproductcopyrightoasisopenpageof"}) == []

@@ -225,6 +225,16 @@ def test_nested_lists_are_numbered_as_the_docbook_stylesheet_numbers_them(tmp_pa
         assert re.findall(r'<ol type="(\w)"', html) == ["1", "a", "i", "A"]
 
 
+def test_a_list_inside_an_explicitly_lettered_list_takes_the_next_style(tmp_path):
+    """common.xsl's list.numeration: the style after the parent's own, not the
+    depth's. The adversarial review found a list inside numeration='loweralpha'
+    printed a. where the stylesheet prints i. (Sep 2026)."""
+    body = _ol(["top"], _ol(["under"]), attrs="numeration='loweralpha'")
+    r, md = _article(tmp_path, f"<section id='s'><title>S</title>{body}</section>")
+    assert r.returncode == 0, r.stderr
+    assert "\na. top" in md and "\n   i. under" in md
+
+
 def test_an_appendix_lists_one_level_deeper_in_the_contents(tmp_path):
     """The stylesheet counts an appendix's levels from its first section:
     A.1.1.1 is in the contents, 1.1.1.1 is not (DMLex lists A.2.2.1 but not 3.2.1.1)."""

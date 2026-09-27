@@ -41,10 +41,15 @@ comparison on DMLex found three more faults the HTML checks could not see.
 - **verify/verify_pdf.py** (new): the rendered PDF against the published PDF,
   every page, with `verify_md.py`'s allow files. A contents entry's page
   number is read as a placeholder, so an entry numbered on one side only is
-  a difference; the running footer is compared, and every rendered page must
-  carry one. Line wrapping, reordered layout, bullets and ligatures are
-  counted, not reported. Against the 24 September DMLex render it reports
-  all 133 unnumbered contents entries.
+  a difference. The running footer is compared with its version, date and
+  year, and every rendered page must carry one. Line wrapping (a hyphen that
+  ends a line between letters), a block moved unchanged, bullets and
+  ligatures are counted, not reported; a `region` rule declares a stretch,
+  such as a regenerated diagram, compared as characters in any order.
+  Against the 24 September DMLex render it reports all 133 unnumbered
+  contents entries. The adversarial review broke the first version: swapped
+  numbers, a moved "NOT", a lost minus sign and a footer with the wrong
+  version all passed. Each is now a test.
 - **verify/verify_md.py**:
   - it now compares each ordered list's numbering (`1`, `a`, `i`) and the
     contents, entry by entry;
@@ -57,7 +62,10 @@ comparison on DMLex found three more faults the HTML checks could not see.
     DMLex section 2 was printed `1.`, `2.`, `3.` where the standard has `a.`,
     `b.`, `c.`, and its text refers to "point c. above";
   - the contents list an appendix one level deeper, as the stylesheet does.
-    DMLex's first edition dropped the 38 A.2.2.x and F.1.2.x entries.
+    DMLex's first edition dropped the 38 A.2.2.x and F.1.2.x entries;
+  - a list inside an explicitly numbered list takes the style after its
+    parent's, as the stylesheet's `list.numeration` does, not one set by
+    depth.
 - **Pipeline, contents numbering** (`toc_pages.py`): a wrapped entry ends its
   last line with the page number, as a published OASIS PDF does. It used to
   print on the first line, with the leader running along the second to
@@ -68,8 +76,14 @@ comparison on DMLex found three more faults the HTML checks could not see.
   reviewer copy lines before judging. The grader looks every copied line up
   in its page's text, and accepts the review only when the planted fault is
   named for what it is. On DMLex:
-  - Haiku invented the lines for 13 of 36 pairs and missed the fault;
-  - Sonnet named the fault and the `csd04.xml` heading defect.
+  - Haiku copied lines that are not on the page for 21 of 36 pairs and missed the fault;
+  - Sonnet named the fault and the `csd04.xml` heading defect, and was
+    accepted after re-running 5 pairs.
+
+  Evidence is a distinct line of eight or more letters and digits that is
+  not on most pages; the first grader accepted "1", "2", "3" and footer
+  text, and credited a word written about every pair as naming the fault.
+  The adversarial review found both.
 - **Gate**:
   - `content-labels` reads a heading's label before any anchor that follows
     it (`... (Informative) <a id='x'></a>`). The DMLex edition drew eight
@@ -77,8 +91,10 @@ comparison on DMLex found three more faults the HTML checks could not see.
   - `pdf-toc-pages` reads a contents entry that is a bare appendix letter
     (`A Informative material ...`), as FOP prints it.
 - **DMLex profile**: `allow-pdf.json`, the accepted PDF differences. It
-  records two defects of the published PDF itself: `#` printed for `ň` and
-  `ō` (15 times), and a caption printed partway through Example A.64.
+  records defects of the published PDF itself: `#` printed for `ň` and `ō`
+  (15 times), and four example captions (A.63, A.64, A.87, A.88) printed on
+  a line of their code where a page break splits the example. The UML
+  diagram is a declared region.
 
 ## v1.9.2 - 2026-09-27
 

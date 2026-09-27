@@ -214,12 +214,13 @@ is read as a placeholder, so the two editions may paginate differently, but
 an entry numbered on one side only is a difference. The running footer is
 compared too, and every rendered page must carry one.
 
-For DMLex it passes with 34 accepted differences in 65,790 tokens (words
-and punctuation marks). Most are
-the template's, as in step 2. Two are defects of the published PDF itself:
-its font has no `ň` or `ō`, so it prints `sklize#` and `skul#` where the
-standard says `sklizeň` and `skulō`, and it prints one example's caption
-partway through the example. Against the 24 September render it fails with
+For DMLex it passes with 42 accepted differences in 65,790 tokens (words
+and punctuation marks), one block moved and one declared region (the UML
+diagram, which Graphviz lays out anew). Most are the template's, as in step 2.
+The rest are defects of the published PDF itself: its font has no `ň` or
+`ō`, so it prints `sklize#` and `skul#` where the standard says `sklizeň` and
+`skulō`, and where a page break splits Examples A.63, A.64, A.87 and A.88 it
+prints the caption on a line of the example's code. Against the 24 September render it fails with
 133 contents entries unnumbered.
 
 ## 5. Review the pages
@@ -248,10 +249,11 @@ from both sides before comparing, and list every kind of element on each.
 that did not look is caught. It accepts the review only when the planted
 fault is named for what it is. Pass the first review and then a re-run of
 the pairs it failed; the later answers replace the earlier. On DMLex:
-- Haiku invented the lines on 13 of the 36 pairs and missed the fault;
+- Haiku copied lines that are not on the page for 21 of the 36 pairs and missed the fault;
 - Sonnet named the fault and the `csd04.xml` heading defect. On two pairs it
-  copied lines from other pages, and on a diagram page too few. Those three
-  were re-run, and the review was accepted.
+  copied lines from other pages, and on three it copied too little to show
+  it had read them (brackets, a heading). Those five were re-run, and the
+  review was accepted.
 
 A rejected review is run again. It is never read as a pass.
 

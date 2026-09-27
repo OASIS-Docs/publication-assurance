@@ -49,12 +49,13 @@ try:
 except ImportError:  # grade needs no images
     Image = ImageDraw = None
 
-MIN_LINES = 5  # lines a reviewer must copy from each side of a pair
+MIN_LINES = 5  # lines the brief asks a reviewer to copy from each side of a pair
+MIN_EVIDENCE = 3  # of those, lines that must show the page was read (fewer if the page has fewer)
 FOUND = 0.8  # share of a pair's copied lines that must be on its pages
 NAMES = {  # what a reviewer who saw the planted fault says about it
     'right-column': r'page\s*num|numbers?\b|right[- ]hand|leader',
     'footer': r'footer|copyright|page\s+\S+\s+of|running',
-    'text-lines': r'missing|blank|gap|erased|absent|white|lines?\b',
+    'text-lines': r'missing|blank|gap|erased|absent|white\s*space|empty',
 }
 
 
@@ -203,9 +204,12 @@ Compare how the SAME content is shown on both sides.
 Do not judge whether a pair "looks the same". Work through each pair in this
 order and write down what you see before you decide anything:
 
-1. Copy the first {min_lines} lines of the shared content from the LEFT page
-   exactly as printed, including every number, dot leader, bullet or list
-   letter. Then the same lines from the RIGHT page.
+1. Copy {min_lines} lines of the shared content from the LEFT page exactly as
+   printed, including every number, dot leader, bullet or list letter. Choose
+   lines with words in them, at least three of eight characters or more: a
+   lone bracket, a page footer or a line on every page shows nothing. Then
+   the same lines from the RIGHT page. Your lines are checked against the
+   pages' text.
 2. List every kind of element on each side: headings, list numbers or
    letters, page numbers in a contents list, dot leaders, header and footer
    fields (name, date, copyright, page x of y), captions, figures, tables,
@@ -232,17 +236,33 @@ def norm(s):
     return re.sub(r'[^0-9a-z]+', '', str(s).lower().replace('ﬁ', 'fi').replace('ﬂ', 'fl'))
 
 
-def on_page(lines, text):
-    """The copied lines of eight or more letters, and how many are on the page."""
-    flat = norm(text)
-    real = [x for x in lines if len(norm(x)) >= 8]
-    return len(real), sum(1 for x in real if norm(x) in flat)
+def evidence(lines, generic):
+    """The copied lines that can show the page was read: distinct, eight or
+    more letters and digits, and not text that is on most pages (a footer's
+    "OASIS Open", a running title). A line of "1" or "Copyright" proves nothing."""
+    out = []
+    for x in lines:
+        n = norm(x)
+        if len(n) >= 8 and n not in out and not any(re.sub(r'\d', '', n) in g for g in generic):
+            out.append(n)
+    return out
+
+
+def generic_lines(pages):
+    """Lines found on half the pages or more: they match any page."""
+    seen = {}
+    for p in pages:
+        # digits out: a footer differs from page to page only by its page number
+        for n in {re.sub(r'\d', '', norm(x)) for x in p.splitlines() if len(norm(x)) >= 8}:
+            seen[n] = seen.get(n, 0) + 1
+    return {n for n, k in seen.items() if k * 2 >= len(pages) and k > 1}
 
 
 def grade(a):
     key = json.load(open(a.key, encoding='utf-8'))
     texts = {side: run('pdftotext', '-layout', key[side], '-').split('\f') for side in ('published', 'rendered')}
     page = lambda side, n: texts[side][n - 1] if 0 < n <= len(texts[side]) else ''
+    generic = {side: generic_lines(texts[side]) for side in texts}
     by = {}
     for path in a.review:  # a later review of a pair (a re-run of the rejected ones) replaces an earlier
         try:
@@ -258,19 +278,24 @@ def grade(a):
             continue
         for side, pdf, n in (('left_lines', 'published', p['published_page']),
                              ('right_lines', 'rendered', p['rendered_page'])):
-            lines = [x for x in r.get(side) or [] if str(x).strip()]
+            copied = evidence(r.get(side) or [], generic[pdf])
             # a page that is mostly a figure has fewer lines to copy
-            need = min(MIN_LINES, sum(1 for x in page(pdf, n).splitlines() if len(norm(x)) >= 8))
-            if len(lines) < need:
-                problems.append(f"{p['pair']}: fewer than {need} {side} copied")
+            need = min(MIN_EVIDENCE, len(evidence(page(pdf, n).splitlines(), generic[pdf])))
+            if len(copied) < need:
+                problems.append(f"{p['pair']}: fewer than {need} {side} copied that show the page was read")
                 continue
-            copied, there = on_page(lines, page(pdf, n))
-            if copied and there < FOUND * copied:
-                problems.append(f"{p['pair']}: {copied - there} of {copied} {side} are not on "
+            flat = norm(page(pdf, n))
+            there = sum(1 for x in copied if x in flat)
+            if copied and there < FOUND * len(copied):
+                problems.append(f"{p['pair']}: {len(copied) - there} of {len(copied)} {side} are not on "
                                 f"{pdf} page {n}: not copied from the page")
     planted = by.get(key['planted_pair']) or {}
-    said = ' '.join(str(x) for k in ('differences', 'only_left', 'only_right') for x in planted.get(k) or [])
-    caught = bool(re.search(NAMES[key['planted']], said, re.I)) and not any(
+    says = lambda r: ' '.join(str(x) for k in ('differences', 'only_left', 'only_right') for x in r.get(k) or [])
+    name = NAMES[key['planted']]
+    # A word the reviewer writes about most pairs names nothing in particular.
+    elsewhere = sum(1 for p in key['pairs'] if p['pair'] != key['planted_pair']
+                    and re.search(name, says(by.get(p['pair']) or {}), re.I))
+    caught = bool(re.search(name, says(planted), re.I)) and elsewhere * 4 <= len(key['pairs']) and not any(
         x.startswith(key['planted_pair'] + ':') for x in problems)
     print(f"planted fault: {key['planted_pair']} ({key['planted']}): {'FOUND' if caught else 'MISSED'}")
     for p in key['pairs']:
@@ -306,7 +331,8 @@ def main():
     g.add_argument('review', nargs='+', help='the review, then any re-run of the pairs it failed')
     a = ap.parse_args()
     if a.cmd == 'make':
-        if os.path.abspath(os.path.dirname(a.key)).startswith(os.path.abspath(a.out)):
+        out, keydir = os.path.realpath(a.out), os.path.realpath(os.path.dirname(os.path.abspath(a.key)))
+        if os.path.commonpath([out, keydir]) == out:
             sys.exit('review_pairs: --key must be outside OUT_DIR, where the reviewer cannot read it')
         make(a)
         return 0

@@ -87,15 +87,18 @@ erased on the right. `KEY.json` records which; keep it where the reviewer
 cannot read it (`make` refuses a key inside `OUT_DIR`).
 
 The brief asks for lines copied from both sides before any judgement, and
-every kind of element on each side. `grade` looks every copied line up in the
-text of its page and rejects a pair whose lines are not there. It accepts the
-review only when the planted fault is named for what it is ("page numbers",
-"footer", "missing lines"); a difference that names something else is a miss.
+every kind of element on each side. `grade` counts as evidence only a
+distinct line of eight or more letters and digits that is not on most pages
+(a bracket, "1" or a footer proves nothing), needs three of those per side
+(fewer on a page with fewer), and rejects a pair whose lines are not on its
+page. It accepts the review only when the planted fault is named for what it
+is ("page numbers", "footer", "missing"), and not by a word the reviewer
+writes about most pairs.
 It prints every other difference for a person to rule on. Pass a re-run of
 the rejected pairs after the first review: later answers replace earlier.
 
-Why so strict: on the DMLex pairs a Haiku reviewer invented the lines for 13
-of 36 pairs, and its "difference" on the planted pair described text that is
+Why so strict: on the DMLex pairs a Haiku reviewer copied lines that are not on
+the page for 21 of 36 pairs, and its "difference" on the planted pair described text that is
 not on the page. A grader that counted any difference as a catch passed it.
 
 ## Tests

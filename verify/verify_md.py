@@ -253,9 +253,12 @@ def load_rules(path):
     for i, r in enumerate(rules):
         if not isinstance(r, dict) or not str(r.get('reason', '')).strip():
             fail(f'allow rule {i} in {path} has no reason: {r}')
-        if r.get('kind', 'text') not in ('text', 'heading', 'link', 'image', 'footer'):
+        if r.get('kind', 'text') not in ('text', 'heading', 'link', 'image', 'footer', 'region'):
             fail(f'allow rule {i} in {path} has an unknown kind: {r}')
-        if 'published' not in r or ('markdown' not in r and r.get('kind') != 'heading'):
+        if r.get('kind') == 'region':
+            if not (str(r.get('from', '')).strip() and str(r.get('to', '')).strip()):
+                fail(f'allow rule {i} in {path} is a region without "from" and "to": {r}')
+        elif 'published' not in r or ('markdown' not in r and r.get('kind') != 'heading'):
             fail(f'allow rule {i} in {path} needs "published" and "markdown": {r}')
         if not isinstance(r.get('count', 1), int) or r.get('count', 1) < 1:
             fail(f'allow rule {i} in {path} has a count that is not a positive integer: {r}')
