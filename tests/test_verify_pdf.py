@@ -268,3 +268,22 @@ def test_a_declared_region_compares_characters_not_order():
     changed = ["Figure 1", "entry   sense   example", "core@uri: 0..1   core@title: 1..1"]
     ok, _ = run_pages(pages(fig + ["Next section"] + BASE), pages(changed + ["Next section"] + BASE), [region])
     assert not ok, "inside the region a changed multiplicity still counts"
+
+
+def test_a_rule_matches_a_difference_that_pdftotext_split_in_two():
+    """Ubuntu's pdftotext split DMLex's "Example A.64. RDF" caption around a
+    word of the code beside it; poppler 26 printed it whole. The same rule
+    must accept both, and still nothing more."""
+    pub = pages(["Example 7. RDF ex:lexicon a dmlex:Resource ;", "dmlex:hint dmlex:navigate ;"])
+    ren = pages(["ex:lexicon a dmlex:Resource ;", "dmlex:hint dmlex:navigate ;"])
+    whole = {"published": "Example 7 . RDF", "markdown": "", "reason": "caption printed on a code line"}
+    ok, rep = run_pages(pub, ren, [whole])
+    assert ok, rep["diffs"]
+    split = pages(["Example 7. ex:lexicon a RDF dmlex:Resource ;", "dmlex:hint dmlex:navigate ;"])
+    ok, rep = run_pages(split, ren, [whole])
+    assert ok, rep["diffs"]
+    far = pages(["Example 7. ex:lexicon a dmlex:Resource ; dmlex:hint dmlex:navigate ; and a long run of",
+                 "other words that are the same on both sides before the stray RDF appears"])
+    ok, _ = run_pages(far, pages(["ex:lexicon a dmlex:Resource ; dmlex:hint dmlex:navigate ; and a long run of",
+                                  "other words that are the same on both sides before the stray appears"]), [whole])
+    assert not ok, "pieces far apart are two differences, not one split"

@@ -26,7 +26,7 @@
 #         contents: read
 #       steps:
 #         - uses: actions/checkout@v5
-#         - uses: OASIS-Docs/publication-assurance@v1.10.0
+#         - uses: OASIS-Docs/publication-assurance@v1.10.1
 #           with:
 #             target: ${{ inputs.target }}
 #

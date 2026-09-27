@@ -105,6 +105,29 @@ def test_the_edition_renders_with_the_published_footer(rendered):
     assert ".html" not in bottom
 
 
+def test_the_rendered_pdf_matches_the_published_pdf(rendered, tmp_path):
+    """verify_pdf on the real DMLex render, against the live published PDF,
+    with this runner's pdftotext. Ubuntu's poppler split a caption that
+    poppler 26 printed whole, and the DMLex allow rules failed only in the
+    lexidma workflow (v1.10.0); this runs the same check here first."""
+    import urllib.request
+    _, stage, _ = rendered
+    if not shutil.which("pdftotext"):
+        pytest.skip("pdftotext (poppler) not installed")
+    published = tmp_path / "published.pdf"
+    try:
+        req = urllib.request.Request("https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.pdf",
+                                     headers={"User-Agent": "oasis-verify-pdf"})
+        published.write_bytes(urllib.request.urlopen(req, timeout=120).read())
+    except OSError as e:
+        pytest.skip(f"the published PDF could not be fetched: {e}")
+    allow = REPO_ROOT / "converters" / "docbook-to-markdown" / "profiles" / "dmlex" / "allow-pdf.json"
+    r = subprocess.run([sys.executable, str(REPO_ROOT / "verify" / "verify_pdf.py"), str(stage / "dmlex-v1.0-os.pdf"),
+                        str(published), "--allow", str(allow)], capture_output=True, text=True)
+    assert r.returncode == 0, "\n".join(l for l in r.stdout.splitlines() if not l.startswith("ACCEPTED"))
+    assert "contents_numbered_rendered: 171" in r.stdout
+
+
 def test_the_gate_raises_nothing_on_the_rendered_pdf(rendered):
     """The blockers left are the DMLex source's own; none is about the PDF,
     and the cover carries the title once (no running header)."""
