@@ -26,6 +26,16 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.9.0 - 2026-09-27
+
+MINOR: two new check classes (html-code-sync, pdf-toc-pages) and a Working Draft
+condition in stage-name, 173 to 178 conditions and 59 to 61 classes, learned from the
+DMLex Markdown edition; the tooling that moves a published specification to Markdown
+and proves it matches (verify, converters, render, advance_stage); step 1 keeps tabs;
+step 2 prints the published footer and numbered contents; harvest learns from every run.
+
 - **verify/verify_md.py** (proposal 011): checks a Markdown edition of a
   specification against its published HTML, a file or a URL, word for word,
   with headings, code blocks, list and table shape, anchors and images. Lifted
