@@ -103,13 +103,7 @@ python3 .github/src/fix_html_for_pdf.py spec.html -o .spec-pdf.html
 wkhtmltopdf \
   --page-size A4 --orientation Portrait \
   --margin-top 25mm --margin-right 20mm --margin-bottom 25mm --margin-left 20mm \
-  --header-spacing 6 --header-font-size 10 \
-  --header-center "<document title>" \
-  --footer-line --footer-spacing 4 \
-  --footer-left "spec.html" \
-  --footer-center "Copyright © OASIS Open <year>. All Rights Reserved." \
-  --footer-right "[date] - Page [page] of [topage]" \
-  --footer-font-size 8 --footer-font-name Times \
+  --footer-html .spec-footer.html --footer-spacing 4 \
   --no-outline --print-media-type \
   --disable-smart-shrinking --dpi 288 \
   --enable-local-file-access \
@@ -117,6 +111,22 @@ wkhtmltopdf \
   --load-media-error-handling ignore \
   .spec-pdf.html spec.pdf
 ```
+
+`.spec-footer.html` is the footer of a published OASIS PDF, which
+`PdfRenderer.footer_html` builds from the document and removes after the
+render: the document name on the left; the copyright line with "Standards
+Track Work Product" (or "Non-Standards Track" for a Committee or Project Note)
+beneath it in the centre; the document's own date and "Page x of y" on the
+right. There is no running header. Until proposal 012 the footer printed the
+file name with `.html`, wkhtmltopdf's `[date]` (the day of the render) and a
+running title header on every page.
+
+When the document has a table of contents (`id="table-of-contents"`),
+`PdfRenderer` then numbers it: `.github/src/pipeline/toc_pages.py` reads each
+heading's page from the printed PDF's named destinations (`pdfinfo -dests`),
+writes the page numbers with dot leaders into a copy of the HTML, and the PDF
+is printed again until no number moves. A published OASIS PDF numbers its
+contents; the gate's `pdf-toc-pages` check reports one that does not.
 
 The preprocessor also removes any `<base href>` from the PDF copy, after
 making relative hyperlinks absolute against it, so stylesheets and images

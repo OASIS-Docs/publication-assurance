@@ -83,7 +83,7 @@ Each version is anchored by a git tag on this repository.
   Committee and Project Notes), the Notices copyright line, the document's
   date, the page. The pipeline's step 2 prints the render date, the file name
   with `.html`, no track line and a running title header (proposal 012).
-  `toc_pages.py` numbers the table of contents from the printed pages, with
+  `.github/src/pipeline/toc_pages.py` numbers the table of contents from the printed pages, with
   dot leaders, and the PDF is printed again until no number moves: the
   published DMLex PDF numbers its contents and the first render did not.
   `compare.mjs` captures named anchors of the published and rendered pages
@@ -145,6 +145,18 @@ Each version is anchored by a git tag on this repository.
     (`odata-v4.02-csd02-part1-protocol`, Naming Directives v1.7
     `[stage][rev]-[partNumber]-[partName]`) no longer has to end in the stage.
   `tests/test_harvest.py`, `tests/test_odata_adjudications.py`.
+- **Pipeline, step 2** (proposal 012): the PDF footer is the one published
+  OASIS PDFs carry, built from the document: its name (no `.html`), the
+  copyright line with "Standards Track Work Product" (Non-Standards Track for
+  Committee and Project Notes) beneath it, the document's own date and the
+  page. Before, wkhtmltopdf printed the file name with `.html`, `[date]` (the
+  day of the render), no track line and the title as a running header on every
+  page, the cover included. Step 2 also numbers the table of contents from the
+  printed pages (`.github/src/pipeline/toc_pages.py`, shared with
+  `render/render.sh`). `tests/test_pdf_command.py`,
+  `tests/test_step2_script.py`, and in the pdf-render job
+  `tests/test_pdf_type_scale.py` checks the footer, the absent header and the
+  numbered contents on a real CSAF render.
 - Release process: a `move-v1` workflow moves the floating `v1` tag to each v1.x.y
   release when it is published (it sat at v1.4.0 for four releases), with a manual
   dispatch to point it at a named release. The adoption guide's `@v1` row now says so.

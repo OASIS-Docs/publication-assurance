@@ -7,6 +7,14 @@ top of every page. Nothing in the repository exercised the pipeline, so nothing
 could have caught it.
 
 These tests pin the two values to the document being rendered.
+
+Then (proposal 012, Sep 2026) the footer itself was wrong for every TC: the
+file name with ".html", the render's date where a published OASIS PDF prints
+the document's, no "Standards Track Work Product" line, and the title as a
+running header on every page, the cover included. Published CSAF PDFs print
+`csaf-v2.0-csd02 | Copyright (c) OASIS Open 2022. All Rights Reserved. /
+Standards Track Work Product | 30 March 2022 - Page 2 of 122` and no header.
+The footer is now an HTML footer built from the document.
 """
 
 from __future__ import annotations
@@ -46,7 +54,8 @@ def _renderer_class():
 PdfRenderer = _renderer_class()
 
 PAGE = """<!DOCTYPE html><html><head><title>{title}</title></head>
-<body><h1>{h1}</h1><p>Copyright &copy; OASIS Open {year}. All Rights Reserved.</p>
+<body><h1>{h1}</h1><h2>Committee Specification Draft 01</h2><h2>12 June {year}</h2>
+<p>Copyright &copy; OASIS Open {year}. All Rights Reserved.</p>
 </body></html>"""
 
 
@@ -60,19 +69,39 @@ def _flag(cmd, name):
     return cmd[cmd.index(name) + 1]
 
 
-def test_the_running_header_is_this_document_s_title(tmp_path):
+def test_there_is_no_running_header(tmp_path):
+    """A published OASIS PDF has none, and a title there repeats on the cover."""
     r = _render(tmp_path, PAGE.format(title="Virtio Version 1.4",
                                       h1="Virtio Version 1.4", year="2026"))
     cmd = r.build_command(str(tmp_path / "spec.html"))
-    assert _flag(cmd, "--header-center") == "Virtio Version 1.4"
+    assert not [t for t in cmd if t.startswith("--header")], cmd
     assert "Common Security Advisory Framework" not in " ".join(cmd)
 
 
-def test_the_footer_year_is_the_document_s_own(tmp_path):
-    r = _render(tmp_path, PAGE.format(title="T", h1="T", year="2024"))
-    cmd = r.build_command(str(tmp_path / "spec.html"))
-    assert _flag(cmd, "--footer-center") == \
-        "Copyright © OASIS Open 2024. All Rights Reserved."
+def test_the_footer_is_the_published_one_read_from_the_document(tmp_path):
+    src = tmp_path / "virtio-v1.4-csd01.html"
+    src.write_text(PAGE.format(title="T", h1="T", year="2024"), encoding="utf-8")
+    r = PdfRenderer(str(src), str(tmp_path / "spec.pdf"))
+    cmd = r.build_command(str(src))
+    assert _flag(cmd, "--footer-html").endswith(".html")
+    footer = r.footer_html()
+    for part in ("virtio-v1.4-csd01<", "Copyright © OASIS Open 2024. All Rights Reserved.",
+                 "Standards Track Work Product", "12 June 2024 - Page", 'class="page"', 'class="topage"'):
+        assert part in footer, part
+    assert "virtio-v1.4-csd01.html" not in footer
+
+
+def test_a_committee_note_is_non_standards_track(tmp_path):
+    src = tmp_path / "widget-v1.0-cnd02.html"
+    src.write_text(PAGE.format(title="T", h1="T", year="2026"), encoding="utf-8")
+    assert "Non-Standards Track Work Product" in PdfRenderer(str(src), str(tmp_path / "w.pdf")).footer_html()
+
+
+def test_a_document_without_a_date_line_prints_no_render_date(tmp_path):
+    src = tmp_path / "x-v1.0-csd01.html"
+    src.write_text("<html><body><h1>X</h1></body></html>", encoding="utf-8")
+    footer = PdfRenderer(str(src), str(tmp_path / "x.pdf")).footer_html()
+    assert "[date]" not in footer and ">Page <span" in footer
 
 
 def test_a_document_with_no_title_element_falls_back_to_its_heading(tmp_path):
@@ -97,10 +126,7 @@ def test_the_documented_command_matches_the_built_one(tmp_path):
         "--page-size", "A4", "--orientation", "Portrait",
         "--margin-top", "25mm", "--margin-right", "20mm",
         "--margin-bottom", "25mm", "--margin-left", "20mm",
-        "--header-spacing", "6", "--header-font-size", "10",
-        "--header-center", "--footer-line", "--footer-spacing", "4",
-        "--footer-left", "--footer-center", "--footer-right",
-        "--footer-font-size", "8", "--footer-font-name", "Times",
+        "--footer-html", "--footer-spacing", "4",
         "--no-outline", "--print-media-type",
         "--disable-smart-shrinking", "--dpi", "288",
         "--enable-local-file-access",

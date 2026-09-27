@@ -17,7 +17,6 @@ is still the TC's to change. The walkthrough is
 | `render.sh` | Stage, render (HTML, then PDF), number the contents, gate |
 | `footer.py` | Read from the document: the stage path, and the PDF footer (name, track, copyright line, date) |
 | `print_pdf.mjs` | HTML to PDF in headless Chrome on the pipeline's A4 geometry, with that footer |
-| `toc_pages.py` | Page numbers and dot leaders for the table of contents, read from the printed PDF |
 | `compare.mjs` | The published and rendered pages side by side at named anchors |
 
 Requirements:
@@ -44,7 +43,7 @@ render/render.sh MD_DIR SCHEMAS_DIR OUT_ROOT     # SCHEMAS_DIR "-" when there ar
   left, the copyright line in the centre, the document's date and "Page x of
   y" on the right. Nothing in the footer comes from the day of the render.
 - **Contents.** Chrome cannot number a table of contents as it prints.
-  `toc_pages.py` reads each heading's page from the PDF and writes it in, and
+  `.github/src/pipeline/toc_pages.py` (shared with step 2) reads each heading's page from the PDF and writes it in, and
   the PDF is printed again until no number moves.
 - **Gate.** The script runs `pub-check/oasis_pub_check.py` on the staged
   package, and its exit status is the gate's: 0 publishable, 1 blockers.
