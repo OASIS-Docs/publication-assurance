@@ -73,7 +73,7 @@ node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$FOOTER"
 # The contents' page numbers come from the printed PDF; print again until
 # they stop moving (numbering can push a heading onto the next page).
 for pass in 1 2 3 4; do
-  CHANGED=$(python3 "$HERE/toc_pages.py" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$STAGE/.$NAME-pdf.html" | tee /dev/stderr | sed -n 's/.*, \([0-9]*\) changed$/\1/p')
+  CHANGED=$(python3 "$PA/.github/src/pipeline/toc_pages.py" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$STAGE/.$NAME-pdf.html" | tee /dev/stderr | sed -n 's/.*, \([0-9]*\) changed$/\1/p')
   [ "$CHANGED" = 0 ] && break
   [ "$pass" = 4 ] && { echo "contents page numbers did not settle after 4 passes" >&2; exit 1; }
   node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$FOOTER"

@@ -267,6 +267,52 @@ class PdfRenderer(PipelineStep):
         year = m.group(1) if m else str(date.today().year)
         return f"Copyright © OASIS Open {year}. All Rights Reserved."
 
+    NON_STANDARDS_TRACK = ("cnd", "cn", "cnprd", "pnd", "pn")
+
+    @property
+    def footer_file(self) -> Path:
+        """Where the footer HTML is written for the render (and removed after)."""
+        return self.output_pdf.with_name(f".{self.output_pdf.stem}-footer.html")
+
+    def document_date(self) -> str:
+        """The document's date line ("12 June 2026"), or "" when it has none."""
+        try:
+            text = self.html_file.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return ""
+        m = re.search(r">\s*(\d{1,2} (?:January|February|March|April|May|June|July|August|"
+                      r"September|October|November|December) \d{4})\s*<", text)
+        return m.group(1) if m else ""
+
+    def footer_html(self) -> str:
+        """The footer of a published OASIS PDF, built from the document:
+        its name and, under the copyright line, its track; its own date and
+        the page on the right. wkhtmltopdf fills page and topage through the
+        query string it passes to a footer HTML."""
+        name = Path(self.footer_name).stem
+        stage = re.search(r"-([a-z]+)\d*$", name)
+        track = ("Non-Standards Track Work Product"
+                 if stage and stage.group(1) in self.NON_STANDARDS_TRACK
+                 else "Standards Track Work Product")
+        date_ = self.document_date()
+        esc = lambda t: t.replace("&", "&amp;").replace("<", "&lt;")
+        right = f"{esc(date_)} - Page" if date_ else "Page"
+        return (
+            '<!DOCTYPE html><html><head><meta charset="utf-8"><script>'
+            "function subst(){var v={},q=document.location.search.substring(1).split('&');"
+            "for(var i=0;i<q.length;i++){var z=q[i].split('=',2);v[z[0]]=decodeURIComponent(z[1]||'');}"
+            "var k=['page','topage'];for(var j=0;j<k.length;j++){var e=document.getElementsByClassName(k[j]);"
+            "for(var n=0;n<e.length;n++){e[n].textContent=v[k[j]];}}}"
+            '</script></head><body onload="subst()" style="margin:0">'
+            '<table style="width:100%;border-top:0.5pt solid #000;border-collapse:collapse;'
+            'font-family:Times,serif;font-size:8pt;color:#000"><tr>'
+            f'<td style="text-align:left;vertical-align:top;padding-top:2pt">{esc(name)}</td>'
+            f'<td style="text-align:center;vertical-align:top;padding-top:2pt">{esc(self.copyright_line())}'
+            f'<br>{track}</td>'
+            f'<td style="text-align:right;vertical-align:top;padding-top:2pt">{right} '
+            '<span class="page"></span> of <span class="topage"></span></td>'
+            "</tr></table></body></html>")
+
     def build_command(self, html_file_path: str) -> list[str]:
         """Return the exact wkhtmltopdf argument vector for this conversion.
 
@@ -281,16 +327,10 @@ class PdfRenderer(PipelineStep):
             '--margin-right', '20mm',
             '--margin-bottom', '25mm',
             '--margin-left', '20mm',
-            '--header-spacing', '6',
-            '--header-font-size', '10',
-            '--header-center', self.document_title(),
-            '--footer-line',
+            # The footer of a published OASIS PDF, read from the document
+            # (footer_html). No running header: published PDFs have none.
+            '--footer-html', str(self.footer_file),
             '--footer-spacing', '4',
-            '--footer-left', self.footer_name,
-            '--footer-center', self.copyright_line(),
-            '--footer-right', '[date] - Page [page] of [topage]',
-            '--footer-font-size', '8',
-            '--footer-font-name', 'Times',
             '--no-outline',
             '--print-media-type',
             # Print CSS points at their size. Smart shrinking scales each
@@ -323,8 +363,12 @@ class PdfRenderer(PipelineStep):
             logger.info("Executing PDF conversion with wkhtmltopdf")
             logger.debug(f"Command: {' '.join(cmd)}")
 
-            # Execute wkhtmltopdf conversion
-            result = self._run_subprocess(cmd, capture=True)
+            # Execute wkhtmltopdf conversion, with the footer it reads
+            self.footer_file.write_text(self.footer_html(), encoding="utf-8")
+            try:
+                result = self._run_subprocess(cmd, capture=True)
+            finally:
+                self.footer_file.unlink(missing_ok=True)
 
             if result.stderr:
                 logger.debug(f"wkhtmltopdf output: {result.stderr}")
@@ -352,6 +396,7 @@ class PdfRenderer(PipelineStep):
 
             # Execute PDF conversion
             self._convert_to_pdf(str(self.html_file))
+            self._number_contents()
 
             # Verify successful conversion
             if self.output_pdf.exists():
@@ -363,6 +408,34 @@ class PdfRenderer(PipelineStep):
         except Exception as e:
             logger.error(f"Conversion failed: {str(e)}")
             raise
+
+    def _number_contents(self) -> None:
+        """Write each contents entry's printed page into the contents and
+        print again, until no number moves (toc_pages). A published OASIS
+        PDF numbers its contents; a PDF printed from HTML has none unless
+        something writes them. A document without a contents list, or a PDF
+        without the named destinations to read pages from, is left as it is
+        and the gate's pdf-toc-pages check reports it."""
+        from .toc_pages import main as number
+        text = self.html_file.read_text(encoding="utf-8", errors="replace")
+        if 'id="table-of-contents"' not in text:
+            return
+        numbered = self.html_file.with_name(f".{self.html_file.stem}-numbered.html")
+        numbered.write_text(text, encoding="utf-8")
+        try:
+            for _ in range(4):
+                try:
+                    changed = number(str(numbered), str(self.output_pdf), str(numbered))
+                except (LookupError, OSError, subprocess.CalledProcessError) as e:
+                    logger.warning(f"contents left unnumbered: {e}")
+                    return
+                if not changed:
+                    logger.info("contents numbered")
+                    return
+                self._convert_to_pdf(str(numbered))
+            logger.warning("contents page numbers did not settle after 4 passes")
+        finally:
+            numbered.unlink(missing_ok=True)
 
     def run(self) -> None:
         """Execute the rendering stage (alias for :meth:`convert`)."""

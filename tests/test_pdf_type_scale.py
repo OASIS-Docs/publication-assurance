@@ -231,6 +231,30 @@ def test_a_real_package_prints_the_type_scale(tmp_path, stage):
     assert missing == [], f"{len(missing)} of {len(rows)} table rows are not in the PDF: {missing}"
     assert m["outside_column"] == [], m["outside_column"]
 
+    # The footer of a published OASIS PDF, read from the document (proposal
+    # 012): name without ".html", copyright over the track, the document's
+    # own date and the page; no running header.
+    import fitz
+    import re as _re
+    doc = fitz.open(str(pkg / f"{name}.pdf"))
+    page = doc[1]
+    height = page.rect.height
+    bottom = " ".join(b[4] for b in page.get_text("blocks") if b[1] > height * 0.88)
+    top = " ".join(b[4] for b in page.get_text("blocks") if b[3] < height * 0.10)
+    date_ = _re.search(r">\s*(\d{1,2} [A-Z][a-z]+ \d{4})\s*<", text).group(1)
+    for part in (name, "Standards Track Work Product", "Copyright © OASIS Open",
+                 f"{date_} - Page 2 of {doc.page_count}"):
+        assert part in " ".join(bottom.split()), (part, bottom)
+    assert ".html" not in bottom, bottom
+    assert top.strip() == "", f"a running header: {top!r}"
+
+    # The contents carry the page each heading prints on (the gate's own check).
+    from conftest import oasis_pub_check
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.check_pdf_toc_pages(str(pkg / f"{name}.pdf"), f)
+    assert [x["message"] for x in f.items if x["check"] == "pdf-toc-pages"] == []
+    assert int(f.observed["pdf-toc-pages"]["with_page_numbers"]) > 100, f.observed["pdf-toc-pages"]
+
 
 def _table_rows(html: str) -> list[str]:
     """Each table row's text, its cells in order. A row is printed left to

@@ -8,8 +8,10 @@ Chrome cannot number a table of contents as it prints (no CSS
 target-counter), but the PDF it prints carries a named destination, with its
 page, for every heading id. This reads those pages back (poppler's
 pdfinfo -dests) and writes them into the HTML's table of contents, with dot
-leaders, as a published OASIS PDF shows them. render.sh prints again and
-repeats until the pages stop moving.
+leaders, as a published OASIS PDF shows them. The caller prints again and
+repeats until the pages stop moving: step 2 (pdf_renderer.PdfRenderer) with
+wkhtmltopdf, and render/render.sh with Chrome. Standard library only, so it
+also runs as a script.
 
 Usage: toc_pages.py IN.html PRINTED.pdf OUT.html
 Prints the number of entries numbered and how many changed since IN.html.
@@ -33,10 +35,12 @@ def dests(pdf):
 
 
 def main(src, pdf, out):
+    """Number the contents of src from pdf's pages into out; return how many
+    numbers changed since src."""
     h = open(src, encoding='utf-8').read()
     m = re.search(r'<h([1-6])[^>]*id="table-of-contents"[^>]*>.*?</h\1>\s*<ul>', h, re.S)
     if not m:
-        sys.exit('toc_pages.py: no table of contents (a heading with id table-of-contents followed by a list)')
+        raise LookupError('toc_pages.py: no table of contents (a heading with id table-of-contents followed by a list)')
     depth, end = 0, None
     for t in re.finditer(r'<(/?)ul\b[^>]*>', h[m.end() - 4:]):
         depth += -1 if t.group(1) else 1
@@ -62,7 +66,7 @@ def main(src, pdf, out):
                 f'<span class="toc-page" data-for="{target}">{pages[target]}</span></span>')
     toc = re.sub(r'<a href="#([^"]+)">.*?</a>', number, toc, flags=re.S)
     if missing:
-        sys.exit(f'toc_pages.py: no page in {pdf} for {missing}')
+        raise LookupError(f'toc_pages.py: no page in {pdf} for {missing}')
     h = h[:m.end() - 4] + toc + h[end:]
     if 'id="toc-pages"' not in h:
         h = h.replace('</head>', CSS + '</head>', 1)
@@ -74,4 +78,7 @@ def main(src, pdf, out):
 if __name__ == '__main__':
     if len(sys.argv) != 4:
         sys.exit(__doc__)
-    main(*sys.argv[1:])
+    try:
+        main(*sys.argv[1:])
+    except LookupError as e:
+        sys.exit(str(e))

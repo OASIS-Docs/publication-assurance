@@ -33,6 +33,8 @@ args = sys.argv[1:]
 log = os.environ["STUB_LOG"]
 src = args[-2]
 shutil.copy(src, log + ".input.html")
+if "--footer-html" in args:
+    shutil.copy(args[args.index("--footer-html") + 1], log + ".footer.html")
 json.dump(args, open(log, "w"))
 open(args[-1], "wb").write(b"%PDF-1.4 partial")
 sys.exit(1 if os.environ.get("STUB_FAIL") else 0)
@@ -85,9 +87,13 @@ def test_the_script_renders_the_preprocessed_html(run):
 
 
 def test_the_footer_names_the_published_file_not_the_intermediate(run):
-    go, _ = run
+    go, pkg = run
     _, argv, _, _, _ = go()
-    assert argv[argv.index("--footer-left") + 1] == "csaf-v2.1-csd01.html", argv
+    assert "--footer-html" in argv, argv
+    log = pkg.parent.parent.parent / "argv.json"
+    footer = (log.parent / (log.name + ".footer.html")).read_text(encoding="utf-8")
+    assert "csaf-v2.1-csd01<" in footer
+    assert "csaf-v2.1-csd01.html" not in footer and "pdf-" not in footer
 
 
 def test_the_script_leaves_only_the_pdf_behind(run):
@@ -96,7 +102,9 @@ def test_the_script_leaves_only_the_pdf_behind(run):
     assert r.returncode == 0, r.stdout + r.stderr
     assert set(after) - set(before) == {pkg.joinpath("csaf-v2.1-csd01.pdf").relative_to(pkg)}
     r2, argv2, _, _, _ = go()                 # a second run picks the same source
-    assert r2.returncode == 0 and "csaf-v2.1-csd01.html" in argv2
+    log = pkg.parent.parent.parent / "argv.json"
+    footer = (log.parent / (log.name + ".footer.html")).read_text(encoding="utf-8")
+    assert r2.returncode == 0 and "--footer-html" in argv2 and "csaf-v2.1-csd01<" in footer
 
 
 # Counterexamples from the independent verification of this change.
