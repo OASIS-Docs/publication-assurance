@@ -46,6 +46,7 @@ prettier --write spec.md
 # 2. Base conversion (the invocation in .github/src/pipeline/html_converter.py)
 pandoc spec.md \
   -f markdown+autolink_bare_uris-implicit_figures \
+  --preserve-tabs \
   --no-highlight \
   -c https://docs.oasis-open.org/styles/markdown-styles-v1.7.3.css \
   -s \
@@ -56,6 +57,10 @@ pandoc spec.md \
 python3 .github/src/step_1_markdown_to_html_converter_V3_0.py \
   path/to/spec.md "$(pwd)" path/to/dir --md-format --md-to-html
 ```
+
+`--preserve-tabs` keeps a tab in a code block a tab: without it pandoc expands
+tabs to spaces, and 9 of the 316 code blocks in DMLex no longer matched the
+published standard.
 
 `-implicit_figures` stops pandoc wrapping a bare image line in
 `<figure>`/`<figcaption>`, where the alt text renders as a visible caption.
