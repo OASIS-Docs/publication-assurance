@@ -179,16 +179,26 @@ def test_an_allow_rule_accepts_only_as_many_differences_as_it_names(tmp_path):
     assert [d["published"] for d in rep["diffs"]] == [":"], rep["diffs"]
 
 
-def test_an_unused_allow_rule_is_reported_and_fails_under_strict(tmp_path):
+def test_an_unused_allow_rule_fails(tmp_path):
+    """A rule that accepts nothing is either stale or half of a pair whose
+    other half hid something: the Key words paragraph is allowed to move
+    (a delete and an insert), not to vanish."""
     rules = json.loads(ALLOW.read_text(encoding="utf-8"))
     rules.append({"published": "never", "markdown": "seen", "reason": "a stale rule"})
     stale = tmp_path / "allow.json"
     stale.write_text(json.dumps(rules), encoding="utf-8")
     r, rep = verify(MD, PUBLISHED, tmp_path, allow=stale)
-    assert r.returncode == 0 and "UNUSED ALLOW RULE" in r.stdout
+    assert r.returncode == 1 and "UNUSED ALLOW RULE" in r.stdout
     assert rep["allow_rules_unused"] == [rules[-1]]
-    r, _ = verify(MD, PUBLISHED, tmp_path, "--strict", allow=stale)
-    assert r.returncode == 1
+
+
+def test_the_key_words_paragraph_may_move_but_not_vanish(tmp_path):
+    text = MD.read_text(encoding="utf-8")
+    start = text.index("#### Key words:")
+    end = text.index("\n#### ", start + 1)
+    md = altered(tmp_path, text[start:end], "")
+    r, rep = verify(md, PUBLISHED, tmp_path)
+    assert r.returncode == 1 and rep["allow_rules_unused"], rep["diffs"]
 
 
 TABLE_HTML = ("<html><body><p>Values and meanings follow.</p><table><tr><th>Value</th><th>Meaning</th></tr>"
@@ -207,7 +217,7 @@ def _pair(tmp_path, md_text):
 def test_a_table_and_a_list_with_their_shape_pass(tmp_path):
     r, rep = _pair(tmp_path, TABLE_MD)
     assert r.returncode == 0, r.stdout
-    assert rep["tables_published"] == rep["tables_markdown"] == [[3, 6]]
+    assert rep["tables_published"] == rep["tables_markdown"] == [[["Value", "Meaning"], ["alpha", "first"], ["beta", "second"]]]
 
 
 def test_a_table_flattened_into_paragraphs_fails(tmp_path):
@@ -235,3 +245,101 @@ def test_a_rule_without_a_count_accepts_one_difference(tmp_path):
     r, rep = verify(MD, PUBLISHED, tmp_path, allow=one)
     assert r.returncode == 1
     assert [(d["published"], d["markdown"]) for d in rep["diffs"]] == [("version", "stage")] * 2
+
+
+def test_text_added_under_the_contents_heading_is_compared(tmp_path):
+    md = altered(tmp_path, "\n---\n\n# 1 Introduction",
+                 "\nNote: implementations MAY ignore the Conformance section.\n\n---\n\n# 1 Introduction")
+    r, rep = verify(md, PUBLISHED, tmp_path)
+    assert r.returncode == 1
+    assert any("MAY ignore" in d["markdown"] for d in rep["diffs"]), rep["diffs"]
+
+
+def test_an_image_commented_out_or_swapped_fails(tmp_path):
+    img = '<img src="core/databaseDiagrams/entry.svg"'
+    text = MD.read_text(encoding="utf-8")
+    line = text[text.index(img):text.index(">", text.index(img)) + 1]
+    md = altered(tmp_path, line, f"<!-- {line} -->")
+    r, rep = verify(md, PUBLISHED, tmp_path)
+    assert r.returncode == 1 and rep["images_differing"] == ["-core/databaseDiagrams/entry.svg"]
+    md = altered(tmp_path / "b", line, line.replace("entry.svg", "sense.svg"))
+    r, rep = verify(md, PUBLISHED, tmp_path)
+    assert r.returncode == 1 and "+core/databaseDiagrams/sense.svg" in rep["images_differing"]
+
+
+def test_a_changed_link_target_fails(tmp_path):
+    md = altered(tmp_path, "(https://www.muni.cz/)", "(https://example.com/)")
+    r, rep = verify(md, PUBLISHED, tmp_path)
+    assert r.returncode == 1 and rep["diff_regions"] == 0
+    diff = rep["external_links_differing"]
+    assert {d["published"] for d in diff} - {""} == {"https://www.muni.cz/"}
+    assert {d["markdown"] for d in diff} - {""} == {"https://example.com/"}
+
+
+def test_hidden_or_struck_words_fail(tmp_path):
+    for i, (old, new) in enumerate((("modelling dictionaries", "modelling ~~dictionaries~~"),
+                                    ("modelling dictionaries", 'modelling <span style="display:none">dictionaries</span>'),
+                                    ("modelling dictionaries", "modelling <header>no</header><head></head> dictionaries"))):
+        md = altered(tmp_path / str(i), old, new)
+        r, rep = verify(md, PUBLISHED, tmp_path)
+        assert r.returncode == 1, (new, rep["diffs"], rep["hidden_or_struck_markdown"])
+
+
+def test_code_indentation_and_a_missing_block_are_reported_once(tmp_path):
+    text = MD.read_text(encoding="utf-8")
+    start = text.index("```json\n") + len("```json\n")
+    first = text[start:text.index("\n", start)]
+    md = altered(tmp_path, "```json\n" + first, "```json\n    " + first)
+    r, rep = verify(md, PUBLISHED, tmp_path)
+    assert r.returncode == 1 and len(rep["code_blocks_differing"]) == 1
+    end = text.index("```", start) + 3
+    md = altered(tmp_path / "b", text[start - len("```json\n"):end], "")
+    r, rep = verify(md, PUBLISHED, tmp_path)
+    assert r.returncode == 1 and len(rep["code_blocks_differing"]) == 1, rep["code_blocks_differing"]
+    assert rep["code_blocks_differing"][0]["op"] == "delete"
+
+
+def test_a_word_moved_to_another_table_row_fails(tmp_path):
+    html = TABLE_HTML.replace("<td>first</td>", "<td>first MUST</td>")
+    (tmp_path / "t.html").write_text(html, encoding="utf-8")
+    moved = TABLE_MD.replace("| alpha | first |\n| beta | second |", "| alpha | first |\n| MUST beta | second |")
+    (tmp_path / "t.md").write_text(moved, encoding="utf-8")
+    r, rep = verify(tmp_path / "t.md", tmp_path / "t.html", tmp_path, allow=None)
+    assert rep["diff_regions"] == 0, "the words line up; only the rows show it"
+    assert r.returncode == 1 and rep["tables_published"] != rep["tables_markdown"]
+
+
+def test_the_charset_comes_from_the_page_the_server_or_the_html_default(tmp_path):
+    html = PUBLISHED.read_bytes()
+    bare = tmp_path / "bare.html"
+    bare.write_bytes(re.sub(rb'<meta http-equiv="Content-Type"[^>]*>', b"", html, count=1))
+    assert b"charset" not in bare.read_bytes()[:2000]
+    r, rep = verify(MD, bare, tmp_path)
+    assert r.returncode == 0, rep.get("diffs")
+    odd = tmp_path / "odd.html"
+    odd.write_bytes(html.replace(b"charset=ISO-8859-1", b"charset=no-such-charset", 1))
+    r, _ = verify(MD, odd, tmp_path)
+    assert r.returncode == 2 and "unknown charset" in r.stderr
+
+
+def test_a_url_is_decoded_with_the_server_charset(tmp_path):
+    import http.server
+    import threading
+    body = re.sub(rb'<meta http-equiv="Content-Type"[^>]*>', b"", PUBLISHED.read_bytes(), count=1)
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=ISO-8859-1")
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *a):
+            pass
+    srv = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        r, rep = verify(MD, f"http://127.0.0.1:{srv.server_port}/dmlex.html", tmp_path)
+    finally:
+        srv.shutdown()
+    assert r.returncode == 0, rep.get("diffs")

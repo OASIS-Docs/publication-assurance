@@ -61,7 +61,7 @@ def html_text(s):
     s = re.sub(r'<span class="__cf_email__" data-cfemail="([0-9a-fA-F]+)">.*?</span>',
                lambda m: cf_decode(m.group(1)), s, flags=re.S)
     s = re.sub(r'<!--.*?-->', ' ', s, flags=re.S)
-    s = re.sub(r'<(script|style|head)[^>]*>.*?</\1>', ' ', s, flags=re.S | re.I)
+    s = re.sub(r'<(script|style|head)\b[^>]*>.*?</\1>', ' ', s, flags=re.S | re.I)
     s = re.sub(r'<[^>]+>', ' ', s)
     return html.unescape(s)
 
@@ -85,30 +85,57 @@ def pandoc_version():
     return v
 
 
+def balanced_end(h, start, tag):
+    """The end of the element opened at h[start], counting nested <tag>s."""
+    depth = 0
+    for t in re.finditer(rf'<(/?){tag}\b[^>]*>', h[start:], re.I):
+        depth += -1 if t.group(1) else 1
+        if depth == 0:
+            return start + t.end()
+    return None
+
+
 def strip_toc(h):
-    """Remove a generated table of contents: the DocBook stylesheet's
-    div.toc (cut at its balancing </div>, so the first heading after it
-    survives) or the OASIS Markdown template's "Table of Contents" heading up
-    to the next rule."""
+    """Remove a generated table of contents and nothing else: the DocBook
+    stylesheet's div.toc, or the OASIS Markdown template's "Table of Contents"
+    heading and the one list after it. Anything else near them is compared."""
     m = re.search(r'<div class="toc">', h)
     if m:
-        depth = 0
-        for t in re.finditer(r'<(/?)div\b[^>]*>', h[m.start():]):
-            depth += -1 if t.group(1) else 1
-            if depth == 0:
-                return h[:m.start()] + ' ' + h[m.start() + t.end():]
-    return re.sub(r'<h1[^>]*>Table of Contents</h1>.*?<hr\s*/?>', ' ', h, count=1, flags=re.S)
+        end = balanced_end(h, m.start(), 'div')
+        if end:
+            return h[:m.start()] + ' ' + h[end:]
+    m = re.search(r'<h1[^>]*>Table of Contents</h1>\s*', h)
+    if m:
+        ul = re.match(r'<ul\b', h[m.end():])
+        end = balanced_end(h, m.end(), 'ul') if ul else m.end()
+        return h[:m.start()] + ' ' + h[end or m.end():]
+    return h
 
 
 def shapes(h):
-    """List items, and each data table's (rows, cells)."""
+    """List items, and each data table (two or more rows, two or more cells
+    in a row) as its rows of cell text, so a word moved to another row or a
+    table flattened into paragraphs is seen."""
     tables = []
     for m in re.finditer(r'<table\b[^>]*>(.*?)</table>', h, re.S | re.I):
-        rows = [len(re.findall(r'<t[dh][\s>]', r, re.I))
+        rows = [[' '.join(tokens(html_text(c)))
+                 for c in re.findall(r'<t[dh]\b[^>]*>(.*?)</t[dh]>', r, re.S | re.I)]
                 for r in re.findall(r'<tr\b[^>]*>(.*?)</tr>', m.group(1), re.S | re.I)]
-        if len(rows) >= 2 and max(rows) >= 2:
-            tables.append([len(rows), sum(rows)])
+        if len(rows) >= 2 and max(map(len, rows)) >= 2:
+            tables.append(rows)
     return len(re.findall(r'<li[\s>]', h, re.I)), tables
+
+
+def hidden(h):
+    """Struck-through or hidden text still has its words; count the markup."""
+    return len(re.findall(r'<(del|s|strike)\b|display\s*:\s*none|visibility\s*:\s*hidden', h, re.I))
+
+
+def external_links(h):
+    """Every http(s) link target, the scheme read as https (docs.oasis-open.org
+    serves both, and the published HTML mixes them)."""
+    return sorted(re.sub(r'^http://', 'https://', html.unescape(u))
+                  for u in re.findall(r'<a\b[^>]*href="(https?://[^"]+)"', h, re.I))
 
 
 def md_to_html(md_path):
@@ -135,10 +162,25 @@ def read_published(src):
                 raw = r.read()
         except OSError as e:
             fail(f'cannot fetch {src}: {e}')
+        header = r.headers.get_content_charset()
     else:
-        raw = open(src, 'rb').read()
-    m = re.search(rb'charset=["\']?([\w-]+)', raw[:2000])
-    return raw.decode(m.group(1).decode() if m else 'utf-8', errors='replace')
+        try:
+            raw = open(src, 'rb').read()
+        except OSError as e:
+            fail(f'cannot read {src}: {e}')
+        header = None
+    head = raw[:raw.lower().find(b'</head>')] if b'</head>' in raw.lower() else raw[:8192]
+    m = re.search(rb'charset=["\']?([\w-]+)', head)
+    charset = header or (m.group(1).decode() if m else None)
+    if charset:
+        try:
+            return raw.decode(charset, errors='replace')
+        except LookupError:
+            fail(f'{src} declares an unknown charset {charset!r}')
+    try:
+        return raw.decode('utf-8')
+    except UnicodeDecodeError:
+        return raw.decode('windows-1252', errors='replace')  # the HTML default without a declaration
 
 
 def load_rules(path):
@@ -149,6 +191,8 @@ def load_rules(path):
     for i, r in enumerate(rules):
         if not isinstance(r, dict) or not str(r.get('reason', '')).strip():
             fail(f'allow rule {i} in {path} has no reason: {r}')
+        if r.get('kind', 'text') not in ('text', 'heading', 'link'):
+            fail(f'allow rule {i} in {path} has an unknown kind: {r}')
         if 'published' not in r or ('markdown' not in r and r.get('kind') != 'heading'):
             fail(f'allow rule {i} in {path} needs "published" and "markdown": {r}')
         if not isinstance(r.get('count', 1), int) or r.get('count', 1) < 1:
@@ -165,7 +209,6 @@ def main():
     ap.add_argument('--json', help='write the full report here')
     ap.add_argument('--context', type=int, default=8, help='tokens of context before each difference')
     ap.add_argument('--allow', help='JSON list of accepted deviations {published, markdown, reason}')
-    ap.add_argument('--strict', action='store_true', help='fail when an allow rule accepted nothing')
     a = ap.parse_args()
 
     try:
@@ -192,7 +235,7 @@ def main():
         diffs.append({'op': op, 'published': ' '.join(A[i1:i2]), 'markdown': ' '.join(B[j1:j2]),
                       'context_before': ' '.join(A[max(0, i1 - a.context):i1]), 'pub_pos': i1})
     accepted, keep, uses = [], [], {}
-    text_rules = [(i, r) for i, r in enumerate(rules) if r.get('kind') != 'heading']
+    text_rules = [(i, r) for i, r in enumerate(rules) if r.get('kind', 'text') == 'text']
     for d in diffs:
         hit = next(((i, r) for i, r in text_rules
                     if r['published'] == d['published'] and r['markdown'] == d['markdown']
@@ -232,27 +275,49 @@ def main():
     links = re.findall(r'href="#([^"]+)"', md_html)
     broken = sorted({l for l in links if l not in anchors})
 
-    # Code blocks, in document order, whitespace at the ends of lines trimmed.
+    # Code blocks, in document order: blank lines around a block and
+    # whitespace at line ends ignored, indentation kept. Aligned as sequences,
+    # so one missing block is reported once, not as every block after it.
     def pres(h):
         out = []
         for m in re.finditer(r'<pre[^>]*>(.*?)</pre>', h, re.S):
             t = html.unescape(re.sub(r'<[^>]+>', '', m.group(1)))
-            out.append('\n'.join(l.rstrip() for l in t.strip('\n').split('\n')).strip())
+            out.append('\n'.join(l.rstrip() for l in t.split('\n')).strip('\n'))
         return out
     P, M = pres(pub), pres(md_html)
-    code_mismatch = [i for i, (x, y) in enumerate(zip(P, M)) if x != y]
-    if len(P) != len(M):
-        code_mismatch.append(f'count {len(P)} vs {len(M)}')
+    code_mismatch = []
+    for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, P, M, autojunk=False).get_opcodes():
+        if op != 'equal':
+            code_mismatch.append({'op': op, 'published_blocks': list(range(i1, i2)),
+                                  'markdown_blocks': list(range(j1, j2)),
+                                  'published': P[i1:i2], 'markdown': M[j1:j2]})
 
-    # Images.
-    imgs = (re.findall(r'!\[[^\]]*\]\(([^)\s]+)\)', md_src)
-            + re.findall(r'<img\s[^>]*src="([^"]+)"', md_src))
+    # Images, as rendered (a commented-out image is gone), in order.
+    src = lambda h: [html.unescape(u) for u in re.findall(r'<img\b[^>]*\bsrc="([^"]+)"',
+                                                           re.sub(r'<!--.*?-->', ' ', h, flags=re.S), re.I)]
+    pub_imgs, imgs = src(pub_body), src(md_body)
     missing_imgs = [p for p in imgs if not re.match(r'https?://', p)
                     and not os.path.exists(os.path.join(root, p))]
-    pub_imgs = len(re.findall(r'<img[\s>]', pub))
 
     pub_items, pub_tables = shapes(pub_body)
     md_items, md_tables = shapes(md_body)
+    pub_hidden, md_hidden = hidden(pub_body), hidden(md_body)
+
+    # Link targets: every difference needs a "link" rule.
+    link_rules = [(i, r) for i, r in enumerate(rules) if r.get('kind') == 'link']
+    pl, ml = external_links(pub_body), external_links(md_body)
+    link_diffs = []
+    for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, pl, ml, autojunk=False).get_opcodes():
+        if op == 'equal':
+            continue
+        for k in range(max(i2 - i1, j2 - j1)):
+            d = {'published': pl[i1 + k] if i1 + k < i2 else '', 'markdown': ml[j1 + k] if j1 + k < j2 else ''}
+            hit = next((i for i, r in link_rules if r['published'] == d['published']
+                        and r['markdown'] == d['markdown'] and uses.get(i, 0) < r.get('count', 1)), None)
+            if hit is None:
+                link_diffs.append(d)
+            else:
+                uses[hit] = uses.get(hit, 0) + 1
 
     empty = [side for side, toks in (('published', A), ('markdown', B)) if not toks]
     report = {
@@ -262,9 +327,14 @@ def main():
         'internal_links': len(links), 'broken_internal_links': broken,
         'code_blocks_published': len(P), 'code_blocks_markdown': len(M),
         'code_blocks_differing': code_mismatch,
-        'images_published': pub_imgs, 'images_markdown': len(imgs), 'images_missing_on_disk': missing_imgs,
+        'images_published': len(pub_imgs), 'images_markdown': len(imgs),
+        'images_differing': [] if pub_imgs == imgs else [p for p in difflib.unified_diff(pub_imgs, imgs, lineterm='', n=0)
+                                                         if p[:1] in '+-' and p[:3] not in ('---', '+++')],
+        'images_missing_on_disk': missing_imgs,
+        'external_links_published': len(pl), 'external_links_differing': link_diffs,
         'list_items_published': pub_items, 'list_items_markdown': md_items,
         'tables_published': pub_tables, 'tables_markdown': md_tables,
+        'hidden_or_struck_published': pub_hidden, 'hidden_or_struck_markdown': md_hidden,
         'empty': empty, 'pandoc': pandoc,
         'allow_rules_unused': [r for i, r in enumerate(rules) if i not in uses],
         'diffs': diffs, 'accepted': accepted,
@@ -273,7 +343,7 @@ def main():
         with open(a.json, 'w', encoding='utf-8') as f:
             json.dump(report, f, indent=1, ensure_ascii=False)
     for k, v in report.items():
-        if k not in ('diffs', 'accepted', 'allow_rules_unused'):
+        if k not in ('diffs', 'accepted', 'allow_rules_unused', 'tables_published', 'tables_markdown'):
             print(f'{k}: {v if not isinstance(v, list) else (len(v), v)}')
     for d in diffs:
         print(f"\n[{d['op']}] ...{d['context_before']}\n  PUB: {d['published']}\n  MD : {d['markdown']}")
@@ -281,10 +351,12 @@ def main():
         print(f"ACCEPTED: PUB[{d['published']}] MD[{d['markdown']}] -- {d['reason']}")
     for r in report['allow_rules_unused']:
         print(f"UNUSED ALLOW RULE: {r}")
+    print(f"tables: {len(pub_tables)} published, {len(md_tables)} markdown, "
+          f"{'identical' if pub_tables == md_tables else 'DIFFERENT (see --json)'}")
     ok = (not diffs and not missing_heads and not broken and not code_mismatch
-          and not missing_imgs and len(imgs) == pub_imgs and not empty
-          and pub_items == md_items and pub_tables == md_tables
-          and not (a.strict and report['allow_rules_unused']))
+          and not missing_imgs and imgs == pub_imgs and not empty and not link_diffs
+          and pub_items == md_items and pub_tables == md_tables and pub_hidden == md_hidden
+          and not report['allow_rules_unused'])
     print('\nRESULT:', 'PASS' if ok else 'FAIL')
     return 0 if ok else 1
 
