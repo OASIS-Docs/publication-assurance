@@ -38,13 +38,15 @@ for (const [side, src] of [['published', published], ['rendered', rendered]]) {
         ? (document.getElementById('table-of-contents') || document.querySelector('div.toc'))
         : (document.getElementById(id) || document.querySelector(`[name="${CSS.escape(id)}"]`));
       if (!el) return false;
+      const box = el.getBoundingClientRect();
+      if (!el.getClientRects().length || (box.width === 0 && box.height === 0)) return false; // not rendered
       el.scrollIntoView({ block: 'start' });
       window.scrollBy(0, -12);
       return true;
     }, id);
-    if (!found) { console.log(`MISSING ${side} #${id}`); missing++; continue; }
+    if (!found) { console.log(`MISSING ${side} #${id} (absent or not rendered)`); missing++; continue; }
     await new Promise((r) => setTimeout(r, 400));
-    const file = `${out}/${i + 1}-${id}-${side}.png`;
+    const file = `${out}/${i + 1}-${id.replace(/[^A-Za-z0-9._-]/g, '_')}-${side}.png`;
     await page.screenshot({ path: file });
     console.log(`captured ${file}`);
   }

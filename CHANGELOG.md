@@ -75,6 +75,22 @@ Each version is anchored by a git tag on this repository.
   flattening it. `tests/test_docbook_to_markdown.py` converts oasis-tcs/lexidma
   at e3c0626 and requires lexidma's committed `dmlex-v1.0-os.md` byte for byte.
 
+- **render/** (proposal 011): `render.sh` renders one Markdown specification
+  through the pipeline's step 1 and step 2's print styles, prints the PDF in
+  headless Chrome, stages the package at its `docs.oasis-open.org` path and
+  gates it. The PDF footer is the one published OASIS PDFs carry, read from
+  the document by `footer.py`: name and track (Non-Standards Track for
+  Committee and Project Notes), the Notices copyright line, the document's
+  date, the page. The pipeline's step 2 prints the render date, the file name
+  with `.html`, no track line and a running title header (proposal 012).
+  `toc_pages.py` numbers the table of contents from the printed pages, with
+  dot leaders, and the PDF is printed again until no number moves: the
+  published DMLex PDF numbers its contents and the first render did not.
+  `compare.mjs` captures named anchors of the published and rendered pages
+  side by side and fails on an anchor that is missing or not rendered.
+  `tests/test_render.py` renders DMLex v1.0 OS and checks the footer, every
+  contents number against the page its heading prints on, the gate's PDF
+  checks and the comparison.
 - Release process: a `move-v1` workflow moves the floating `v1` tag to each v1.x.y
   release when it is published (it sat at v1.4.0 for four releases), with a manual
   dispatch to point it at a named release. The adoption guide's `@v1` row now says so.
