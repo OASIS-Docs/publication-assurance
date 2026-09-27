@@ -102,7 +102,16 @@ uses DocBook the converter does not yet handle.
   `<sub>`. A cross-reference takes its target's number and title, its
   `xreflabel`, or its `endterm`.
 - Program listings are fenced code blocks copied byte for byte.
-- The table of contents lists headings to three levels.
+- An ordered list is numbered as the DocBook stylesheet prints it: by its
+  `numeration`, or else by how many ordered lists enclose it (`1.`, `a.`,
+  `i.`, `A.`, `I.`, then round again). The pipeline's pandoc `markdown` reader
+  prints `a.` as a lettered list; GitHub shows the letter as text. DMLex
+  section 2 is lettered, and its text refers to "point c. above": before
+  v1.10.0 the converter wrote `1.`, `2.`, `3.` there, and no comparison of the
+  words could see it.
+- The table of contents lists headings to three levels, counted in an
+  appendix from its first section, as the stylesheet does: `A.2.2.1` is
+  listed, `3.2.1.1` is not.
 - A `<graphic>` with a `contentwidth` in centimetres becomes `<img width>` in
   pixels at `figure_dpi`. Without the width an SVG draws at its natural size
   and a large diagram runs off the page.
@@ -116,7 +125,8 @@ something that reads differently from the publication:
   flattening it into paragraphs. Tables (`table`, `informaltable`) are the
   first a second specification is likely to meet; DMLex has none;
 - content directly under `<article>` outside any section;
-- a lettered, roman or continued `<orderedlist>`, which GitHub's Markdown cannot express;
+- a continued `<orderedlist>` (`continuation="continues"`), which Markdown
+  cannot express, and a `numeration` it does not know;
 - a cross-reference with no text to show (no title, `xreflabel` or `endterm`);
 - a reference to an id that does not exist.
 

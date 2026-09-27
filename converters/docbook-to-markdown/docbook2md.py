@@ -295,11 +295,10 @@ class Converter:
                 return ''
             return self.para(el, indent)
         if tag in ('itemizedlist', 'orderedlist'):
-            if tag == 'orderedlist' and (el.get('numeration', 'arabic') != 'arabic'
-                                         or el.get('continuation') == 'continues'):
-                # GFM has no lettered, roman or continued list.
-                self.warnings.append(f'UNHANDLED block <orderedlist numeration={el.get("numeration")!r} '
-                                     f'continuation={el.get("continuation")!r}>')
+            if tag == 'orderedlist' and el.get('continuation') == 'continues':
+                # Markdown has no continued list.
+                self.warnings.append(f'UNHANDLED block <orderedlist continuation={el.get("continuation")!r}>')
+            style = self.numeration(el) if tag == 'orderedlist' else None
             out = []
             t = el.find('title')
             if t is not None:
@@ -309,7 +308,7 @@ class Converter:
             items = []
             for li in el.findall('listitem'):
                 k += 1
-                marker = f'{k}. ' if ordered else '- '
+                marker = self.marker(style, k) if ordered else '- '
                 sub = indent + ' ' * len(marker)
                 body = self.children(li, sub)
                 body = body.lstrip()
@@ -411,6 +410,40 @@ class Converter:
                 return lang
         return ''
 
+    NUMERATIONS = ('arabic', 'loweralpha', 'lowerroman', 'upperalpha', 'upperroman')
+
+    def numeration(self, el):
+        """An ordered list's numbering, as the DocBook stylesheet prints it: the
+        list's numeration attribute, or else by how many ordered lists enclose it
+        (1., a., i., A., I., then round again)."""
+        if el.get('numeration'):
+            if el.get('numeration') not in self.NUMERATIONS:
+                self.warnings.append(f'UNHANDLED block <orderedlist numeration={el.get("numeration")!r}>')
+            return el.get('numeration')
+        depth, p = 0, self.parent_of.get(el)
+        while p is not None:
+            depth += p.tag == 'orderedlist'
+            p = self.parent_of.get(p)
+        return self.NUMERATIONS[depth % len(self.NUMERATIONS)]
+
+    def marker(self, style, k):
+        """A list marker pandoc's markdown reader (the pipeline's step 1) numbers
+        in that style. GitHub shows a lettered or roman marker as text."""
+        if style in ('loweralpha', 'upperalpha'):
+            if k > 26:
+                self.warnings.append(f'UNHANDLED block <orderedlist numeration={style!r}> past 26 items')
+            m = chr(ord('a') + (k - 1) % 26)
+            # pandoc reads "A. " as a sentence initial; a capital needs two spaces
+            return f'{m}. ' if style == 'loweralpha' else f'{m.upper()}.  '
+        if style in ('lowerroman', 'upperroman'):
+            r = ''
+            for v, sym in ((1000, 'm'), (900, 'cm'), (500, 'd'), (400, 'cd'), (100, 'c'), (90, 'xc'),
+                           (50, 'l'), (40, 'xl'), (10, 'x'), (9, 'ix'), (5, 'v'), (4, 'iv'), (1, 'i')):
+                while k >= v:
+                    r, k = r + sym, k - v
+            return f'{r}. ' if style == 'lowerroman' else f'{r.upper()}.  '
+        return f'{k}. '
+
     def children(self, el, indent=''):
         out = []
         for c in el:
@@ -508,7 +541,10 @@ class Converter:
                 self.warnings.append(f'UNHANDLED block <{c.tag}> outside any section')
         toc = ['# Table of Contents', '']
         for depth, label, anchor in self.toc:
-            if depth > 3:
+            # The DocBook stylesheet's contents go three section levels deep,
+            # counted in an appendix from its first section: A.2.2.1 is listed,
+            # 3.2.1.1 is not.
+            if depth > (4 if label.startswith('Appendix ') or re.match(r'[A-Z]\.', label) else 3):
                 continue
             toc.append(f"{'    ' * (depth - 1)}- [{esc(label)}](#{anchor})")
         doc = '\n\n'.join([self.front(), '\n'.join(toc), '---'] + body_parts)

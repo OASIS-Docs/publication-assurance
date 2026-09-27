@@ -79,3 +79,14 @@ def test_the_markdown_pipeline_corpus_pdf_warns_and_the_word_one_does_not():
     assert len(got) == 1 and "no page number" in got[0]
     cvrf = next((CORPUS / "csaf-cvrf/v1.2/cs01").glob("*-cs01.pdf"))
     assert warnings(cvrf) == []
+
+
+def test_a_bare_appendix_letter_is_a_contents_entry():
+    """FOP prints DMLex's appendices in the contents as "A Informative material
+    ... 126", with no "Appendix"; they were not read as entries (Sep 2026)."""
+    E = oasis_pub_check._TOC_ENTRY
+    for line in ("A Informative material on serializations (Informative) ........ 126",
+                 "Appendix B References ........ 185", "A.2.2.1 NVH node: entry ........ 172"):
+        assert E.match(line), line
+    for line in ("A lexicographic resource contains entries.", "a. Conformant widgets"):
+        assert not E.match(line), line

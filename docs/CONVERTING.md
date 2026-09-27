@@ -21,10 +21,11 @@ the one that converted it.
 | 1. Convert | [`converters/docbook-to-markdown/build.sh`](../converters/docbook-to-markdown/README.md) | `<name>.md` and its figures |
 | 2. Prove it matches | [`verify/verify_md.py`](../verify/README.md) | `RESULT: PASS`, and a report listing every difference and why it is accepted |
 | 3. Render and gate | [`render/render.sh`](../render/README.md) | HTML and PDF staged at their `docs.oasis-open.org` path, and the gate's verdict |
-| 4. Compare by eye | `render/compare.mjs` | The published and rendered pages side by side |
-| 5. Cut the next stage | [`pub-check/advance_stage.py`](../pub-check/README.md#cutting-the-next-stage) | `<name>` at the next stage, with every stage-bound line rewritten |
+| 4. Prove the PDF matches | [`verify/verify_pdf.py`](../verify/README.md#verify_pdf-the-rendered-pdf-against-the-published-pdf) | `RESULT: PASS` against the published PDF: every word, the contents' page numbers, the running footer |
+| 5. Review the pages | [`render/review_pairs.py`](../render/README.md#review_pairspy) | Published and rendered pages paired for a reviewer, with a planted fault, and a grade of the review |
+| 6. Cut the next stage | [`pub-check/advance_stage.py`](../pub-check/README.md#cutting-the-next-stage) | `<name>` at the next stage, with every stage-bound line rewritten |
 
-Word sources are not handled yet. Steps 2 to 5 do not depend on DocBook.
+Word sources are not handled yet. Steps 2 to 6 do not depend on DocBook.
 They work on any Markdown edition, however it was made.
 
 ## Before you start
@@ -43,7 +44,7 @@ sudo apt-get install libxml2-utils graphviz m4 poppler-utils
 Clone this repository at a release tag, and clone your TC's source:
 
 ```bash
-git clone --depth 1 --branch v1.9.2 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.10.0 https://github.com/OASIS-Docs/publication-assurance
 git clone https://github.com/oasis-tcs/lexidma
 ```
 
@@ -157,9 +158,15 @@ This is how the pipeline was found turning the tab characters in 9 of DMLex's
 316 code blocks into spaces. The gate now checks the same thing for every package
 (`html-code-sync`).
 
-**What it cannot see:** a heading's level, a numbered list turned into bullets,
-a list item moved to another level, emphasis removed. Read the Markdown diff
-for those, and use step 4.
+It also compares how each ordered list is numbered (`1`, `a`, `i`) and the
+contents entry by entry. Both passed unseen in the first DMLex edition: its
+section 2 lists were numbered `1.`, `2.` where the standard has `a.`, `b.`
+(and its text says "as per point c. above"), and its contents stopped a
+level short in the appendices. The words were the same, so no word
+comparison could see either.
+
+**What it cannot see:** a heading's level, a list item moved to another
+level, emphasis removed. Read the Markdown diff for those, and use step 5.
 
 ## 3. Render and gate
 
@@ -191,21 +198,66 @@ gate. DMLex's nine blockers come from five defects, all in its source:
 Record them for the TC to decide. Do not fix them in the conversion: the
 conversion must say what the standard says.
 
-## 4. Compare by eye
+## 4. Prove the PDF matches
 
 ```bash
-CHROME=/path/to/chrome node publication-assurance/render/compare.mjs \
-    https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html \
-    out/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html shots cover,toc,core_entry
+python3 publication-assurance/verify/verify_pdf.py out/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.pdf \
+    https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.pdf \
+    --allow publication-assurance/converters/docbook-to-markdown/profiles/dmlex/allow-pdf.json
 ```
 
-Step 3 installed the browser driver `compare.mjs` needs.
+Step 2 checks HTML, and an HTML contents list has no page numbers. The first
+DMLex renders printed their contents with none, where the published PDF
+numbers every entry, and every HTML check passed them. `verify_pdf.py`
+compares the two PDFs word for word, every page. A contents entry's number
+is read as a placeholder, so the two editions may paginate differently, but
+an entry numbered on one side only is a difference. The running footer is
+compared too, and every rendered page must carry one.
 
-For each anchor you name, it saves the published and the rendered page at the
-same place, one after the other. It exits 1 if an anchor is missing on either
-side. Look at the figures, the tables and the contents; the verifier does not.
+For DMLex it passes with 34 accepted differences in 65,790 tokens (words
+and punctuation marks). Most are
+the template's, as in step 2. Two are defects of the published PDF itself:
+its font has no `ň` or `ō`, so it prints `sklize#` and `skul#` where the
+standard says `sklizeň` and `skulō`, and it prints one example's caption
+partway through the example. Against the 24 September render it fails with
+133 contents entries unnumbered.
 
-## 5. Cut the next stage
+## 5. Review the pages
+
+The words are proven; how the pages look is not. A figure off the page, a
+page number on the wrong line of a wrapped entry, a caption beside the wrong
+block: these need a reviewer. A reviewer asked "do these match?" says yes.
+The first DMLex comparison put the published and rendered contents pages
+side by side, and nobody saw that one had no page numbers. So the review is
+a task that cannot be passed by glancing:
+
+```bash
+python3 publication-assurance/render/review_pairs.py make \
+    out/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.pdf published.pdf pairs --key key.json
+# give a reviewer pairs/PROMPT.md and the images in pairs/, never key.json
+python3 publication-assurance/render/review_pairs.py grade key.json review.json
+```
+
+`make` pairs every page with a figure, the cover and the contents, plus 30
+random pages, each with the published page that shares its words. It adds
+one pair with something erased from the rendered side: the footer, a band of
+text, or a contents page's numbers. The brief makes the reviewer copy lines
+from both sides before comparing, and list every kind of element on each.
+
+`grade` looks each copied line up in the text of its page, so a reviewer
+that did not look is caught. It accepts the review only when the planted
+fault is named for what it is. Pass the first review and then a re-run of
+the pairs it failed; the later answers replace the earlier. On DMLex:
+- Haiku invented the lines on 13 of the 36 pairs and missed the fault;
+- Sonnet named the fault and the `csd04.xml` heading defect. On two pairs it
+  copied lines from other pages, and on a diagram page too few. Those three
+  were re-run, and the review was accepted.
+
+A rejected review is run again. It is never read as a pass.
+
+`render/compare.mjs` remains for a quick look at the HTML at named anchors.
+
+## 6. Cut the next stage
 
 DocBook keeps the version and stage in one place and fills them in
 everywhere. A Markdown specification has no such variables, so its stage
@@ -262,7 +314,19 @@ gate the result (step 3).
   fixes the hash seed. Compare such figures by their contents, not their
   bytes.
 - **pandoc versions differ.** The verifier reads the Markdown through pandoc's
-  GFM reader and requires 3.x; the DMLex result was made with 3.8.2.1.
+  `markdown` reader, as the pipeline does, and requires 3.x; the DMLex result
+  was made with 3.8.2.1.
+- **List letters are not words.** DocBook numbers a list inside a list `a.`,
+  and one inside that `i.`, unless told otherwise. A converter that writes
+  `1.` keeps every word and changes what "point c. above" means. The
+  converter numbers them as the stylesheet does; `verify_md.py` compares the
+  numbering.
+- **A wrapped contents entry.** Its page number belongs at the end of its
+  last line. The pipeline's contents numbering puts it there (v1.10.0); it
+  used to print on the first line, with the leader running to nothing.
+- **The published PDF has defects of its own.** DMLex's prints `#` for two
+  letters its font lacks. Compare against the published HTML as well as the
+  PDF, and record such a defect in the allow file with its reason.
 - **The contents need page numbers.** A PDF printed from HTML has none unless
   something writes them. The pipeline's PDF step and `render.sh` both do, and
   the gate's `pdf-toc-pages` check reports a PDF whose contents have none, or

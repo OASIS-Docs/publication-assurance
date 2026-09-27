@@ -138,3 +138,22 @@ def test_real_contents_wrappers_are_accepted(between):
     h = f'{H}{between}<ul><li><a href="#a">1 A</a></li><li><a href="#b">2 B</a></li></ul>'
     start, end = T.contents_span(h)
     assert [e.group("t") for e in T.ENTRY.finditer(h[start:end])] == ["a", "b"]
+
+
+def test_a_wrapped_entry_ends_its_last_line_with_the_page_number(tmp_path):
+    """DMLex F.1.1 wraps onto a second line; the number printed on the first
+    line and the leader ran along the second to nothing. A published OASIS
+    PDF ends the last line with the number (Sep 2026)."""
+    long = "Tracking of changes made during the OASIS publishing process after the Public Reviews of the draft"
+    text = doc(plain(3, lambda i: f'<a href="#s{i}">{i} {long if i == 2 else f"Section {i}"}</a>'),
+               "".join(sec(f"{i} {long if i == 2 else f'Section {i}'}", f"s{i}") for i in range(1, 4)))
+    src, pdf = chrome_pdf(tmp_path, "wrapped", text)
+    out = tmp_path / "numbered.html"
+    T.main(str(src), str(pdf), str(out))
+    _, printed = chrome_pdf(tmp_path, "numbered", out.read_text(encoding="utf-8"))
+    page = subprocess.run(["pdftotext", "-layout", "-f", "2", "-l", "2", str(printed), "-"],
+                          capture_output=True, text=True).stdout
+    lines = [l.rstrip() for l in page.splitlines() if l.strip()]
+    first = next(i for i, l in enumerate(lines) if "2 Tracking of changes" in l)
+    assert not re.search(r"\s\d+$", lines[first]), lines[first]
+    assert "draft" in lines[first + 1] and re.search(r"\s\d+$", lines[first + 1]), lines[first:first + 2]

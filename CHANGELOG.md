@@ -28,6 +28,58 @@ Each version is anchored by a git tag on this repository.
 
 Nothing yet.
 
+## v1.10.0 - 2026-09-27
+
+MINOR: the rendered PDF is verified word for word against the published PDF,
+and the page review is a task a reviewer cannot pass without looking.
+
+The first DMLex renders printed their contents with no page numbers. Every
+HTML check passed them, because an HTML contents list has no page numbers. A
+side-by-side review of the contents page passed them too. Turning the PDF
+comparison on DMLex found three more faults the HTML checks could not see.
+
+- **verify/verify_pdf.py** (new): the rendered PDF against the published PDF,
+  every page, with `verify_md.py`'s allow files. A contents entry's page
+  number is read as a placeholder, so an entry numbered on one side only is
+  a difference; the running footer is compared, and every rendered page must
+  carry one. Line wrapping, reordered layout, bullets and ligatures are
+  counted, not reported. Against the 24 September DMLex render it reports
+  all 133 unnumbered contents entries.
+- **verify/verify_md.py**:
+  - it now compares each ordered list's numbering (`1`, `a`, `i`) and the
+    contents, entry by entry;
+  - it reads the Markdown with the pipeline's reader
+    (`markdown+autolink_bare_uris-implicit_figures`) rather than GFM, so it
+    verifies what OASIS would publish.
+- **Converter**:
+  - nested ordered lists are numbered as the DocBook stylesheet numbers them
+    (`1.`, `a.`, `i.`, `A.`, `I.`), with an explicit `numeration` honoured.
+    DMLex section 2 was printed `1.`, `2.`, `3.` where the standard has `a.`,
+    `b.`, `c.`, and its text refers to "point c. above";
+  - the contents list an appendix one level deeper, as the stylesheet does.
+    DMLex's first edition dropped the 38 A.2.2.x and F.1.2.x entries.
+- **Pipeline, contents numbering** (`toc_pages.py`): a wrapped entry ends its
+  last line with the page number, as a published OASIS PDF does. It used to
+  print on the first line, with the leader running along the second to
+  nothing. The same markup prints this way in Chrome and wkhtmltopdf.
+- **render/review_pairs.py** (new): pairs each sampled rendered page with the
+  published page that shares its words, and plants one fault: an erased
+  footer, band of text, or contents page numbers. The brief makes the
+  reviewer copy lines before judging. The grader looks every copied line up
+  in its page's text, and accepts the review only when the planted fault is
+  named for what it is. On DMLex:
+  - Haiku invented the lines for 13 of 36 pairs and missed the fault;
+  - Sonnet named the fault and the `csd04.xml` heading defect.
+- **Gate**:
+  - `content-labels` reads a heading's label before any anchor that follows
+    it (`... (Informative) <a id='x'></a>`). The DMLex edition drew eight
+    false "unlabelled appendix" notes and one false Examples warning;
+  - `pdf-toc-pages` reads a contents entry that is a bare appendix letter
+    (`A Informative material ...`), as FOP prints it.
+- **DMLex profile**: `allow-pdf.json`, the accepted PDF differences. It
+  records two defects of the published PDF itself: `#` printed for `ň` and
+  `ō` (15 times), and a caption printed partway through Example A.64.
+
 ## v1.9.2 - 2026-09-27
 
 PATCH: step 2 fixes found when publisher-toolkit adopted this PDF step (proposal 009).

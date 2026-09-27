@@ -1,0 +1,16 @@
+[
+ {"published": "Specification URIs", "markdown": "", "reason": "OASIS Markdown template (CSAF/NIEM) has no 'Specification URIs' heading; stage URLs follow directly"},
+ {"published": "version", "markdown": "stage", "count": 3, "reason": "Naming Directives v1.7 (2 Jan 2024) label: 'This stage / Previous stage / Latest stage'"},
+ {"published": "Key words : The key words MUST , MUST NOT , REQUIRED , SHALL , SHALL NOT , SHOULD , SHOULD NOT , RECOMMENDED , MAY , and OPTIONAL in this document are to be interpreted as de - scribed in BCP 14 [ RFC2119 ] and [ RFC8174 ] if , and only if , they appear in all capitals , as shown here .", "markdown": "", "reason": "Key words paragraph moved after Status (source order of legalnotice elements); text identical, see paired insert"},
+ {"published": "", "markdown": ". Key words : The key words MUST , MUST NOT , REQUIRED , SHALL , SHALL NOT , SHOULD , SHOULD NOT , RECOMMENDED , MAY , and OPTIONAL in this document are to be interpreted as described in BCP 14 [ RFC2119 ] and [ RFC8174 ] if , and only if , they appear in all capitals , as shown here", "reason": "paired with the delete above: same paragraph, new position"},
+ {"published": ":", "markdown": "", "context": "Notices", "reason": "'Notices:' front-matter label rendered as the '## Notices' heading, as in the CSAF template"},
+ {"published": "Appendixes", "markdown": "Appendix", "reason": "the DocBook contents group the appendices under 'Appendixes' and letter them 'A'; the Markdown template's contents name each 'Appendix A'"},
+ {"published": "", "markdown": "Appendix", "count": 7, "reason": "the Markdown template's contents name each appendix 'Appendix B' where the DocBook contents print 'B'"},
+ {"published": "sklize #", "markdown": "sklizeň", "count": 5, "reason": "PUBLISHED PDF DEFECT: its font has no ň and FOP prints '#'; the published HTML and the source have 'sklizeň'"},
+ {"published": "skul #", "markdown": "skulō", "count": 10, "reason": "PUBLISHED PDF DEFECT: its font has no ō and FOP prints '#'; the published HTML and the source have 'skulō'"},
+ {"published": "", "markdown": "Example A . 64 . RDF ex : lexicon a dmlex : LexicographicResource ; dmlex : entry ex : microscope , ex : lens ,", "reason": "PUBLISHED PDF LAYOUT: FOP prints the 'Example A.64. RDF' caption partway through the example, where it broke the page; see the paired delete"},
+ {"published": "Example A . 64 . RDF", "markdown": "", "reason": "paired with the insert above: the same caption, printed mid-example in the published PDF"},
+ {"published": "csd04 . xmlTracking", "markdown": "Tracking", "reason": "SOURCE DEFECT: empty <ulink url='csd04.xml'/> inside the F.1.2.1 title leaks the filename into the heading"},
+ {"published": "csd03 . xmlTracking", "markdown": "Tracking", "reason": "SOURCE DEFECT: empty <ulink url='csd03.xml'/> inside the F.1.2.2 title"},
+ {"kind": "footer", "published": "Standards Track Work Product Copyright © OASIS Open #. All rights reserved. Page # of #", "markdown": "Standards Track Work Product Copyright © OASIS Open #. All Rights Reserved. Page # of #", "reason": "the footer's copyright line is the document's own ('All Rights Reserved.', as its Notices print it); the DocBook stylesheet writes 'All rights reserved.'"}
+]

@@ -237,6 +237,40 @@ For complete copyright information please see the [full Notices](#full-notices) 
     - [A.2 DMLex NVH serialization (Informative)](#nvh)
         - [A.2.1 Design Principles (Informative)](#NVHDesignPrinciples)
         - [A.2.2 DMLex NVH serialization nodes (Informative)](#NVHNodes)
+            - [A.2.2.1 NVH node: lexicographicResource](#nvh_lexicographicResource)
+            - [A.2.2.2 NVH node: entry](#nvh_entry)
+            - [A.2.2.3 NVH node: pos](#nvh_pos)
+            - [A.2.2.4 NVH node: form](#nvh_form)
+            - [A.2.2.5 NVH node: sense](#nvh_sense)
+            - [A.2.2.6 NVH node: definition](#nvh_definition)
+            - [A.2.2.7 NVH node: label](#nvh_label)
+            - [A.2.2.8 NVH node: pronunciation](#nvh_pronunciation)
+            - [A.2.2.9 NVH node: transcription](#nvh_transcription)
+            - [A.2.2.10 NVH node: example](#nvh_example)
+            - [A.2.2.11 NVH node: translationLanguage](#nvh_translationLanguage)
+            - [A.2.2.12 NVH nodes: \[PREFIX\]translation](#nvh_headwordTranslation)
+            - [A.2.2.13 NVH nodes: \[PREFIX\]explanation](#nvh_headwordExplanation)
+            - [A.2.2.14 NVH nodes: \[PREFIX\]exampleTranslation](#nvh_exampleTranslation)
+            - [A.2.2.15 NVH node: definitionTypeTag](#nvh_definitionTypeTag)
+            - [A.2.2.16 NVH node: formTag](#nvh_formTag)
+            - [A.2.2.17 NVH node: labelTag](#nvh_labelTag)
+            - [A.2.2.18 NVH node: labelTypeTag](#nvh_labelTypeTag)
+            - [A.2.2.19 NVH node: posTag](#nvh_posTag)
+            - [A.2.2.20 NVH node: sourceIdentityTag](#nvh_sourceIdentityTag)
+            - [A.2.2.21 NVH node: transcriptionSchemeTag](#nvh_transcriptionSchemeTag)
+            - [A.2.2.22 NVH node: sameAs](#nvh_sameAs)
+            - [A.2.2.23 NVH node: relation](#nvh_relation)
+            - [A.2.2.24 NVH nodes: \[PREFIX\]member](#nvh_member)
+            - [A.2.2.25 NVH node: relationType](#nvh_relationType)
+            - [A.2.2.26 NVH node: memberType](#nvh_memberType)
+            - [A.2.2.27 NVH node: placeholder](#nvh_placeholder)
+            - [A.2.2.28 NVH node: headword](#nvh_headword)
+            - [A.2.2.29 NVH node: collocate](#nvh_collocate)
+            - [A.2.2.30 NVH node: etymology](#nvh_etymology)
+            - [A.2.2.31 NVH node: etymon](#nvh_etymon)
+            - [A.2.2.32 NVH nodes: \[PREFIX\]etymonUnit](#nvh_etymonUnit)
+            - [A.2.2.33 NVH node: etymonType](#nvh_etymonType)
+            - [A.2.2.34 NVH node: etymonLanguage](#nvh_etymonLanguage)
 - [Appendix B References (Normative)](#references)
     - [B.1 Normative references (Normative)](#normativeReferences)
     - [B.2 Informative references (Informative)](#informativeReferences)
@@ -247,6 +281,10 @@ For complete copyright information please see the [full Notices](#full-notices) 
     - [F.1 Tracking of changes](#ReviewChangeTrack)
         - [F.1.1 Tracking of changes made during the OASIS publishing process after Public Reviews](#f-1-1-tracking-of-changes-made-during-the-oasis-publishing-process-after-public-reviews)
         - [F.1.2 Tracking of changes made in response to Public Reviews](#f-1-2-tracking-of-changes-made-in-response-to-public-reviews)
+            - [F.1.2.1 Tracking of changes in response to the 4th Public Review](#csprd04)
+            - [F.1.2.2 Tracking of changes in response to the 3rd Public Review](#csprd03)
+            - [F.1.2.3 Tracking of changes in response to the 2nd Public Review](#csprd02)
+            - [F.1.2.4 Tracking of changes in response to the 1st Public Review](#csprd01)
 - [Appendix G Acknowledgements (Informative)](#acknowledgements)
 - [Appendix H Notices (Informative)](#full-notices)
 
@@ -410,29 +448,29 @@ The term UNIQUE shall be interpreted as given in the section on [Unique identifi
 
 1. <a id='DocumentConformance'></a>**DMLex Instances Conformance**
 
-   1. Conformant *DMLex Instances* MUST be well formed and valid instances according to one of the normative DMLex Serialization Specifications.
+   a. Conformant *DMLex Instances* MUST be well formed and valid instances according to one of the normative DMLex Serialization Specifications.
 
-   2. *DMLex Instances* MAY contain custom extensions, provided that those extensions do not provide features or parts of features that are provided by the [DMLex Core](#core) or any of the [DMLex Modules](#modules). Extensions MUST be serialized in a way conformant and compatible with the pertaining DMLex Serialization Specifications.
+   b. *DMLex Instances* MAY contain custom extensions, provided that those extensions do not provide features or parts of features that are provided by the [DMLex Core](#core) or any of the [DMLex Modules](#modules). Extensions MUST be serialized in a way conformant and compatible with the pertaining DMLex Serialization Specifications.
 
 2. <a id='ApplicationConformance'></a>**Application Conformance**
 
-   1. DMLex *Writers* MUST create conformant *DMLex Instances* to be considered DMLex compliant.
+   a. DMLex *Writers* MUST create conformant *DMLex Instances* to be considered DMLex compliant.
 
-   2. *Agents* processing conformant *DMLex Instances* that contain custom extensions are not REQUIRED to understand and process non-DMLex objects or attributes. However, conformant applications SHOULD preserve existing custom extensions when processing conformant *DMLex Instances*, provided that the objects that contain custom extensions are not removed according to DMLex Processing Requirements or the extension's own processing requirements.
+   b. *Agents* processing conformant *DMLex Instances* that contain custom extensions are not REQUIRED to understand and process non-DMLex objects or attributes. However, conformant applications SHOULD preserve existing custom extensions when processing conformant *DMLex Instances*, provided that the objects that contain custom extensions are not removed according to DMLex Processing Requirements or the extension's own processing requirements.
 
-   3. All *Agents* MUST comply with Processing Requirements for otherwise unspecified *Agents* or without a specifically set target *Agent*.
+   c. All *Agents* MUST comply with Processing Requirements for otherwise unspecified *Agents* or without a specifically set target *Agent*.
 
-   4. Specialized *Agents* defined in this specification - this is *Creator*, *Writer*, *Modifier*, and *Enricher* *Agents* - MUST comply with the Processing Requirements targeting their specifically defined type of *Agent* on top of Processing Requirements targeting all *Agents* as per point c. above.
+   d. Specialized *Agents* defined in this specification - this is *Creator*, *Writer*, *Modifier*, and *Enricher* *Agents* - MUST comply with the Processing Requirements targeting their specifically defined type of *Agent* on top of Processing Requirements targeting all *Agents* as per point c. above.
 
-   5. DMLex is an object model explicitly designed for exchanging data in the same serialization among various *Agents*. Thus, a conformant DMLex application MUST be able to accept *DMLex Instances* *Created*, *Modified*, or *Enriched* by a different application, provided that:
+   e. DMLex is an object model explicitly designed for exchanging data in the same serialization among various *Agents*. Thus, a conformant DMLex application MUST be able to accept *DMLex Instances* *Created*, *Modified*, or *Enriched* by a different application, provided that:
 
-      1. The processed files are conformant *DMLex Instances* according to the same DMLex Serialization Specification,
+      i. The processed files are conformant *DMLex Instances* according to the same DMLex Serialization Specification,
 
-      2. in a state compliant with all relevant Processing Requirements.
+      ii. in a state compliant with all relevant Processing Requirements.
 
 3. **Backwards Compatibility**
 
-   1. N/A (no previous versions)
+   a. N/A (no previous versions)
 
 > **Note**
 >
