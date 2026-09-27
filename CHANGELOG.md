@@ -28,6 +28,21 @@ Each version is anchored by a git tag on this repository.
 
 Nothing yet.
 
+## v1.10.1 - 2026-09-27
+
+PATCH: `verify_pdf.py` allow rules no longer depend on how a pdftotext
+version splits a line.
+
+- An allow rule now also matches up to four differences within 12 tokens of
+  each other, joined. Where DMLex's published PDF prints the "Example A.64.
+  RDF" caption on a line of code, poppler 26 read it whole and Ubuntu's
+  poppler split it around a word of the code. v1.10.0 passed on the first
+  and failed in the lexidma workflow on the second. Differences that are far
+  apart still count as separate.
+- `tests/test_render.py` now runs `verify_pdf.py` on the rendered DMLex PDF
+  against the live published PDF, so this repository's CI checks the DMLex
+  rules with Ubuntu's pdftotext before a release.
+
 ## v1.10.0 - 2026-09-27
 
 MINOR: the rendered PDF is verified word for word against the published PDF,

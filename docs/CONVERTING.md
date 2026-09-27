@@ -44,7 +44,7 @@ sudo apt-get install libxml2-utils graphviz m4 poppler-utils
 Clone this repository at a release tag, and clone your TC's source:
 
 ```bash
-git clone --depth 1 --branch v1.10.0 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.10.1 https://github.com/OASIS-Docs/publication-assurance
 git clone https://github.com/oasis-tcs/lexidma
 ```
 

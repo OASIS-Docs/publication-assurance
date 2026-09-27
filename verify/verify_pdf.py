@@ -32,7 +32,9 @@ verify_md.py compares the HTML:
   wrong version or date is a difference. Every rendered page must carry one.
 
 --allow takes verify_md.py's allow files ({"published", "markdown",
-"reason"}, with "count" and "context"). {"kind": "footer", "published": ...,
+"reason"}, with "count" and "context"); a rule also matches up to four
+differences within 12 tokens of each other, joined, since pdftotext versions
+split a line differently. {"kind": "footer", "published": ...,
 "markdown": ...} accepts a running line as the report prints it.
 {"kind": "region", "from": ..., "to": ..., "reason": ...} names a stretch
 after the contents, from the tokens "from" up to the tokens "to", whose
@@ -71,6 +73,8 @@ BULLETS = set('•◦▪■□●○‣∙')
 EDGE = 3  # lines at the top and bottom of a page where a running line can be
 MOVE = 400  # tokens a block may travel and still count as moved
 MIN_MOVE = 3  # tokens in the smallest block that counts as moved
+SPLIT = 4  # adjacent differences an allow rule may match as one
+NEAR = 12  # tokens that may separate them
 LIGATURES = {0xFB00: 'ff', 0xFB01: 'fi', 0xFB02: 'fl', 0xFB03: 'ffi', 0xFB04: 'ffl', 0xFB05: 'st', 0xFB06: 'st'}
 
 
@@ -278,22 +282,41 @@ def compare(pub_pages, ren_pages, rules, context=8):
     kept = [o for n, o in enumerate(ops) if n not in moved]
 
     text_rules = [(i, r) for i, r in enumerate(rules) if r.get('kind', 'text') == 'text']
-    diffs, accepted = list(region_diffs), []
-    for op, i1, i2, j1, j2 in kept:
-        d = {'op': op, 'published': ' '.join(ta[i1:i2]), 'markdown': ' '.join(tb[j1:j2]),
-             'context_before': ' '.join(ta[max(0, i1 - context):i1]),
-             'published_page': A.pos[ia[min(i1, len(ia) - 1)]] if ia else 0,
-             'rendered_page': B.pos[ib[min(j1, len(ib) - 1)]] if ib else 0}
-        hit = next(((i, r) for i, r in text_rules
-                    if r['published'] == d['published'] and r['markdown'] == d['markdown']
-                    and d['context_before'].endswith(r.get('context', ''))
-                    and uses.get(i, 0) < r.get('count', 1)), None)
+    found = [{'op': op, 'published': ' '.join(ta[i1:i2]), 'markdown': ' '.join(tb[j1:j2]),
+              'context_before': ' '.join(ta[max(0, i1 - context):i1]), 'span': (i1, i2, j1, j2),
+              'published_page': A.pos[ia[min(i1, len(ia) - 1)]] if ia else 0,
+              'rendered_page': B.pos[ib[min(j1, len(ib) - 1)]] if ib else 0}
+             for op, i1, i2, j1, j2 in kept]
+    diffs, accepted, k = list(region_diffs), [], 0
+    while k < len(found):
+        # A rule may match a run of up to SPLIT adjacent differences, joined: one
+        # pdftotext prints a caption beside a code line whole, another splits it
+        # around a word of the code (poppler 26 against Ubuntu's, on DMLex A.64).
+        hit = None
+        for n in range(1, SPLIT + 1):
+            run = found[k:k + n]
+            if len(run) < n or any(b['span'][0] - a['span'][1] > NEAR or b['span'][2] - a['span'][3] > NEAR
+                                   for a, b in zip(run, run[1:])):
+                break
+            pub = ' '.join(d['published'] for d in run if d['published'])
+            md = ' '.join(d['markdown'] for d in run if d['markdown'])
+            hit = next(((i, r) for i, r in text_rules
+                        if r['published'] == pub and r['markdown'] == md
+                        and run[0]['context_before'].endswith(r.get('context', ''))
+                        and uses.get(i, 0) < r.get('count', 1)), None)
+            if hit:
+                break
         if hit:
             uses[hit[0]] = uses.get(hit[0], 0) + 1
-            d['reason'] = hit[1]['reason']
-            accepted.append(d)
+            for d in run:
+                d['reason'] = hit[1]['reason']
+                accepted.append(d)
+            k += len(run)
         else:
-            diffs.append(d)
+            diffs.append(found[k])
+            k += 1
+    for d in diffs + accepted:
+        d.pop('span', None)
 
     pub_lines, ren_lines = set(pub_run.values()), set(ren_run.values())
     only_pub, only_ren = sorted(pub_lines - ren_lines), sorted(ren_lines - pub_lines)
