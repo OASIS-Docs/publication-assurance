@@ -23,10 +23,10 @@ import subprocess
 import sys
 
 CSS = """<style id="toc-pages">
-.toc-line { display: flex; align-items: baseline; }
-.toc-line > a { flex: 0 1 auto; }
-.toc-dots { flex: 1 1 auto; border-bottom: 1px dotted #666; margin: 0 0.3em; min-width: 1em; }
-.toc-page { flex: 0 0 auto; }
+.toc-line { display: -webkit-box; display: flex; -webkit-box-align: baseline; align-items: baseline; }
+.toc-text { -webkit-box-flex: 0; flex: 0 1 auto; }
+.toc-dots { -webkit-box-flex: 1; flex: 1 1 auto; border-bottom: 1px dotted #666; margin: 0 0.3em; min-width: 1em; }
+.toc-page { -webkit-box-flex: 0; flex: 0 0 auto; }
 </style>"""
 
 
@@ -61,46 +61,57 @@ def text_pages(pdf, entries):
     return found
 
 
+ENTRY = re.compile(r'(?P<pre>(?:<li\b[^>]*>|<br\s*/?>)?\s*)(?P<num>[^<>]*?)'
+                   r'(?P<a><a href="#(?P<t>[^"]+)">(?P<label>.*?)</a>)', re.S)
+
+
 def main(src, pdf, out):
-    """Number the contents of src from pdf's pages into out; return how many
-    numbers changed since src."""
+    """Number the contents of src (the unnumbered HTML, never changed) from
+    pdf's pages into out, and return how many numbers differ from the ones
+    out held before. A contents entry is a list item or a line: optional
+    text (a section number), then a link to the heading. Pages come from
+    the PDF's named destinations, else from where the entry's text is
+    printed (text_pages)."""
     h = open(src, encoding='utf-8').read()
-    m = re.search(r'<h([1-6])[^>]*id="table-of-contents"[^>]*>.*?</h\1>\s*<ul>', h, re.S)
+    m = re.search(r'<h([1-6])[^>]*id="table-of-contents"[^>]*>.*?</h\1>\s*(?=<(ul|ol)\b)', h, re.S)
     if not m:
         raise LookupError('toc_pages.py: no table of contents (a heading with id table-of-contents followed by a list)')
-    depth, end = 0, None
-    for t in re.finditer(r'<(/?)ul\b[^>]*>', h[m.end() - 4:]):
+    tag, start, depth, end = m.group(2), m.end(), 0, None
+    for t in re.finditer(rf'<(/?){tag}\b[^>]*>', h[start:]):
         depth += -1 if t.group(1) else 1
         if depth == 0:
-            end = m.end() - 4 + t.end()
+            end = start + t.end()
             break
-    toc = h[m.end() - 4:end]
+    toc = h[start:end]
+    entries = [(e.group('t'), re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', '', e.group('num') + e.group('label')))).strip().lower())
+               for e in ENTRY.finditer(toc)]
     pages = dests(pdf)
-    links = [(t, re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', html.unescape(label))).strip().lower())
-             for t, label in re.findall(r'<a href="#([^"]+)">(.*?)</a>', toc, re.S)]
-    if any(t not in pages for t, _ in links):
-        pages = {**text_pages(pdf, [(t, l) for t, l in links if t not in pages]), **pages}
-    old = dict(re.findall(r'<span class="toc-page" data-for="([^"]+)">(\d+)</span>', toc))
-    toc = re.sub(r'<span class="toc-line">(<a href="#[^"]+">.*?</a>)<span class="toc-dots"></span>'
-                 r'<span class="toc-page"[^>]*>\d+</span></span>', r'\1', toc, flags=re.S)
+    if any(t not in pages for t, _ in entries):
+        pages = {**text_pages(pdf, [(t, l) for t, l in entries if t not in pages]), **pages}
+    try:
+        old = dict(re.findall(r'<span class="toc-page" data-for="([^"]+)">(\d+)</span>',
+                              open(out, encoding='utf-8').read()))
+    except OSError:
+        old = {}
     missing, changed, n = [], 0, 0
 
-    def number(a):
+    def number(e):
         nonlocal changed, n
-        target = a.group(1)
+        target = e.group('t')
         if target not in pages:
             missing.append(target)
-            return a.group(0)
+            return e.group(0)
         n += 1
         changed += old.get(target) != str(pages[target])
-        return (f'<span class="toc-line">{a.group(0)}<span class="toc-dots"></span>'
-                f'<span class="toc-page" data-for="{target}">{pages[target]}</span></span>')
-    toc = re.sub(r'<a href="#([^"]+)">.*?</a>', number, toc, flags=re.S)
+        return (f'{e.group("pre")}<span class="toc-line"><span class="toc-text">{e.group("num")}{e.group("a")}</span>'
+                f'<span class="toc-dots"></span><span class="toc-page" data-for="{target}">{pages[target]}</span></span>')
+    toc = ENTRY.sub(number, toc)
+    # a numbered line is a block of its own: the line break after it goes
+    toc = re.sub(r'(<span class="toc-page" data-for="[^"]+">\d+</span></span>)\s*<br\s*/?>', r'\1', toc)
     if missing:
         raise LookupError(f'toc_pages.py: no page in {pdf} for {missing}')
-    h = h[:m.end() - 4] + toc + h[end:]
-    if 'id="toc-pages"' not in h:
-        h = h.replace('</head>', CSS + '</head>', 1)
+    h = h[:start] + toc + h[end:]
+    h = h.replace('</head>', CSS + '</head>', 1)
     open(out, 'w', encoding='utf-8').write(h)
     print(f'numbered {n} contents entries, {changed} changed')
     return changed

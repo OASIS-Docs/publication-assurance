@@ -70,15 +70,15 @@ CHROME=$(command -v "${CHROME:-}" || echo "${CHROME:-}")
 export CHROME
 [ -d "$HERE/node_modules/puppeteer-core" ] || npm install --prefix "$HERE" --no-save --silent puppeteer-core@24
 node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$FOOTER"
-# The contents' page numbers come from the printed PDF; print again until
-# they stop moving (numbering can push a heading onto the next page).
+# The contents' page numbers come from the printed PDF; print a numbered
+# copy until no number moves (numbering can push a heading onto the next page).
 for pass in 1 2 3 4; do
-  CHANGED=$(python3 "$PA/.github/src/pipeline/toc_pages.py" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$STAGE/.$NAME-pdf.html" | tee /dev/stderr | sed -n 's/.*, \([0-9]*\) changed$/\1/p')
+  CHANGED=$(python3 "$PA/.github/src/pipeline/toc_pages.py" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$STAGE/.$NAME-pdf-numbered.html" | tee /dev/stderr | sed -n 's/.*, \([0-9]*\) changed$/\1/p')
   [ "$CHANGED" = 0 ] && break
   [ "$pass" = 4 ] && { echo "contents page numbers did not settle after 4 passes" >&2; exit 1; }
-  node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$FOOTER"
+  node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf-numbered.html" "$STAGE/$NAME.pdf" "$FOOTER"
 done
-rm -f "$STAGE/.$NAME-pdf.html"
+rm -f "$STAGE/.$NAME-pdf.html" "$STAGE/.$NAME-pdf-numbered.html"
 test -s "$STAGE/$NAME.pdf"
 
 # 4. The gate. Exit 0 means publishable; warnings do not fail.
