@@ -50,14 +50,11 @@ render/render.sh MD_DIR SCHEMAS_DIR OUT_ROOT     # SCHEMAS_DIR "-" when there ar
   With `PUBCHECK=0` it stops after staging; CI then runs the gate through the
   action.
 
-The pipeline's own step 2 (wkhtmltopdf) is not used for the PDF because its
-footer does not match the published footer:
-- it prints the file name with `.html`;
-- it prints the date of the render;
-- it has no track line;
-- it puts the title as a running header on every page.
-
-Proposal 012 fixes step 2 itself.
+`render.sh` prints with Chrome, which GitHub's runners and most desktops
+already have. The pipeline's own PDF step prints with wkhtmltopdf. Both
+print the same published footer and numbered contents; until proposal 012
+(v1.9.0) the wkhtmltopdf step printed the file name with `.html`, the day of
+the render, no track line, and a running title header.
 
 ## compare.mjs
 

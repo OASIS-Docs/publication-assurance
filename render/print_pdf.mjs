@@ -9,9 +9,8 @@
 // document date and "Page x of y" on the right. No running header: the
 // published PDFs have none, and a title there repeats on the cover page.
 //
-// Why not the pipeline's step 2: its wkhtmltopdf footer prints the file name
-// with ".html", the date of the render rather than the document's, no track
-// line, and the title as a running header on every page (proposal 012).
+// Chrome, because GitHub's runners and most desktops have it; the pipeline's
+// own PDF step prints the same footer with wkhtmltopdf (proposal 012).
 //
 //   CHROME=/path/to/chrome node print_pdf.mjs IN.html OUT.pdf FOOTER.json
 //

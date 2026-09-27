@@ -348,8 +348,12 @@ def main(argv=None) -> int:
     ap.add_argument("--formats", help="This stage formats, e.g. md,html,pdf (default: the source's)")
     ap.add_argument("--write", action="store_true", help="create the new file (default: dry run)")
     ap.add_argument("--out", help="directory for the new file (default: beside the source)")
-    ap.add_argument("--allow-dirty", action="store_true")
-    ap.add_argument("--unpublished-ok", action="store_true")
+    ap.add_argument("--allow-dirty", action="store_true",
+                    help="cut from a source with uncommitted changes; for a scratch copy only, "
+                         "since the cut can then not be traced to a commit")
+    ap.add_argument("--unpublished-ok", action="store_true",
+                    help="allow a Working Draft (wd) target; Working Drafts are not published on "
+                         "docs.oasis-open.org, so their URIs will not resolve")
     ap.add_argument("--leave-stale", action="store_true",
                     help="write the cut even when references to the old stage remain, and list them")
     a = ap.parse_args(argv)
