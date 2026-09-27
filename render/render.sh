@@ -25,6 +25,7 @@
 # (puppeteer-core is installed next to this script on first run) and Chrome or
 # Chromium (CHROME overrides discovery).
 set -euo pipefail
+case "${1:-}" in -h|--help|"") sed -n '5,28p' "$0" | sed 's/^# \{0,1\}//'; exit 0;; esac
 HERE=$(cd "$(dirname "$0")" && pwd)
 PA=$(cd "$HERE/.." && pwd)
 MD_DIR=$(cd "$1" && pwd)

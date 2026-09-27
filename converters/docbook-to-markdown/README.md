@@ -19,6 +19,7 @@ walkthrough for a TC is [docs/CONVERTING.md](../../docs/CONVERTING.md).
 | `docbook2md.py` | The converter: resolved DocBook XML to Markdown |
 | `profiles/<spec>/profile.json` | What differs for one specification (below) |
 | `profiles/<spec>/allow.json` | The accepted differences from its published HTML, each with a reason |
+| `profiles/<spec>/allow-rendered.json` | The further differences the pipeline's own HTML makes on purpose, for `verify_md.py --rendered` |
 | `profiles/<spec>/prebuild.sh` | Optional: figures the TC's own build generates |
 
 Requirements: Python 3.10 or later (standard library only), `xmllint`
@@ -63,6 +64,7 @@ is the shared OASIS DocBook stylesheet's behaviour and lives in the converter.
 
 | Key | Meaning | Default |
 |---|---|---|
+| `spec` | The specification's name, for people reading the profile | none |
 | `main` | The DocBook root file in `SPEC_DIR` | required |
 | `dtd` | The local DocBook DTD, so nothing is fetched | required |
 | `entities` | The entity file that declares `version`, `stage` and the rest | required |
@@ -71,7 +73,7 @@ is the shared OASIS DocBook stylesheet's behaviour and lives in the converter.
 | `prebuild` | A script run as `prebuild.sh SPEC_DIR WORK_DIR EXTRA_DIR` | none |
 | `glossterm_upper` | Uppercase `<glossterm>`, as the v1.43 stylesheet does for the BCP 14 key words | `false` |
 | `figure_dpi` | Pixels per inch for a `<graphic contentwidth="...cm">` | `90` (DocBook XSL) |
-| `code_languages` | Fence language by the extension of a listing's `xml:base` | `.json`, `.xml`, `.sql` |
+| `code_languages` | The language label a code block gets, by the extension of the file it was included from (`xml:base`) | `.json`, `.xml`, `.sql` |
 | `allow` | The allow file passed to the verifier | none |
 
 The DMLex profile (`profiles/dmlex/`) is the first. A second specification
@@ -114,7 +116,7 @@ something that reads differently from the publication:
   flattening it into paragraphs. Tables (`table`, `informaltable`) are the
   first a second specification is likely to meet; DMLex has none;
 - content directly under `<article>` outside any section;
-- a lettered, roman or continued `<orderedlist>`, which GFM cannot write;
+- a lettered, roman or continued `<orderedlist>`, which GitHub's Markdown cannot express;
 - a cross-reference with no text to show (no title, `xreflabel` or `endterm`);
 - a reference to an id that does not exist.
 

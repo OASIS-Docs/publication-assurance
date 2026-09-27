@@ -446,6 +446,7 @@ jobs:
           curl -fsSL -o "$RUNNER_TEMP/pandoc.deb" \
             "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-1-amd64.deb"
           sudo dpkg -i "$RUNNER_TEMP/pandoc.deb"
+          sudo apt-get update -q && sudo apt-get install -y poppler-utils   # contents page numbers
           python3 -m pip install --quiet beautifulsoup4
 
       - name: Render Markdown to HTML and PDF

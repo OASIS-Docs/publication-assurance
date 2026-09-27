@@ -17,7 +17,7 @@ differences that are not in the document; the tool refuses them and records
 the version it used in the report.
 
 ```bash
-python3 verify/verify_md.py SPEC.md PUBLISHED [--root DIR] [--allow FILE ...] [--json OUT] [--rendered HTML]
+python3 verify/verify_md.py SPEC.md PUBLISHED [--root DIR] [--allow FILE] (repeat --allow for more than one file) [--json OUT] [--rendered HTML]
 ```
 
 | Argument | Meaning |
@@ -25,7 +25,7 @@ python3 verify/verify_md.py SPEC.md PUBLISHED [--root DIR] [--allow FILE ...] [-
 | `SPEC.md` | The Markdown edition |
 | `PUBLISHED` | The published HTML: a saved file or an `https://docs.oasis-open.org/...` URL |
 | `--root DIR` | Where the Markdown's image paths are resolved (default: the Markdown's directory) |
-| `--allow FILE` | Accepted deviations, each with a reason (below) |
+| `--allow FILE` | Accepted deviations, each with a reason (below); give it more than once to combine files |
 | `--json OUT` | The full report, every difference in full |
 | `--rendered HTML` | Verify this rendering of `SPEC.md`, the pipeline's step 1 output, instead of reading `SPEC.md` with pandoc's GFM reader. This is the HTML that is published, so it is the stronger check; add the profile's `allow-rendered.json` for what step 1 changes on purpose |
 
@@ -43,7 +43,7 @@ The last line printed is `RESULT: PASS` or `RESULT: FAIL`.
 | Lists and tables | Same number of list items; every data table (two or more rows) has the same words in the same cells of the same rows |
 | Images | The same image sources in the same order, as rendered (a commented-out image is gone), and every local one exists under `--root` |
 | Link targets | The same external (http or https) link targets; the scheme is read as https |
-| Hidden text | No more struck-through (`~~`, `<del>`) or hidden (`display:none`) markup than the publication has |
+| Hidden text | The same amount of struck-through (`~~`, `<del>`) or hidden (`display:none`) markup as the publication |
 | Internal links | Every `#id` link in the Markdown has an anchor |
 | Not empty | Neither side is empty |
 
@@ -90,11 +90,17 @@ exactly. A rule accepts one difference unless it gives `count`, and with
 difference no rule accepts fails the run, so the allow file is the complete,
 reviewable list of every way the Markdown differs from the publication.
 
+A rule's `kind` says what it accepts: `text` (the default) a difference in
+the words, `heading` a published heading the Markdown words differently,
+`link` a changed link target, and `image` a changed image source (with
+`--rendered`, the pipeline serves the OASIS logo from the package's own
+`images/` directory).
+
 The DMLex rules are in
 [`converters/docbook-to-markdown/profiles/dmlex/allow.json`](../converters/docbook-to-markdown/profiles/dmlex/allow.json).
 With them, the DMLex v1.0 OASIS Standard Markdown edition matches
 [the published HTML](https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html) on
-61,260 words, 311 headings, 316 code blocks, 1,133 list items, 93 external
+61,260 tokens (words and punctuation marks), 311 headings, 316 code blocks, 1,133 list items, 93 external
 links and 50 images
 (`tests/test_verify_md.py`).
 

@@ -163,6 +163,7 @@ def markdown(h):
 
 
 def write_proposals(h, directory):
+    os.makedirs(directory, exist_ok=True)
     nums = [int(m.group(1)) for f in os.listdir(directory) if (m := re.match(r"(\d{3})-", f))]
     n = max(nums, default=0)
     written = []

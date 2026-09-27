@@ -33,15 +33,18 @@ reason is refused; a rule that accepted nothing fails the run.
 {"kind": "link", "published": URL or "", "markdown": URL or ""} accepts a
 difference in the external link targets.
 
-Tables and lists are compared by shape: the number of list items, and the
-number of data tables (two or more rows, two or more cells in a row) with
-their row and cell counts. A table flattened into paragraphs keeps its words
-and loses its shape, so the word comparison alone would pass it.
+Tables and lists are compared by shape: the number of list items, and each
+data table (two or more rows, two or more cells in a row) cell by cell, row
+by row. A table flattened into paragraphs keeps its words and loses its
+shape, so the word comparison alone would pass it.
 
 Images are compared as rendered, source by source in order; external link
 targets as a set; struck-through and hidden markup by count.
 
-Usage: verify_md.py SPEC.md PUBLISHED.html|URL [--root DIR] [--allow FILE] [--json OUT]
+Rule kinds: text (default), heading, link, and image (a changed image source,
+{"kind": "image", "published": SRC, "markdown": SRC}).
+
+Usage: verify_md.py SPEC.md PUBLISHED.html|URL [--root DIR] [--allow FILE]... [--json OUT] [--rendered HTML]
 Exit 0 when every check passes, 1 when any fails, 2 when the input cannot be read.
 """
 import argparse

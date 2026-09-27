@@ -29,7 +29,8 @@ They work on any Markdown edition, however it was made.
 
 ## Before you start
 
-You need Python 3.10 or later, pandoc 3.x, `xmllint`, Node.js 18 or later,
+You need Python 3.10 or later with the `beautifulsoup4` package
+(`pip install beautifulsoup4`), pandoc 3.x, `xmllint`, Node.js 18 or later,
 Chrome or Chromium, and poppler (`pdfinfo`, `pdftotext`). The converter needs
 Graphviz and m4 if your specification generates figures the way DMLex does.
 On Debian or Ubuntu:
@@ -59,10 +60,11 @@ directory gets `dmlex-v1.0-os.md`, every figure it references, and
 `dmlex-v1.0-os-verification.json`. The last line printed is the verifier's
 verdict (step 2).
 
-A **profile** holds what is particular to one specification: the root file,
-where the version and stage entities are, the output name, whether key words
-are uppercased, the figure resolution, the fence language for each kind of
-example file, and any figure the TC's own build generates. DMLex's is
+A **profile** holds what is particular to one specification: its main file;
+the file where the DocBook source names its version and stage; the output
+name; whether key words are printed in capitals; the figure resolution; the
+language label each kind of example file gets on its code block; and any
+figure the TC's own build generates. DMLex's is
 [`profiles/dmlex/`](../converters/docbook-to-markdown/profiles/dmlex/). For a
 new specification, copy it, change what differs, and pass the directory to
 `--profile`. The keys are listed in the
@@ -123,8 +125,9 @@ and `insert` means it added them. Fix the conversion, not the report.
 **The allow file** is the complete list of the ways your Markdown is meant to
 differ from the publication, each with a reason a reviewer can check. For
 DMLex these are:
-- template differences: "This stage" where DocBook said "This version", and
-  the Key words paragraph in its template position;
+- template differences: "This stage" where DocBook said "This version", no
+  "Specification URIs" heading, "Notices" as a heading rather than a label,
+  and the Key words paragraph in its template position;
 - the HTML page footer;
 - two source defects in the published headings;
 - the logo link;
@@ -136,10 +139,11 @@ nothing fails the run. That stops a paragraph that was allowed to move from
 disappearing. Never add a rule to make a failure go away. Add one only for a
 difference you would defend to the TC.
 
-**Verify what is published, too.** The verifier reads your Markdown with
-pandoc's GitHub reader. The pipeline renders it with pandoc's `markdown` reader
-and its own transforms, and that HTML is what is published. After step 3,
-check the rendered HTML itself:
+**Verify what is published, too.** The verifier reads your Markdown the way
+GitHub displays it. The pipeline's HTML converter reads it with pandoc's own
+Markdown dialect, which treats a few characters differently, and then applies
+its own changes; that HTML is what is published. After step 3, check the
+rendered HTML itself:
 
 ```bash
 python3 publication-assurance/verify/verify_md.py out/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.md \
@@ -149,8 +153,8 @@ python3 publication-assurance/verify/verify_md.py out/lexidma/dmlex/v1.0/os/dmle
     --allow publication-assurance/converters/docbook-to-markdown/profiles/dmlex/allow-rendered.json
 ```
 
-This is how the pipeline was found expanding the tabs in 9 of DMLex's 316 code
-blocks. The gate now checks the same thing for every package
+This is how the pipeline was found turning the tab characters in 9 of DMLex's
+316 code blocks into spaces. The gate now checks the same thing for every package
 (`html-code-sync`).
 
 **What it cannot see:** a heading's level, a numbered list turned into bullets,
@@ -165,20 +169,24 @@ publication-assurance/render/render.sh dmlex-md lexidma/dmlex-v1.0/specification
 
 The stage path comes from the document's "This stage" URL, so the package is
 laid out exactly as on `docs.oasis-open.org`
-(`out/lexidma/dmlex/v1.0/os/`). HTML comes from the pipeline's step 1. The
-PDF uses step 2's print styles and is printed by Chrome with the footer of a
+(`out/lexidma/dmlex/v1.0/os/`). The HTML comes from the pipeline's HTML
+converter (TRANSFORMS.md, Stage 1). The PDF uses the pipeline's print styles
+(Stage 2) and is printed by Chrome with the footer of a
 published OASIS PDF: the name and track, the copyright line, the document's
 date and the page. The table of contents gets its page numbers from the
 printed pages. The last lines are the gate's findings. Exit 0 means
-publishable. The pipeline's own step 2, which prints with wkhtmltopdf, now
+publishable. The pipeline's own PDF step, which prints with wkhtmltopdf,
 produces the same footer and numbered contents.
 
 A published specification being converted carries its own defects into the
-gate. DMLex's nine blockers are all in its source:
-- a cited file that was never published;
-- a member-only URL;
-- four link texts ending `.pdf.pdf`;
-- two schemas with the wrong `$id`.
+gate. DMLex's nine blockers come from five defects, all in its source:
+- `dmlex.nvh` is cited under the stage's own path but is missing from the
+  TC's source repository, so the package lacks it (`asset-refs` and
+  `package-refs`);
+- one reference is a member-only URL (`member-uri`);
+- two link texts end in `.pdf.pdf` while their targets end in `.pdf` (each
+  reported twice, by the two `link-mismatch` conditions);
+- two JSON schemas declare an `$id` that does not resolve (`schema-id`).
 
 Record them for the TC to decide. Do not fix them in the conversion: the
 conversion must say what the standard says.
@@ -186,11 +194,12 @@ conversion must say what the standard says.
 ## 4. Compare by eye
 
 ```bash
-cd publication-assurance/render && npm install --no-save puppeteer-core@24
-CHROME=/path/to/chrome node compare.mjs \
+CHROME=/path/to/chrome node publication-assurance/render/compare.mjs \
     https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html \
-    ../../out/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html shots cover,toc,core_entry
+    out/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html shots cover,toc,core_entry
 ```
+
+Step 3 installed the browser driver `compare.mjs` needs.
 
 For each anchor you name, it saves the published and the rendered page at the
 same place, one after the other. It exits 1 if an anchor is missing on either
@@ -198,7 +207,9 @@ side. Look at the figures, the tables and the contents; the verifier does not.
 
 ## 5. Cut the next stage
 
-A Markdown specification has no entities, so its stage lives in its text:
+DocBook keeps the version and stage in one place and fills them in
+everywhere. A Markdown specification has no such variables, so its stage
+lives in its text:
 - the title version, the stage line and the date;
 - the This, Previous and Latest stage URLs;
 - the citation;
@@ -209,9 +220,20 @@ A Markdown specification has no entities, so its stage lives in its text:
 
 ```bash
 python3 publication-assurance/pub-check/advance_stage.py dmlex-md/dmlex-v1.0-os.md \
-    --to wd01 --version 1.1 --previous source --date 2026-09-24 --unpublished-ok --allow-dirty
+    --to wd01 --version 1.1 --previous source --date 2026-09-24 --unpublished-ok
 # add --write to create dmlex-v1.1-wd01.md
 ```
+
+- `--to` is the new stage and revision; `--version` is given only when the
+  version changes.
+- `--previous source` makes the document being cut the new "Previous stage";
+  `--previous none` makes it N/A. A new version has to say which.
+- `--unpublished-ok` is needed for a Working Draft (`wd`), because Working
+  Drafts are not published on `docs.oasis-open.org` and their links will not
+  resolve.
+- The tool refuses a source file with uncommitted changes, so the cut can
+  always be traced to a commit; `--allow-dirty` lifts that, and is only for a
+  scratch copy you will throw away.
 
 It is a dry run unless you add `--write`. It refuses, and writes nothing, when
 anything is ambiguous. Its refusal rules are in the
@@ -226,7 +248,7 @@ gate the result (step 3).
   writes `<img width>` from the profile's `figure_dpi`.
 - **Long inline code shrinks the PDF.** An unbreakable `code span` wider than
   the page makes a shrink-to-fit renderer print the whole document smaller.
-  NIEM NDR v6.0 printed its 12pt body at 8pt. The step 2 print styles wrap
+  NIEM NDR v6.0 printed its 12pt body at 8pt. The pipeline's print styles wrap
   inline code, and the gate's `pdf-legibility` check measures the printed body
   size against the declared one.
 - **Cloudflare hides email addresses.** `docs.oasis-open.org` replaces each
@@ -242,11 +264,11 @@ gate the result (step 3).
 - **pandoc versions differ.** The verifier reads the Markdown through pandoc's
   GFM reader and requires 3.x; the DMLex result was made with 3.8.2.1.
 - **The contents need page numbers.** A PDF printed from HTML has none unless
-  something writes them. The pipeline's step 2 and `render.sh` both do, and
+  something writes them. The pipeline's PDF step and `render.sh` both do, and
   the gate's `pdf-toc-pages` check reports a PDF whose contents have none, or
   point at the wrong pages.
 - **Tabs in code.** pandoc expands tabs to spaces unless told not to. The
-  pipeline's step 1 now passes `--preserve-tabs`; the gate's `html-code-sync`
+  pipeline's HTML converter now passes `--preserve-tabs`; the gate's `html-code-sync`
   reports a published code block that is not the source's.
 
 ## Who owns what
