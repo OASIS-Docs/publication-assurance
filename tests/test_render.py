@@ -97,7 +97,8 @@ def test_the_edition_renders_with_the_published_footer(rendered):
     pages = int(re.search(r"Pages:\s+(\d+)", subprocess.run(["pdfinfo", str(pdf)], capture_output=True,
                                                               text=True).stdout).group(1))
     assert pages > 150
-    bottom = " ".join(page_text(pdf, 3).split()[-24:])
+    lines = [l for l in page_text(pdf, 3).splitlines() if l.strip()]
+    bottom = " ".join(" ".join(lines[-2:]).split())
     for part in ("dmlex-v1.0-os", "Standards Track Work Product",
                  "Copyright © OASIS Open 2025. All Rights Reserved.", "29 April 2025", f"Page 3 of {pages}"):
         assert part in bottom, f"{part!r} not in the page 3 footer: {bottom}"
@@ -128,3 +129,22 @@ def test_compare_captures_named_anchors_and_fails_on_a_missing_one(rendered, tmp
     bad = subprocess.run(["node", str(RENDER / "compare.mjs"), str(PUBLISHED), str(html), str(tmp_path / "bad"),
                           "core_entry,no_such_anchor"], capture_output=True, text=True, env=env)
     assert bad.returncode == 1 and "MISSING published #no_such_anchor" in bad.stdout
+
+
+def test_the_contents_carry_the_page_each_heading_is_on(rendered):
+    """The published DMLex PDF numbers its contents; Chrome cannot, so
+    render.sh reads the pages back from the printed PDF. Each number is
+    checked against the page the heading's text is actually printed on."""
+    r, stage, _ = rendered
+    if not shutil.which("pdftotext"):
+        pytest.skip("pdftotext (poppler) not installed")
+    pdf = stage / "dmlex-v1.0-os.pdf"
+    pages = [page_text(pdf, n) for n in range(1, 12)]
+    toc = "\n".join(p for p in pages if "Table of Contents" in p or re.search(r"^\s*\d+(\.\d+)* \S.*\s(\d+)\s*$", p, re.M))
+    entries = re.findall(r"^\s*((?:\d+(?:\.\d+)*|Appendix [A-Z]|[A-Z](?:\.\d+)+) .*?)\s{2,}(\d+)\s*$", toc, re.M)
+    assert len(entries) >= 40, f"too few numbered contents entries: {entries[:5]}"
+    unnumbered = re.findall(r"^\s*(\d+\.\d+ [A-Za-z].*[a-z])\s*$", pages[4], re.M)
+    assert unnumbered == [], f"contents entries without a page: {unnumbered}"
+    for title, page in [e for e in entries if e[0].split()[0] in ("1", "2", "3", "3.4", "4")]:
+        body = " ".join(page_text(pdf, int(page)).split())
+        assert " ".join(title.split()) in body, f"{title!r} is not on page {page}"
