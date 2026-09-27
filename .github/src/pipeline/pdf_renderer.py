@@ -299,18 +299,22 @@ class PdfRenderer(PipelineStep):
              or re.search(rf">\s*()({date_})\s*<", text))
         return m.group(2) if m else ""
 
+    def track(self) -> str:
+        """The work product's track, from the stage token anywhere after the
+        version in its name: a part (-cn01-part1-x) or an errata
+        (-cn01-errata01) keeps its stage's track."""
+        notes = "|".join(self.NON_STANDARDS_TRACK)
+        return ("Non-Standards Track Work Product"
+                if re.search(rf"-(?:{notes})\d*(?:-|$)", Path(self.footer_name).stem, re.I)
+                else "Standards Track Work Product")
+
     def footer_html(self) -> str:
         """The footer of a published OASIS PDF, built from the document:
         its name and, under the copyright line, its track; its own date and
         the page on the right. wkhtmltopdf fills page and topage through the
         query string it passes to a footer HTML."""
         name = Path(self.footer_name).stem
-        # the stage token anywhere after the version: a part (-cn01-part1-x)
-        # or an errata (-cn01-errata01) keeps its stage's track
-        notes = "|".join(self.NON_STANDARDS_TRACK)
-        track = ("Non-Standards Track Work Product"
-                 if re.search(rf"-(?:{notes})\d*(?:-|$)", name, re.I)
-                 else "Standards Track Work Product")
+        track = self.track()
         date_ = self.document_date()
         esc = lambda t: t.replace("&", "&amp;").replace("<", "&lt;")
         right = f"{esc(date_)} - Page" if date_ else "Page"

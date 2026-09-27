@@ -32,6 +32,9 @@ Each version is anchored by a git tag on this repository.
   when DIR did not exist. Both found by the v1.9.0 end-to-end run (JOB-011).
   `tests/test_advance_stage.py::test_a_committed_source_given_by_a_relative_path_from_elsewhere_is_clean`,
   `tests/test_advance_stage.py::test_write_creates_the_out_directory`.
+- **Pipeline, step 2**: `PdfRenderer.track()` gives the work product's track
+  on its own, for renderers that build the footer themselves
+  (publisher-toolkit's Chrome step, proposal 009). No change to the footer.
 
 ## v1.9.0 - 2026-09-27
 
