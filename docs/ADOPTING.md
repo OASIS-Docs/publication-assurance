@@ -22,6 +22,7 @@ and each run publishes a Validation Report you can open in a browser.
 | [Environment variables](#environment-variables) | You need offline runs or a specific browser for the PDF |
 | [Report branch layout](#report-branch-layout) | You want to know where each report is kept |
 | [Markdown rendering before the gate](#markdown-rendering-before-the-gate) | Your repository holds Markdown sources, not a rendered package |
+| [Converting a published specification](CONVERTING.md) | Your specification was written in DocBook and the next version will be Markdown: convert it, prove the Markdown says what the standard says, render, gate and cut the next stage |
 | [Gating and report-only runs](#gating-and-report-only-runs) | A blocker should not fail the build, for example on a published standard |
 | [Several documents in one repository](#several-documents-in-one-repository) | The TC publishes more than one work product from this repository |
 | [Fork pull requests and read-only tokens](#fork-pull-requests-and-read-only-tokens) | Contributors open pull requests from their own forks |
@@ -389,13 +390,15 @@ fails.
 
 The gate checks a rendered package: the HTML and the PDF beside the
 Markdown source, laid out at their `docs.oasis-open.org` path. If the
-repository holds only Markdown, the workflow renders it first. The pattern
-has three steps in one job:
+repository holds only Markdown, the workflow renders it first with
+[`render/render.sh`](../render/README.md) from this repository, at the same
+release as the action. It has three steps in one job:
 
 1. **Render.** Markdown to HTML with the OASIS converter
-   (`.github/src/step_1_markdown_to_html_converter_V3_0.py` in this
-   repository), then HTML to PDF with the OASIS PDF preprocessor
-   (`.github/src/fix_html_for_pdf.py`) and a headless browser.
+   (`.github/src/step_1_markdown_to_html_converter_V3_0.py`), then HTML to
+   PDF with the OASIS print styles (`.github/src/fix_html_for_pdf.py`) and
+   headless Chrome, with the published footer read from the document and
+   page numbers in the table of contents.
 2. **Stage.** Copy the Markdown, HTML, PDF, figures and schemas into a
    directory that mirrors the publish path, for example
    `_publication/lexidma/dmlex/v1.1/wd01/`. The path comes from the
@@ -406,13 +409,9 @@ has three steps in one job:
 [TRANSFORMS.md](../TRANSFORMS.md) gives every command of the pipeline.
 
 **Worked example: DMLex.** The LexiDMA TC's DMLex Markdown editions run
-this pattern. The files are
-[`tools/publication-assurance/render.sh`](https://github.com/MColetta-OASIS/lexidma/tree/markdown-conversion/tools/publication-assurance)
-(render and stage one edition, cloning this repository at a pinned
-release) and the workflow
+this pattern in the workflow
 [`.github/workflows/publication-assurance.yml`](https://github.com/MColetta-OASIS/lexidma/blob/markdown-conversion/.github/workflows/publication-assurance.yml).
-Condensed to one document (the DMLex workflow runs two, as a matrix), the
-workflow is:
+Condensed to one document (the DMLex workflow runs two, as a matrix), it is:
 
 ```yaml
 name: pub-check
@@ -427,13 +426,20 @@ permissions:
 
 env:
   PANDOC_VERSION: 3.8.2.1
-  PA_REF: v1.8.0          # the release render.sh clones
+  PA_REF: v1.8.0          # the release whose render/render.sh renders
 
 jobs:
   render-and-gate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      - name: Check out the renderer at the pinned release
+        uses: actions/checkout@v5
+        with:
+          repository: OASIS-Docs/publication-assurance
+          ref: ${{ env.PA_REF }}
+          path: _pa
 
       - name: Install pandoc and BeautifulSoup
         run: |
@@ -446,7 +452,7 @@ jobs:
         env:
           PUBCHECK: '0'           # render.sh stops after staging; the action gates
           CHROME: google-chrome   # preinstalled on GitHub's Ubuntu runners
-        run: tools/publication-assurance/render.sh dmlex-v1.1 dmlex-v1.1/schemas _publication
+        run: _pa/render/render.sh dmlex-v1.1 dmlex-v1.1/schemas _publication
 
       - name: OASIS publication gate
         uses: OASIS-Docs/publication-assurance@v1.8.0

@@ -93,7 +93,7 @@ reviewable list of every way the Markdown differs from the publication.
 The DMLex rules are in
 [`converters/docbook-to-markdown/profiles/dmlex/allow.json`](../converters/docbook-to-markdown/profiles/dmlex/allow.json).
 With them, the DMLex v1.0 OASIS Standard Markdown edition matches
-<https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html> on
+[the published HTML](https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html) on
 61,260 words, 311 headings, 316 code blocks, 1,133 list items, 93 external
 links and 50 images
 (`tests/test_verify_md.py`).

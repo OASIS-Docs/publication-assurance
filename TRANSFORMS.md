@@ -35,6 +35,13 @@ push, and `touch`-based timestamp management.
 | `step_2_convert_md_to_html_pdf_final.yml` | one Python HTML preprocessor, then `wkhtmltopdf` | `spec.pdf` |
 | `step_3_create_zipfile.yml` | `zip` | `spec.zip` |
 
+Before these, a specification published in DocBook can be converted to
+Markdown and checked word for word against its publication
+(`converters/docbook-to-markdown/build.sh`, `verify/verify_md.py`), and after
+them `render/render.sh` runs Stage 1 and Stage 2's preprocessor for one
+document, prints the PDF in Chrome and gates it. See
+[Conversion and local rendering](#conversion-and-local-rendering).
+
 ## Stage 1: Markdown to HTML
 
 Three commands, in order:
@@ -196,6 +203,23 @@ cd path/to/stage-dir && zip -r ../spec-version-stage.zip .
 The workflow additionally runs `touch -d "<date> 17:00:00 UTC"` across the
 directory, which sets every published file's timestamp to the publication
 date.
+
+## Conversion and local rendering
+
+```bash
+# DocBook to OASIS Markdown, with the specification's profile, verified against the publication
+converters/docbook-to-markdown/build.sh --profile dmlex SPEC_DIR OUT_DIR PUBLISHED_URL
+# any Markdown edition against its published HTML, word for word
+python3 verify/verify_md.py SPEC.md PUBLISHED_URL --allow ALLOW.json --json report.json
+# render, stage at the docs.oasis-open.org path, gate
+render/render.sh MD_DIR SCHEMAS_DIR OUT_ROOT
+```
+
+`render.sh` uses Stage 1 as above and Stage 2's preprocessor, then prints in
+headless Chrome rather than wkhtmltopdf. The footer is the one published
+OASIS PDFs carry, read from the document (name, track, copyright line,
+document date, page), and the table of contents is numbered from the printed
+pages. The walkthrough is [docs/CONVERTING.md](docs/CONVERTING.md).
 
 Every defect class these transforms guard against (the lint series D1-D7 and
 the post-render assertions A1/A2) is enforceable in a TC's own build before
