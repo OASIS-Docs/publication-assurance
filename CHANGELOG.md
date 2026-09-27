@@ -26,6 +26,12 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.9.1 - 2026-09-27
+
+PATCH: advance_stage.py fixes found by the v1.9.0 end-to-end run, and `PdfRenderer.track()`.
+
 - **advance_stage.py**: a committed source given by a relative path from
   another directory was refused as "not committed", because git ran in the
   file's directory with the path as given; and `--write --out DIR` crashed
