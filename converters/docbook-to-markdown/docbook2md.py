@@ -57,8 +57,14 @@ def clean_ws(s):
 def esc(s):
     """Escape characters that Markdown would otherwise interpret."""
     s = s.replace('\\', '\\\\')
-    s = re.sub(r'([*_`\[\]<>|])', r'\\\1', s)
-    return s
+    s = re.sub(r'([*_`\[\]<>|$^])', r'\\\1', s)
+    return re.sub(r'&(?=#?\w+;)', '&amp;', s)
+
+
+def esc_start(s):
+    """A paragraph that starts like a list item or a heading is not one."""
+    s = re.sub(r'^(\d+)([.)])(\s)', r'\1\\\2\3', s)
+    return re.sub(r'^#', r'\\#', s)
 
 
 def code_span(s):
@@ -104,7 +110,6 @@ class Converter:
     def __init__(self, root, images_prefix='', profile=None):
         self.profile = dict(DEFAULTS, **(profile or {}))
         self.root = root
-        drop_unconditioned(root)
         self.nb = Numberer(root)
         self.images_prefix = images_prefix
         self.toc = []
@@ -121,6 +126,9 @@ class Converter:
                 for e in top.iter('example'):
                     body += 1
                     self.example_num[e] = str(body)
+        # Numbered first, then dropped: the stylesheet hides an element whose
+        # condition excludes oasis but still counts it.
+        drop_unconditioned(root)
 
     # ---------------------------------------------------------------- inline
     def title_text(self, el):
@@ -181,7 +189,16 @@ class Converter:
             return f'[{label.strip()}](#{tgt})'
         if tag == 'xref':
             tgt = c.get('linkend')
-            label = self.xref_text(tgt)
+            target = self.nb.byid.get(tgt)
+            end = self.nb.byid.get(c.get('endterm') or '')
+            if end is not None:
+                label = clean_ws(''.join(end.itertext())).strip()
+            elif target is not None and target.get('xreflabel'):
+                label = target.get('xreflabel')
+            else:
+                label = self.xref_text(tgt)
+            if not label.strip():
+                self.warnings.append(f'xref to {tgt} has no text (give the target a title or an xreflabel)')
             return label if plain else f'[{esc(label)}](#{tgt})'
         if tag == 'ulink':
             url = c.get('url')
@@ -215,7 +232,10 @@ class Converter:
             return s if plain else self.wrap(s, '**')
         if tag == 'simplelist':
             return ' '.join(clean_ws(self.inline(m, plain)).strip() for m in c.findall('member'))
-        if tag in ('edition', 'abbrev', 'acronym', 'phrase', 'productname', 'orgname', 'member', 'title', 'superscript', 'subscript'):
+        if tag in ('superscript', 'subscript'):
+            t = 'sup' if tag == 'superscript' else 'sub'
+            return txt() if plain else f'<{t}>{txt()}</{t}>'
+        if tag in ('edition', 'abbrev', 'acronym', 'phrase', 'productname', 'orgname', 'member', 'title'):
             return txt()
         if tag == 'footnote':
             self.warnings.append('footnote rendered inline')
@@ -250,7 +270,7 @@ class Converter:
         out = []
         for kind, s in blocks:
             if kind == 'p':
-                s = clean_ws(s).strip()
+                s = esc_start(clean_ws(s).strip())
                 if s:
                     out.append(indent + s)
             else:
@@ -275,6 +295,11 @@ class Converter:
                 return ''
             return self.para(el, indent)
         if tag in ('itemizedlist', 'orderedlist'):
+            if tag == 'orderedlist' and (el.get('numeration', 'arabic') != 'arabic'
+                                         or el.get('continuation') == 'continues'):
+                # GFM has no lettered, roman or continued list.
+                self.warnings.append(f'UNHANDLED block <orderedlist numeration={el.get("numeration")!r} '
+                                     f'continuation={el.get("continuation")!r}>')
             out = []
             t = el.find('title')
             if t is not None:
@@ -479,6 +504,8 @@ class Converter:
         for c in self.root:
             if c.tag in ('section', 'appendix'):
                 body_parts.append(self.section(c))
+            elif isinstance(c.tag, str) and c.tag not in ('articleinfo', 'title', 'subtitle'):
+                self.warnings.append(f'UNHANDLED block <{c.tag}> outside any section')
         toc = ['# Table of Contents', '']
         for depth, label, anchor in self.toc:
             if depth > 3:
@@ -524,7 +551,8 @@ def main():
         print('WARNING:', w, file=sys.stderr)
     print(f'wrote {a.out}: {len(md.splitlines())} lines, {len(conv.toc)} headings, '
           f'{len(set(conv.warnings))} distinct warnings', file=sys.stderr)
-    return 1 if any('unknown id' in w or 'lost' in w or 'UNHANDLED' in w for w in conv.warnings) else 0
+    fatal = ('unknown id', 'lost', 'UNHANDLED', 'no text')
+    return 1 if any(f in w for w in conv.warnings for f in fatal) else 0
 
 
 if __name__ == '__main__':

@@ -170,3 +170,86 @@ def test_an_element_the_converter_does_not_know_stops_it(tmp_path):
     r, _ = convert(tmp_path, block=table)
     assert r.returncode == 1
     assert "UNHANDLED block <informaltable>" in r.stderr
+
+
+def _article(tmp_path, body, profile=None):
+    doc = DOC.split(" <section id=\"intro\">")[0] + body + "\n</article>\n"
+    src = tmp_path / "a.xml"
+    src.write_text(doc, encoding="utf-8")
+    args = [sys.executable, str(DOCBOOK2MD), str(src), str(tmp_path / "a.md")]
+    r = subprocess.run(args, capture_output=True, text=True)
+    md = (tmp_path / "a.md").read_text(encoding="utf-8") if (tmp_path / "a.md").exists() else ""
+    return r, md
+
+
+def test_content_outside_a_section_stops_the_conversion(tmp_path):
+    r, _ = _article(tmp_path, "<para>Orphan text.</para><section id='s'><title>S</title><para>x</para></section>")
+    assert r.returncode == 1 and "UNHANDLED" in r.stderr and "para" in r.stderr
+
+
+def test_a_hidden_section_keeps_its_number_as_the_stylesheet_does(tmp_path):
+    """The stylesheet hides a non-OASIS section but still numbers it."""
+    r, md = _article(tmp_path, "<section id='one' condition='html'><title>One</title><para>h</para></section>"
+                                "<section id='two'><title>Two</title><para>See <xref linkend='three'/>.</para></section>"
+                                "<section id='three'><title>Three</title><para>t</para></section>")
+    assert r.returncode == 0, r.stderr
+    assert "# 2 Two" in md and "# 3 Three" in md and "Section 3" in md and "One" not in md
+
+
+def test_lettered_or_continued_lists_stop_the_conversion(tmp_path):
+    for attrs in ("numeration='loweralpha'", "continuation='continues'"):
+        r, _ = _article(tmp_path, f"<section id='s'><title>S</title><orderedlist {attrs}>"
+                                  "<listitem><para>a</para></listitem></orderedlist></section>")
+        assert r.returncode == 1 and "UNHANDLED" in r.stderr, attrs
+
+
+def test_characters_markdown_would_read_as_markup_are_escaped(tmp_path):
+    r, md = _article(tmp_path, "<section id='s'><title>S</title><para>Cost $5 and $6, 2^10^ items.</para>"
+                                "<para>2024. was a year.</para><para># not a heading</para>"
+                                "<para>Write &amp;copy; literally.</para></section>")
+    assert r.returncode == 0, r.stderr
+    assert "\\$5 and \\$6" in md and "2\\^10\\^" in md
+    assert "2024\\. was a year." in md and "\\# not a heading" in md and "&amp;copy;" in md
+
+
+def test_superscript_and_subscript_keep_their_meaning(tmp_path):
+    r, md = _article(tmp_path, "<section id='s'><title>S</title><para>2<superscript>10</superscript> "
+                                "H<subscript>2</subscript>O</para></section>")
+    assert r.returncode == 0 and "2<sup>10</sup>" in md and "H<sub>2</sub>O" in md
+
+
+def test_an_xref_takes_its_xreflabel_or_endterm_and_never_comes_out_empty(tmp_path):
+    r, md = _article(tmp_path, "<section id='s'><title>S</title>"
+                                "<para id='p1' xreflabel='the rule'>Rule.</para><para id='p2'>Other.</para>"
+                                "<para><phrase id='t'>the term</phrase></para>"
+                                "<para>See <xref linkend='p1'/> and <xref linkend='s' endterm='t'/>.</para></section>")
+    assert r.returncode == 0, r.stderr
+    assert "[the rule](#p1)" in md and "[the term](#s)" in md
+    r, _ = _article(tmp_path, "<section id='s'><title>S</title><para id='p2'>x</para>"
+                              "<para>See <xref linkend='p2'/>.</para></section>")
+    assert r.returncode == 1 and "no text" in r.stderr
+
+
+def test_a_source_path_with_a_space_builds(tmp_path, dmlex_source):
+    spaced = tmp_path / "spec dir"
+    shutil.copytree(dmlex_source, spaced, ignore=shutil.ignore_patterns(".git"))
+    r = subprocess.run(["bash", str(BUILD), "--profile", "dmlex", str(spaced), str(tmp_path / "o")],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-2000:]
+    assert (tmp_path / "o" / "dmlex-v1.0-os.md").read_bytes() == (EDITION / "dmlex-v1.0-os.md").read_bytes()
+
+
+def test_a_failing_prebuild_and_a_missing_entity_say_so(tmp_path, dmlex_source):
+    prof = tmp_path / "prof"
+    shutil.copytree(CONV / "profiles" / "dmlex", prof)
+    (prof / "prebuild.sh").write_text("#!/bin/sh\nexit 3\n")
+    r = subprocess.run(["bash", str(BUILD), "--profile", str(prof), str(dmlex_source), str(tmp_path / "o")],
+                       capture_output=True, text=True)
+    assert r.returncode != 0 and "prebuild" in r.stderr
+    p = json.loads((prof / "profile.json").read_text())
+    p["basename"] = "x-{nosuchentity}"
+    p["prebuild"] = ""
+    (prof / "profile.json").write_text(json.dumps(p))
+    r = subprocess.run(["bash", str(BUILD), "--profile", str(prof), str(dmlex_source), str(tmp_path / "o")],
+                       capture_output=True, text=True)
+    assert r.returncode == 2 and "nosuchentity" in r.stderr and "Traceback" not in r.stderr
