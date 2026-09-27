@@ -327,3 +327,40 @@ def test_write_creates_the_out_directory(tmp_path):
                         "--unpublished-ok", "--write", "--out", str(out)], capture_output=True, text=True)
     assert r.returncode == 0 and "Traceback" not in r.stderr, r.stderr[-1500:]
     assert (out / "dmlex-v1.1-wd01.md").is_file()
+
+
+def _cut_cli(src, *extra, cwd=None):
+    return subprocess.run(["python3", str(REPO_ROOT / "pub-check" / "advance_stage.py"), str(src), "--to", "wd01",
+                           "--version", "1.1", "--previous", "source", "--date", "2026-09-24", "--unpublished-ok",
+                           *map(str, extra)], cwd=cwd, capture_output=True, text=True)
+
+
+def test_a_symlink_to_a_modified_file_is_not_clean(tmp_path):
+    repo = _committed_copy(tmp_path)
+    (repo / "link.md").symlink_to("dmlex-v1.0-os.md")
+    subprocess.run(["git", "-C", str(repo), "add", "link.md"], check=True)
+    subprocess.run(["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@example.org", "commit", "-qm", "l"],
+                   check=True)
+    (repo / "dmlex-v1.0-os.md").write_text(dmlex() + "\nchanged\n", encoding="utf-8")
+    r = _cut_cli(repo / "link.md")
+    assert r.returncode == 1 and "modified since commit" in r.stdout + r.stderr
+
+
+def test_an_assume_unchanged_edit_is_not_clean(tmp_path):
+    repo = _committed_copy(tmp_path)
+    subprocess.run(["git", "-C", str(repo), "update-index", "--assume-unchanged", "dmlex-v1.0-os.md"], check=True)
+    (repo / "dmlex-v1.0-os.md").write_text(dmlex() + "\nchanged\n", encoding="utf-8")
+    r = _cut_cli(repo / "dmlex-v1.0-os.md")
+    assert r.returncode == 1 and "modified since commit" in r.stdout + r.stderr
+
+
+def test_write_never_follows_a_dangling_link_or_crashes_on_a_bad_out(tmp_path):
+    repo = _committed_copy(tmp_path)
+    out = tmp_path / "out"
+    out.mkdir()
+    (out / "dmlex-v1.1-wd01.md").symlink_to(tmp_path / "elsewhere.md")
+    r = _cut_cli(repo / "dmlex-v1.0-os.md", "--write", "--out", out)
+    assert r.returncode == 1 and "REFUSED" in r.stderr and not (tmp_path / "elsewhere.md").exists()
+    (tmp_path / "afile").write_text("x")
+    r = _cut_cli(repo / "dmlex-v1.0-os.md", "--write", "--out", tmp_path / "afile" / "sub")
+    assert r.returncode == 1 and "REFUSED" in r.stderr and "Traceback" not in r.stderr

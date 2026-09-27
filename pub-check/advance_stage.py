@@ -324,20 +324,30 @@ class StageAdvance:
 
 
 def source_is_clean(path: str) -> tuple[bool, str]:
-    # git runs in the file's directory, so it is given the absolute path: a
-    # relative one would be read from that directory, not from the caller's.
-    path = os.path.abspath(path)
+    # git runs in the file's own directory, on the file itself: the path is
+    # resolved through any symlink (a link's own entry says nothing about the
+    # text behind it) and made absolute (a relative one would be read from
+    # that directory, not the caller's). Clean means the bytes on disk are the
+    # committed blob, which git status alone does not prove (assume-unchanged).
+    path = os.path.realpath(path)
     d = os.path.dirname(path)
     try:
-        sha = subprocess.run(["git", "-C", d, "log", "-1", "--format=%h", "--", path],
+        top = subprocess.run(["git", "-C", d, "rev-parse", "--show-toplevel"],
                              capture_output=True, text=True, check=True).stdout.strip()
-        dirty = subprocess.run(["git", "-C", d, "status", "--porcelain", "--", path],
-                               capture_output=True, text=True, check=True).stdout.strip()
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False, "not in a git repository"
+    rel = os.path.relpath(path, top)
+    sha = subprocess.run(["git", "-C", top, "log", "-1", "--format=%h", "--", rel],
+                         capture_output=True, text=True).stdout.strip()
     if not sha:
         return False, "not committed"
-    return (not dirty), (f"commit {sha}" if not dirty else f"modified since commit {sha}")
+    head = subprocess.run(["git", "-C", top, "rev-parse", f"HEAD:{rel}"],
+                          capture_output=True, text=True).stdout.strip()
+    disk = subprocess.run(["git", "-C", top, "hash-object", "--", rel],
+                          capture_output=True, text=True).stdout.strip()
+    if not head or head != disk:
+        return False, f"modified since commit {sha}"
+    return True, f"commit {sha}"
 
 
 def main(argv=None) -> int:
@@ -387,10 +397,14 @@ def main(argv=None) -> int:
     if not a.write:
         print("dry run: nothing written (pass --write)")
         return 0
-    if os.path.exists(target):
+    if os.path.lexists(target):  # lexists: a dangling link would be written through
         print(f"REFUSED: {target} exists", file=sys.stderr)
         return 1
-    os.makedirs(os.path.dirname(os.path.abspath(target)), exist_ok=True)
+    try:
+        os.makedirs(os.path.dirname(os.path.abspath(target)), exist_ok=True)
+    except OSError as e:
+        print(f"REFUSED: cannot create {os.path.dirname(os.path.abspath(target))}: {e.strerror}", file=sys.stderr)
+        return 1
     with open(target, "w", encoding="utf-8") as fh:
         fh.write(out)
     print(f"wrote {target}")
