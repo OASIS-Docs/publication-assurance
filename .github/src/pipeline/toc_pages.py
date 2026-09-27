@@ -17,6 +17,7 @@ Usage: toc_pages.py IN.html PRINTED.pdf OUT.html
 Prints the number of entries numbered and how many changed since IN.html.
 Exit 2 when the HTML has no table of contents or an entry has no page.
 """
+import html
 import re
 import subprocess
 import sys
@@ -34,6 +35,32 @@ def dests(pdf):
     return {m.group(2): int(m.group(1)) for m in re.finditer(r'^\s*(\d+)\s+\[[^\]]*\]\s+"([^"]*)"', out, re.M)}
 
 
+def text_pages(pdf, entries):
+    """{target: page} found by text: each entry's title, searched from the
+    page after the contents and never before the previous entry's page.
+    wkhtmltopdf writes its internal links as explicit page destinations, not
+    named ones, so pdfinfo -dests has nothing to read there."""
+    text = subprocess.run(['pdftotext', '-layout', pdf, '-'], capture_output=True, text=True,
+                          check=True).stdout.split('\f')
+    flat = [re.sub(r'\s+', ' ', t).lower() for t in text]
+    start = next((i for i, t in enumerate(flat) if 'table of contents' in t), -1) + 1
+    while start < len(flat) and 'table of contents' in flat[start]:
+        start += 1
+    # the contents may run over several pages: skip those that list the first title
+    if entries:
+        first = entries[0][1]
+        while start < len(flat) and first in flat[start] and flat[start].count(first) and \
+                sum(1 for _, t in entries[:10] if t in flat[start]) > 3:
+            start += 1
+    found, at = {}, start
+    for target, title in entries:
+        k = next((i for i in range(at, len(flat)) if title in flat[i]), None)
+        if k is not None:
+            found[target] = k + 1
+            at = k
+    return found
+
+
 def main(src, pdf, out):
     """Number the contents of src from pdf's pages into out; return how many
     numbers changed since src."""
@@ -49,6 +76,10 @@ def main(src, pdf, out):
             break
     toc = h[m.end() - 4:end]
     pages = dests(pdf)
+    links = [(t, re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', html.unescape(label))).strip().lower())
+             for t, label in re.findall(r'<a href="#([^"]+)">(.*?)</a>', toc, re.S)]
+    if any(t not in pages for t, _ in links):
+        pages = {**text_pages(pdf, [(t, l) for t, l in links if t not in pages]), **pages}
     old = dict(re.findall(r'<span class="toc-page" data-for="([^"]+)">(\d+)</span>', toc))
     toc = re.sub(r'<span class="toc-line">(<a href="#[^"]+">.*?</a>)<span class="toc-dots"></span>'
                  r'<span class="toc-page"[^>]*>\d+</span></span>', r'\1', toc, flags=re.S)

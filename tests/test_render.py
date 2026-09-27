@@ -222,3 +222,26 @@ def test_compare_counts_an_invisible_anchor_as_missing_and_names_files_safely(re
                           "gone,p/q"], capture_output=True, text=True, env=env)
     assert res.returncode == 1 and "MISSING published #gone" in res.stdout, res.stdout + res.stderr
     assert "ENOENT" not in res.stderr and list((tmp_path / "o").glob("*p_q*.png"))
+
+
+def test_pages_found_by_text_agree_with_the_pdf_s_named_destinations(rendered):
+    """wkhtmltopdf writes no named destinations, so step 2 finds each
+    heading's page by its text. On the Chrome render, which has both, the two
+    must agree for every entry."""
+    import importlib.util
+    import html as html_lib
+    r, stage, _ = rendered
+    spec = importlib.util.spec_from_file_location(
+        "toc_pages", REPO_ROOT / ".github/src/pipeline/toc_pages.py")
+    tp = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tp)
+    pdf = str(stage / "dmlex-v1.0-os.pdf")
+    named = tp.dests(pdf)
+    text = (stage / "dmlex-v1.0-os.html").read_text(encoding="utf-8")
+    start = text.index('id="table-of-contents"')
+    links = [(t, re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", html_lib.unescape(label))).strip().lower())
+             for t, label in re.findall(r'<a href="#([^"]+)">(.*?)</a>', text[start:start + 80000], re.S)]
+    links = [x for x in links if x[0] in named][:133]
+    assert len(links) > 100
+    found = tp.text_pages(pdf, links)
+    assert {t: found.get(t) for t, _ in links} == {t: named[t] for t, _ in links}
