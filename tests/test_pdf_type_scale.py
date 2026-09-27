@@ -181,6 +181,15 @@ def test_the_render_job_installs_the_workflow_s_wkhtmltopdf():
     assert step2 and set(ci) == set(step2), (ci, step2)
 
 
+
+def test_the_render_jobs_install_poppler_for_the_contents_pages():
+    """Step 2 numbers the contents from pdfinfo -dests; without poppler it
+    leaves them unnumbered and says so only in its log."""
+    for wf in ("ci.yml", "step_2_convert_md_to_html_pdf_final.yml"):
+        text = (REPO_ROOT / ".github/workflows" / wf).read_text()
+        assert re.search(r"apt-get install -y xfonts-75dpi[^\n]*poppler-utils", text), wf
+
+
 def _have_renderer():
     try:
         import fitz  # noqa: F401

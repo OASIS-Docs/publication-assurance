@@ -104,7 +104,7 @@ jobs:
         sudo apt-get remove -y wkhtmltopdf || true
 
         # Install dependencies required by wkhtmltopdf
-        sudo apt-get install -y xfonts-75dpi fonts-liberation fonts-dejavu
+        sudo apt-get install -y xfonts-75dpi fonts-liberation fonts-dejavu poppler-utils
 
 
       shell: bash
