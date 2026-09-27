@@ -26,6 +26,7 @@ geometry, running header, and footer. The command is constructed by
 from __future__ import annotations
 
 import argparse
+import html as html_lib
 import logging
 import re
 import subprocess
@@ -254,20 +255,34 @@ class PdfRenderer(PipelineStep):
         return ""
 
     def copyright_line(self) -> str:
-        """The footer copyright, taking its year from the document itself.
-
-        A hardcoded year is wrong for every document published in a later one.
-        """
-        try:
-            text = self.html_file.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            text = ""
-        m = re.search(r"Copyright\s*(?:\(c\)|&copy;|©)\s*OASIS Open\s*(\d{4})",
-                      text, re.IGNORECASE)
-        year = m.group(1) if m else str(date.today().year)
+        """The footer copyright, taking its year (or range) from the document
+        itself: "Copyright © OASIS Open 2021-2026", "© 2023 OASIS Open", an
+        entity for the sign. A hardcoded year is wrong for every document
+        published in a later one."""
+        text = self.document_text()
+        years = r"(\d{4}(?:\s*[-\u2013]\s*\d{4})?)"
+        m = (re.search(rf"Copyright\s*(?:©|\(c\))?\s*OASIS Open,?\s*{years}", text, re.I)
+             or re.search(rf"(?:Copyright\s*)?(?:©|\(c\))\s*{years},?\s*OASIS Open", text, re.I))
+        year = re.sub(r"\s*[-\u2013]\s*", "-", m.group(1)) if m else str(date.today().year)
         return f"Copyright © OASIS Open {year}. All Rights Reserved."
 
     NON_STANDARDS_TRACK = ("cnd", "cn", "cnprd", "pnd", "pn")
+    MONTHS = ("January|February|March|April|May|June|July|August|September|"
+              "October|November|December")
+
+    def document_text(self) -> str:
+        """The document as text, decoded with the charset it declares
+        (KMIP's Committee Notes are windows-1252), entities resolved."""
+        try:
+            raw = self.html_file.read_bytes()
+        except OSError:
+            return ""
+        m = re.search(rb'charset=["\']?([\w-]+)', raw[:4096])
+        try:
+            text = raw.decode(m.group(1).decode() if m else "utf-8", errors="replace")
+        except LookupError:
+            text = raw.decode("utf-8", errors="replace")
+        return html_lib.unescape(text)
 
     @property
     def footer_file(self) -> Path:
@@ -275,14 +290,14 @@ class PdfRenderer(PipelineStep):
         return self.output_pdf.with_name(f".{self.output_pdf.stem}-footer.html")
 
     def document_date(self) -> str:
-        """The document's date line ("12 June 2026"), or "" when it has none."""
-        try:
-            text = self.html_file.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            return ""
-        m = re.search(r">\s*(\d{1,2} (?:January|February|March|April|May|June|July|August|"
-                      r"September|October|November|December) \d{4})\s*<", text)
-        return m.group(1) if m else ""
+        """The document's date line ("12 June 2026"): a heading that is only
+        a date (the cover's) first, else the first element that is only a
+        date; "" when it has none."""
+        text = self.document_text()
+        date_ = rf"\d{{1,2}} (?:{self.MONTHS}) \d{{4}}"
+        m = (re.search(rf"<(h[1-6]|h1big)\b[^>]*>\s*({date_})\s*</\1>", text)
+             or re.search(rf">\s*()({date_})\s*<", text))
+        return m.group(2) if m else ""
 
     def footer_html(self) -> str:
         """The footer of a published OASIS PDF, built from the document:
@@ -290,9 +305,11 @@ class PdfRenderer(PipelineStep):
         the page on the right. wkhtmltopdf fills page and topage through the
         query string it passes to a footer HTML."""
         name = Path(self.footer_name).stem
-        stage = re.search(r"-([a-z]+)\d*$", name)
+        # the stage token anywhere after the version: a part (-cn01-part1-x)
+        # or an errata (-cn01-errata01) keeps its stage's track
+        notes = "|".join(self.NON_STANDARDS_TRACK)
         track = ("Non-Standards Track Work Product"
-                 if stage and stage.group(1) in self.NON_STANDARDS_TRACK
+                 if re.search(rf"-(?:{notes})\d*(?:-|$)", name, re.I)
                  else "Standards Track Work Product")
         date_ = self.document_date()
         esc = lambda t: t.replace("&", "&amp;").replace("<", "&lt;")
@@ -413,26 +430,32 @@ class PdfRenderer(PipelineStep):
         """Write each contents entry's printed page into a copy of the HTML
         and print that copy, until no number moves (toc_pages). A published
         OASIS PDF numbers its contents; a PDF printed from HTML has none
-        unless something writes them. A document without a contents list, or
-        whose headings cannot be found in the PDF, is left as it is, and the
-        gate's pdf-toc-pages check reports it."""
+        unless something writes them. If the numbers cannot be read, or do
+        not settle in four passes, the PDF is printed from the unnumbered
+        HTML again, so no number that was not checked ships; the gate's
+        pdf-toc-pages check then reports the unnumbered contents."""
         from .toc_pages import main as number
         text = self.html_file.read_text(encoding="utf-8", errors="replace")
         if 'id="table-of-contents"' not in text:
             return
         numbered = self.html_file.with_name(f".{self.html_file.stem}-numbered.html")
+        printed = False
         try:
             for _ in range(4):
                 try:
                     changed = number(str(self.html_file), str(self.output_pdf), str(numbered))
                 except (LookupError, OSError, subprocess.CalledProcessError) as e:
                     logger.warning(f"contents left unnumbered: {e}")
-                    return
+                    break
                 if not changed:
                     logger.info("contents numbered")
                     return
                 self._convert_to_pdf(str(numbered))
-            logger.warning("contents page numbers did not settle after 4 passes")
+                printed = True
+            else:
+                logger.warning("contents page numbers did not settle after 4 passes; left unnumbered")
+            if printed:
+                self._convert_to_pdf(str(self.html_file))
         finally:
             numbered.unlink(missing_ok=True)
 

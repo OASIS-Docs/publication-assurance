@@ -153,7 +153,16 @@ Each version is anchored by a git tag on this repository.
   day of the render), no track line and the title as a running header on every
   page, the cover included. Step 2 also numbers the table of contents from the
   printed pages (`.github/src/pipeline/toc_pages.py`, shared with
-  `render/render.sh`). `tests/test_pdf_command.py`,
+  `render/render.sh`). It reads the contents list right after its heading,
+  whatever wrapper stands between them (NIEM's `<nav>`, OData's
+  `<details>`, a comment), as list items or `<br/>`-separated lines (CSAF),
+  and takes pages from the PDF's named destinations or, for wkhtmltopdf,
+  from the line each heading is printed on. Numbers that cannot be read or
+  do not settle are not shipped: the PDF is printed unnumbered and the gate
+  reports it. Checked with wkhtmltopdf 0.12.6 on CSAF v2.0 OS and v2.1
+  csd01, NIEM NDR v6.0 OS, ACAL core v1.0 csd01 and OData CSDL JSON v4.02
+  csd02: every contents list numbered, the gate's sample of 20 pages right
+  on each. `tests/test_pdf_command.py`,
   `tests/test_step2_script.py`, and in the pdf-render job
   `tests/test_pdf_type_scale.py` checks the footer, the absent header and the
   numbered contents on a real CSAF render.

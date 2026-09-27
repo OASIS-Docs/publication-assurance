@@ -51,7 +51,11 @@ TMP_PDF="$(dirname "$HTML_FILE")/.$NAME-$$-$RANDOM.pdf"
 SRC=$(cd "$(dirname "$0")/../src" && pwd)
 PY=${PYTHON:-python3}
 WORK=$(mktemp -d)
-trap 'rm -rf "$TMP_HTML" "$TMP_PDF" "$WORK"' EXIT
+# The renderer writes its footer and numbered-contents copies beside these;
+# a killed run must not leave them in the package either.
+TMP_FOOTER="$(dirname "$TMP_PDF")/.$(basename "$TMP_PDF" .pdf)-footer.html"
+TMP_NUMBERED="$(dirname "$TMP_HTML")/.$(basename "$TMP_HTML" .html)-numbered.html"
+trap 'rm -rf "$TMP_HTML" "$TMP_PDF" "$TMP_FOOTER" "$TMP_NUMBERED" "$WORK"' EXIT
 
 echo "Found HTML file: $HTML_FILE"
 echo "Output PDF file will be: $PDF_FILE"

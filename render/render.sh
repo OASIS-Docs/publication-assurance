@@ -75,7 +75,12 @@ node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$FOOTER"
 for pass in 1 2 3 4; do
   CHANGED=$(python3 "$PA/.github/src/pipeline/toc_pages.py" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$STAGE/.$NAME-pdf-numbered.html" | tee /dev/stderr | sed -n 's/.*, \([0-9]*\) changed$/\1/p')
   [ "$CHANGED" = 0 ] && break
-  [ "$pass" = 4 ] && { echo "contents page numbers did not settle after 4 passes" >&2; exit 1; }
+  if [ "$pass" = 4 ]; then
+    # never ship numbers that were not checked: print the unnumbered HTML
+    echo "contents page numbers did not settle after 4 passes; left unnumbered" >&2
+    node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$FOOTER"
+    break
+  fi
   node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf-numbered.html" "$STAGE/$NAME.pdf" "$FOOTER"
 done
 rm -f "$STAGE/.$NAME-pdf.html" "$STAGE/.$NAME-pdf-numbered.html"
