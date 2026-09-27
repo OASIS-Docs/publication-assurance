@@ -47,6 +47,15 @@ jobs:
       # a skipped authority check proves nothing.
       # requests is imported by the pipeline package that
       # tests/test_step2_script.py runs end to end through the step 2 script.
+      # verify/verify_md.py compares through pandoc's GFM reader, whose output
+      # changes between releases; pin the release its fixtures were made with.
+      - name: Install pandoc 3.8.2.1 (verify_md)
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/pandoc.deb" \
+            https://github.com/jgm/pandoc/releases/download/3.8.2.1/pandoc-3.8.2.1-1-amd64.deb
+          sudo dpkg -i "$RUNNER_TEMP/pandoc.deb"
+          pandoc --version | head -1
+
       - name: Install test dependencies
         run: |
           python3 -m pip install --upgrade pip
@@ -57,6 +66,7 @@ jobs:
       - name: Run pytest
         env:
           REQUIRE_CHROME: "1"
+          REQUIRE_PANDOC: "1"
         run: pytest tests/ -v
 
       # The registry/AST parity assertion inside --list-checks is the tool's
