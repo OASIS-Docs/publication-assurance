@@ -23,10 +23,15 @@ import subprocess
 import sys
 
 CSS = """<style id="toc-pages">
-.toc-line { display: -webkit-box; display: flex; -webkit-box-align: baseline; align-items: baseline; }
-.toc-text { -webkit-box-flex: 0; flex: 0 1 auto; }
-.toc-dots { -webkit-box-flex: 1; flex: 1 1 auto; border-bottom: 1px dotted #666; margin: 0 0.3em; min-width: 1em; }
-.toc-page { -webkit-box-flex: 0; flex: 0 0 auto; }
+/* Floats and a positioned rule, not flexbox: wkhtmltopdf's QtWebKit ignores
+   flexbox, and the same markup has to print in it and in Chrome. An inline
+   block keeps an <ol>'s own numbers beside its first line. The number
+   floats right; the dot leader runs under the whole line and the title and
+   number, on the page's white, cover it where they sit. */
+.toc-line { display: inline-block; width: 100%; vertical-align: top; position: relative; overflow: hidden; }
+.toc-page { float: right; padding-left: 0.35em; background: #fff; position: relative; z-index: 1; }
+.toc-text { background: #fff; padding-right: 0.35em; position: relative; z-index: 1; }
+.toc-dots { position: absolute; left: 0; right: 0; bottom: 0.3em; border-bottom: 1px dotted #666; z-index: 0; }
 </style>"""
 
 
@@ -103,11 +108,11 @@ def main(src, pdf, out):
             return e.group(0)
         n += 1
         changed += old.get(target) != str(pages[target])
-        return (f'{e.group("pre")}<span class="toc-line"><span class="toc-text">{e.group("num")}{e.group("a")}</span>'
-                f'<span class="toc-dots"></span><span class="toc-page" data-for="{target}">{pages[target]}</span></span>')
+        return (f'{e.group("pre")}<span class="toc-line"><span class="toc-page" data-for="{target}">{pages[target]}</span>'
+                f'<span class="toc-text">{e.group("num")}{e.group("a")}</span><span class="toc-dots"></span></span>')
     toc = ENTRY.sub(number, toc)
     # a numbered line is a block of its own: the line break after it goes
-    toc = re.sub(r'(<span class="toc-page" data-for="[^"]+">\d+</span></span>)\s*<br\s*/?>', r'\1', toc)
+    toc = re.sub(r'(<span class="toc-dots"></span></span>)\s*<br\s*/?>', r'\1', toc)
     if missing:
         raise LookupError(f'toc_pages.py: no page in {pdf} for {missing}')
     h = h[:start] + toc + h[end:]
