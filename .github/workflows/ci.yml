@@ -222,7 +222,7 @@ jobs:
       - name: Install wkhtmltopdf and fonts (as the step 2 workflow does)
         run: |
           sudo apt-get update
-          sudo apt-get install -y xfonts-75dpi fonts-liberation fonts-dejavu
+          sudo apt-get install -y xfonts-75dpi fonts-liberation fonts-dejavu poppler-utils
           wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
           sudo apt-get install -y ./wkhtmltox_0.12.6.1-2.jammy_amd64.deb
           wkhtmltopdf --version
