@@ -295,3 +295,35 @@ def test_dmlex_has_no_stale_reference():
 def test_the_stale_scan_reads_case_underscores_and_relative_links(line):
     src = (CSAF / "cs01/csaf-v2.0-cs01.md").read_text(encoding="utf-8") + f"\n{line}\n"
     assert "stale" in refused(text=src, to="cs02", previous="source")
+
+
+def _committed_copy(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "dmlex-v1.0-os.md").write_text(dmlex(), encoding="utf-8")
+    for cmd in (["init", "-q"], ["add", "."], ["-c", "user.name=t", "-c", "user.email=t@example.org",
+                                             "commit", "-qm", "src"]):
+        subprocess.run(["git", "-C", str(repo), *cmd], check=True, capture_output=True)
+    return repo
+
+
+def test_a_committed_source_given_by_a_relative_path_from_elsewhere_is_clean(tmp_path):
+    """The clean-source check ran git in the file's directory with the path as
+    given, so a relative path from any other directory read as not committed
+    (found by the v1.9.0 end-to-end run, JOB-011)."""
+    _committed_copy(tmp_path)
+    r = subprocess.run(["python3", str(REPO_ROOT / "pub-check" / "advance_stage.py"), "repo/dmlex-v1.0-os.md",
+                        "--to", "wd01", "--version", "1.1", "--previous", "source", "--date", "2026-09-24",
+                        "--unpublished-ok"], cwd=tmp_path, capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout[-1500:] + r.stderr[-1500:]
+    assert "not committed" not in r.stdout + r.stderr
+
+
+def test_write_creates_the_out_directory(tmp_path):
+    repo = _committed_copy(tmp_path)
+    out = tmp_path / "new" / "wd01"
+    r = subprocess.run(["python3", str(REPO_ROOT / "pub-check" / "advance_stage.py"), str(repo / "dmlex-v1.0-os.md"),
+                        "--to", "wd01", "--version", "1.1", "--previous", "source", "--date", "2026-09-24",
+                        "--unpublished-ok", "--write", "--out", str(out)], capture_output=True, text=True)
+    assert r.returncode == 0 and "Traceback" not in r.stderr, r.stderr[-1500:]
+    assert (out / "dmlex-v1.1-wd01.md").is_file()

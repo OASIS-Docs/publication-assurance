@@ -26,7 +26,12 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+- **advance_stage.py**: a committed source given by a relative path from
+  another directory was refused as "not committed", because git ran in the
+  file's directory with the path as given; and `--write --out DIR` crashed
+  when DIR did not exist. Both found by the v1.9.0 end-to-end run (JOB-011).
+  `tests/test_advance_stage.py::test_a_committed_source_given_by_a_relative_path_from_elsewhere_is_clean`,
+  `tests/test_advance_stage.py::test_write_creates_the_out_directory`.
 
 ## v1.9.0 - 2026-09-27
 

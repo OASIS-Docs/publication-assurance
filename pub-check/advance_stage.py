@@ -324,7 +324,10 @@ class StageAdvance:
 
 
 def source_is_clean(path: str) -> tuple[bool, str]:
-    d = os.path.dirname(os.path.abspath(path))
+    # git runs in the file's directory, so it is given the absolute path: a
+    # relative one would be read from that directory, not from the caller's.
+    path = os.path.abspath(path)
+    d = os.path.dirname(path)
     try:
         sha = subprocess.run(["git", "-C", d, "log", "-1", "--format=%h", "--", path],
                              capture_output=True, text=True, check=True).stdout.strip()
@@ -387,6 +390,7 @@ def main(argv=None) -> int:
     if os.path.exists(target):
         print(f"REFUSED: {target} exists", file=sys.stderr)
         return 1
+    os.makedirs(os.path.dirname(os.path.abspath(target)), exist_ok=True)
     with open(target, "w", encoding="utf-8") as fh:
         fh.write(out)
     print(f"wrote {target}")
