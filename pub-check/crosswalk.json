@@ -11,9 +11,9 @@
   "missing": 30,
   "conditions_total": 96,
   "policy_grounded": 94,
-  "operational_extra": 75,
-  "total_conditions": 173,
-  "total_signatures": 169,
+  "operational_extra": 80,
+  "total_conditions": 178,
+  "total_signatures": 174,
   "policy_grounded_conditions": 97
  },
  "criteria": [
@@ -1014,6 +1014,16 @@
    ]
   },
   {
+   "check": "html-code-sync",
+   "sig": "differs only in whitespace in the HTML",
+   "status": "operational-extra"
+  },
+  {
+   "check": "html-code-sync",
+   "sig": "is missing from the HTML or differs from the Markdown source",
+   "status": "operational-extra"
+  },
+  {
    "check": "html-residue",
    "sig": "<h1> elements",
    "status": "operational-extra"
@@ -1369,6 +1379,16 @@
    "status": "operational-extra"
   },
   {
+   "check": "pdf-toc-pages",
+   "sig": "gives no page number for",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-toc-pages",
+   "sig": "numbered entries at a page the heading is not on",
+   "status": "operational-extra"
+  },
+  {
    "check": "previous-stage",
    "sig": "no Previous-version block with docs.oasis-open.org URLs found on the HTML cover",
    "status": "policy-grounded",
@@ -1499,6 +1519,11 @@
    "criteria": [
     "AC-FORMATS-04"
    ]
+  },
+  {
+   "check": "stage-name",
+   "sig": "is a Working Draft. Working Drafts are unpublished",
+   "status": "operational-extra"
   },
   {
    "check": "stage-name",

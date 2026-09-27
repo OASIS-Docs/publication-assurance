@@ -10,7 +10,7 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 This guide sets up `oasis-pub-check`, the OASIS publication acceptance tests,
 in a TC's own GitHub repository. After setup, every push checks your
-package against the same 173 conditions TC Administration runs at intake,
+package against the same 178 conditions TC Administration runs at intake,
 and each run publishes a Validation Report you can open in a browser.
 
 | Section | Read it when |
@@ -173,7 +173,7 @@ the new commit and publishes a new report.
 ## The Validation Report
 
 It is the report OASIS staff produce at intake, from the same code. It has
-a header, a table of the 59 check classes and a table of all 173
+a header, a table of the 61 check classes and a table of all 178
 conditions. The job summary shows the same two tables, above them the
 findings list, which ends with the verdict in a second form,
 `N blocker(s), M warning(s) -> NOT PUBLISHABLE`. The header lines described
@@ -182,7 +182,7 @@ below are in the report files.
 ### Verdict
 
 The header block states the target, the date, the tool, the coverage
-(173 conditions in 59 classes, all run), the blocker count and the gate's
+(178 conditions in 61 classes, all run), the blocker count and the gate's
 exit code, then one **Result** line:
 
 - `PUBLICATION-READY: zero blockers.` with exit code `0`. Warnings may remain.
@@ -194,7 +194,7 @@ almost always because the `target` path is wrong.
 ### Check class table
 
 
-One row per check class, 59 rows, whether or not the class raised
+One row per check class, 61 rows, whether or not the class raised
 anything, plus a row for any finding that belongs to no registered class (its
 condition count reads 0). Each row gives the class result, the number of
 individual conditions inside the class, and up to five findings in full.
@@ -219,7 +219,7 @@ beside it that says what was found and, where the check knows, where.
 
 ### Condition table
 
-One row per condition, 173 rows. Each row gives:
+One row per condition, 178 rows. Each row gives:
 
 | Column | Content |
 |---|---|

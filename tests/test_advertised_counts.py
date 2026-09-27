@@ -228,3 +228,17 @@ def test_the_class_table_covers_every_class_and_matches_the_registry():
     wrong = {c: (listed[c], counts[c]) for c in counts if listed[c] != counts[c]}
     assert not wrong, f"per-class condition counts disagree (table, registry): {wrong}"
     assert sum(listed.values()) == TOTAL
+
+
+def test_the_gate_diagram_shows_the_registry_area_counts():
+    """assets/gate.svg drew six hardcoded area figures that summed to 164
+    while the gate ran 177 (found 27 Sep 2026); they now come from the
+    registry, and this keeps them there."""
+    svg = (REPO_ROOT / "assets" / "gate.svg").read_text(encoding="utf-8")
+    texts = re.findall(r">([^<>]+)</text>", svg)
+    shown = {}
+    for area in _area_totals():
+        assert area in texts, f"assets/gate.svg has no box for {area!r}"
+        i = texts.index(area)
+        shown[area] = int(texts[i + 1])
+    assert shown == _area_totals()
