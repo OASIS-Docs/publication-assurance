@@ -36,8 +36,10 @@ jobs:
       # The checker is stdlib-only; poppler-utils matches the runtime the
       # pub-check workflow gives it, so the optional PDF cross-check takes the
       # same path in CI as it does on a maintainer's machine.
-      - name: Install pdftotext (optional PDF cross-check)
-        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      # libxml2-utils, graphviz and m4: converters/docbook-to-markdown resolves
+      # the DMLex DocBook with xmllint and regenerates its UML figure.
+      - name: Install pdftotext (optional PDF cross-check) and the converter's tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils libxml2-utils graphviz m4
 
       # The checker is stdlib-only. beautifulsoup4 is not its dependency: it
       # belongs to the document pipeline under .github/src/, which
@@ -67,6 +69,7 @@ jobs:
         env:
           REQUIRE_CHROME: "1"
           REQUIRE_PANDOC: "1"
+          REQUIRE_CONVERTER: "1"
         run: pytest tests/ -v
 
       # The registry/AST parity assertion inside --list-checks is the tool's

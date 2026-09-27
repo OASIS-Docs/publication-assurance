@@ -64,6 +64,17 @@ Each version is anchored by a git tag on this repository.
   unless `--leave-stale` is given. Multi-part specs with files in a stage
   subdirectory are refused. Pinned by `tests/test_advance_stage.py`. No check
   added.
+- **converters/docbook-to-markdown/** (proposal 011): `build.sh` and
+  `docbook2md.py` convert an OASIS DocBook specification to the OASIS Markdown
+  template and verify it. What is specific to one specification sits in a
+  profile (`profiles/<spec>/profile.json`: root file, entities, output name,
+  key-word case, figure dpi, fence languages, prebuild, allow rules); DMLex is
+  the first. The source tree is only read. After review the converter drops
+  elements whose `condition` excludes `oasis`, as the stylesheet does, and
+  stops on an element it does not handle (a table, for one) instead of
+  flattening it. `tests/test_docbook_to_markdown.py` converts oasis-tcs/lexidma
+  at e3c0626 and requires lexidma's committed `dmlex-v1.0-os.md` byte for byte.
+
 - Release process: a `move-v1` workflow moves the floating `v1` tag to each v1.x.y
   release when it is published (it sat at v1.4.0 for four releases), with a manual
   dispatch to point it at a named release. The adoption guide's `@v1` row now says so.

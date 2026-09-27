@@ -198,7 +198,10 @@ publication-assurance/
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
 ├── verify/                          # Markdown edition vs published HTML, word for word
 │   └── verify_md.py                 #   the verifier (stdlib + pandoc 3.x); README.md says how to read it
-├── converters/docbook-to-markdown/  # DocBook to OASIS Markdown; profiles/<spec>/ per specification
+├── converters/docbook-to-markdown/  # DocBook to OASIS Markdown, then verify_md
+│   ├── build.sh                     #   resolve, prebuild, convert, copy images, verify
+│   ├── docbook2md.py                #   the converter (stdlib)
+│   └── profiles/dmlex/              #   what is specific to one specification (DMLex first)
 ├── docs/ADOPTING.md                 # Adoption guide: the gate in a TC's own repository
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
 ├── examples/                        # Worked example + the regression corpus
@@ -219,6 +222,7 @@ publication-assurance/
 │   ├── test_pdf_command.py          #   the wkhtmltopdf argument vector, token for token
 │   ├── test_stage_uri_live.py       #   the live-URI probe: what blocks, what stays INFO
 │   ├── test_verify_md.py            #   the verifier on DMLex v1.0 OS, and on altered copies
+│   ├── test_docbook_to_markdown.py  #   DMLex DocBook to the committed Markdown, byte for byte
 │   └── fixtures/                    #   hand-built defect trees (the corpus supplies the rest)
 ├── TRANSFORMS.md                    # The pipeline, command by command (canonical criteria)
 ├── assets/                          # The diagrams (SVG sources and rendered PNGs)
