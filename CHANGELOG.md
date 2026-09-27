@@ -131,6 +131,20 @@ Each version is anchored by a git tag on this repository.
   - Both are operational rules (no clause in the pinned corpus), recorded in
     the crosswalk. 178 individual checks in 61 classes; 97 policy-grounded.
     `tests/test_html_code_sync.py`, `tests/test_pdf_toc_pages.py`.
+- **harvest/harvest.py** (proposal 013): learns from every gate run. It reads
+  validation reports, publication audits and adjudications, re-runs the
+  current gate on each recorded package still on disk, and proposes what to
+  change: checks to narrow (adjudicated false positives), new checks (defects
+  found by hand that no check names), classes that fire nearly everywhere or
+  never. It changes nothing; `--proposals` writes speculative drafts. Its
+  first run found two OData v4.02 csd02 false positives still raised, both
+  fixed here:
+  - **template**: a Conformance heading with an anchor inside it
+    (`# <a id="Conformance" ...>17 Conformance</a>`) is a Conformance section.
+  - **filenames**: a multi-part work product's part stem
+    (`odata-v4.02-csd02-part1-protocol`, Naming Directives v1.7
+    `[stage][rev]-[partNumber]-[partName]`) no longer has to end in the stage.
+  `tests/test_harvest.py`, `tests/test_odata_adjudications.py`.
 - Release process: a `move-v1` workflow moves the floating `v1` tag to each v1.x.y
   release when it is published (it sat at v1.4.0 for four releases), with a manual
   dispatch to point it at a named release. The adoption guide's `@v1` row now says so.

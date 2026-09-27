@@ -525,7 +525,9 @@ def check_filenames(items: dict[str, str], stage: str, f: Findings,
                   f"named for the stage being published (…-{stage}.md/.html/.pdf).")
     ending = (f"{errata_dir.lower()}-{stage}" if re.fullmatch(r"errata\d{2}", errata_dir, re.I)
               else stage)
-    if stem and not stem.endswith(f"-{ending}"):
+    # Naming Directives v1.7: a multi-part work product's part files are
+    # [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-[partNumber]-[partName].
+    if stem and not stem.endswith(f"-{ending}") and not re.search(rf"-{re.escape(ending)}-part\d+-[a-z0-9-]+$", stem):
         f.add(BLOCKER, "filenames",
               f"Delivery filename '{stem}' does not end in '-{ending}' (the stage directory name"
               f"{', under its Errata directory' if ending != stage else ''}).")
@@ -1518,14 +1520,14 @@ def check_template(md_text: str, html_text: str, f: Findings) -> None:
         else:
             positions.append((m.start(), label))
     f.observe("template", sections_found=[lbl for _pos, lbl in sorted(positions)],
-              conformance_section=bool(re.search(r"^#+\s+[\d.\sA-Za-z]*Conformance", md_text, re.M | re.I)))
+              conformance_section=bool(re.search(r"^#+\s+(?:<a\b[^>]*>\s*)?[\d.\sA-Za-z]*Conformance", md_text, re.M | re.I)))
     if positions != sorted(positions):
         order = " -> ".join(lbl for _pos, lbl in positions)
         f.add(WARN, "template",
               f"Front-matter sections out of template order: {order}.")
 
     # TC Process: every Standards Track Work Product carries a Conformance section
-    if not re.search(r"^#+\s+[\d.\sA-Za-z]*Conformance", md_text, re.M | re.I):
+    if not re.search(r"^#+\s+(?:<a\b[^>]*>\s*)?[\d.\sA-Za-z]*Conformance", md_text, re.M | re.I):
         f.add(BLOCKER, "template",
               "No Conformance section found. The TC Process requires a conformance "
               "clauses section in every Standards Track Work Product.")

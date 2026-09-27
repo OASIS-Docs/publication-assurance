@@ -4,7 +4,8 @@ Copyright 2025-2026 OASIS Open
 SOFTWARE (the document-processing pipeline under .github/, the pub-check
 publication-readiness gate code under pub-check/, including pub_check.py and
 manifest-schema.json, the conversion verifier under verify/, the
-converters under converters/, and the renderer under render/) is authored by Michael Coletta, Technical Advisor to
+converters under converters/, the renderer under render/, and the run
+harvester under harvest/) is authored by Michael Coletta, Technical Advisor to
 OASIS Open, and licensed under the Apache License, Version 2.0 (see LICENSE).
 
 DOCUMENTATION PROSE (TRANSFORMS.md, PUBLICATION-QUALITY.md,
