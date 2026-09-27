@@ -26,7 +26,26 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+- **Pipeline, step 2** (found by the adversarial pass on publisher-toolkit's
+  adoption of this step, proposal 009):
+  - the PDF preprocessor crashed on every VIRTIO spec with
+    beautifulsoup4 4.11.1, which serialises recursively and which
+    `requirements.txt` pinned; the pin is now 4.13.4, and the preprocessor
+    raises Python's recursion limit around serialisation for older versions;
+  - the footer date is read from the cover only (up to the table of
+    contents), with line breaks inside the date read as spaces and a cover
+    heading that starts with a date ("1 August 2025 draft") accepted: KMIP
+    profiles v3.0 csprd01 printed a revision-history "04 May 2020" on every
+    page;
+  - `fallback_date` (`--fallback-date`) prints the caller's publication date
+    when the document has none, and gives the copyright year when there is no
+    notice;
+  - the copyright notice is read as text, so markup inside it (VIRTIO) no
+    longer hides the year;
+  - the footer is set in the OASIS stylesheet's font (LiberationSans, Arial),
+    not Times, which the gate's pdf-fonts check reported as undeclared;
+  - a contents entry whose heading wraps over several lines is found.
+  Tests in `tests/test_pdf_command.py`.
 
 ## v1.9.1 - 2026-09-27
 

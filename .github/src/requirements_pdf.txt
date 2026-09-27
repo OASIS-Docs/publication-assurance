@@ -8,4 +8,4 @@
 # using wkhtmltopdf. Note that wkhtmltopdf itself must be installed separately
 # as a system binary (e.g., via brew install wkhtmltopdf on macOS).
 #
-beautifulsoup4>=4.11.1
+beautifulsoup4>=4.13.4

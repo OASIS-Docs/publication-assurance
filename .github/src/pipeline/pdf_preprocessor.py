@@ -257,8 +257,16 @@ class PdfPreprocessor(PipelineStep):
         self.tag_print_layout(soup)
 
         # Write preprocessed HTML to output file
+        # BeautifulSoup before 4.12 serialises recursively, and a deeply nested
+        # document (every VIRTIO spec) exceeded Python's default depth there.
+        limit = sys.getrecursionlimit()
+        sys.setrecursionlimit(max(limit, 50000))
+        try:
+            out = str(soup)
+        finally:
+            sys.setrecursionlimit(limit)
         with open(self.output_file, 'w', encoding='utf-8') as f:
-            f.write(str(soup))
+            f.write(out)
 
         logger.info(f"HTML preprocessing completed successfully: {self.output_file}")
 

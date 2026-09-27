@@ -82,7 +82,8 @@ def text_pages(pdf, entries):
         tests = (lambda ls: title in ls or any(a + ' ' + b == title for a, b in zip(ls, ls[1:])),
                  lambda ls: any(numbered.fullmatch(l) for l in ls),
                  lambda ls: bool(lettered) and any(lettered.fullmatch(l) for l in ls),
-                 lambda ls: any(title in l for l in ls))
+                 lambda ls: any(title in l for l in ls),
+                 lambda ls: title in ' '.join(ls))  # a heading wrapped over several lines
         k = next((i for test in tests for i in range(at, len(pages)) if test(pages[i])), None)
         if k is not None:
             found[target] = k + 1
