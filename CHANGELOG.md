@@ -26,6 +26,12 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.9.2 - 2026-09-27
+
+PATCH: step 2 fixes found when publisher-toolkit adopted this PDF step (proposal 009).
+
 - **Pipeline, step 2** (found by the adversarial pass on publisher-toolkit's
   adoption of this step, proposal 009):
   - the PDF preprocessor crashed on every VIRTIO spec with
