@@ -78,6 +78,11 @@
     },
     {
       "severity": "WARN",
+      "check": "pdf-toc-pages",
+      "message": "The PDF's table of contents gives no page number for 356 of its 356 entries: a reader of the PDF cannot find a section by it."
+    },
+    {
+      "severity": "WARN",
       "check": "md-links",
       "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/aggregator.json"
     },
@@ -152,6 +157,15 @@
       "pulls": "the stage directory name, and the parent directory name when it is an errata directory",
       "compares_to": "valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4)",
       "severity": "BLOCKER"
+    },
+    {
+      "check": "stage-name",
+      "sig": "is a Working Draft. Working Drafts are unpublished",
+      "applies": "all",
+      "condition": "A package staged for publication is not a Working Draft",
+      "pulls": "the stage directory name's stage token",
+      "compares_to": "wd: Working Drafts are unpublished and may use any naming (naming-directives.txt 5.2 note); docs.oasis-open.org has no wd location (dmlex/v1.1/wd01 returns 404)",
+      "severity": "WARN"
     },
     {
       "check": "stage-name",
@@ -887,6 +901,44 @@
       "condition": "The PDF's body text prints at no less than 85% of the body size the package declares",
       "pulls": "the median word-box height over every page (pdftotext -bbox), and the body font-size from the package's own CSS or the OASIS stylesheet it links",
       "compares_to": "85% of the declared body size; skipped for landscape PDFs and PDFs from Word, LibreOffice, TeX, Typst, FOP or Acrobat",
+      "severity": "WARN"
+    },
+    {
+      "check": "html-code-sync",
+      "sig": "differs only in whitespace in the HTML",
+      "applies": "md",
+      "condition": "Each fenced code block of the Markdown source is published in the HTML with the same whitespace",
+      "pulls": "every fenced code block of the .md, and every <pre> block of the HTML, whitespace at line ends ignored",
+      "compares_to": "the same block with its tabs intact; a block whose only change is tabs expanded to spaces (the pipeline's pandoc did this to DMLex v1.0 OS, Sep 2026) is this WARN, any other change the BLOCKER",
+      "severity": "WARN"
+    },
+    {
+      "check": "html-code-sync",
+      "sig": "is missing from the HTML or differs from the Markdown source",
+      "applies": "md",
+      "condition": "Each fenced code block of the Markdown source appears in the HTML with the same characters",
+      "pulls": "every top-level fenced code block of the .md (not those in comments, lists, blockquotes, raw or diagram fences, or !include), and every <pre> block of the HTML",
+      "compares_to": "the HTML's <pre> blocks: every Markdown block must match one not already matched, character for character apart from whitespace at line ends",
+      "severity": "BLOCKER"
+    },
+    {
+      "check": "pdf-toc-pages",
+      "sig": "gives no page number for",
+      "applies": "all",
+      "requires": "pdftotext",
+      "condition": "The PDF's table of contents gives a page number for its entries",
+      "pulls": "the contents entries on the PDF's first 25 pages (pdftotext -layout, a Word line-number column removed, wrapped entries joined) and whether each ends in a page number (solid or spaced dot leaders, or two spaces)",
+      "compares_to": "at least half of the entries numbered; a contents list of fewer than five entries is not graded",
+      "severity": "WARN"
+    },
+    {
+      "check": "pdf-toc-pages",
+      "sig": "numbered entries at a page the heading is not on",
+      "applies": "all",
+      "requires": "pdftotext",
+      "condition": "The page a contents entry gives is the page its heading is printed on",
+      "pulls": "up to 20 numbered contents entries spread across the list, and the text of the page each names",
+      "compares_to": "the entry's title on that page, after the constant offset most entries agree on (printed labels may differ from the PDF page index); more than 2, or a fifth of the sample, missing is reported",
       "severity": "WARN"
     },
     {
@@ -1927,11 +1979,20 @@
       "declared_by": "markdown-styles-v1.7.3.css",
       "words": "59411"
     },
+    "pdf-toc-pages": {
+      "contents_entries": "356",
+      "with_page_numbers": "0"
+    },
     "md-links": {
       "links_scanned": "208"
     },
     "fence-collapse": {
       "fences_scanned": "970"
+    },
+    "html-code-sync": {
+      "markdown_fenced_blocks": "485",
+      "not_compared": "15",
+      "html_pre_blocks": "500"
     },
     "dead-lists": {
       "md_lists_addresses": "(none)"
