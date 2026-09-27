@@ -1,0 +1,13 @@
+{
+ "spec": "DMLex (OASIS LEXIDMA TC)",
+ "main": "dmlex.xml",
+ "dtd": "docbook/docbookx.dtd",
+ "entities": "docbook/dbgenent.mod",
+ "basename": "dmlex-v{version}-{stage}",
+ "merge_log_ignore": "failed to load external entity \"schemas/informativeCopies",
+ "prebuild": "prebuild.sh",
+ "glossterm_upper": true,
+ "figure_dpi": 90,
+ "code_languages": {".json": "json", ".xml": "xml", ".rdf": "turtle", ".nvh": "nvh", ".sql": "sql"},
+ "allow": "allow.json"
+}
