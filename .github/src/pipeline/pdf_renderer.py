@@ -31,7 +31,7 @@ import logging
 import re
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Optional
 
@@ -51,7 +51,7 @@ class PdfRenderer(PipelineStep):
     """
 
     def __init__(self, html_file: str, output_pdf: str, base_dir: Optional[str] = None,
-                 footer_name: Optional[str] = None):
+                 footer_name: Optional[str] = None, fallback_date: Optional[str] = None):
         """Resolve absolute paths and validate the input HTML exists.
 
         ``footer_name`` is the file name printed in the running footer. It
@@ -60,6 +60,9 @@ class PdfRenderer(PipelineStep):
         """
         self.html_file = Path(html_file).resolve()
         self.footer_name = footer_name or self.html_file.name
+        # yyyy-mm-dd, for a document with no date line or copyright notice
+        # (publisher-toolkit passes the workflow's publication date)
+        self.fallback_date = fallback_date
         self.output_pdf = Path(output_pdf).resolve()
         self.base_dir = Path(base_dir).resolve() if base_dir else self.html_file.parent
 
@@ -259,11 +262,13 @@ class PdfRenderer(PipelineStep):
         itself: "Copyright © OASIS Open 2021-2026", "© 2023 OASIS Open", an
         entity for the sign. A hardcoded year is wrong for every document
         published in a later one."""
-        text = self.document_text()
+        # read as text: markup may sit inside the notice (VIRTIO's does)
+        text = re.sub(r"<[^>]+>", " ", self.document_text())
         years = r"(\d{4}(?:\s*[-\u2013]\s*\d{4})?)"
         m = (re.search(rf"Copyright\s*(?:©|\(c\))?\s*OASIS Open,?\s*{years}", text, re.I)
              or re.search(rf"(?:Copyright\s*)?(?:©|\(c\))\s*{years},?\s*OASIS Open", text, re.I))
-        year = re.sub(r"\s*[-\u2013]\s*", "-", m.group(1)) if m else str(date.today().year)
+        fallback = self.fallback_date[:4] if self.fallback_date else str(date.today().year)
+        year = re.sub(r"\s*[-\u2013]\s*", "-", m.group(1)) if m else fallback
         return f"Copyright © OASIS Open {year}. All Rights Reserved."
 
     NON_STANDARDS_TRACK = ("cnd", "cn", "cnprd", "pnd", "pn")
@@ -290,14 +295,24 @@ class PdfRenderer(PipelineStep):
         return self.output_pdf.with_name(f".{self.output_pdf.stem}-footer.html")
 
     def document_date(self) -> str:
-        """The document's date line ("12 June 2026"): a heading that is only
-        a date (the cover's) first, else the first element that is only a
-        date; "" when it has none."""
+        """The document's date line ("12 June 2026"), from its cover: a
+        heading that is, or starts with, a date first ("1 August 2025
+        draft"), else an element holding only a date. The cover ends at the
+        table of contents, so a revision-history date is never taken. Line
+        breaks inside the date are read as spaces. Else the fallback date,
+        else ""."""
         text = self.document_text()
-        date_ = rf"\d{{1,2}} (?:{self.MONTHS}) \d{{4}}"
-        m = (re.search(rf"<(h[1-6]|h1big)\b[^>]*>\s*({date_})\s*</\1>", text)
-             or re.search(rf">\s*()({date_})\s*<", text))
-        return m.group(2) if m else ""
+        toc = re.search(r"""id=["']table-of-contents["']""", text)
+        cover = text[:toc.start()] if toc else text[:20000]
+        date_ = rf"\d{{1,2}}\s+(?:{self.MONTHS})\s+\d{{4}}"
+        m = (re.search(rf"<(h[1-6]|h1big)\b[^>]*>\s*({date_})\b[^<]*</\1>", cover)
+             or re.search(rf">\s*()({date_})\s*<", cover))
+        if m:
+            return " ".join(m.group(2).split())
+        if self.fallback_date:
+            d = datetime.strptime(self.fallback_date, "%Y-%m-%d")
+            return f"{d.day} {d:%B %Y}"
+        return ""
 
     def track(self) -> str:
         """The work product's track, from the stage token anywhere after the
@@ -326,7 +341,7 @@ class PdfRenderer(PipelineStep):
             "for(var n=0;n<e.length;n++){e[n].textContent=v[k[j]];}}}"
             '</script></head><body onload="subst()" style="margin:0">'
             '<table style="width:100%;border-top:0.5pt solid #000;border-collapse:collapse;'
-            'font-family:Times,serif;font-size:8pt;color:#000"><tr>'
+            'font-family:LiberationSans, Arial, Helvetica, sans-serif;font-size:8pt;color:#000"><tr>'
             f'<td style="text-align:left;vertical-align:top;padding-top:2pt">{esc(name)}</td>'
             f'<td style="text-align:center;vertical-align:top;padding-top:2pt">{esc(self.copyright_line())}'
             f'<br>{track}</td>'
@@ -495,6 +510,11 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--fallback-date",
+        help="yyyy-mm-dd, printed when the document has no date line of its own"
+    )
+
+    parser.add_argument(
         "--footer-name",
         help="File name for the running footer (default: the input file's name)"
     )
@@ -524,7 +544,8 @@ def main() -> None:
             html_file=args.html_file,
             output_pdf=output_pdf,
             base_dir=args.base_dir,
-            footer_name=args.footer_name
+            footer_name=args.footer_name,
+            fallback_date=args.fallback_date
         )
 
         converter.convert()

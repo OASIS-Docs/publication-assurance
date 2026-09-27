@@ -220,3 +220,77 @@ def test_numbers_that_do_not_settle_are_not_shipped(tmp_path, monkeypatch):
     monkeypatch.setattr(toc, "main", flaky)
     r._number_contents()
     assert printed[-1] == str(src), printed
+
+
+def test_a_cover_date_split_across_lines_is_the_date_not_a_revision_row(tmp_path):
+    """KMIP profiles v3.0 csprd01: the cover's "21\\nMay 2026" was missed and
+    a revision-history "04 May 2020" printed on every page."""
+    src = tmp_path / "kmip-profiles-v3.0-csprd01.html"
+    src.write_text("<html><body><h1>KMIP Profiles</h1><h2>Committee Specification Draft 01</h2>"
+                   "<p class='date'>21\nMay 2026</p><h1 id='table-of-contents'>Contents</h1>"
+                   "<table><tr><td>04 May 2020</td><td>first draft</td></tr></table></body></html>",
+                   encoding="utf-8")
+    assert PdfRenderer(str(src), str(tmp_path / "x.pdf")).document_date() == "21 May 2026"
+
+
+def test_a_dated_cover_heading_with_words_after_the_date_counts(tmp_path):
+    """NIEM NDR v6.0 psd02: "1 August 2025 draft"."""
+    src = tmp_path / "ndr-v6.0-psd02.html"
+    src.write_text("<html><body><h1>NDR</h1><h2>1 August 2025 draft</h2></body></html>", encoding="utf-8")
+    assert PdfRenderer(str(src), str(tmp_path / "x.pdf")).document_date() == "1 August 2025"
+
+
+def test_a_date_outside_the_cover_is_not_the_document_s(tmp_path):
+    src = tmp_path / "x-v1.0-csd01.html"
+    src.write_text("<html><body><h1>X</h1><h1 id='table-of-contents'>Contents</h1>"
+                   "<table><tr><td>04 May 2020</td></tr></table></body></html>", encoding="utf-8")
+    assert PdfRenderer(str(src), str(tmp_path / "x.pdf")).document_date() == ""
+
+
+def test_the_workflow_s_date_stands_in_where_the_document_has_none(tmp_path):
+    """publisher-toolkit's step 2 passes the publication date (modify_date)."""
+    src = tmp_path / "x-v1.0-csd01.html"
+    src.write_text("<html><body><h1>X</h1><p>no date, no notice</p></body></html>", encoding="utf-8")
+    r = PdfRenderer(str(src), str(tmp_path / "x.pdf"), fallback_date="2027-01-05")
+    assert "5 January 2027 - Page" in r.footer_html()
+    assert r.copyright_line() == "Copyright © OASIS Open 2027. All Rights Reserved."
+
+
+def test_the_footer_is_set_in_the_oasis_stylesheet_s_font(tmp_path):
+    """Times is not in the OASIS stylesheet, so the gate's pdf-fonts check
+    reported the footer as a font the package does not declare."""
+    footer = _render(tmp_path, PAGE.format(title="T", h1="T", year="2026")).footer_html()
+    assert "font-family:LiberationSans, Arial, Helvetica, sans-serif" in footer and "Times" not in footer
+
+
+def test_the_pipeline_needs_a_beautifulsoup_that_serialises_deep_documents():
+    """beautifulsoup4 4.11.1 serialised recursively and crashed on every VIRTIO
+    spec in the PDF preprocessor; 4.12 and later do not."""
+    import re as _re
+    for req in ("requirements.txt", "requirements_pdf.txt"):
+        text = (PIPELINE / req).read_text()
+        v = _re.search(r"beautifulsoup4\s*[=>]=\s*(\d+)\.(\d+)", text)
+        assert v and (int(v.group(1)), int(v.group(2))) >= (4, 12), (req, text)
+
+
+def test_the_preprocessor_writes_a_deeply_nested_document(tmp_path):
+    spec = importlib.util.spec_from_file_location("pipeline.pdf_preprocessor",
+                                                  PIPELINE / "pipeline" / "pdf_preprocessor.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["pipeline.pdf_preprocessor"] = mod
+    spec.loader.exec_module(mod)
+    deep = "<div>" * 3000 + "x" + "</div>" * 3000
+    src = tmp_path / "deep.html"
+    src.write_text(f"<html><head></head><body>{deep}</body></html>", encoding="utf-8")
+    out = tmp_path / "out.html"
+    mod.PdfPreprocessor(src, out).run()
+    assert out.read_text(encoding="utf-8").count("<div>") == 3000
+
+
+def test_markup_inside_the_notice_does_not_hide_its_year(tmp_path):
+    """VIRTIO v1.0 csd03 printed the current year: its notice has markup inside."""
+    src = tmp_path / "virtio-v1.0-csd03.html"
+    src.write_text('<html><body><p>Copyright <span class="c">&copy;</span> OASIS Open <b>2014</b>. '
+                   'All Rights Reserved.</p></body></html>', encoding="utf-8")
+    assert PdfRenderer(str(src), str(tmp_path / "x.pdf")).copyright_line() == \
+        "Copyright © OASIS Open 2014. All Rights Reserved."
