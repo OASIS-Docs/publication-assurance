@@ -35,6 +35,11 @@ DOCS = [
     "assets/architecture/README.md",
     "examples/eox-core-v1.0-csd01/README.md",
     "docs/ADOPTING.md",
+    "docs/CONVERTING.md",
+    "verify/README.md",
+    "converters/docbook-to-markdown/README.md",
+    "render/README.md",
+    "harvest/README.md",
 ]
 
 TAG = re.compile(r"<(/?)([A-Za-z][A-Za-z0-9]*)\b[^>\n]*>|<([^\s>]+)>")

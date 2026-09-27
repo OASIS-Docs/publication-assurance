@@ -15,7 +15,7 @@ import re
 
 from conftest import REPO_ROOT
 
-PINNED = ["docs/ADOPTING.md", "README.md", "examples/consumer-workflow.yml",
+PINNED = ["docs/ADOPTING.md", "docs/CONVERTING.md", "README.md", "examples/consumer-workflow.yml",
           "examples/consumer-workflow-matrix.yml", "action.yml"]
 PIN = re.compile(r"publication-assurance@(v\d+\.\d+\.\d+)|--branch (v\d+\.\d+\.\d+)"
                  r"|PA_REF: (v\d+\.\d+\.\d+)|refs/tags/(v\d+\.\d+\.\d+)|`@(v\d+\.\d+\.\d+)`")

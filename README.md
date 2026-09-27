@@ -86,6 +86,8 @@ URL shapes and what happens when nothing is published:
 | **[pub-check/README.md](pub-check/README.md)** | The class-level summary of what it checks, with severities and the regression corpus. |
 | **[pub-check/CHECKS.md](pub-check/CHECKS.md)** | A check fired and you want the exact one. Full catalog, generated from the code. |
 | **[TRANSFORMS.md](TRANSFORMS.md)** | Building from Markdown and want the pipeline command by command. |
+| **[docs/CONVERTING.md](docs/CONVERTING.md)** | Moving a published DocBook specification to Markdown: convert, prove it says what the standard says, render, gate, cut the next stage. |
+| **[harvest/README.md](harvest/README.md)** | You run the gate often and want each run's records turned into candidate improvements to the gate. |
 | **[pub-check/AUTHORITIES.md](pub-check/AUTHORITIES.md)** | The OASIS rule behind a check, quoted verbatim with its source. The criterion-to-clause map. |
 | **[examples/eox-core-v1.0-csd01/](examples/eox-core-v1.0-csd01/README.md)** | A real Validation Report from a live publication. |
 
@@ -203,7 +205,15 @@ publication-assurance/
 │   ├── build.sh                     #   resolve, prebuild, convert, copy images, verify
 │   ├── docbook2md.py                #   the converter (stdlib)
 │   └── profiles/dmlex/              #   what is specific to one specification (DMLex first)
+├── render/                          # Render, stage and gate one Markdown specification
+│   ├── render.sh                    #   step 1, step 2's print styles, Chrome, contents pages
+│   │                                #   (.github/src/pipeline/toc_pages.py), gate
+│   ├── footer.py / print_pdf.mjs    #   the published PDF footer, read from the document
+│   └── compare.mjs                  #   published and rendered pages side by side
+├── harvest/                         # Learn from every run: records in, candidate gate changes out
+│   └── harvest.py                   #   re-gates recorded packages, reads audits and adjudications
 ├── docs/ADOPTING.md                 # Adoption guide: the gate in a TC's own repository
+├── docs/CONVERTING.md               # Converting a published specification to OASIS Markdown
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
 ├── examples/                        # Worked example + the regression corpus
 │   ├── consumer-workflow.yml        #   the drop-in TC workflow (copy this)
@@ -224,6 +234,13 @@ publication-assurance/
 │   ├── test_stage_uri_live.py       #   the live-URI probe: what blocks, what stays INFO
 │   ├── test_verify_md.py            #   the verifier on DMLex v1.0 OS, and on altered copies
 │   ├── test_docbook_to_markdown.py  #   DMLex DocBook to the committed Markdown, byte for byte
+│   ├── test_render.py               #   DMLex rendered: footer, contents pages, gate, compare
+│   ├── test_step1_fidelity.py       #   step 1's own HTML of DMLex against the published page
+│   ├── test_toc_pages.py            #   contents page numbers against where headings print
+│   ├── test_html_code_sync.py       #   code blocks published unchanged from the Markdown
+│   ├── test_pdf_toc_pages.py        #   the gate's contents page-number check
+│   ├── test_stage_vocabulary.py     #   every accepted stage token has a source
+│   ├── test_harvest.py              #   run records in, candidates out
 │   └── fixtures/                    #   hand-built defect trees (the corpus supplies the rest)
 ├── TRANSFORMS.md                    # The pipeline, command by command (canonical criteria)
 ├── assets/                          # The diagrams (SVG sources and rendered PNGs)
@@ -304,4 +321,4 @@ The OASIS name and logo are trademarks of OASIS Open.
 
 ---
 
-**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)
+**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [Converting a specification](docs/CONVERTING.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)

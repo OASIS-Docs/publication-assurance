@@ -24,7 +24,7 @@ walkthrough for a TC is [docs/CONVERTING.md](../../docs/CONVERTING.md).
 Requirements: Python 3.10 or later (standard library only), `xmllint`
 (libxml2), pandoc 3.x for verification, and whatever the profile's prebuild needs (DMLex: Graphviz `dot`
 and `m4`). On Debian or Ubuntu: `apt-get install libxml2-utils graphviz m4`
-plus the pandoc `.deb` from <https://github.com/jgm/pandoc/releases>.
+plus the pandoc `.deb` from [github.com/jgm/pandoc/releases](https://github.com/jgm/pandoc/releases).
 
 ## Usage
 
