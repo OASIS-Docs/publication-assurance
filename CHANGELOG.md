@@ -41,7 +41,7 @@ Each version is anchored by a git tag on this repository.
   recorded, and every difference prints in full. The DMLex allow rules are
   the first profile, `converters/docbook-to-markdown/profiles/dmlex/allow.json`.
   `tests/test_verify_md.py` runs it on the DMLex v1.0 OS edition against a
-  snapshot of the published page (0 unexplained differences in 61,258 words)
+  snapshot of the published page (0 unexplained differences in 61,260 words)
   and against the live page, and fails altered copies.
 - New tool `pub-check/advance_stage.py` (proposal 005): cuts the next stage
   of an OASIS Markdown spec. It rewrites the title version, the stage line
@@ -91,6 +91,21 @@ Each version is anchored by a git tag on this repository.
   `tests/test_render.py` renders DMLex v1.0 OS and checks the footer, every
   contents number against the page its heading prints on, the gate's PDF
   checks and the comparison.
+- **Pipeline, step 1** (proposal 011): pandoc now runs with `--preserve-tabs`.
+  Without it, step 1 expanded the tabs in 9 of the 316 code blocks of DMLex
+  v1.0 OS, so the HTML it published no longer carried the standard's bytes.
+  Found by verifying step 1's own output against the published page.
+- **verify_md.py `--rendered`**: verifies the HTML the pipeline actually
+  renders (step 1's output) instead of reading the Markdown with pandoc's GFM
+  reader, since step 1 reads with pandoc's `markdown` reader and applies its
+  own transforms. Links into the document's own stage, which step 1 makes
+  relative, are read against its This stage URL. `--allow` may be given more
+  than once, and an `image` rule accepts a changed image source. An ellipsis
+  counts as its three dots (typography, like curly quotes), and a custom tag
+  such as step 1's `<h1big>` is no longer read as an `<h1>` (it swallowed the
+  cover). The DMLex profile's `allow-rendered.json` holds the one step 1
+  difference: the logo served from `images/`.
+  `tests/test_step1_fidelity.py` runs step 1 on DMLex and verifies its HTML.
 - Release process: a `move-v1` workflow moves the floating `v1` tag to each v1.x.y
   release when it is published (it sat at v1.4.0 for four releases), with a manual
   dispatch to point it at a named release. The adoption guide's `@v1` row now says so.

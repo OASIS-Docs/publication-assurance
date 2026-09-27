@@ -7,7 +7,7 @@ The fixture is the Markdown edition of DMLex Version 1.0 OASIS Standard
 (MColetta-OASIS/lexidma, branch markdown-conversion) and a copy of
 https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html fetched
 on 27 September 2026 (sha256 3f533a53...). With the DMLex allow file the two
-agree on all 61,258 published tokens, 311 headings and 316 code blocks. A
+agree on all 61,260 published tokens, 311 headings and 316 code blocks. A
 verifier that passes an altered copy, or passes on nothing, proves nothing,
 so both are tested.
 """
@@ -68,7 +68,7 @@ def test_the_dmlex_edition_matches_the_published_os(tmp_path):
     assert rep["allow_rules_unused"] == []
     assert rep["list_items_published"] == rep["list_items_markdown"] == 1133
     assert int(rep["pandoc"].split(".")[0]) >= 3
-    assert rep["published_tokens"] == 61258
+    assert rep["published_tokens"] == 61260
     assert rep["headings_published"] == 311 and rep["headings_missing"] == []
     assert rep["code_blocks_published"] == rep["code_blocks_markdown"] == 316
     assert rep["code_blocks_differing"] == []
@@ -85,7 +85,7 @@ def test_the_live_published_page_is_accepted_by_url(tmp_path):
         pytest.skip("docs.oasis-open.org is not reachable (CI sets REQUIRE_NETWORK=1)")
     r, rep = verify(MD, LIVE, tmp_path)
     assert r.returncode == 0, r.stdout[-3000:] + r.stderr
-    assert rep["diff_regions"] == 0 and rep["published_tokens"] == 61258
+    assert rep["diff_regions"] == 0 and rep["published_tokens"] == 61260
 
 
 def test_a_changed_word_fails_and_is_named(tmp_path):

@@ -17,7 +17,7 @@ differences that are not in the document; the tool refuses them and records
 the version it used in the report.
 
 ```bash
-python3 verify/verify_md.py SPEC.md PUBLISHED [--root DIR] [--allow FILE] [--json OUT]
+python3 verify/verify_md.py SPEC.md PUBLISHED [--root DIR] [--allow FILE ...] [--json OUT] [--rendered HTML]
 ```
 
 | Argument | Meaning |
@@ -27,6 +27,7 @@ python3 verify/verify_md.py SPEC.md PUBLISHED [--root DIR] [--allow FILE] [--jso
 | `--root DIR` | Where the Markdown's image paths are resolved (default: the Markdown's directory) |
 | `--allow FILE` | Accepted deviations, each with a reason (below) |
 | `--json OUT` | The full report, every difference in full |
+| `--rendered HTML` | Verify this rendering of `SPEC.md`, the pipeline's step 1 output, instead of reading `SPEC.md` with pandoc's GFM reader. This is the HTML that is published, so it is the stronger check; add the profile's `allow-rendered.json` for what step 1 changes on purpose |
 
 Exit `0` when every check passes, `1` when any fails, `2` when an input
 cannot be read (a missing file, no pandoc, an allow rule without a reason).
@@ -93,7 +94,7 @@ The DMLex rules are in
 [`converters/docbook-to-markdown/profiles/dmlex/allow.json`](../converters/docbook-to-markdown/profiles/dmlex/allow.json).
 With them, the DMLex v1.0 OASIS Standard Markdown edition matches
 <https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html> on
-61,258 words, 311 headings, 316 code blocks, 1,133 list items, 93 external
+61,260 words, 311 headings, 316 code blocks, 1,133 list items, 93 external
 links and 50 images
 (`tests/test_verify_md.py`).
 

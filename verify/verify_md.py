@@ -52,6 +52,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.parse
 import urllib.request
 
 
@@ -75,6 +76,7 @@ def tokens(text):
     text = re.sub('[“”„″]', '"', text)
     text = re.sub('[‘’′]', "'", text)
     text = re.sub('[–—]', '-', text)
+    text = text.replace('…', '...')  # smart typography: an ellipsis is its three dots
     return re.findall(r"[A-Za-z0-9À-ɏ]+|[^\sA-Za-z0-9À-ɏ]", text)
 
 
@@ -135,11 +137,21 @@ def hidden(h):
     return len(re.findall(r'<(del|s|strike)\b|display\s*:\s*none|visibility\s*:\s*hidden', h, re.I))
 
 
-def external_links(h):
+def external_links(h, base=None):
     """Every http(s) link target, the scheme read as https (docs.oasis-open.org
-    serves both, and the published HTML mixes them)."""
-    return sorted(re.sub(r'^http://', 'https://', html.unescape(u))
-                  for u in re.findall(r'<a\b[^>]*href="(https?://[^"]+)"', h, re.I))
+    serves both, and the published HTML mixes them). With a base, a relative
+    link (the pipeline makes links into the document's own stage relative)
+    is read as the absolute URL it resolves to."""
+    out = []
+    for u in re.findall(r'<a\b[^>]*href="([^"#][^"]*)"', h, re.I):
+        u = html.unescape(u)
+        if not re.match(r'[a-z][a-z0-9+.-]*:', u, re.I):
+            if not base:
+                continue
+            u = urllib.parse.urljoin(base, u)
+        if re.match(r'https?://', u, re.I):
+            out.append(re.sub(r'^http://', 'https://', u))
+    return sorted(out)
 
 
 def md_to_html(md_path):
@@ -195,7 +207,7 @@ def load_rules(path):
     for i, r in enumerate(rules):
         if not isinstance(r, dict) or not str(r.get('reason', '')).strip():
             fail(f'allow rule {i} in {path} has no reason: {r}')
-        if r.get('kind', 'text') not in ('text', 'heading', 'link'):
+        if r.get('kind', 'text') not in ('text', 'heading', 'link', 'image'):
             fail(f'allow rule {i} in {path} has an unknown kind: {r}')
         if 'published' not in r or ('markdown' not in r and r.get('kind') != 'heading'):
             fail(f'allow rule {i} in {path} needs "published" and "markdown": {r}')
@@ -212,7 +224,10 @@ def main():
                     '(default: the Markdown file\'s directory)')
     ap.add_argument('--json', help='write the full report here')
     ap.add_argument('--context', type=int, default=8, help='tokens of context before each difference')
-    ap.add_argument('--allow', help='JSON list of accepted deviations {published, markdown, reason}')
+    ap.add_argument('--allow', action='append', default=[],
+                    help='JSON list of accepted deviations {published, markdown, reason}; may be repeated')
+    ap.add_argument('--rendered', help='compare this HTML rendering of SPEC.md (the pipeline\'s step 1 '
+                    'output) instead of reading SPEC.md with pandoc\'s GFM reader')
     a = ap.parse_args()
 
     try:
@@ -220,10 +235,17 @@ def main():
     except OSError as e:
         fail(f'cannot read {a.md}: {e}')
     root = a.root or os.path.dirname(os.path.abspath(a.md))
-    rules = load_rules(a.allow) if a.allow else []
-    pandoc = pandoc_version()
+    rules = [r for path in a.allow for r in load_rules(path)]
     pub = read_published(a.html)
-    md_html = md_to_html(a.md)
+    if a.rendered:
+        pandoc = f'not used: {a.rendered}'
+        try:
+            md_html = open(a.rendered, encoding='utf-8').read()
+        except OSError as e:
+            fail(f'cannot read {a.rendered}: {e}')
+    else:
+        pandoc = pandoc_version()
+        md_html = md_to_html(a.md)
 
     # Tables of contents are generated, not content: drop them from both sides.
     pub_body = strip_toc(pub)
@@ -259,7 +281,7 @@ def main():
     # Headings: every numbered published heading, in order.
     def heads(h):
         return [re.sub(r'\s+', ' ', html.unescape(re.sub('<[^>]+>', '', t))).strip()
-                for _, t in re.findall(r'<h([1-6])[^>]*>(.*?)</h\1>', h, re.S)]
+                for _, t in re.findall(r'<h([1-6])\b[^>]*>(.*?)</h\1>', h, re.S)]
     pub_heads = [h for h in heads(pub) if re.match(r'^(\d+(\.\d+)*|Appendix [A-Z]|[A-Z](\.\d+)+) ', h)]
     norm = lambda h: ' '.join(tokens(re.sub(r'^(\d+)\.(\s)', r'\1\2',
                                             re.sub(r'^Appendix ([A-Z])\.', r'Appendix \1', h)))).lower()
@@ -284,7 +306,7 @@ def main():
     # so one missing block is reported once, not as every block after it.
     def pres(h):
         out = []
-        for m in re.finditer(r'<pre[^>]*>(.*?)</pre>', h, re.S):
+        for m in re.finditer(r'<pre\b[^>]*>(.*?)</pre>', h, re.S):
             t = html.unescape(re.sub(r'<[^>]+>', '', m.group(1)))
             out.append('\n'.join(l.rstrip() for l in t.split('\n')).strip('\n'))
         return out
@@ -300,6 +322,11 @@ def main():
     src = lambda h: [html.unescape(u) for u in re.findall(r'<img\b[^>]*\bsrc="([^"]+)"',
                                                            re.sub(r'<!--.*?-->', ' ', h, flags=re.S), re.I)]
     pub_imgs, imgs = src(pub_body), src(md_body)
+    for i, r in enumerate(rules):
+        if r.get('kind') == 'image' and r['published'] in pub_imgs and r['markdown'] in imgs \
+                and pub_imgs.index(r['published']) == imgs.index(r['markdown']):
+            imgs[imgs.index(r['markdown'])] = r['published']
+            uses[i] = 1
     missing_imgs = [p for p in imgs if not re.match(r'https?://', p)
                     and not os.path.exists(os.path.join(root, p))]
 
@@ -309,7 +336,10 @@ def main():
 
     # Link targets: every difference needs a "link" rule.
     link_rules = [(i, r) for i, r in enumerate(rules) if r.get('kind') == 'link']
-    pl, ml = external_links(pub_body), external_links(md_body)
+    # The Markdown's own This stage URL is the base its relative links resolve against.
+    this = re.search(r'https?://docs\.oasis-open\.org/[^\s()\[\]<>]*/' + re.escape(os.path.splitext(os.path.basename(a.md))[0])
+                     + r'\.html', md_src)
+    pl, ml = external_links(pub_body), external_links(md_body, this.group(0) if (this and a.rendered) else None)
     link_diffs = []
     for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, pl, ml, autojunk=False).get_opcodes():
         if op == 'equal':

@@ -1,0 +1,3 @@
+[
+ {"kind": "image", "published": "https://docs.oasis-open.org/templates/OASISLogo-v3.0.png", "markdown": "images/OASISLogo-v3.0.png", "reason": "the pipeline's step 1 serves the OASIS logo from the package's images/ directory instead of the templates URL; same image, same position"}
+]

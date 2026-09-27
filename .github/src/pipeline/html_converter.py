@@ -231,6 +231,9 @@ class HtmlConverter(PipelineStep):
             "pandoc",
             self.md_file,
             "-f", "markdown+autolink_bare_uris-implicit_figures",
+            # Tabs in a code block are the specification's bytes; without
+            # this pandoc expands them to spaces (DMLex: 9 of 316 blocks).
+            "--preserve-tabs",
             "--no-highlight",
             "-c", self.css_ref_for_pandoc,
             "-s",
