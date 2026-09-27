@@ -1,7 +1,7 @@
 # Publication Validation Report (pub-check): CSAF v2.1 CSD01 (corpus)
 
 **Target:** ` examples/csaf/v2.1/csd01 `  
-**Validation date:** 2026-09-26  
+**Validation date:** 2026-09-27  
 **Tool:** oasis_pub_check.py (OASIS-Docs/publication-assurance)  
 **Coverage:** 173 individual checks across 59 check classes, all run  
 **Blockers:** 1  
