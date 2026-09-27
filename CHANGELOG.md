@@ -32,10 +32,13 @@ Each version is anchored by a git tag on this repository.
   from the DMLex Markdown edition (MColetta-OASIS/lexidma) and hardened after
   review: an empty document no longer passes, an allow rule accepts one
   difference unless it gives a `count` (and optionally a `context`), a rule
-  without a reason is refused, unused rules are reported (and fail under
-  `--strict`), a table or list flattened into paragraphs fails, the DocBook
-  contents strip no longer swallows the first heading, pandoc 3.x is required
-  and recorded, and every difference prints in full. The DMLex allow rules are
+  without a reason is refused, a rule that accepted nothing fails (a moved
+  paragraph cannot silently vanish), a table flattened into paragraphs or a
+  word moved to another row fails, images are compared as rendered and in
+  order, external link targets and struck-through or hidden text are
+  checked, the contents strip removes only the contents, the charset comes
+  from the server, the page or the HTML default, pandoc 3.x is required and
+  recorded, and every difference prints in full. The DMLex allow rules are
   the first profile, `converters/docbook-to-markdown/profiles/dmlex/allow.json`.
   `tests/test_verify_md.py` runs it on the DMLex v1.0 OS edition against a
   snapshot of the published page (0 unexplained differences in 61,258 words)
