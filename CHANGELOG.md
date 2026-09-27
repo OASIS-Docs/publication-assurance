@@ -30,6 +30,12 @@ Each version is anchored by a git tag on this repository.
   another directory was refused as "not committed", because git ran in the
   file's directory with the path as given; and `--write --out DIR` crashed
   when DIR did not exist. Both found by the v1.9.0 end-to-end run (JOB-011).
+  An adversarial pass on the fix then found the clean-source check fooled by
+  a symlink to a changed file and by `assume-unchanged`, and `--write`
+  writing through a dangling link: the source is now resolved through links
+  and its bytes compared with the committed blob, a target that exists even
+  as a dangling link is refused, and an `--out` that cannot be created is a
+  `REFUSED:` line, not a traceback.
   `tests/test_advance_stage.py::test_a_committed_source_given_by_a_relative_path_from_elsewhere_is_clean`,
   `tests/test_advance_stage.py::test_write_creates_the_out_directory`.
 - **Pipeline, step 2**: `PdfRenderer.track()` gives the work product's track
