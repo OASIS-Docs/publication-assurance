@@ -142,19 +142,27 @@ compares the HTML, every page:
 |---|---|
 | Words | Every published word is in the rendered PDF in the same order, apart from allowed deviations. List letters and numbers are text in a PDF, so a lettered list printed `1.`, `2.` is a difference |
 | Contents | Each contents entry's page number is read as `<page>`: the two editions paginate differently, so the numbers need not match, but an entry numbered on one side and not the other is a difference |
-| Running lines | The header and footer lines (a line near the page edge that repeats, digits aside, on half the pages or more) are the same on both sides, and every rendered page carries one |
+| Running lines | The header and footer lines (a line near the page edge that repeats, digits aside, on two pages or more and half of them) are the same on both sides, and every rendered page carries one. Only the numbers that change from page to page and the page count after them are masked, so a footer with the wrong version, date or year is a difference |
 
-What it takes as layout and counts rather than reports: a difference that
-vanishes once spaces and hyphens are removed (line wrapping: FOP hyphenates,
-Chrome breaks a URL at a hyphen); a run of differences within 80 tokens that
-holds the same characters in another order (a caption beside a code block
-split by a page break, labels in a regenerated diagram); list bullets, which
-a renderer may draw outside the text layer; ligature glyphs, read as their
-letters.
+What it takes as layout and counts rather than reports:
+- line wrapping: the two sides are equal once spaces go and a hyphen that
+  ends a line between two letters may vanish (FOP hyphenates, Chrome breaks
+  a URL). Any other hyphen counts, so a lost minus sign is a difference;
+- a moved block: three or more tokens deleted in one place and inserted,
+  unchanged, within 400 tokens. A block that changed on the way is reported;
+- list bullets, which a renderer may draw outside the text layer, and
+  ligature glyphs, read as their letters.
 
-The allow file is `verify_md.py`'s, with one more kind: `{"kind": "footer",
-"published": ..., "markdown": ..., "reason": ...}` accepts a running line,
-digits written as `#`. DMLex's is
+Nothing else is waved through: two numbers that swap places, or a "NOT"
+that moves from one sentence to another, is a difference.
+
+The allow file is `verify_md.py`'s, with two more kinds.
+`{"kind": "footer", "published": ..., "markdown": ..., "reason": ...}`
+accepts a running line as the report prints it. `{"kind": "region", "from":
+..., "to": ..., "reason": ...}` declares a stretch after the contents whose
+order is not the document's to keep, a diagram regenerated from its source
+for one. There the two sides must hold the same characters, in any order.
+DMLex's is
 [`profiles/dmlex/allow-pdf.json`](../converters/docbook-to-markdown/profiles/dmlex/allow-pdf.json).
 It also records two defects of the published PDF itself: its font has no `ň`
 or `ō`, and FOP printed `#` for them 15 times.

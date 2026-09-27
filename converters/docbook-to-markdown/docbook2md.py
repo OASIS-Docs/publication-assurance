@@ -413,18 +413,22 @@ class Converter:
     NUMERATIONS = ('arabic', 'loweralpha', 'lowerroman', 'upperalpha', 'upperroman')
 
     def numeration(self, el):
-        """An ordered list's numbering, as the DocBook stylesheet prints it: the
-        list's numeration attribute, or else by how many ordered lists enclose it
-        (1., a., i., A., I., then round again)."""
+        """An ordered list's numbering, as the DocBook stylesheet prints it
+        (common.xsl, list.numeration): the list's numeration attribute, or else
+        the style after that of the nearest enclosing ordered list, itself
+        worked out the same way (1., a., i., A., I., then round again). A list
+        inside an explicitly lettered list is therefore roman."""
         if el.get('numeration'):
             if el.get('numeration') not in self.NUMERATIONS:
                 self.warnings.append(f'UNHANDLED block <orderedlist numeration={el.get("numeration")!r}>')
+                return 'arabic'
             return el.get('numeration')
-        depth, p = 0, self.parent_of.get(el)
-        while p is not None:
-            depth += p.tag == 'orderedlist'
+        p = self.parent_of.get(el)
+        while p is not None and p.tag != 'orderedlist':
             p = self.parent_of.get(p)
-        return self.NUMERATIONS[depth % len(self.NUMERATIONS)]
+        if p is None:
+            return 'arabic'
+        return self.NUMERATIONS[(self.NUMERATIONS.index(self.numeration(p)) + 1) % len(self.NUMERATIONS)]
 
     def marker(self, style, k):
         """A list marker pandoc's markdown reader (the pipeline's step 1) numbers
