@@ -34,9 +34,9 @@ def dests(pdf):
 
 def main(src, pdf, out):
     h = open(src, encoding='utf-8').read()
-    m = re.search(r'<h1[^>]*id="table-of-contents"[^>]*>.*?</h1>\s*<ul>', h, re.S)
+    m = re.search(r'<h([1-6])[^>]*id="table-of-contents"[^>]*>.*?</h\1>\s*<ul>', h, re.S)
     if not m:
-        sys.exit('toc_pages.py: no table of contents (h1#table-of-contents followed by a list)')
+        sys.exit('toc_pages.py: no table of contents (a heading with id table-of-contents followed by a list)')
     depth, end = 0, None
     for t in re.finditer(r'<(/?)ul\b[^>]*>', h[m.end() - 4:]):
         depth += -1 if t.group(1) else 1

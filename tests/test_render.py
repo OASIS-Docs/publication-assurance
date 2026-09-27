@@ -40,7 +40,7 @@ def footer(md):
 def test_the_footer_is_read_from_the_document():
     r, f = footer(EDITION / "dmlex-v1.0-os.md")
     assert r.returncode == 0, r.stderr
-    assert f == {"name": "dmlex-v1.0-os", "stage": "os", "track": "Standards Track Work Product",
+    assert f == {"name": "dmlex-v1.0-os", "stage": "os", "path": "lexidma/dmlex/v1.0/os", "track": "Standards Track Work Product",
                  "copyright": "Copyright © OASIS Open 2025. All Rights Reserved.", "date": "29 April 2025"}
 
 
@@ -148,3 +148,77 @@ def test_the_contents_carry_the_page_each_heading_is_on(rendered):
     for title, page in [e for e in entries if e[0].split()[0] in ("1", "2", "3", "3.4", "4")]:
         body = " ".join(page_text(pdf, int(page)).split())
         assert " ".join(title.split()) in body, f"{title!r} is not on page {page}"
+
+
+TINY = """![OASIS Logo](https://docs.oasis-open.org/templates/OASISLogo-v3.0.png)
+
+---
+
+# Widget Version 1.0
+
+## Committee Note Draft 01
+
+## 2 May 2026
+
+#### This stage:
+
+[https://docs.oasis-open.org/w/widget/v1.0/cnprd01/widget-v1.0-cnprd01.html](https://docs.oasis-open.org/w/widget/v1.0/cnprd01/widget-v1.0-cnprd01.html)
+
+## Notices
+
+Copyright &copy; OASIS Open 2019-2026. All Rights Reserved.
+
+---
+
+## Table of Contents
+
+- [1 Intro](#intro)
+
+---
+
+# 1 Intro <a id='intro'></a>
+
+Text.
+
+```
+Copyright © OASIS Open 2011. All Rights Reserved.
+```
+"""
+
+
+def test_the_footer_takes_the_notices_copyright_a_range_and_a_retired_note_stage(tmp_path):
+    md = tmp_path / "widget-v1.0-cnprd01.md"
+    md.write_text(TINY, encoding="utf-8")
+    r, f = footer(md)
+    assert r.returncode == 0, r.stderr
+    assert f["copyright"] == "Copyright © OASIS Open 2019-2026. All Rights Reserved."
+    assert f["track"] == "Non-Standards Track Work Product"
+    assert f["path"] == "w/widget/v1.0/cnprd01"
+
+
+def test_a_linked_this_stage_url_stages_at_its_path_and_an_h2_contents_is_numbered(tmp_path):
+    chrome = validation_report.find_browser()
+    if not (chrome and shutil.which("pandoc") and shutil.which("node")):
+        if os.environ.get("REQUIRE_CHROME") == "1":
+            pytest.fail("REQUIRE_CHROME=1 but Chrome, pandoc or node is missing")
+        pytest.skip("Chrome, pandoc or node missing")
+    (tmp_path / "md").mkdir()
+    (tmp_path / "md" / "widget-v1.0-cnprd01.md").write_text(TINY, encoding="utf-8")
+    r = subprocess.run(["bash", str(RENDER / "render.sh"), str(tmp_path / "md"), "-", str(tmp_path / "out")],
+                       capture_output=True, text=True, env=dict(os.environ, CHROME=chrome, PUBCHECK="0"))
+    assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-2000:]
+    stage = tmp_path / "out" / "w" / "widget" / "v1.0" / "cnprd01"
+    assert (stage / "widget-v1.0-cnprd01.pdf").is_file()
+    assert "numbered 1 contents entries" in r.stdout + r.stderr
+
+
+def test_compare_counts_an_invisible_anchor_as_missing_and_names_files_safely(rendered, tmp_path):
+    r, stage, chrome = rendered
+    html = tmp_path / "hidden.html"
+    html.write_text("<html><body><p>top</p><div id='gone' style='display:none'>x</div>"
+                    "<p id='p/q'>slash</p></body></html>", encoding="utf-8")
+    env = dict(os.environ, CHROME=chrome, NODE_PATH=str(RENDER / "node_modules"))
+    res = subprocess.run(["node", str(RENDER / "compare.mjs"), str(html), str(html), str(tmp_path / "o"),
+                          "gone,p/q"], capture_output=True, text=True, env=env)
+    assert res.returncode == 1 and "MISSING published #gone" in res.stdout, res.stdout + res.stderr
+    assert "ENOENT" not in res.stderr and list((tmp_path / "o").glob("*p_q*.png"))

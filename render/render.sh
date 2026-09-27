@@ -36,9 +36,10 @@ MDS=$(ls "$MD_DIR"/*.md | grep -v "/README.md$" || true)
 [ "$(printf '%s\n' "$MDS" | grep -c .)" = 1 ] || { echo "MD_DIR must hold exactly one specification .md: $MDS" >&2; exit 2; }
 MD=$MDS
 NAME=$(basename "$MD" .md)
-THIS_URL=$(grep -m1 -oE "https://docs\.oasis-open\.org/[^ )>]*/$NAME\.html" "$MD" || true)
-[ -n "$THIS_URL" ] || { echo "no This stage URL ending /$NAME.html in $MD" >&2; exit 2; }
-REL=${THIS_URL#https://docs.oasis-open.org/}; REL=${REL%/*}
+# The stage path, and the footer, come from the document (footer.py).
+FOOTER=$(mktemp); trap 'rm -f "$FOOTER"' EXIT
+python3 "$HERE/footer.py" "$MD" > "$FOOTER" || exit 2
+REL=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["path"])' "$FOOTER")
 STAGE="$OUT/$REL"
 echo "Staging $NAME at $REL"
 
@@ -46,7 +47,6 @@ echo "Staging $NAME at $REL"
 mkdir -p "$STAGE"
 rsync -a --delete --exclude '*-verification.json' --exclude README.md --exclude schemas "$MD_DIR"/ "$STAGE"/
 [ "$SCHEMAS" = - ] || rsync -a "$SCHEMAS"/ "$STAGE/schemas/"
-python3 "$HERE/footer.py" "$STAGE/$NAME.md" > "$OUT/.$NAME-footer.json"
 
 # 2. Markdown to HTML: the pipeline's step 1 (pandoc, the OASIS stylesheet,
 #    the post-processor). OUT is the repo base, so the converter resolves the
@@ -69,16 +69,16 @@ CHROME=$(command -v "${CHROME:-}" || echo "${CHROME:-}")
 [ -x "$CHROME" ] || { echo "no Chrome or Chromium found; set CHROME" >&2; exit 2; }
 export CHROME
 [ -d "$HERE/node_modules/puppeteer-core" ] || npm install --prefix "$HERE" --no-save --silent puppeteer-core@24
-node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$OUT/.$NAME-footer.json"
+node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$FOOTER"
 # The contents' page numbers come from the printed PDF; print again until
 # they stop moving (numbering can push a heading onto the next page).
 for pass in 1 2 3 4; do
   CHANGED=$(python3 "$HERE/toc_pages.py" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$STAGE/.$NAME-pdf.html" | tee /dev/stderr | sed -n 's/.*, \([0-9]*\) changed$/\1/p')
   [ "$CHANGED" = 0 ] && break
   [ "$pass" = 4 ] && { echo "contents page numbers did not settle after 4 passes" >&2; exit 1; }
-  node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$OUT/.$NAME-footer.json"
+  node "$HERE/print_pdf.mjs" "$STAGE/.$NAME-pdf.html" "$STAGE/$NAME.pdf" "$FOOTER"
 done
-rm -f "$STAGE/.$NAME-pdf.html" "$OUT/.$NAME-footer.json"
+rm -f "$STAGE/.$NAME-pdf.html"
 test -s "$STAGE/$NAME.pdf"
 
 # 4. The gate. Exit 0 means publishable; warnings do not fail.
