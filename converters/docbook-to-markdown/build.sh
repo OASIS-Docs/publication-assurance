@@ -42,21 +42,25 @@ IGNORE="$(field merge_log_ignore)"; PREBUILD="$(field prebuild)"; ALLOW="$(field
 NAME="$(python3 - "$SPEC/$ENTITIES" "$(field basename)" <<'PY'
 import re, sys
 ents = dict(re.findall(r'<!ENTITY\s+(\w+)\s+"([^"]*)"', open(sys.argv[1], encoding='utf-8').read()))
-print(sys.argv[2].format(**ents))
+try:
+    print(sys.argv[2].format(**ents))
+except KeyError as e:
+    sys.exit(f'basename {sys.argv[2]!r} names entity {e} that {sys.argv[1]} does not declare')
 PY
-)"
+)" || exit 2
 echo "building $NAME from $SPEC (profile $(basename "$PROFILE"))"
 
 # 1. Resolve XIncludes and entities. The module files declare the DocBook DTD by
 #    its public URL; a catalog points that at the local copy so nothing is fetched.
+DTD_URI="$(python3 -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).as_uri())' "$SPEC/$DTD")"
 cat > "$WORK/catalog.xml" <<XML
 <?xml version="1.0"?>
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
-  <system systemId="http://www.docbook.org/xml/4.5/docbookx.dtd" uri="file://$SPEC/$DTD"/>
-  <public publicId="-//OASIS//DTD DocBook XML V4.5//EN" uri="file://$SPEC/$DTD"/>
+  <system systemId="http://www.docbook.org/xml/4.5/docbookx.dtd" uri="$DTD_URI"/>
+  <public publicId="-//OASIS//DTD DocBook XML V4.5//EN" uri="$DTD_URI"/>
 </catalog>
 XML
-( cd "$SPEC" && XML_CATALOG_FILES="$WORK/catalog.xml" \
+( cd "$SPEC" && XML_CATALOG_FILES="$(python3 -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).as_uri())' "$WORK/catalog.xml")" \
     xmllint --xinclude --noent --loaddtd --nonet "$MAIN" > "$WORK/merged.xml" 2> "$WORK/merge.log" )
 grep -v 'validity warning\|^\s\|^\^\|^[a-z]*\s*CDATA' "$WORK/merge.log" > "$WORK/merge.errors" || true
 if [ -n "$IGNORE" ]; then grep -vF "$IGNORE" "$WORK/merge.errors" > "$WORK/merge.kept" || true; mv "$WORK/merge.kept" "$WORK/merge.errors"; fi
@@ -65,7 +69,9 @@ if grep -qi 'error' "$WORK/merge.errors"; then
 fi
 
 # 2. The profile's prebuild, for figures the TC's own build generates.
-if [ -n "$PREBUILD" ]; then "$PROFILE/$PREBUILD" "$SPEC" "$WORK" "$WORK/extra"; fi
+if [ -n "$PREBUILD" ]; then
+  "$PROFILE/$PREBUILD" "$SPEC" "$WORK" "$WORK/extra" || { echo "prebuild $PROFILE/$PREBUILD failed (exit $?)" >&2; exit 3; }
+fi
 
 # 3. Convert.
 python3 "$HERE/docbook2md.py" "$WORK/merged.xml" "$OUT/$NAME.md" --profile "$PROFILE/profile.json"

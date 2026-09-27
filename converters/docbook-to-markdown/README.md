@@ -92,7 +92,13 @@ uses DocBook the converter does not yet handle.
 - Paragraphs placed directly in a section that holds a bibliography are
   omitted: the OASIS stylesheet suppresses them.
 - An element whose `condition` attribute does not contain `oasis` is dropped,
-  as the stylesheet drops it.
+  as the stylesheet drops it, after numbering: a hidden section still takes
+  its number, so the sections after it keep the published numbers.
+- Characters Markdown would read as markup are escaped: `* _ [ ] < > | $ ^`,
+  an entity-like `&name;`, and a paragraph that starts like a numbered item
+  (`2024.`) or a heading (`#`). Superscript and subscript become `<sup>` and
+  `<sub>`. A cross-reference takes its target's number and title, its
+  `xreflabel`, or its `endterm`.
 - Program listings are fenced code blocks copied byte for byte.
 - The table of contents lists headings to three levels.
 - A `<graphic>` with a `contentwidth` in centimetres becomes `<img width>` in
@@ -101,11 +107,22 @@ uses DocBook the converter does not yet handle.
 
 ## What it refuses
 
-An element it does not handle stops the conversion (`UNHANDLED block <...>`
-on stderr, exit 1) rather than being flattened into paragraphs. Tables
-(`table`, `informaltable`) are the first a second specification is likely
-to meet; DMLex has none. Add the element to the converter with a test, do not
-work around it in the profile.
+The conversion stops (exit 1, the reason on stderr) rather than write
+something that reads differently from the publication:
+
+- an element it does not handle (`UNHANDLED block <...>`), rather than
+  flattening it into paragraphs. Tables (`table`, `informaltable`) are the
+  first a second specification is likely to meet; DMLex has none;
+- content directly under `<article>` outside any section;
+- a lettered, roman or continued `<orderedlist>`, which GFM cannot write;
+- a cross-reference with no text to show (no title, `xreflabel` or `endterm`);
+- a reference to an id that does not exist.
+
+Add what is missing to the converter with a test; do not work around it in
+the profile. A lone `~` is not escaped (DMLex's text has five, and escaping
+them would change the edition); run the verifier on the rendered HTML
+(`verify_md.py --rendered`) to catch any mark-up pandoc's `markdown` reader
+finds in the text.
 
 ## Known DMLex source defects
 
