@@ -410,22 +410,21 @@ class PdfRenderer(PipelineStep):
             raise
 
     def _number_contents(self) -> None:
-        """Write each contents entry's printed page into the contents and
-        print again, until no number moves (toc_pages). A published OASIS
-        PDF numbers its contents; a PDF printed from HTML has none unless
-        something writes them. A document without a contents list, or a PDF
-        without the named destinations to read pages from, is left as it is
-        and the gate's pdf-toc-pages check reports it."""
+        """Write each contents entry's printed page into a copy of the HTML
+        and print that copy, until no number moves (toc_pages). A published
+        OASIS PDF numbers its contents; a PDF printed from HTML has none
+        unless something writes them. A document without a contents list, or
+        whose headings cannot be found in the PDF, is left as it is, and the
+        gate's pdf-toc-pages check reports it."""
         from .toc_pages import main as number
         text = self.html_file.read_text(encoding="utf-8", errors="replace")
         if 'id="table-of-contents"' not in text:
             return
         numbered = self.html_file.with_name(f".{self.html_file.stem}-numbered.html")
-        numbered.write_text(text, encoding="utf-8")
         try:
             for _ in range(4):
                 try:
-                    changed = number(str(numbered), str(self.output_pdf), str(numbered))
+                    changed = number(str(self.html_file), str(self.output_pdf), str(numbered))
                 except (LookupError, OSError, subprocess.CalledProcessError) as e:
                     logger.warning(f"contents left unnumbered: {e}")
                     return

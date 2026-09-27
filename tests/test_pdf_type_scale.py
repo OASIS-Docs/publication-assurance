@@ -249,7 +249,8 @@ def test_a_real_package_prints_the_type_scale(tmp_path, stage):
     page = doc[1]
     height = page.rect.height
     bottom = " ".join(b[4] for b in page.get_text("blocks") if b[1] > height * 0.88)
-    top = " ".join(b[4] for b in page.get_text("blocks") if b[3] < height * 0.10)
+    # A running header prints inside the 25mm top margin (70.9pt); body text starts below it.
+    top = " ".join(b[4] for b in page.get_text("blocks") if b[3] < 68)
     date_ = _re.search(r">\s*(\d{1,2} [A-Z][a-z]+ \d{4})\s*<", text).group(1)
     for part in (name, "Standards Track Work Product", "Copyright © OASIS Open",
                  f"{date_} - Page 2 of {doc.page_count}"):
