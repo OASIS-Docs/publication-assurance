@@ -17,7 +17,8 @@ is still the TC's to change. The walkthrough is
 | `render.sh` | Stage, render (HTML, then PDF), number the contents, gate |
 | `footer.py` | Read from the document: the stage path, and the PDF footer (name, track, copyright line, date) |
 | `print_pdf.mjs` | HTML to PDF in headless Chrome on the pipeline's A4 geometry, with that footer |
-| `compare.mjs` | The published and rendered pages side by side at named anchors |
+| `compare.mjs` | The published and rendered HTML side by side at named anchors |
+| `review_pairs.py` | Published and rendered PDF pages paired for a reviewer, with a planted fault; then the review graded |
 
 Requirements:
 - pandoc 3.x;
@@ -68,6 +69,34 @@ captured as `<n>-<anchor>-published.png` and `<n>-<anchor>-rendered.png`.
 anchor missing on either side exits 1: the editions differ in structure
 there. The pictures are for a person to read. The verifier
 ([`verify/`](../verify/README.md)) is the check on the words.
+
+## review_pairs.py
+
+```bash
+python3 render/review_pairs.py make RENDERED.pdf PUBLISHED.pdf OUT_DIR --key KEY.json [--sample 30] [--seed N] [--plant KIND]
+python3 render/review_pairs.py grade KEY.json REVIEW.json [RERUN.json...]
+```
+
+Requires poppler and Pillow. `make` pairs each rendered page it samples
+(every page with a figure or image, the cover, the contents, and `--sample`
+random pages) with the published page sharing most of its words, aligned in
+document order, and writes each pair as one image (published left) with the
+reviewer's brief, `PROMPT.md`. One more pair is a planted fault: a real page
+with its footer, a band of text, or (on a contents page) its page numbers
+erased on the right. `KEY.json` records which; keep it where the reviewer
+cannot read it (`make` refuses a key inside `OUT_DIR`).
+
+The brief asks for lines copied from both sides before any judgement, and
+every kind of element on each side. `grade` looks every copied line up in the
+text of its page and rejects a pair whose lines are not there. It accepts the
+review only when the planted fault is named for what it is ("page numbers",
+"footer", "missing lines"); a difference that names something else is a miss.
+It prints every other difference for a person to rule on. Pass a re-run of
+the rejected pairs after the first review: later answers replace earlier.
+
+Why so strict: on the DMLex pairs a Haiku reviewer invented the lines for 13
+of 36 pairs, and its "difference" on the planted pair described text that is
+not on the page. A grader that counted any difference as a catch passed it.
 
 ## Tests
 

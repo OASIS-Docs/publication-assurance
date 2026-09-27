@@ -49,8 +49,10 @@ jobs:
       # a skipped authority check proves nothing.
       # requests is imported by the pipeline package that
       # tests/test_step2_script.py runs end to end through the step 2 script.
-      # verify/verify_md.py compares through pandoc's GFM reader, whose output
-      # changes between releases; pin the release its fixtures were made with.
+      # verify/verify_md.py reads Markdown through pandoc (the pipeline's
+      # markdown reader), whose output changes between releases; pin the
+      # release its fixtures were made with. Pillow draws the page pairs of
+      # render/review_pairs.py, which tests/test_review_pairs.py builds.
       - name: Install pandoc 3.8.2.1 (verify_md)
         run: |
           curl -fsSL -o "$RUNNER_TEMP/pandoc.deb" \
@@ -61,7 +63,7 @@ jobs:
       - name: Install test dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install pytest beautifulsoup4 PyYAML requests
+          python3 -m pip install pytest beautifulsoup4 PyYAML requests pillow
 
       # google-chrome ships on ubuntu-latest, so the Validation Report PDF
       # test must run here: REQUIRE_CHROME=1 turns its skip into a failure.

@@ -37,7 +37,7 @@ target could not be read. Two ways to run it:
 ### 1. On your machine
 
 ```bash
-git clone --depth 1 --branch v1.9.2 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.10.0 https://github.com/OASIS-Docs/publication-assurance
 python3 publication-assurance/pub-check/oasis_pub_check.py <package>
 ```
 
@@ -199,8 +199,9 @@ publication-assurance/
 │   ├── advance_stage.py             #   cuts the next stage of a Markdown spec (dry run by default)
 │   ├── rules/                       #   oasis.rules.yaml, the criteria as data for nide
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
-├── verify/                          # Markdown edition vs published HTML, word for word
-│   └── verify_md.py                 #   the verifier (stdlib + pandoc 3.x); README.md says how to read it
+├── verify/                          # An edition vs what was published, word for word
+│   ├── verify_md.py                 #   Markdown and its HTML vs the published HTML (stdlib + pandoc 3.x)
+│   └── verify_pdf.py                #   the rendered PDF vs the published PDF (stdlib + poppler)
 ├── converters/docbook-to-markdown/  # DocBook to OASIS Markdown, then verify_md
 │   ├── build.sh                     #   resolve, prebuild, convert, copy images, verify
 │   ├── docbook2md.py                #   the converter (stdlib)
@@ -209,7 +210,8 @@ publication-assurance/
 │   ├── render.sh                    #   step 1, step 2's print styles, Chrome, contents pages
 │   │                                #   (.github/src/pipeline/toc_pages.py), gate
 │   ├── footer.py / print_pdf.mjs    #   the published PDF footer, read from the document
-│   └── compare.mjs                  #   published and rendered pages side by side
+│   ├── compare.mjs                  #   published and rendered HTML side by side at anchors
+│   └── review_pairs.py              #   PDF page pairs for a reviewer, a planted fault, the grade
 ├── harvest/                         # Learn from every run: records in, candidate gate changes out
 │   └── harvest.py                   #   re-gates recorded packages, reads audits and adjudications
 ├── docs/ADOPTING.md                 # Adoption guide: the gate in a TC's own repository
@@ -233,6 +235,8 @@ publication-assurance/
 │   ├── test_pdf_command.py          #   the wkhtmltopdf argument vector, token for token
 │   ├── test_stage_uri_live.py       #   the live-URI probe: what blocks, what stays INFO
 │   ├── test_verify_md.py            #   the verifier on DMLex v1.0 OS, and on altered copies
+│   ├── test_verify_pdf.py           #   the PDF verifier: unnumbered contents, list letters, footers
+│   ├── test_review_pairs.py         #   page pairs, and a grader invented lines cannot pass
 │   ├── test_docbook_to_markdown.py  #   DMLex DocBook to the committed Markdown, byte for byte
 │   ├── test_render.py               #   DMLex rendered: footer, contents pages, gate, compare
 │   ├── test_step1_fidelity.py       #   step 1's own HTML of DMLex against the published page

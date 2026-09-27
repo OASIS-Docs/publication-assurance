@@ -343,3 +343,30 @@ def test_a_url_is_decoded_with_the_server_charset(tmp_path):
     finally:
         srv.shutdown()
     assert r.returncode == 0, rep.get("diffs")
+
+
+LETTERED_HTML = ('<html><body><ol type="1"><li><p>Top</p><ol type="a"><li><p>first</p></li>'
+                 '<li><p>second, as per point a. above</p></li></ol></li></ol></body></html>')
+
+
+def test_a_lettered_list_numbered_1_2_fails_though_its_words_match(tmp_path):
+    """The DMLex edition numbered section 2's a., b., c. as 1., 2., 3.; its
+    text refers to "point c. above", and no word differed (Sep 2026)."""
+    (tmp_path / "p.html").write_text(LETTERED_HTML, encoding="utf-8")
+    for md, code in (("1. Top\n\n   a. first\n\n   b. second, as per point a. above\n", 0),
+                     ("1. Top\n\n   1. first\n\n   2. second, as per point a. above\n", 1)):
+        (tmp_path / "t.md").write_text(md, encoding="utf-8")
+        r, rep = verify(tmp_path / "t.md", tmp_path / "p.html", tmp_path, allow=None)
+        assert r.returncode == code, r.stdout
+        assert rep["diff_regions"] == 0 and rep["list_numbering_published"] == "1a"
+
+
+def test_a_contents_entry_the_publication_lists_and_the_markdown_drops_fails(tmp_path):
+    """The contents are generated, so the word comparison leaves them out; they
+    are compared as a list. The first DMLex edition's contents stopped at three
+    levels and dropped the 38 A.2.2.x and F.1.2.x entries the publication lists."""
+    md = altered(tmp_path, "            - [A.2.2.1 NVH node: lexicographicResource](#nvh_lexicographicResource)\n", "")
+    r, rep = verify(md, PUBLISHED, tmp_path)
+    assert r.returncode == 1 and rep["diff_regions"] == 0
+    assert rep["contents_differing"] == [{"published": ["a . 2 . 2 . 1 nvh node : lexicographicresource"],
+                                          "markdown": []}]

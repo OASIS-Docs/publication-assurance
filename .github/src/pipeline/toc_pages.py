@@ -23,13 +23,16 @@ import subprocess
 import sys
 
 CSS = """<style id="toc-pages">
-/* Floats and a positioned rule, not flexbox: wkhtmltopdf's QtWebKit ignores
-   flexbox, and the same markup has to print in it and in Chrome. An inline
-   block keeps an <ol>'s own numbers beside its first line. The number
-   floats right; the dot leader runs under the whole line and the title and
-   number, on the page's white, cover it where they sit. */
-.toc-line { display: inline-block; width: 100%; vertical-align: top; position: relative; overflow: hidden; }
-.toc-page { float: right; padding-left: 0.35em; background: #fff; position: relative; z-index: 1; }
+/* Positioned boxes, not flexbox: wkhtmltopdf's QtWebKit ignores flexbox,
+   and the same markup has to print in it and in Chrome. An inline block
+   keeps an <ol>'s own numbers beside its first line. The number sits at the
+   bottom right, in padding the title cannot run into, so a title that wraps
+   ends its last line with the number as a published OASIS PDF does. The dot
+   leader runs under the last line; the title and number, on the page's
+   white, cover it where they sit. */
+.toc-line { display: inline-block; width: 100%; vertical-align: top; position: relative; overflow: hidden;
+            padding-right: 2.6em; -webkit-box-sizing: border-box; box-sizing: border-box; }
+.toc-page { position: absolute; right: 0; bottom: 0; padding-left: 0.35em; background: #fff; z-index: 1; }
 .toc-text { background: #fff; padding-right: 0.35em; position: relative; z-index: 1; }
 .toc-dots { position: absolute; left: 0; right: 0; bottom: 0.3em; border-bottom: 1px dotted #666; z-index: 0; }
 </style>"""

@@ -10,5 +10,5 @@
  {"kind": "heading", "published": "F.1.2.1 csd04.xmlTracking of changes in response to the 4th Public Review", "markdown": "", "reason": "same source defect; Markdown heading reads 'F.1.2.1 Tracking of changes in response to the 4th Public Review'"},
  {"kind": "heading", "published": "F.1.2.2 csd03.xmlTracking of changes in response to the 3rd Public Review", "markdown": "", "reason": "same source defect"},
  {"kind": "link", "published": "https://www.oasis-open.org/", "markdown": "", "reason": "the published title page links the OASIS logo to www.oasis-open.org; the OASIS Markdown template's logo is an image, not a link"},
- {"kind": "link", "published": "", "markdown": "https://www.w3.org/XML/1998/namespace", "reason": "pandoc's GFM reader autolinks the bare namespace URI in the [XML namespace] reference; the published text is the same words, unlinked"}
+ {"kind": "link", "published": "", "markdown": "https://www.w3.org/XML/1998/namespace", "reason": "pandoc autolinks the bare namespace URI (autolink_bare_uris, as the pipeline's step 1 reads Markdown) in the [XML namespace] reference; the published text is the same words, unlinked"}
 ]
