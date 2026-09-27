@@ -150,3 +150,73 @@ def test_wkhtmltopdf_prints_css_points_at_their_size(tmp_path):
         .build_command(str(tmp_path / "spec.html"))
     i = cmd.index("--print-media-type")
     assert cmd[i + 1:i + 4] == ["--disable-smart-shrinking", "--dpi", "288"], cmd
+
+
+@pytest.mark.parametrize("name", ["foo-v1.0-cn01-part1-intro", "foo-v1.0-cnd01-part2-x", "foo-v1.0-cn01-errata01",
+                                  "foo-v1.0-CN01", "foo-v1.0-cnprd02", "foo-v1.0-pnd01"])
+def test_a_committee_or_project_note_in_any_file_name_shape_is_non_standards_track(tmp_path, name):
+    src = tmp_path / f"{name}.html"
+    src.write_text(PAGE.format(title="T", h1="T", year="2026"), encoding="utf-8")
+    assert "Non-Standards Track Work Product" in PdfRenderer(str(src), str(tmp_path / "x.pdf")).footer_html()
+
+
+@pytest.mark.parametrize("name", ["foo-v1.0-csd01-part1-intro", "foo-v1.0-os", "foo-v1.0-cs02-errata01"])
+def test_a_specification_in_any_file_name_shape_is_standards_track(tmp_path, name):
+    src = tmp_path / f"{name}.html"
+    src.write_text(PAGE.format(title="T", h1="T", year="2026"), encoding="utf-8")
+    footer = PdfRenderer(str(src), str(tmp_path / "x.pdf")).footer_html()
+    assert "Standards Track Work Product" in footer and "Non-Standards" not in footer
+
+
+def test_the_date_is_the_cover_s_not_an_earlier_one_in_the_text(tmp_path):
+    src = tmp_path / "x-v1.0-csd01.html"
+    src.write_text("<html><body><p>Drafted <span>1 May 2026</span></p><h1>X</h1>"
+                   "<h2>Committee Specification Draft 01</h2><h2>12 June 2026</h2>"
+                   "<table><tr><td>3 March 2021</td></tr></table></body></html>", encoding="utf-8")
+    assert PdfRenderer(str(src), str(tmp_path / "x.pdf")).document_date() == "12 June 2026"
+
+
+@pytest.mark.parametrize("notice,expected", [
+    ("Copyright &copy; OASIS Open 2021-2026. All Rights Reserved.", "2021-2026"),
+    ("Copyright &#169; OASIS Open 2024. All Rights Reserved.", "2024"),
+    ("Copyright © 2023 OASIS Open. All Rights Reserved.", "2023"),
+])
+def test_the_copyright_year_is_the_document_s_in_any_form(tmp_path, notice, expected):
+    src = tmp_path / "x-v1.0-csd01.html"
+    src.write_text(f"<html><body><p>{notice}</p></body></html>", encoding="utf-8")
+    assert PdfRenderer(str(src), str(tmp_path / "x.pdf")).copyright_line() == \
+        f"Copyright © OASIS Open {expected}. All Rights Reserved."
+
+
+def test_a_windows_1252_page_keeps_its_copyright_year(tmp_path):
+    src = tmp_path / "x-v1.0-cn01.html"
+    src.write_bytes('<html><head><meta charset="windows-1252"></head><body><p>Copyright \xa9 OASIS Open 2020. '
+                    'All Rights Reserved.</p></body></html>'.encode("cp1252"))
+    assert PdfRenderer(str(src), str(tmp_path / "x.pdf")).copyright_line() == \
+        "Copyright © OASIS Open 2020. All Rights Reserved."
+
+
+def test_numbers_that_do_not_settle_are_not_shipped(tmp_path, monkeypatch):
+    """After four passes that keep moving, or a failure after a numbered
+    print, the PDF is printed from the unnumbered HTML again."""
+    src = tmp_path / "x-v1.0-csd01.html"
+    src.write_text('<html><head></head><body><h1 id="table-of-contents">Table of Contents</h1>'
+                   '<ul><li><a href="#a">1 A</a></li></ul><h1 id="a">1 A</h1></body></html>', encoding="utf-8")
+    r = PdfRenderer(str(src), str(tmp_path / "x.pdf"))
+    printed = []
+    monkeypatch.setattr(r, "_convert_to_pdf", lambda path: printed.append(path))
+    toc = sys.modules.get("pipeline.toc_pages") or importlib.import_module("pipeline.toc_pages")
+    monkeypatch.setattr(toc, "main", lambda s, p, o: 1)
+    r._number_contents()
+    assert len(printed) == 5 and printed[-1] == str(src), printed
+    calls = iter([1, LookupError("gone")])
+
+    def flaky(s, p, o):
+        v = next(calls)
+        if isinstance(v, Exception):
+            raise v
+        return v
+    printed.clear()
+    monkeypatch.setattr(toc, "main", flaky)
+    r._number_contents()
+    assert printed[-1] == str(src), printed

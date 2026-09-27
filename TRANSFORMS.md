@@ -160,9 +160,22 @@ through the Publication Console come from publisher-toolkit's own step 2,
 which renders on Letter paper and does not run this preprocessor, so the
 code-wrap and image-cap rules do not reach those PDFs yet.
 
-The header title and the copyright year are read from the document being
-rendered: its `<title>` element (falling back to the first heading) and the
-copyright line in its own front matter.
+Everything in the footer is read from the document being rendered, never from
+the day of the render:
+- the name is the published file's name without `.html`;
+- the track is Non-Standards for a Committee or Project Note (cn, cnd, cnprd,
+  pn, pnd, in any part or errata name);
+- the copyright year or range comes from the document's own notice, decoded
+  with its declared charset;
+- the date is the cover's date line.
+
+The contents' page numbers come from the printed PDF's named destinations or,
+since wkhtmltopdf writes none, from the page each heading is printed on:
+- a line equal to the entry's title, or to it after a section number;
+- found in order, after the contents pages.
+
+If the numbers cannot be read or do not settle in four passes, the PDF is
+printed unnumbered, and the gate's `pdf-toc-pages` check says so.
 
 A note on renderers: wkhtmltopdf is what this repository's workflows run, but
 the production pipeline has since moved to headless Chrome print-to-PDF with
