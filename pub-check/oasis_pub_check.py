@@ -49,6 +49,8 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 from __future__ import annotations
 
 import argparse
+import collections
+import difflib
 import hashlib
 import html as html_lib
 import json
@@ -70,6 +72,24 @@ SITE = "https://docs.oasis-open.org"
 # review KEEPS its stage name. csprd/cnprd/cos are retired; csdpr never existed.
 VALID_STAGE_PREFIXES = {"wd", "csd", "cs", "cnd", "cn", "os", "ps", "psd", "pn", "pnd", "errata"}
 RETIRED_STAGE_TOKENS = {"csprd", "cnprd", "cos", "csdpr", "cndpr"}
+
+# Where each accepted stage token comes from (proposal 010). A corpus source is
+# a verbatim quote, whitespace normalised, that tests/test_stage_vocabulary.py
+# checks against pub-check/corpus/; "published" is live evidence: the Open
+# Project stages have no clause in the pinned corpus, and OASIS publishes them.
+STAGE_TOKEN_SOURCES = {
+    "csd": ("naming-directives.txt", "Specification Draft (CSD)"),
+    "cs": ("naming-directives.txt", "Specification (CS)"),
+    "os": ("naming-directives.txt", "Standard (OS)"),
+    "errata": ("naming-directives.txt", "Errata (Errata)"),
+    "cnd": ("naming-directives.txt", "Note Draft (CND)"),
+    "cn": ("naming-directives.txt", "Note (CN)"),
+    "wd": ("naming-directives.txt", 'Many TCs use a pattern similar to stage names above, with "wd" instead of "csd."'),
+    "ps": ("committee-operations-process.txt", "Project Specification"),
+    "psd": ("published", "https://docs.oasis-open.org/niemopen/ndr/v6.0/psd01/ (Open Project, NIEMOpen)"),
+    "pn": ("published", "https://docs.oasis-open.org/niemopen/niem-pubs/v1.0/pn01/ (Open Project, NIEMOpen)"),
+    "pnd": ("published", "https://docs.oasis-open.org/niemopen/niem-6.0-arch-changes/v1.0/pnd01/ (Open Project, NIEMOpen)"),
+}
 
 # Previous-stage cover URIs a csd/cnd draft may legitimately point at: the
 # draft family's own token, or the APPROVED stage of the track when the
@@ -312,6 +332,11 @@ def check_stage_name(stage: str, f: Findings, errata_dir: str = "") -> None:
         if nm and pfx in VALID_STAGE_PREFIXES and pfx != "os" and len(nm.group(2)) != 2:
             f.add(BLOCKER, "stage-name",
                   f"{label} '{name}' is missing its two-digit number (e.g. {pfx}01).")
+        if label == "Stage" and pfx == "wd" and nm:
+            f.add(WARN, "stage-name",
+                  f"Stage '{stage}' is a Working Draft. Working Drafts are unpublished (Naming "
+                  f"Directives v1.7, 5.2) and have no docs.oasis-open.org location, so this "
+                  f"package's cover URIs will not resolve. Publish it as a csd, cnd, psd or pnd.")
         if label == "Stage" and pfx in RETIRED_STAGE_TOKENS:
             f.add(BLOCKER, "stage-name",
                   f"Stage '{stage}' uses a retired/invalid stage token. Current naming: a document "
@@ -774,6 +799,238 @@ def check_md_fences(md_text: str, f: Findings) -> None:
                   f"('{info[:40]}...'): pandoc does not recognize it as a fence and "
                   f"the block collapses to inline code. Use ```{{.lang title=\"...\"}} "
                   f"or drop the trailing text.")
+
+
+def _code_norm(text: str) -> str:
+    """A code block as compared: whitespace at line ends and blank lines
+    around the block ignored, everything else (tabs, indentation) kept."""
+    return "\n".join(l.rstrip() for l in text.split("\n")).strip("\n")
+
+
+def _md_fenced_blocks(md_text: str) -> tuple[list[tuple[int, str]], int]:
+    """(opening line, content) of every top-level fenced code block, the
+    fence's own indentation removed as CommonMark does, and the number of
+    fenced blocks not compared. Not compared, because their HTML is not their
+    text or pandoc places them differently: a fence inside an HTML comment
+    (never rendered), on a list-marker line, inside a blockquote or indented
+    four or more spaces; a raw block ({=html}); a diagram (mermaid, plantuml,
+    dot);
+    and a preprocessor directive (!include) whose output replaces it."""
+    out, skipped, lines, i = [], 0, md_text.replace("\r\n", "\n").split("\n"), 0
+    in_comment = False
+    nested = re.compile(r"^(?:\s*(?:>\s*)+|\s*(?:[-*+]|\d+[.)])\s+|\s{4,})(`{3,}|~{3,})")
+    while i < len(lines):
+        # An HTML comment outside code is never rendered, fences in it included;
+        # a comment inside a code block is code.
+        if in_comment:
+            in_comment = "-->" not in lines[i]
+            i += 1
+            continue
+        if "<!--" in lines[i] and "-->" not in lines[i][lines[i].index("<!--"):]:
+            in_comment = True
+            i += 1
+            continue
+        m = re.match(r"^( {0,3})(`{3,}|~{3,})(.*)$", lines[i])
+        if not m or (m.group(2)[0] == "`" and "`" in m.group(3)):
+            n = nested.match(lines[i])
+            i += 1
+            if n:  # skip the nested block through its own closing fence
+                skipped += 1
+                close = re.compile(r"^[\s>]*" + re.escape(n.group(1)[0]) + "{" + str(len(n.group(1))) + r",}\s*$")
+                while i < len(lines) and not close.match(lines[i]):
+                    i += 1
+                i += 1
+            continue
+        indent, mark, info, start, body = len(m.group(1)), m.group(2), m.group(3).strip(), i + 1, []
+        i += 1
+        close = re.compile(r"^ {0,3}" + re.escape(mark[0]) + "{" + str(len(mark)) + r",}\s*$")
+        while i < len(lines) and not close.match(lines[i]):
+            line = lines[i]
+            k = 0
+            while k < indent and line[k:k + 1] == " ":
+                k += 1
+            body.append(line[k:])
+            i += 1
+        if i >= len(lines):  # never closed: pandoc's markdown reader renders no code block
+            skipped += 1
+            break
+        i += 1
+        text = _code_norm("\n".join(body))
+        lang = re.sub(r"^\{\s*\.?", "", info).split()[0].lower() if info else ""
+        if (info.startswith("{=") or lang in ("mermaid", "plantuml", "dot", "graphviz")
+                or (text and all(l.strip().startswith("!include") or not l.strip() for l in text.split("\n")))):
+            skipped += 1
+            continue
+        out.append((start, text))
+    return out, skipped
+
+
+def _tabs_expanded(block: str, other: str) -> bool:
+    """other is block with its tabs expanded to spaces, and nothing else changed."""
+    if "\t" not in block:
+        return False
+    # A block nested in a list starts some columns in, which moves its tab stops.
+    return any(_code_norm("\n".join((" " * col + l).expandtabs(ts)[col:] for l in block.split("\n"))) == other
+               for ts in (2, 4, 8) for col in range(0, 8))
+
+
+def check_html_code_sync(md_text: str, html_text: str, f: Findings) -> None:
+    """Every fenced code block of the Markdown source is published in the
+    HTML with the same characters. The HTML is what is published; a code
+    block the pipeline changed publishes code the TC did not approve.
+    Found on DMLex v1.0 OS (Sep 2026): the pipeline's pandoc expanded the
+    tabs in 9 of its 316 code blocks. Each block is looked for among the
+    HTML's <pre> blocks (a block matched once is used up), so one missing
+    block is one finding. The HTML may hold more <pre> blocks than the
+    Markdown has fences. Blocks whose HTML is not their text are not
+    compared (_md_fenced_blocks)."""
+    blocks, skipped = _md_fenced_blocks(md_text)
+    body = re.sub(r"<!--.*?-->|<(script|template|style)\b.*?</\1>", " ", html_text, flags=re.S | re.I)
+    pres = [_code_norm(html_lib.unescape(re.sub(r"<[^>]+>", "", m.group(1))))
+            for m in re.finditer(r"<pre\b[^>]*>(.*?)</pre>", body, re.S | re.I)]
+    f.observe("html-code-sync", markdown_fenced_blocks=len(blocks), not_compared=skipped,
+              html_pre_blocks=len(pres))
+    if not blocks:
+        return
+    remaining = collections.Counter(pres)
+    missing = []
+    for line, block in blocks:
+        if remaining[block]:
+            remaining[block] -= 1
+        else:
+            missing.append((line, block))
+    for line, block in missing:
+        expanded = next((p for p in remaining if remaining[p] and _tabs_expanded(block, p)), None)
+        if expanded is not None:
+            remaining[expanded] -= 1
+            f.add(WARN, "html-code-sync",
+                  f"Code block at Markdown line {line} differs only in whitespace in the HTML "
+                  f"(its tabs were expanded to spaces): the published code is not the source's "
+                  f"bytes. Render with pandoc --preserve-tabs.")
+        else:
+            first = block.split("\n", 1)[0]
+            f.add(BLOCKER, "html-code-sync",
+                  f"Code block at Markdown line {line} ('{first}') is missing from the HTML or "
+                  f"differs from the Markdown source: the HTML publishes code the TC did not approve.")
+
+
+_TOC_ENTRY = re.compile(r"^\s*((?:\d+(?:\.\d+)*|Appendix [A-Z]|[A-Z](?:\.\d+)+)\.?\s+\S.*?)\s*$")
+_TOC_NUMBER = re.compile(r"(?:(?:\s*\.){2,}\s*|\s{2,})(\d+)\s*$")
+
+
+def _without_line_numbers(lines: list[str]) -> list[str]:
+    """Strip a Word template's line-number column: a leading run of numbers
+    that climbs by one from line to line down most of the page."""
+    nums = [(i, int(m.group(1))) for i, l in enumerate(lines)
+            if (m := re.match(r"^\s*(\d{1,5})\s{2,}\S|^\s*(\d{1,5})\s*$", l)) and m.group(1)]
+    steps = sum(1 for (a, x), (b, y) in zip(nums, nums[1:]) if y == x + 1)
+    if len(lines) < 6 or steps < 0.6 * len(lines):
+        return lines
+    return [re.sub(r"^\s*\d{1,5}(?=\s{2,}\S|\s*$)", "", l) for l in lines]
+
+
+def _toc_title(entry: str) -> str:
+    return re.sub(r"\s+", " ", _TOC_NUMBER.sub("", entry)).strip().rstrip(".").strip()
+
+
+def check_pdf_toc_pages(pdf_path: str, f: Findings) -> None:
+    """A PDF's table of contents gives the page of each entry, and the page
+    it gives is where the heading is printed. A PDF printed from HTML has
+    no page numbers unless something writes them: the DMLex Markdown
+    edition's first render (Sep 2026) had none where the published standard
+    numbered every entry, and no check noticed.
+
+    Read with pdftotext -layout. A Word line-number column is stripped; dot
+    leaders may be solid or spaced (LaTeX); an entry wrapped onto a second
+    line carries its number there. Printed page labels may differ from the
+    PDF's page index by a constant (unnumbered front matter): the offset is
+    the one most sampled headings agree on. Limits: a page number separated
+    from its title by a single space is not read, and a contents list wrong
+    by the same number of pages throughout reads as a label offset."""
+    pdftotext, pdfinfo = shutil.which("pdftotext"), shutil.which("pdfinfo")
+    if not pdftotext or not pdfinfo:
+        return
+
+    cache: dict[int, list[str]] = {}
+
+    def page(n: int) -> list[str]:
+        if n not in cache:
+            text = subprocess.run([pdftotext, "-f", str(n), "-l", str(n), "-layout", pdf_path, "-"],
+                                  capture_output=True, text=True, timeout=60).stdout
+            cache[n] = _without_line_numbers([l for l in text.splitlines() if l.strip()])
+        return cache[n]
+
+    try:
+        info = subprocess.run([pdfinfo, pdf_path], capture_output=True, text=True, timeout=60).stdout
+        pages = int(re.search(r"Pages:\s+(\d+)", info).group(1))
+        entries, toc_pages, seen = [], [], set()
+        for n in range(1, min(pages, 25) + 1):
+            lines = page(n)
+            head = next((i for i, l in enumerate(lines)
+                         if re.fullmatch(r"\s*(?:Table of )?Contents\s*", l, re.I)), None)
+            if not toc_pages and head is None:
+                continue
+            body = lines[head + 1:] if (head is not None and not toc_pages) else lines
+            found, k = [], 0
+            while k < len(body):
+                line = body[k]
+                if _TOC_ENTRY.match(line):
+                    if (not _TOC_NUMBER.search(line) and k + 1 < len(body)
+                            and not _TOC_ENTRY.match(body[k + 1]) and _TOC_NUMBER.search(body[k + 1])):
+                        line = line.rstrip() + " " + body[k + 1].strip()
+                        k += 1
+                    found.append(line)
+                k += 1
+            if not found or any(_toc_title(e).lower() in seen for e in found):
+                break  # the body begins where its headings repeat the contents
+            toc_pages.append(n)
+            entries += found
+            seen.update(_toc_title(e).lower() for e in found)
+            if len(found) < len(body) // 3:
+                break
+    except Exception:  # noqa: BLE001 - pdf-sync already reports an unreadable PDF
+        return
+    numbered = [(e, int(m.group(1))) for e in entries if (m := _TOC_NUMBER.search(e))]
+    f.observe("pdf-toc-pages", contents_entries=len(entries), with_page_numbers=len(numbered))
+    if len(entries) < 5:
+        return
+    if len(numbered) * 2 < len(entries):
+        f.add(WARN, "pdf-toc-pages",
+              f"The PDF's table of contents gives no page number for {len(entries) - len(numbered)} of "
+              f"its {len(entries)} entries: a reader of the PDF cannot find a section by it.")
+        return
+    try:
+        whole = subprocess.run([pdftotext, "-layout", pdf_path, "-"], capture_output=True,
+                               text=True, timeout=180).stdout.split("\f")
+    except Exception:  # noqa: BLE001
+        return
+    flat_pages = [re.sub(r"\s+", " ", " ".join(_without_line_numbers(p.splitlines()))).lower()
+                  for p in whole]
+    flat = lambda n: flat_pages[n - 1] if 1 <= n <= len(flat_pages) else ""
+    step = max(1, len(numbered) // 20)
+    sample = numbered[::step][:20]
+    after = toc_pages[-1] + 1 if toc_pages else 1
+    # Printed page labels may differ from the PDF's page index by a constant:
+    # take the offset most of the sampled headings agree on.
+    offsets = collections.Counter()
+    for entry, number in sample:
+        title = _toc_title(entry).lower()
+        at = next((n for n in range(after, pages + 1) if title in flat(n)), None)
+        if at is not None:
+            offsets[at - number] += 1
+    if not offsets:
+        return  # no heading can be found: page accuracy is not graded
+    offset = offsets.most_common(1)[0][0]
+    wrong = []
+    for entry, number in sample:
+        target = number + offset
+        if not 1 <= target <= pages or target in toc_pages or _toc_title(entry).lower() not in flat(target):
+            wrong.append(f"{_toc_title(entry)} -> {number}")
+    f.observe("pdf-toc-pages", sampled=len(sample), page_offset=offset, wrong=len(wrong))
+    if len(wrong) > max(2, len(sample) // 5):
+        f.add(WARN, "pdf-toc-pages",
+              f"The PDF's table of contents points {len(wrong)} of {len(sample)} sampled "
+              f"numbered entries at a page the heading is not on: {wrong}.")
 
 
 IMG_EXTS = {".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp"}
@@ -6798,11 +7055,14 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
         check_pdf_cover(items["pdf"], title, f)
         check_pdf_fonts(stage_dir, items["pdf"], html_text, f)
         check_pdf_legibility(items["pdf"], stage_dir, html_text, f)
+        check_pdf_toc_pages(items["pdf"], f)
 
     # ---- source add-ons ---------------------------------------------------
     if md_text:
         check_md_links(md_text, f)
         check_md_fences(md_text, f)
+        if html_text:
+            check_html_code_sync(md_text, html_text, f)
         check_policy(md_text, html_text, version, stage, f)
         check_template(md_text, html_text, f)
         check_correction_classes(md_text, stage_dir, base, stage, f)
@@ -6932,6 +7192,10 @@ CONDITION_DOCS: list[dict] = [
          condition="Stage directory name, and an errataNN parent directory, carry a two-digit number",
          pulls="the stage directory name, and the parent directory name when it is an errata directory",
          compares_to="valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4)"),
+    dict(check="stage-name", sig="is a Working Draft. Working Drafts are unpublished", applies="all",
+         condition="A package staged for publication is not a Working Draft",
+         pulls="the stage directory name's stage token",
+         compares_to="wd: Working Drafts are unpublished and may use any naming (naming-directives.txt 5.2 note); docs.oasis-open.org has no wd location (dmlex/v1.1/wd01 returns 404)"),
     dict(check="stage-name", sig="uses a retired/invalid stage token", applies="all",
          condition="Stage token is not a retired abbreviation",
          pulls="the alphabetic prefix of the stage directory name",
@@ -7284,6 +7548,24 @@ CONDITION_DOCS: list[dict] = [
          condition="The PDF's body text prints at no less than 85% of the body size the package declares",
          pulls="the median word-box height over every page (pdftotext -bbox), and the body font-size from the package's own CSS or the OASIS stylesheet it links",
          compares_to="85% of the declared body size; skipped for landscape PDFs and PDFs from Word, LibreOffice, TeX, Typst, FOP or Acrobat"),
+    # html-code-sync
+    dict(check="html-code-sync", sig="differs only in whitespace in the HTML", applies="md",
+         condition="Each fenced code block of the Markdown source is published in the HTML with the same whitespace",
+         pulls="every fenced code block of the .md, and every <pre> block of the HTML, whitespace at line ends ignored",
+         compares_to="the same block with its tabs intact; a block whose only change is tabs expanded to spaces (the pipeline's pandoc did this to DMLex v1.0 OS, Sep 2026) is this WARN, any other change the BLOCKER"),
+    dict(check="html-code-sync", sig="is missing from the HTML or differs from the Markdown source", applies="md",
+         condition="Each fenced code block of the Markdown source appears in the HTML with the same characters",
+         pulls="every top-level fenced code block of the .md (not those in comments, lists, blockquotes, raw or diagram fences, or !include), and every <pre> block of the HTML",
+         compares_to="the HTML's <pre> blocks: every Markdown block must match one not already matched, character for character apart from whitespace at line ends"),
+    # pdf-toc-pages
+    dict(check="pdf-toc-pages", sig="gives no page number for", applies="all", requires="pdftotext",
+         condition="The PDF's table of contents gives a page number for its entries",
+         pulls="the contents entries on the PDF's first 25 pages (pdftotext -layout, a Word line-number column removed, wrapped entries joined) and whether each ends in a page number (solid or spaced dot leaders, or two spaces)",
+         compares_to="at least half of the entries numbered; a contents list of fewer than five entries is not graded"),
+    dict(check="pdf-toc-pages", sig="numbered entries at a page the heading is not on", applies="all", requires="pdftotext",
+         condition="The page a contents entry gives is the page its heading is printed on",
+         pulls="up to 20 numbered contents entries spread across the list, and the text of the page each names",
+         compares_to="the entry's title on that page, after the constant offset most entries agree on (printed labels may differ from the PDF page index); more than 2, or a fifth of the sample, missing is reported"),
     # manifest
     dict(check="manifest", sig="manifest.json is not valid JSON", applies="all", requires="manifest",
          condition="manifest.json parses as JSON",

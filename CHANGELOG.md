@@ -106,6 +106,31 @@ Each version is anchored by a git tag on this repository.
   cover). The DMLex profile's `allow-rendered.json` holds the one step 1
   difference: the logo served from `images/`.
   `tests/test_step1_fidelity.py` runs step 1 on DMLex and verifies its HTML.
+- **Two new check classes, four conditions**, learned from the DMLex Markdown
+  edition (proposal 011). The gate had passed both defects.
+  - **html-code-sync**: every fenced code block of the Markdown source must be
+    published in the HTML unchanged. BLOCKER when a block is missing or its
+    characters differ; WARN when its tabs were only expanded to spaces. The
+    DMLex render made before the step 1 fix draws 9 WARNs; every CSAF corpus
+    package matches its Markdown exactly. Swept over the 152 Markdown and HTML
+    pairs on the TC Administration workspace, it raises BLOCKERs on two
+    published documents only: DPS prov-meta v1.0 csd01 (28 YAML blocks
+    collapsed to inline text by fences with trailing text) and NIEM Model v6.0
+    OS, whose published HTML lacks the six XML examples its published
+    Markdown carries.
+  - **pdf-toc-pages**: a PDF's table of contents gives page numbers (WARN when
+    fewer than half its entries have one), and the pages are right (WARN when
+    more than 3 of the first 12 numbered entries point at a page the heading is
+    not on, after the page-label offset most entries agree on). It reads
+    Word line-number columns, spaced LaTeX dot leaders and wrapped entries.
+    The CSAF v2.1 csd01 corpus PDF (Markdown pipeline, no numbers) warns; the
+    CSAF-CVRF v1.2 cs01 PDF (Word, numbered) does not. Over 455 OASIS PDFs it
+    warns on 42: 34 contents lists with no page numbers (NIEMOpen,
+    LegalDocML part 2), 7 redline diff PDFs and one stale Word contents list
+    (ECF v5.01 errata01 csd01).
+  - Both are operational rules (no clause in the pinned corpus), recorded in
+    the crosswalk. 178 individual checks in 61 classes; 97 policy-grounded.
+    `tests/test_html_code_sync.py`, `tests/test_pdf_toc_pages.py`.
 - Release process: a `move-v1` workflow moves the floating `v1` tag to each v1.x.y
   release when it is published (it sat at v1.4.0 for four releases), with a manual
   dispatch to point it at a named release. The adoption guide's `@v1` row now says so.

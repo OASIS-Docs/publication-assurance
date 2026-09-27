@@ -15,7 +15,7 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=173)
+![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=178)
 
 `oasis_pub_check.py` is the executable form of the publication acceptance
 criteria: the TC-side version of the checks OASIS TC Administration
@@ -33,7 +33,7 @@ Characteristics:
 - No configuration. Every expectation is derived from the package itself:
   its own front matter, its own CSS, its own schema `$id`s, its own publish
   path.
-- 173 individual checks across 59 check classes. `--list-checks` asserts
+- 178 individual checks across 61 check classes. `--list-checks` asserts
   that inventory against the code, and every count advertised anywhere in
   this repository comes from it.
 - It combines the intake acceptance criteria with the publication
@@ -139,6 +139,7 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | front-matter | 12 | BLOCKER/WARN | The This/Latest stage URL blocks must match the package's actual publish path. |
 | generator | 1 | BLOCKER | DOCX-native renders must come from Microsoft Word, matching the TC's precedent. |
 | html-anchors | 2 | BLOCKER/WARN | Every internal fragment link must resolve to an anchor in the document. |
+| html-code-sync | 2 | BLOCKER/WARN | Every fenced code block of the Markdown source is published in the HTML unchanged, tabs and indentation included. |
 | html-residue | 3 | BLOCKER | Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths. |
 | html-title | 2 | BLOCKER/WARN | The HTML title element must be an actual document title with no working residue. |
 | image-policy | 11 | BLOCKER/WARN | Images must be self-contained, inert, and within the pipeline's size caps. |
@@ -158,6 +159,7 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | pdf-fonts | 2 | WARN | PDF embedded fonts are compared against the package's own CSS as typography authority. |
 | pdf-legibility | 2 | WARN | PDF body text size is measured against the body size the package's stylesheet declares. |
 | pdf-sync | 5 | BLOCKER/WARN | The PDF must be readable and rendered from the same revision as the rest of the package. |
+| pdf-toc-pages | 2 | WARN | The PDF's table of contents gives page numbers, and each number is the page its heading is printed on. |
 | previous-stage | 2 | BLOCKER | Second and later stages must cite the previous stage's URLs. |
 | public-review-metadata | 3 | BLOCKER/WARN | Post-publication audit: a csd/cnd stage directory that underwent a TC public review must carry the [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html companion file Project Administration is obligated to publish alongside it (Naming Directives v1.7 s5.2 / TC Handbook Naming). |
 | ref-rfc | 2 | WARN | An [RFCnnnn] references entry's label, body text, and URL must cite the same RFC number. |
@@ -166,7 +168,7 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | revision-collision | 1 | WARN | A new submission must not collide with a stage already live for the version. |
 | rfc-keywords | 2 | BLOCKER/WARN | Normative key words require the RFC 2119 (and 8174) citations. |
 | schema-id | 4 | BLOCKER/WARN | Every JSON schema's $id must agree with where the file actually publishes. |
-| stage-name | 3 | BLOCKER | The stage token must be a current, correctly numbered stage per the Naming Directives. |
+| stage-name | 4 | BLOCKER/WARN | The stage token must be a current, correctly numbered stage per the Naming Directives. |
 | stage-token | 3 | BLOCKER/WARN | On a second or later stage, the Previous-stage cover URI should carry the document's own csd or cnd stage token; a retired or mismatched token is a WARN, with a caveat for pre-v1.7 legacy paths. A Latest-stage cover URI filename must carry no stage-abbreviation or revision token (BLOCKER). |
 | stage-uri-live | 1 | BLOCKER | The Previous-stage and Latest-stage URIs on the cover name files that are not in the package, so every other check can see only their shape. This class fetches them. A 404 or 410 is a BLOCKER: the cover cites a document that was never published at that address, usually because the template hardcodes the extension while templating the stage name, so a stage that went markdown-native is still cited as `.docx`. Transport failures, 5xx responses and bot challenges are recorded as INFO. `PUB_CHECK_OFFLINE` turns the class off. |
 | symlinks | 1 | BLOCKER | Self-referential symlinks materialize into unbounded recursion on deploy. |
@@ -200,7 +202,7 @@ same command on either side of the gate (`--emit-manifest`):
   [OpenDocument releases](https://docs.oasis-open.org/office/OpenDocument/v1.4/csd01/OpenDocument-v1.4-csd01-manifest.txt)
   carry the precedent.
 
-![The verification chain](../assets/chain.png?v=173)
+![The verification chain](../assets/chain.png?v=178)
 
 If the package includes a `manifest.json` conforming to
 [`manifest-schema.json`](manifest-schema.json), the intake side can verify
