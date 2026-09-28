@@ -219,7 +219,7 @@ render/render.sh MD_DIR SCHEMAS_DIR OUT_ROOT
 headless Chrome rather than wkhtmltopdf. The footer is the one published
 OASIS PDFs carry, read from the document (name, track, copyright line,
 document date, page), and the table of contents is numbered from the printed
-pages. The walkthrough is [docs/CONVERTING.md](docs/CONVERTING.md).
+pages. For a DocBook specification, the [`docbook-markdown` action](docs/MARKDOWN-EDITION.md) runs this for you.
 
 Every defect class these transforms guard against (the lint series D1-D7 and
 the post-render assertions A1/A2) is enforceable in a TC's own build before

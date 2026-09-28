@@ -86,7 +86,7 @@ URL shapes and what happens when nothing is published:
 | **[pub-check/README.md](pub-check/README.md)** | The class-level summary of what it checks, with severities and the regression corpus. |
 | **[pub-check/CHECKS.md](pub-check/CHECKS.md)** | A check fired and you want the exact one. Full catalog, generated from the code. |
 | **[TRANSFORMS.md](TRANSFORMS.md)** | Building from Markdown and want the pipeline command by command. |
-| **[docs/CONVERTING.md](docs/CONVERTING.md)** | Moving a published DocBook specification to Markdown: convert, prove it says what the standard says, render, gate, cut the next stage. |
+| **[docs/MARKDOWN-EDITION.md](docs/MARKDOWN-EDITION.md)** | A Markdown edition of a DocBook specification, as one more output of its source: one workflow step, checked word for word against the published HTML, with HTML and PDF. |
 | **[harvest/README.md](harvest/README.md)** | You run the gate often and want each run's records turned into candidate improvements to the gate. |
 | **[pub-check/AUTHORITIES.md](pub-check/AUTHORITIES.md)** | The OASIS rule behind a check, quoted verbatim with its source. The criterion-to-clause map. |
 | **[examples/eox-core-v1.0-csd01/](examples/eox-core-v1.0-csd01/README.md)** | A real Validation Report from a live publication. |
@@ -215,7 +215,7 @@ publication-assurance/
 ├── harvest/                         # Learn from every run: records in, candidate gate changes out
 │   └── harvest.py                   #   re-gates recorded packages, reads audits and adjudications
 ├── docs/ADOPTING.md                 # Adoption guide: the gate in a TC's own repository
-├── docs/CONVERTING.md               # Converting a published specification to OASIS Markdown
+├── docs/MARKDOWN-EDITION.md         # A Markdown edition of a DocBook specification (the docbook-markdown action)
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
 ├── examples/                        # Worked example + the regression corpus
 │   ├── consumer-workflow.yml        #   the drop-in TC workflow (copy this)
@@ -325,4 +325,4 @@ The OASIS name and logo are trademarks of OASIS Open.
 
 ---
 
-**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [Converting a specification](docs/CONVERTING.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)
+**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [Markdown edition of a DocBook specification](docs/MARKDOWN-EDITION.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)

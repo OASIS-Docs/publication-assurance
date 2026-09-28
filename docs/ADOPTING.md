@@ -22,7 +22,7 @@ and each run publishes a Validation Report you can open in a browser.
 | [Environment variables](#environment-variables) | You need offline runs or a specific browser for the PDF |
 | [Report branch layout](#report-branch-layout) | You want to know where each report is kept |
 | [Markdown rendering before the gate](#markdown-rendering-before-the-gate) | Your repository holds Markdown sources, not a rendered package |
-| [Converting a published specification](CONVERTING.md) | Your specification was written in DocBook and the next version will be Markdown: convert it, prove the Markdown says what the standard says, render, gate and cut the next stage |
+| [A Markdown edition of your DocBook specification](MARKDOWN-EDITION.md) | Your specification is written in DocBook and you want its Markdown edition as well: one workflow step, checked against the published HTML |
 | [Gating and report-only runs](#gating-and-report-only-runs) | A blocker should not fail the build, for example on a published standard |
 | [Several documents in one repository](#several-documents-in-one-repository) | The TC publishes more than one work product from this repository |
 | [Fork pull requests and read-only tokens](#fork-pull-requests-and-read-only-tokens) | Contributors open pull requests from their own forks |

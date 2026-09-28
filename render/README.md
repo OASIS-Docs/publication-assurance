@@ -9,8 +9,9 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
 `render.sh` turns one OASIS Markdown specification into the package OASIS
 would publish, laid out at its `docs.oasis-open.org` path, and runs the gate
 on it. A TC can see the verdict TC Administration will see while the document
-is still the TC's to change. The walkthrough is
-[docs/CONVERTING.md](../docs/CONVERTING.md).
+is still the TC's to change. For a DocBook specification the
+`docbook-markdown` action runs it; see
+[docs/MARKDOWN-EDITION.md](../docs/MARKDOWN-EDITION.md).
 
 | File | Role |
 |---|---|
