@@ -4,17 +4,17 @@ SPDX-License-Identifier: Apache-2.0
 Authored by Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-# render: a Markdown specification rendered, staged and gated
+# render: a Markdown specification rendered, staged and checked
 
 `render.sh` turns one OASIS Markdown specification into the package OASIS
-would publish, laid out at its `docs.oasis-open.org` path, and runs the gate
-on it. A TC can see the verdict TC Administration will see while the document
+would publish, laid out at its `docs.oasis-open.org` path, and runs the
+publication checks on it. A TC can see the verdict TC Administration will see while the document
 is still the TC's to change. The walkthrough is
 [docs/CONVERTING.md](../docs/CONVERTING.md).
 
 | File | Role |
 |---|---|
-| `render.sh` | Stage, render (HTML, then PDF), number the contents, gate |
+| `render.sh` | Stage, render (HTML, then PDF), number the contents, check |
 | `footer.py` | Read from the document: the stage path, and the PDF footer (name, track, copyright line, date) |
 | `print_pdf.mjs` | HTML to PDF in headless Chrome on the pipeline's A4 geometry, with that footer |
 | `compare.mjs` | The published and rendered HTML side by side at named anchors |
@@ -46,9 +46,9 @@ render/render.sh MD_DIR SCHEMAS_DIR OUT_ROOT     # SCHEMAS_DIR "-" when there ar
 - **Contents.** Chrome cannot number a table of contents as it prints.
   `.github/src/pipeline/toc_pages.py` (shared with step 2) reads each heading's page from the PDF and writes it in, and
   the PDF is printed again until no number moves.
-- **Gate.** The script runs `pub-check/oasis_pub_check.py` on the staged
-  package, and its exit status is the gate's: 0 publishable, 1 blockers.
-  With `PUBCHECK=0` it stops after staging; CI then runs the gate through the
+- **Check.** The script runs `pub-check/oasis_pub_check.py` on the staged
+  package, and its exit status is the checks': 0 publishable, 1 blockers.
+  With `PUBCHECK=0` it stops after staging; CI then runs the checks through the
   action.
 
 `render.sh` prints with Chrome, which GitHub's runners and most desktops
@@ -107,5 +107,5 @@ not on the page. A grader that counted any difference as a catch passed it.
 four things:
 - the footer on page 3 against the document;
 - every contents number against the page its heading is printed on;
-- the gate's verdict on the PDF;
+- pub-check's verdict on the PDF;
 - `compare.mjs` against the published page.

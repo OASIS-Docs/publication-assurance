@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Authored by Michael Coletta, Technical Advisor to OASIS Open.
 #
-# Convert, verify, render and gate one OASIS Markdown specification: every
+# Convert, verify, render and check one OASIS Markdown specification: every
 # step of docs/CONVERTING.md, as one job a TC repository calls. The copy-me
 # caller is examples/converting-workflow.yml.
 #
@@ -11,12 +11,12 @@
 #   2. Render    HTML and PDF, staged at their docs.oasis-open.org path
 #   3. Verify    the rendered HTML against the published HTML
 #   4. Verify    the rendered PDF against the published PDF
-#   5. Gate      the OASIS publication acceptance criteria
+#   5. Check     the OASIS publication acceptance criteria
 #   6. Pages     page pairs for a review, with a planted fault (an artifact;
 #                the review itself needs a reviewer, see render/README.md)
 #
 # Steps 1, 3 and 4 run only when their inputs are given: a new draft with no
-# published original is rendered and gated. A published original that cannot
+# published original is rendered and checked. A published original that cannot
 # be fetched (Cloudflare, an outage) is reported as a warning, not a failure;
 # a difference from it fails the job.
 
@@ -190,7 +190,7 @@ jobs:
           [ -f "$STAGE-verify-pdf.json" ] && python3 _pa/verify/annotate.py pdf "$STAGE-verify-pdf.json"
           exit $status
 
-      - name: 5. OASIS publication gate
+      - name: 5. OASIS publication checks
         uses: ./_pa
         with:
           target: ${{ steps.render.outputs.stage }}
@@ -207,7 +207,7 @@ jobs:
           NAME: ${{ steps.render.outputs.name }}
         run: |
           [ -f "$RUNNER_TEMP/published.pdf" ] || { echo "No published PDF; no page pairs."; exit 0; }
-          # the gate's action sets up its own Python; give that one Pillow too
+          # the checks' action sets up its own Python; give that one Pillow too
           python3 -m pip install --quiet pillow
           python3 _pa/render/review_pairs.py make "$STAGE/$NAME.pdf" "$RUNNER_TEMP/published.pdf" \
             _page-review/pairs --key _page-review-key/key.json --sample ${{ inputs.review-sample }}

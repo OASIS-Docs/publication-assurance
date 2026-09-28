@@ -119,7 +119,7 @@ links and 50 images
 
 ## What it does not check
 
-Styling and page layout, which are the gate's job (`pub-check/`) and the
+Styling and page layout, which are the publication checks' job (`pub-check/`) and the
 pipeline's; the rendered PDF, which `verify_pdf.py` compares. Nor structure
 that keeps the words in order: a heading's level, a list item moved to
 another nesting level, emphasis or a code span removed. Review those on the
@@ -168,5 +168,5 @@ It also records two defects of the published PDF itself: its font has no `ň`
 or `ō`, and FOP printed `#` for them 15 times.
 
 It does not see where a figure is drawn or what it looks like, nor type
-size (the gate's `pdf-legibility` and `pdf-type-scale` checks measure that).
+size (pub-check's `pdf-legibility` and `pdf-type-scale` checks measure that).
 The pictures need a reviewer: `render/review_pairs.py`.

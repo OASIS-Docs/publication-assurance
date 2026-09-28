@@ -6,7 +6,7 @@ restriction, provided it is reproduced verbatim and this notice is retained.
 Author: Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-# OASIS publication gate: adoption guide
+# OASIS publication checks: adoption guide
 
 This guide sets up `oasis-pub-check`, the OASIS publication acceptance tests,
 in a TC's own GitHub repository. After setup, every push checks your
@@ -15,18 +15,18 @@ and each run publishes a Validation Report you can open in a browser.
 
 | Section | Read it when |
 |---|---|
-| [Quick start](#quick-start) | You are setting the gate up for the first time |
+| [Quick start](#quick-start) | You are setting the checks up for the first time |
 | [The Validation Report](#the-validation-report) | A run has finished and you want to know what it says |
 | [Blocker ownership](#blocker-ownership) | A blocker may not be the TC's to fix, or looks wrong |
 | [Action inputs](#action-inputs) and [outputs](#action-outputs) | You want to change a default or use a result in a later step |
 | [Environment variables](#environment-variables) | You need offline runs or a specific browser for the PDF |
 | [Report branch layout](#report-branch-layout) | You want to know where each report is kept |
-| [Markdown rendering before the gate](#markdown-rendering-before-the-gate) | Your repository holds Markdown sources, not a rendered package |
-| [Converting a published specification](CONVERTING.md) | Your specification was written in DocBook and the next version will be Markdown: convert it, prove the Markdown says what the standard says, render, gate and cut the next stage |
-| [Gating and report-only runs](#gating-and-report-only-runs) | A blocker should not fail the build, for example on a published standard |
+| [Markdown rendering before the checks](#markdown-rendering-before-the-checks) | Your repository holds Markdown sources, not a rendered package |
+| [Converting a published specification](CONVERTING.md) | Your specification was written in DocBook and the next version will be Markdown: convert it, prove the Markdown says what the standard says, render, check and cut the next stage |
+| [Enforcing and report-only runs](#enforcing-and-report-only-runs) | A blocker should not fail the build, for example on a published standard |
 | [Several documents in one repository](#several-documents-in-one-repository) | The TC publishes more than one work product from this repository |
 | [Fork pull requests and read-only tokens](#fork-pull-requests-and-read-only-tokens) | Contributors open pull requests from their own forks |
-| [Version pinning and upgrades](#version-pinning-and-upgrades) | You want a newer release of the gate |
+| [Version pinning and upgrades](#version-pinning-and-upgrades) | You want a newer release of the checks |
 | [Local runs](#local-runs) | You want the verdict on your own machine before pushing |
 | [Troubleshooting](#troubleshooting) | Something did not work as described |
 | [Checks and their authorities](#checks-and-their-authorities) | You want the rule behind a finding |
@@ -41,7 +41,7 @@ defined under [Terms](#terms).
 The package is a **stage directory**: the folder that holds one work
 product at one stage, with its Markdown, HTML and PDF, for example
 `work/v1.0/csd01` holding `mytc-v1.0-csd01.md`, `mytc-v1.0-csd01.html` and
-`mytc-v1.0-csd01.pdf`. The gate checks two of the folder names against the
+`mytc-v1.0-csd01.pdf`. The checks compare two of the folder names against the
 filenames and the cover URLs:
 
 | Folder | Example | Rule |
@@ -54,7 +54,7 @@ A `.zip` of the stage directory also works.
 
 If the repository holds only Markdown and nothing renders it yet, finish
 the Quick start with the path where the rendered package will go, then
-read [Markdown rendering before the gate](#markdown-rendering-before-the-gate).
+read [Markdown rendering before the checks](#markdown-rendering-before-the-checks).
 
 ### Step 1: Workflow file
 
@@ -100,7 +100,7 @@ uses the account's GitHub Actions minutes; public repositories run free.
 
 **Success looks like:** the **Actions** tab lists a run named `pub-check`
 for your commit. It finishes in about a minute. A green tick means the
-package is publishable; a red cross means the gate found at least one
+package is publishable; a red cross means the checks found at least one
 blocker. Either result means the setup works. A red cross with the
 annotation `oasis-pub-check could not read the target` means the `target`
 path is wrong: see [Troubleshooting](#troubleshooting).
@@ -183,13 +183,13 @@ below are in the report files.
 ### Verdict
 
 The header block states the target, the date, the tool, the coverage
-(178 conditions in 61 classes, all run), the blocker count and the gate's
+(178 conditions in 61 classes, all run), the blocker count and the checks'
 exit code, then one **Result** line:
 
 - `PUBLICATION-READY: zero blockers.` with exit code `0`. Warnings may remain.
 - `NOT publication-ready: N blocker(s).` with exit code `1`.
 
-Exit code `2` produces no report: the gate could not read the target,
+Exit code `2` produces no report: the checks could not read the target,
 almost always because the `target` path is wrong.
 
 ### Check class table
@@ -227,7 +227,7 @@ One row per condition, 178 rows. Each row gives:
 | Result | PASS, WARN, BLOCKER, NA or INFO, with a count when one condition fired more than once (`WARN x10`) |
 | Check | The check class the condition belongs to |
 | Condition verified | What was tested, as one sentence |
-| Value pulled (observed) | What the gate read from your package |
+| Value pulled (observed) | What the checks read from your package |
 | Compared against | What it expected, often with the rule it comes from |
 
 When a finding is not clear from the class table, find its row here: the
@@ -273,7 +273,7 @@ with the run link.
 | `member-uri`: a member-only (Kavi) URL is cited | TC, with staff help | The TC replaces the citation; staff can supply a public URL for the cited document |
 | `public-review-metadata`: a reviewed stage lacks its public-review metadata file | TC Administration | Project Administration publishes that file (Naming Directives v1.7 s5.2) |
 | `revision-collision` (WARN): the stage is already live | TC, with staff confirmation | A new submission takes the next revision number; ignore it when re-checking the published package itself |
-| Any finding you believe is wrong | Gate maintainers (GitHub issue) | An issue on the repository, as above; false positives are fixed in the gate, not worked around in the document |
+| Any finding you believe is wrong | Checks maintainers (GitHub issue) | An issue on the repository, as above; false positives are fixed in the checks, not worked around in the document |
 
 ## Reference
 
@@ -285,19 +285,19 @@ All inputs except `target` are optional.
 | Input | Default | Meaning |
 |---|---|---|
 | `target` | (required) | Stage directory or package `.zip`, relative to the repository root after checkout |
-| `args` | `''` | Extra flags passed to the gate, for example `--emit-manifest`. Do not pass `--json`: the action already writes `pubcheck-report.json`, and adding it makes `pubcheck-report.txt` JSON as well |
-| `python-version` | `3.x` | Python version the gate runs on |
+| `args` | `''` | Extra flags passed to the checks, for example `--emit-manifest`. Do not pass `--json`: the action already writes `pubcheck-report.json`, and adding it makes `pubcheck-report.txt` JSON as well |
+| `python-version` | `3.x` | Python version the checks run on |
 | `install-poppler` | `true` | Installs `pdftotext` and `pdffonts` on Linux runners for the PDF cross-checks. Without them those conditions report NA |
 | `report-dir` | `pubcheck-report` | Where the report files are written in the job's working directory. `''` writes none |
 | `write-summary` | `true` | Writes the verdict, the findings and the report tables to the job summary |
 | `publish-branch` | `pubcheck-reports` | The branch the reports are committed to. `''` turns publishing off |
 | `publish-token` | `${{ github.token }}` | The token that pushes the report branch and reads the Pages settings |
-| `fail-on-blockers` | `true` | Whether a blocker fails the step. `false` runs report-only: the report is written and published as usual, a warning names the blocker count, and the step passes. A target the gate cannot read still fails. See [Gating and report-only runs](#gating-and-report-only-runs) |
+| `fail-on-blockers` | `true` | Whether a blocker fails the step. `false` runs report-only: the report is written and published as usual, a warning names the blocker count, and the step passes. A target the checks cannot read still fails. See [Enforcing and report-only runs](#enforcing-and-report-only-runs) |
 | `summary-title` | `''` (the target path is used) | Heading for this call's summary section, and the name of its folder on the report branch; set it when the action runs more than once in a job or matrix |
 
 ### Environment variables
 
-Set these with `env:` on the gate step.
+Set these with `env:` on the checks step.
 
 | Variable | Effect |
 |---|---|
@@ -341,7 +341,7 @@ push against the latest state of the branch, up to ten times.
 
 
 Read an output in a later step as
-`${{ steps.<step-id>.outputs.<name> }}`, which needs an `id:` on the gate
+`${{ steps.<step-id>.outputs.<name> }}`, which needs an `id:` on the checks
 step.
 
 | Output | Content |
@@ -365,7 +365,7 @@ The path outputs are empty when `report-dir` is `''`. When the exit code
 is `2` (the target could not be read) every Validation Report path, every
 `report-url-*` output and `report-publish-note` are empty. The Validation
 Report paths are also empty when that report could not be rendered, and
-the PDF path when the runner has no Chrome; neither changes the gate's
+the PDF path when the runner has no Chrome; neither changes the checks'
 result. Every `report-url-*` output is empty when nothing was published.
 
 An example that posts the blocker count as a notice:
@@ -383,12 +383,12 @@ An example that posts the blocker count as a notice:
         run: echo "::notice::pub-check found $BLOCKERS blocker(s) and $WARNINGS warning(s)"
 ```
 
-`if: always()` matters: without it the step is skipped whenever the gate
-fails.
+`if: always()` matters: without it the step is skipped whenever the checks
+fail.
 
-### Markdown rendering before the gate
+### Markdown rendering before the checks
 
-The gate checks a rendered package: the HTML and the PDF beside the
+The checks apply to a rendered package: the HTML and the PDF beside the
 Markdown source, laid out at their `docs.oasis-open.org` path. If the
 repository holds only Markdown, the workflow renders it first with
 [`render/render.sh`](../render/README.md) from this repository, at the same
@@ -404,7 +404,7 @@ release as the action. It has three steps in one job:
    `_publication/lexidma/dmlex/v1.1/wd01/`. The path comes from the
    document's own "This stage" URL, so the directory, the filenames and the
    cover agree.
-3. **Gate.** Point `target` at the staged directory.
+3. **Check.** Point `target` at the staged directory.
 
 [TRANSFORMS.md](../TRANSFORMS.md) gives every command of the pipeline.
 
@@ -451,20 +451,20 @@ jobs:
 
       - name: Render Markdown to HTML and PDF
         env:
-          PUBCHECK: '0'           # render.sh stops after staging; the action gates
+          PUBCHECK: '0'           # render.sh stops after staging; the action checks
           CHROME: google-chrome   # preinstalled on GitHub's Ubuntu runners
         run: _pa/render/render.sh dmlex-v1.1 dmlex-v1.1/schemas _publication
 
-      - name: OASIS publication gate
+      - name: OASIS publication checks
         uses: OASIS-Docs/publication-assurance@v1.10.1
         with:
           target: _publication/lexidma/dmlex/v1.1/wd01
 ```
 
 Keep `PA_REF` and the action's tag on the same release, so the renderer and
-the gate come from the same version.
+the checks come from the same version.
 
-### Gating and report-only runs
+### Enforcing and report-only runs
 
 By default a blocker fails the step, the job and the run. That is the
 right setting for a working draft the TC is ready to hold to the criteria.
@@ -474,7 +474,7 @@ published exactly as before, the job summary still lists every blocker, a
 warning annotation gives the count, and the step, the job and the run pass.
 Use it for a document that cannot change, such as a published OASIS Standard
 kept in the repository for reference, or for a draft while the TC works
-through findings it inherited and has not yet decided. A target the gate
+through findings it inherited and has not yet decided. A target the checks
 cannot read (a wrong `target:` path) fails the step in either mode.
 
 ```yaml
@@ -486,12 +486,12 @@ cannot read (a wrong `target:` path) fails the step in either mode.
 
 In a matrix the setting can come from the matrix entry, as in the DMLex
 workflow: `fail-on-blockers: ${{ matrix.enforce }}`, with `enforce: true`
-on a draft the TC gates and `enforce: false` on the published standard.
+on a draft the TC holds to the checks and `enforce: false` on the published standard.
 Switch a draft to `true` once its blockers are resolved, so a new one
 cannot slip in.
 
 Releases before v1.7.0 have no `fail-on-blockers`; there, adding
-`continue-on-error: true` to the gate step passes the job and the run, but
+`continue-on-error: true` to the checks step passes the job and the run, but
 the step itself still shows as failed.
 
 Warnings never fail a run in either mode.
@@ -556,11 +556,11 @@ each artifact in the job summary.
 
 A pull request opened from a fork runs with a read-only token, whatever
 the workflow's `permissions:` block says. GitHub does this so that code
-from outside the repository cannot write to it. The gate itself needs no
-write access and runs normally: the verdict, the red or green status, the
+from outside the repository cannot write to it. The checks themselves need no
+write access and run normally: the verdict, the red or green status, the
 job summary and the report files on the runner are all produced. Only
 publishing to the `pubcheck-reports` branch needs write access, so on a
-fork pull request nothing is pushed and the gate result is unaffected. The
+fork pull request nothing is pushed and the checks' result is unaffected. The
 job summary says why the report was not published, and the
 **Validation report** notice reads
 `Report not published: <reason>. Files for this run: <run address>`.
@@ -621,7 +621,7 @@ updates:
 
 ### Local runs
 
-The gate is one Python file with no dependencies beyond the standard
+The checks are one Python file with no dependencies beyond the standard
 library, so it runs anywhere Python 3.10 or later does. The same code runs
 in the action.
 
@@ -702,9 +702,9 @@ those conditions report NA and the rest run unchanged.
 | A matrix upload fails with `409` and "an artifact with this name already exists" | Two entries upload under one artifact name | Name each artifact from the matrix entry, as in [Several documents](#several-documents-in-one-repository) |
 | Two calls to the action in one job leave only the second's report files | The calls share one `report-dir` | Give each call its own `report-dir` |
 | Findings read `could not be reached ... (transport failure, not a 404)` | A network or site outage during the run | These are recorded as INFO, never as blockers, so the run needs no change. `PUB_CHECK_OFFLINE` (see [Environment variables](#environment-variables)) skips the live-site conditions, but it also hides real intake findings such as `revision-collision` and `public-review-metadata`, and intake always runs online: remove it once the site is back |
-| A published standard in the repository keeps the run red | Its findings cannot be fixed in a published document | Set `fail-on-blockers: false` on its gate step, see [Gating and report-only runs](#gating-and-report-only-runs) |
-| A draft stays red on blockers the TC has not decided yet | The draft is gated while its findings are open | Run it report-only with `fail-on-blockers: false` until they are resolved, then set it back to `true` |
-| A finding you believe is wrong | A gap or error in the gate | See [Blocker ownership](#blocker-ownership) |
+| A published standard in the repository keeps the run red | Its findings cannot be fixed in a published document | Set `fail-on-blockers: false` on its checks step, see [Enforcing and report-only runs](#enforcing-and-report-only-runs) |
+| A draft stays red on blockers the TC has not decided yet | The draft is held to the checks while its findings are open | Run it report-only with `fail-on-blockers: false` until they are resolved, then set it back to `true` |
+| A finding you believe is wrong | A gap or error in the checks | See [Blocker ownership](#blocker-ownership) |
 
 ### Checks and their authorities
 
@@ -713,7 +713,7 @@ those conditions report NA and the rest run unchanged.
 | [pub-check/CHECKS.md](../pub-check/CHECKS.md) | Every condition: what is checked, the value pulled, what it is compared against, its severity, and when it applies. Generated from the code |
 | [pub-check/AUTHORITIES.md](../pub-check/AUTHORITIES.md) | The OASIS rule behind each check, quoted verbatim with its source |
 | [pub-check/README.md](../pub-check/README.md) | The check classes grouped by area, with severities and the regression corpus |
-| [PUBLICATION-QUALITY.md](../PUBLICATION-QUALITY.md) | How the gate fits with the 15 audit gates TC Administration runs at intake |
+| [PUBLICATION-QUALITY.md](../PUBLICATION-QUALITY.md) | How the checks fit with the 15 audit checks TC Administration runs at intake |
 | [TRANSFORMS.md](../TRANSFORMS.md) | The Markdown to HTML to PDF pipeline, command by command |
 | [examples/eox-core-v1.0-csd01/](../examples/eox-core-v1.0-csd01/README.md) | A Validation Report from a real publication |
 | [CHANGELOG.md](../CHANGELOG.md) | Every release, with the checks it added or changed |

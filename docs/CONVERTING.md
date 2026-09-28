@@ -12,7 +12,7 @@ This guide is for a TC whose published specification was written in DocBook
 and which wants to write the next version in Markdown, in the OASIS Markdown
 template that CSAF and NIEM use. It takes you from the DocBook source to a
 Markdown file that says exactly what the published specification says, then
-to a rendered and gated package, and then to the next stage. DMLex (LEXIDMA
+to a rendered and checked package, and then to the next stage. DMLex (LEXIDMA
 TC) was the first specification converted this way. Every command below is
 the one that converted it.
 
@@ -20,7 +20,7 @@ the one that converted it.
 |---|---|---|
 | 1. Convert | [`converters/docbook-to-markdown/build.sh`](../converters/docbook-to-markdown/README.md) | `<name>.md` and its figures |
 | 2. Prove it matches | [`verify/verify_md.py`](../verify/README.md) | `RESULT: PASS`, and a report listing every difference and why it is accepted |
-| 3. Render and gate | [`render/render.sh`](../render/README.md) | HTML and PDF staged at their `docs.oasis-open.org` path, and the gate's verdict |
+| 3. Render and check | [`render/render.sh`](../render/README.md) | HTML and PDF staged at their `docs.oasis-open.org` path, and the publication checks' verdict |
 | 4. Prove the PDF matches | [`verify/verify_pdf.py`](../verify/README.md#verify_pdf-the-rendered-pdf-against-the-published-pdf) | `RESULT: PASS` against the published PDF: every word, the contents' page numbers, the running footer |
 | 5. Review the pages | [`render/review_pairs.py`](../render/README.md#review_pairspy) | Published and rendered pages paired for a reviewer, with a planted fault, and a grade of the review |
 | 6. Cut the next stage | [`pub-check/advance_stage.py`](../pub-check/README.md#cutting-the-next-stage) | `<name>` at the next stage, with every stage-bound line rewritten |
@@ -155,7 +155,7 @@ python3 publication-assurance/verify/verify_md.py out/lexidma/dmlex/v1.0/os/dmle
 ```
 
 This is how the pipeline was found turning the tab characters in 9 of DMLex's
-316 code blocks into spaces. The gate now checks the same thing for every package
+316 code blocks into spaces. pub-check now checks the same thing for every package
 (`html-code-sync`).
 
 It also compares how each ordered list is numbered (`1`, `a`, `i`) and the
@@ -168,7 +168,7 @@ comparison could see either.
 **What it cannot see:** a heading's level, a list item moved to another
 level, emphasis removed. Read the Markdown diff for those, and use step 5.
 
-## 3. Render and gate
+## 3. Render and check
 
 ```bash
 publication-assurance/render/render.sh dmlex-md lexidma/dmlex-v1.0/specification/schemas out
@@ -181,12 +181,12 @@ converter (TRANSFORMS.md, Stage 1). The PDF uses the pipeline's print styles
 (Stage 2) and is printed by Chrome with the footer of a
 published OASIS PDF: the name and track, the copyright line, the document's
 date and the page. The table of contents gets its page numbers from the
-printed pages. The last lines are the gate's findings. Exit 0 means
+printed pages. The last lines are the publication checks' findings. Exit 0 means
 publishable. The pipeline's own PDF step, which prints with wkhtmltopdf,
 produces the same footer and numbered contents.
 
 A published specification being converted carries its own defects into the
-gate. DMLex's nine blockers come from five defects, all in its source:
+checks. DMLex's nine blockers come from five defects, all in its source:
 - `dmlex.nvh` is cited under the stage's own path but is missing from the
   TC's source repository, so the package lacks it (`asset-refs` and
   `package-refs`);
@@ -291,8 +291,8 @@ python3 publication-assurance/pub-check/advance_stage.py dmlex-md/dmlex-v1.0-os.
 
 It is a dry run unless you add `--write`. It refuses, and writes nothing, when
 anything is ambiguous. Its refusal rules are in the
-[gate's README](../pub-check/README.md#cutting-the-next-stage). Render and
-gate the result (step 3).
+[pub-check README](../pub-check/README.md#cutting-the-next-stage). Render and
+check the result (step 3).
 
 ## Traps
 
@@ -303,7 +303,7 @@ gate the result (step 3).
 - **Long inline code shrinks the PDF.** An unbreakable `code span` wider than
   the page makes a shrink-to-fit renderer print the whole document smaller.
   NIEM NDR v6.0 printed its 12pt body at 8pt. The pipeline's print styles wrap
-  inline code, and the gate's `pdf-legibility` check measures the printed body
+  inline code, and pub-check's `pdf-legibility` check measures the printed body
   size against the declared one.
 - **Cloudflare hides email addresses.** `docs.oasis-open.org` replaces each
   address with `[email protected]` and an encoded attribute. The verifier
@@ -331,10 +331,10 @@ gate the result (step 3).
   PDF, and record such a defect in the allow file with its reason.
 - **The contents need page numbers.** A PDF printed from HTML has none unless
   something writes them. The pipeline's PDF step and `render.sh` both do, and
-  the gate's `pdf-toc-pages` check reports a PDF whose contents have none, or
+  pub-check's `pdf-toc-pages` check reports a PDF whose contents have none, or
   point at the wrong pages.
 - **Tabs in code.** pandoc expands tabs to spaces unless told not to. The
-  pipeline's HTML converter now passes `--preserve-tabs`; the gate's `html-code-sync`
+  pipeline's HTML converter now passes `--preserve-tabs`; pub-check's `html-code-sync`
   reports a published code block that is not the source's.
 
 ## Who owns what

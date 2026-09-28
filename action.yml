@@ -50,7 +50,7 @@
 # releases.
 
 name: "OASIS pub-check"
-description: "Run the OASIS publication acceptance gate (oasis-pub-check) against a TC package or stage directory."
+description: "Run the OASIS publication acceptance checks (oasis-pub-check) against a TC package or stage directory."
 author: "OASIS Open"
 
 branding:
@@ -66,11 +66,11 @@ inputs:
     required: false
     default: ""
   python-version:
-    description: "Python version to run the gate on."
+    description: "Python version to run the checks on."
     required: false
     default: "3.x"
   install-poppler:
-    description: "Install poppler-utils (pdftotext/pdffonts) for the optional PDF cross-checks. Ignored on non-Linux runners; the gate runs without it either way."
+    description: "Install poppler-utils (pdftotext/pdffonts) for the optional PDF cross-checks. Ignored on non-Linux runners; the checks run without it either way."
     required: false
     default: "true"
   report-dir:
@@ -82,7 +82,7 @@ inputs:
     required: false
     default: "true"
   publish-branch:
-    description: "Branch of the calling repository that receives this run's report files (PDF, Markdown, HTML, JSON, text) under <ref>/<slug>/, so the summary and a ::notice annotation can link them as full https://github.com URLs. Created as an orphan branch on first use; no other branch is touched. Needs `permissions: contents: write`; without it (or on a pull request from a fork) nothing is pushed, the summary says why, and the gate is unaffected. Set to '' to turn publishing off."
+    description: "Branch of the calling repository that receives this run's report files (PDF, Markdown, HTML, JSON, text) under <ref>/<slug>/, so the summary and a ::notice annotation can link them as full https://github.com URLs. Created as an orphan branch on first use; no other branch is touched. Needs `permissions: contents: write`; without it (or on a pull request from a fork) nothing is pushed, the summary says why, and the checks are unaffected. Set to '' to turn publishing off."
     required: false
     default: "pubcheck-reports"
   publish-token:
@@ -90,7 +90,7 @@ inputs:
     required: false
     default: ${{ github.token }}
   fail-on-blockers:
-    description: "Whether a blocker fails the step. 'true' (default) is right for a working draft. 'false' runs report-only: blockers are reported, written and published exactly as before and raised as a ::warning annotation, and the step passes. Use it for a document that cannot change, such as a published OASIS Standard, or while a TC works through inherited findings. A target the gate cannot read (exit code 2) fails the step either way. The exit-code, blockers and warnings outputs are unchanged."
+    description: "Whether a blocker fails the step. 'true' (default) is right for a working draft. 'false' runs report-only: blockers are reported, written and published exactly as before and raised as a ::warning annotation, and the step passes. Use it for a document that cannot change, such as a published OASIS Standard, or while a TC works through inherited findings. A target the checks cannot read (exit code 2) fails the step either way. The exit-code, blockers and warnings outputs are unchanged."
     required: false
     default: "true"
   summary-title:
@@ -136,10 +136,10 @@ outputs:
     description: "The PDF URL pinned to the report commit's SHA, so the link for this run never changes when later runs replace the folder. Empty when nothing was published or no PDF was produced."
     value: ${{ steps.publish.outputs.report_url_pdf_pinned }}
   report-publish-note:
-    description: "'published', or the reason the report files were not published (publishing off, a fork pull request, a token without contents: write). Empty when the gate exits 2 (the target could not be read): nothing is published."
+    description: "'published', or the reason the report files were not published (publishing off, a fork pull request, a token without contents: write). Empty when the checks exit 2 (the target could not be read): nothing is published."
     value: ${{ steps.publish.outputs.report_publish_note }}
   report-validation-pdf:
-    description: "Path to the same Validation Report as an A4 landscape PDF, printed with headless Chrome (light theme, header rows repeated on every page, title and Page X of Y in the footer). Empty if report-dir was set to '', the report could not be rendered, or no Chrome/Chromium was available; a missing PDF is a warning and never changes the gate's result."
+    description: "Path to the same Validation Report as an A4 landscape PDF, printed with headless Chrome (light theme, header rows repeated on every page, title and Page X of Y in the footer). Empty if report-dir was set to '', the report could not be rendered, or no Chrome/Chromium was available; a missing PDF is a warning and never changes the checks' result."
     value: ${{ steps.pubcheck.outputs.report_validation_pdf }}
 
 runs:

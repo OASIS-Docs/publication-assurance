@@ -1,7 +1,7 @@
 # Copyright 2026 OASIS Open
 # SPDX-License-Identifier: Apache-2.0
 #
-# DROP-IN: convert, verify, render and gate an OASIS Markdown specification.
+# DROP-IN: convert, verify, render and check an OASIS Markdown specification.
 #
 # Copy this file to your repository as  .github/workflows/convert-and-verify.yml
 # and edit the lines under `with:` (the paths, the profile and the two
@@ -12,10 +12,10 @@
 #   3. checks the HTML against the published HTML, word for word;
 #   4. checks the PDF against the published PDF: every word, the contents'
 #      page numbers, list letters, the footer;
-#   5. runs the OASIS publication gate;
+#   5. runs the OASIS publication checks;
 #   6. builds page pairs for a visual review (an artifact).
 # Leave out the published-* lines for a new draft that has no published
-# original: it is then rendered and gated.
+# original: it is then rendered and checked.
 #
 # The walkthrough, and what each step checks, is docs/CONVERTING.md.
 
@@ -39,4 +39,4 @@ jobs:
       profile: dmlex                                       # EDIT: a shipped profile name, or your profile's directory
       published-html: https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html
       published-pdf: https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.pdf
-      # fail-on-blockers: true     # once the TC has resolved what the gate reports
+      # fail-on-blockers: true     # once the TC has resolved what the checks report

@@ -1,7 +1,7 @@
 # Copyright 2025-2026 OASIS Open
 # SPDX-License-Identifier: Apache-2.0
 #
-# DROP-IN publication gate for a TC repository.
+# DROP-IN publication checks for a TC repository.
 #
 # Copy this file to your repo as:  .github/workflows/pub-check.yml
 #
@@ -13,7 +13,7 @@
 #
 # Any blocker fails the build; warnings do not.
 # To report without failing (a published standard, or a draft whose findings
-# the TC has not decided yet), add  fail-on-blockers: false  to the gate step.
+# the TC has not decided yet), add  fail-on-blockers: false  to the check step.
 
 name: pub-check
 
@@ -33,7 +33,7 @@ env:
 
 permissions:
   # write lets the action publish the report to the pubcheck-reports branch
-  # and link it; with read the gate runs the same and the summary says why
+  # and link it; with read the checks run the same and the summary says why
   # nothing was published.
   contents: write
 
