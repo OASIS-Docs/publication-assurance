@@ -4,12 +4,12 @@
 #
 # oasis-pub-check as a drop-in GitHub Action.
 #
-# A TC adds ONE step to its own CI and the publication gate runs against its
+# A TC adds ONE step to its own CI and the OASIS publication checks run against its
 # package. The action bundles the self-contained engine
 # (pub-check/oasis_pub_check.py, stdlib only, no external data files), so the TC
 # copies nothing into its repo and pins to a version tag to receive fixes.
 #
-# Requires a checkout step before it (the gate reads the package from the
+# Requires a checkout step before it (the checks read the package from the
 # calling repo's checked-out working directory).
 #
 # Minimal usage in a TC repo (.github/workflows/pub-check.yml):
@@ -26,12 +26,12 @@
 #         contents: read
 #       steps:
 #         - uses: actions/checkout@v5
-#         - uses: OASIS-Docs/publication-assurance@v1.11.1
+#         - uses: OASIS-Docs/publication-assurance@v1.12.0
 #           with:
 #             target: ${{ inputs.target }}
 #
-# The step fails (red CI) when the gate reports one or more blockers; warnings
-# do not fail the build (the gate exits 0 on "publishable").
+# The step fails (red CI) when the checks report one or more blockers; warnings
+# do not fail the build (the checks exit 0 on "publishable").
 #
 # By default the run page is now self-contained: a GitHub Step Summary shows
 # the verdict and full findings list (no need to open raw logs), and
@@ -46,11 +46,11 @@
 # produce at intake. The Step Summary carries its tables too. All of this is
 # purely additive -- set report-dir: "" and/or write-summary: "false" to opt
 # back out; target/args/python-version/
-# install-poppler and the exit-code gate contract are unchanged from earlier
+# install-poppler and the exit-code contract are unchanged from earlier
 # releases.
 
 name: "OASIS pub-check"
-description: "Run the OASIS publication acceptance gate (oasis-pub-check) against a TC package or stage directory."
+description: "Run the OASIS publication acceptance checks (oasis-pub-check) against a TC package or stage directory."
 author: "OASIS Open"
 
 branding:
@@ -66,11 +66,11 @@ inputs:
     required: false
     default: ""
   python-version:
-    description: "Python version to run the gate on."
+    description: "Python version to run the checks on."
     required: false
     default: "3.x"
   install-poppler:
-    description: "Install poppler-utils (pdftotext/pdffonts) for the optional PDF cross-checks. Ignored on non-Linux runners; the gate runs without it either way."
+    description: "Install poppler-utils (pdftotext/pdffonts) for the optional PDF cross-checks. Ignored on non-Linux runners; the checks run without it either way."
     required: false
     default: "true"
   report-dir:
@@ -82,7 +82,7 @@ inputs:
     required: false
     default: "true"
   publish-branch:
-    description: "Branch of the calling repository that receives this run's report files (PDF, Markdown, HTML, JSON, text) under <ref>/<slug>/, so the summary and a ::notice annotation can link them as full https://github.com URLs. Created as an orphan branch on first use; no other branch is touched. Needs `permissions: contents: write`; without it (or on a pull request from a fork) nothing is pushed, the summary says why, and the gate is unaffected. Set to '' to turn publishing off."
+    description: "Branch of the calling repository that receives this run's report files (PDF, Markdown, HTML, JSON, text) under <ref>/<slug>/, so the summary and a ::notice annotation can link them as full https://github.com URLs. Created as an orphan branch on first use; no other branch is touched. Needs `permissions: contents: write`; without it (or on a pull request from a fork) nothing is pushed, the summary says why, and the checks are unaffected. Set to '' to turn publishing off."
     required: false
     default: "pubcheck-reports"
   publish-token:
@@ -90,7 +90,7 @@ inputs:
     required: false
     default: ${{ github.token }}
   fail-on-blockers:
-    description: "Whether a blocker fails the step. 'true' (default) is right for a working draft. 'false' runs report-only: blockers are reported, written and published exactly as before and raised as a ::warning annotation, and the step passes. Use it for a document that cannot change, such as a published OASIS Standard, or while a TC works through inherited findings. A target the gate cannot read (exit code 2) fails the step either way. The exit-code, blockers and warnings outputs are unchanged."
+    description: "Whether a blocker fails the step. 'true' (default) is right for a working draft. 'false' runs report-only: blockers are reported, written and published exactly as before and raised as a ::warning annotation, and the step passes. Use it for a document that cannot change, such as a published OASIS Standard, or while a TC works through inherited findings. A target the checks cannot read (exit code 2) fails the step either way. The exit-code, blockers and warnings outputs are unchanged."
     required: false
     default: "true"
   summary-title:
@@ -136,10 +136,10 @@ outputs:
     description: "The PDF URL pinned to the report commit's SHA, so the link for this run never changes when later runs replace the folder. Empty when nothing was published or no PDF was produced."
     value: ${{ steps.publish.outputs.report_url_pdf_pinned }}
   report-publish-note:
-    description: "'published', or the reason the report files were not published (publishing off, a fork pull request, a token without contents: write). Empty when the gate exits 2 (the target could not be read): nothing is published."
+    description: "'published', or the reason the report files were not published (publishing off, a fork pull request, a token without contents: write). Empty when the checks exit 2 (the target could not be read): nothing is published."
     value: ${{ steps.publish.outputs.report_publish_note }}
   report-validation-pdf:
-    description: "Path to the same Validation Report as an A4 landscape PDF, printed with headless Chrome (light theme, header rows repeated on every page, title and Page X of Y in the footer). Empty if report-dir was set to '', the report could not be rendered, or no Chrome/Chromium was available; a missing PDF is a warning and never changes the gate's result."
+    description: "Path to the same Validation Report as an A4 landscape PDF, printed with headless Chrome (light theme, header rows repeated on every page, title and Page X of Y in the footer). Empty if report-dir was set to '', the report could not be rendered, or no Chrome/Chromium was available; a missing PDF is a warning and never changes the checks' result."
     value: ${{ steps.pubcheck.outputs.report_validation_pdf }}
 
 runs:
@@ -153,15 +153,15 @@ runs:
     - name: Install pdftotext (optional PDF cross-check)
       if: inputs.install-poppler == 'true' && runner.os == 'Linux'
       shell: bash
-      # Non-fatal: the gate soft-degrades when pdftotext/pdffonts are absent, so
+      # Non-fatal: the checks soft-degrade when pdftotext/pdffonts are absent, so
       # a package-manager hiccup must never fail the build.
       run: sudo apt-get update && sudo apt-get install -y poppler-utils || echo "poppler-utils unavailable; PDF cross-checks will be skipped"
 
-    - name: Run the OASIS publication gate
+    - name: Run the OASIS publication checks
       id: pubcheck
       shell: bash
       # continue-on-error lets the remaining internal steps (summary, report
-      # files) run even when the gate finds blockers; the final "Enforce gate
+      # files) run even when the checks find blockers; the final "Enforce the check
       # result" step below re-raises the SAME exit code captured here, so the
       # step the caller sees is unaffected -- it still fails on a blocker,
       # exactly as every release before this one.
@@ -191,7 +191,7 @@ runs:
 
         # Exit 2: the target could not be read (almost always a wrong path).
         # There is no JSON to count or render, so say so once, plainly, and
-        # stop here; the "Enforce gate result" step still fails with 2.
+        # stop here; the "Enforce the check result" step still fails with 2.
         if [ "$exit_code" = 2 ]; then
           echo "::error::oasis-pub-check could not read the target '${TARGET}' (exit code 2). The target path is relative to the repository root and case-sensitive."
           echo "exit_code=2" >> "$GITHUB_OUTPUT"
@@ -213,7 +213,7 @@ runs:
         # warnings and to emit report.json. Idempotent if the caller's own
         # args already included --json. Its own exit code is not used --
         # exit_code above (the primary run) remains the sole source of truth
-        # for the gate contract.
+        # for the exit-code contract.
         python3 "$ACTION_PATH/pub-check/oasis_pub_check.py" "$TARGET" $EXTRA_ARGS --json \
           > "$RUNNER_TEMP/oasis-pub-check.json"
 
@@ -226,7 +226,7 @@ runs:
 
         # The full Validation Report (every check class and condition, not
         # only the findings), rendered from the --json run above. A rendering
-        # failure is a warning, never a change to the gate's exit code.
+        # failure is a warning, never a change to the checks' exit code.
         # Repeated calls in one job share RUNNER_TEMP: clear the previous call's copy.
         rm -f "$RUNNER_TEMP/pubcheck-validation.md" "$RUNNER_TEMP/pubcheck-validation.html" \
           "$RUNNER_TEMP/pubcheck-validation.pdf"
@@ -284,7 +284,7 @@ runs:
         echo "oasis-pub-check exit code: ${exit_code}"
 
     # Commit this run's report files to publish-branch and state their full
-    # URLs. Never fails the gate: a reason is recorded instead. Skipped when
+    # URLs. Never fails the checks: a reason is recorded instead. Skipped when
     # the target could not be read (exit 2): there is no report to publish,
     # and every URL output and the publish note stay empty.
     - name: Publish the report files
@@ -300,7 +300,7 @@ runs:
       run: |
         # A matrix of calls shares RUNNER_TEMP: clear the previous call's block.
         rm -f "$RUNNER_TEMP/pubcheck-links.md"
-        # The files, as the gate step left them in RUNNER_TEMP.
+        # The files, as the checks step left them in RUNNER_TEMP.
         mkdir -p "$RUNNER_TEMP/pubcheck-publish"
         rm -f "$RUNNER_TEMP/pubcheck-publish/"*
         for f in oasis-pub-check.json oasis-pub-check.txt pubcheck-validation.md \
@@ -361,7 +361,7 @@ runs:
             || echo "::warning::validation tables could not be added to the step summary"
         fi
 
-    - name: Enforce gate result
+    - name: Enforce the check result
       if: always()
       shell: bash
       env:

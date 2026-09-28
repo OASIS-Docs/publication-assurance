@@ -10,20 +10,22 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
   <a href="LICENSE"><img alt="Code: Apache-2.0" src="https://img.shields.io/badge/code-Apache--2.0-2c4a8a"></a>
   <a href="NOTICE"><img alt="Criteria prose: OASIS verbatim-only" src="https://img.shields.io/badge/criteria_prose-OASIS_verbatim--only-446CAA"></a>
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776ab">
-  <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/gate_dependencies-stdlib_only-2f9e44">
+  <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/dependencies-stdlib_only-2f9e44">
   <img alt="Checks: 178 individual, 61 classes" src="https://img.shields.io/badge/checks-178_individual_%C2%B7_61_classes-f08c00">
   <img alt="Regression corpus: 12 packages" src="https://img.shields.io/badge/regression_corpus-12_packages-6741d9">
 </p>
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-**Bringing the gate into a TC repository: [docs/ADOPTING.md](docs/ADOPTING.md)**, three steps and about five minutes.
+**Setup guide for TC repositories: [docs/ADOPTING.md](docs/ADOPTING.md)** (three steps, about five minutes)
 
-Before OASIS publishes a work product to `docs.oasis-open.org`, TC
-Administration runs it through the publication acceptance tests.
-`oasis-pub-check` is those tests, packaged to run in your own CI. Run them
-before your TC votes, and fix what they find while the document is still
-yours to change.
+Before a TC Specification is published to `docs.oasis-open.org`, it is run
+through the publication acceptance tests. This repository contains the
+actively maintained, latest set of those tests (`oasis-pub-check`). For TC
+convenience, it also provides example GitHub workflows to add to a TC's own
+repository, so the TC can validate a draft before submitting it to OASIS for
+publication. Run them before your TC votes, and fix what they find while the
+document is still yours to change.
 
 ---
 
@@ -37,7 +39,7 @@ target could not be read. Two ways to run it:
 ### 1. On your machine
 
 ```bash
-git clone --depth 1 --branch v1.11.1 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.12.0 https://github.com/OASIS-Docs/publication-assurance
 python3 publication-assurance/pub-check/oasis_pub_check.py <package>
 ```
 
@@ -61,7 +63,7 @@ Work Product Manifest File.
 
 [docs/ADOPTING.md](docs/ADOPTING.md#quick-start) has the steps in full with
 the workflow to copy, how to read the report, and the reference: every
-input and output, Markdown rendering before the gate, report-only runs,
+input and output, Markdown rendering before the checks, report-only runs,
 several documents in one repository, fork pull requests, pinning and
 upgrades, and troubleshooting.
 
@@ -81,13 +83,14 @@ URL shapes and what happens when nothing is published:
 
 | File | Open it when |
 |---|---|
-| **[docs/ADOPTING.md](docs/ADOPTING.md)** | TC setting the gate up in its own repository: the three-step quick start, reading the report, and every option. |
-| **[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit gates, a worked example. **Start here for the review model.** |
+| **[docs/ADOPTING.md](docs/ADOPTING.md)** | TC setting the checks up in its own repository: the three-step quick start, reading the report, and every option. |
+| **[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit checks, a worked example. **Start here for the review model.** |
 | **[pub-check/README.md](pub-check/README.md)** | The class-level summary of what it checks, with severities and the regression corpus. |
 | **[pub-check/CHECKS.md](pub-check/CHECKS.md)** | A check fired and you want the exact one. Full catalog, generated from the code. |
 | **[TRANSFORMS.md](TRANSFORMS.md)** | Building from Markdown and want the pipeline command by command. |
-| **[docs/MARKDOWN-EDITION.md](docs/MARKDOWN-EDITION.md)** | A Markdown edition of a DocBook specification, as one more output of its source: one workflow step, checked word for word against the published HTML, with HTML and PDF. |
-| **[harvest/README.md](harvest/README.md)** | You run the gate often and want each run's records turned into candidate improvements to the gate. |
+| **[docs/MARKDOWN-EDITION.md](docs/MARKDOWN-EDITION.md)** | A Markdown edition of a DocBook specification, as one more output of its source (the `docbook-markdown` action). |
+| **[docs/CONVERT-AND-VERIFY.md](docs/CONVERT-AND-VERIFY.md)** | The whole check of a converted specification in one copy-me GitHub workflow: convert, render, verify the HTML and PDF against the published originals, run the OASIS publication checks, build page pairs for review. |
+| **[harvest/README.md](harvest/README.md)** | You run the publication checks often and want each run's records turned into candidate improvements to the checks. |
 | **[pub-check/AUTHORITIES.md](pub-check/AUTHORITIES.md)** | The OASIS rule behind a check, quoted verbatim with its source. The criterion-to-clause map. |
 | **[examples/eox-core-v1.0-csd01/](examples/eox-core-v1.0-csd01/README.md)** | A real Validation Report from a live publication. |
 
@@ -142,14 +145,14 @@ take the catalog's word for any of it, and neither does CI:
 a verbatim substring of the page it cites, and every crosswalk entry against the
 tool's own registry, on every run.
 
-## Gate position: validation and audit
+## Where the checks sit: validation and audit
 
 ![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=178)
 
 Your TC runs oasis-pub-check in its own CI to check all 178 conditions, each reported as the value the tool pulled from the
 package set against the value it was compared to, in full. TC Administration
 re-runs the identical code at intake (checklist step 4b) and wraps it with the
-15 mandatory audit gates only a human or a live check can do: byte identity
+15 mandatory audit checks only a human or a live check can do: byte identity
 against the published site, render class against the TC's own precedent, the
 live roster, directory index chains, announcement channels, and an independent
 adversarial verifier. Both reports are filed to the TC's ticket and the
@@ -158,8 +161,8 @@ internal audit record.
 If the package includes a `manifest.json` conforming to
 [pub-check/manifest-schema.json](pub-check/manifest-schema.json) (per file:
 sha256 and role; plus source commit and tool versions), OASIS intake can verify
-it directly: the TC's build records what it produced, the gate checks it against
-the criteria, and the manifest lets every later step verify both.
+it directly: the TC's build records what it produced, the publication checks
+verify it against the criteria, and the manifest lets every later step verify both.
 
 ## Interoperating with nide
 
@@ -206,17 +209,18 @@ publication-assurance/
 │   ├── build.sh                     #   resolve, prebuild, convert, copy images, verify
 │   ├── docbook2md.py                #   the converter (stdlib)
 │   └── profiles/dmlex/              #   what is specific to one specification (DMLex first)
-├── render/                          # Render, stage and gate one Markdown specification
+├── render/                          # Render, stage and check one Markdown specification
 │   ├── render.sh                    #   step 1, step 2's print styles, Chrome, contents pages
-│   │                                #   (.github/src/pipeline/toc_pages.py), gate
+│   │                                #   (.github/src/pipeline/toc_pages.py), check the package
 │   ├── footer.py / print_pdf.mjs    #   the published PDF footer, read from the document
 │   ├── compare.mjs                  #   published and rendered HTML side by side at anchors
 │   └── review_pairs.py              #   PDF page pairs for a reviewer, a planted fault, the grade
-├── harvest/                         # Learn from every run: records in, candidate gate changes out
-│   └── harvest.py                   #   re-gates recorded packages, reads audits and adjudications
-├── docs/ADOPTING.md                 # Adoption guide: the gate in a TC's own repository
+├── harvest/                         # Learn from every run: records in, candidate check improvements out
+│   └── harvest.py                   #   re-runs the checks on recorded packages, reads audits and adjudications
+├── docs/ADOPTING.md                 # Adoption guide: the publication checks in a TC's own repository
 ├── docs/MARKDOWN-EDITION.md         # A Markdown edition of a DocBook specification (the docbook-markdown action)
-├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all gates
+├── docs/CONVERT-AND-VERIFY.md       # Convert, render, verify and check in one GitHub workflow, with screenshots
+├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all checks
 ├── examples/                        # Worked example + the regression corpus
 │   ├── consumer-workflow.yml        #   the drop-in TC workflow (copy this)
 │   ├── consumer-workflow-matrix.yml #   a multi-package caller that uploads the reports
@@ -238,11 +242,11 @@ publication-assurance/
 │   ├── test_verify_pdf.py           #   the PDF verifier: unnumbered contents, list letters, footers
 │   ├── test_review_pairs.py         #   page pairs, and a grader invented lines cannot pass
 │   ├── test_docbook_to_markdown.py  #   DMLex DocBook to the committed Markdown, byte for byte
-│   ├── test_render.py               #   DMLex rendered: footer, contents pages, gate, compare
+│   ├── test_render.py               #   DMLex rendered: footer, contents pages, check, compare
 │   ├── test_step1_fidelity.py       #   step 1's own HTML of DMLex against the published page
 │   ├── test_toc_pages.py            #   contents page numbers against where headings print
 │   ├── test_html_code_sync.py       #   code blocks published unchanged from the Markdown
-│   ├── test_pdf_toc_pages.py        #   the gate's contents page-number check
+│   ├── test_pdf_toc_pages.py        #   pub-check's contents page-number check
 │   ├── test_stage_vocabulary.py     #   every accepted stage token has a source
 │   ├── test_harvest.py              #   run records in, candidates out
 │   └── fixtures/                    #   hand-built defect trees (the corpus supplies the rest)
@@ -255,7 +259,7 @@ publication-assurance/
 │   ├── styles/                      # OASIS markdown-styles CSS lineage (v1.1 → v1.8.1)
 │   └── workflows/                   # ci (this repo's own test suite), step_1 (MD→HTML),
 │                                    #   step_2 (HTML→PDF), step_3 (zip), pub-check (the
-│                                    #   gate), make-manifest (the release manifests)
+│                                    #   publication checks), make-manifest (the release manifests)
 ├── LICENSE                          # Apache-2.0 (software tier)
 └── NOTICE                           # The three-tier IP statement
 ```
@@ -264,7 +268,7 @@ publication-assurance/
 
 ## Running the tests
 
-A defect in the gate mis-grades somebody's publication, so `tests/` is the
+A defect in the checks mis-grades somebody's publication, so `tests/` is the
 regression net: a fixture per fixed defect, plus smoke coverage over the CLI
 contract that `gate.py`, the composite action and the publication runbook
 depend on.
@@ -300,7 +304,7 @@ poppler (`pdftotext`/`pdffonts`, optional, for the PDF cross-checks)
 Three tiers, stated precisely in [NOTICE](NOTICE):
 
 1. **Software** (the document-processing pipeline under `.github/` and the
-   pub-check gate under `pub-check/`) is licensed under the
+   publication checks under `pub-check/`) is licensed under the
    [Apache License, Version 2.0](LICENSE).
    Copyright OASIS Open. Authored by Michael Coletta, Technical Advisor to
    OASIS Open. Every source file carries an SPDX header.
@@ -321,7 +325,7 @@ The OASIS name and logo are trademarks of OASIS Open.
 
 **Repository maintained by**: Michael Coletta, Technical Advisor, OASIS Open  
 **Contact**: michael.coletta@oasis-open.org (OASIS TC Administration)  
-**Documentation**: [PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md) for the full guide, [TRANSFORMS.md](TRANSFORMS.md) for the pipeline, [pub-check/](pub-check/) for the publication gate, individual specification folders for spec-level detail
+**Documentation**: [PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md) for the full guide, [TRANSFORMS.md](TRANSFORMS.md) for the pipeline, [pub-check/](pub-check/) for the publication checks, individual specification folders for spec-level detail
 
 ---
 

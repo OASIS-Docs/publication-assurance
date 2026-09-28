@@ -48,7 +48,7 @@ on a document that will not bounce back for filename fixes, dead anchors, or
 stale front matter.
 
 **Layer 2 is the publication audit.** When TC Administration publishes your
-package, the publication event itself is audited: 15 mandatory gates, each
+package, the publication event itself is audited: 15 mandatory checks, each
 requiring recorded evidence, covering the things no package-level tool can
 see:
 
@@ -80,7 +80,7 @@ round on a real publication. Four of the correction rounds behind the set:
 - a self-referential symlink that a deploy materialized into 41 nested
   directories
 
-The gate is the accumulated record of those correction rounds, plus the
+The check set is the accumulated record of those correction rounds, plus the
 publication pipeline's own lint registry, calibrated against a regression
 corpus of 12 archived CSAF and CSAF-CVRF packages in their original received
 form.
@@ -131,14 +131,14 @@ and gets the Word render-fidelity checks instead. An ODT package carries the
 publishes. A package authored in DocBook/XML or LaTeX runs the
 format-agnostic output and package suites.
 
-## Layer 2: the 15 audit gates
+## Layer 2: the 15 audit checks
 
 The publication audit is recorded as a machine-validated JSON record; the
 human-readable report is rendered from it. The verdict is computed from the
-gate results and findings. These are the
-gates, in the order they appear in every audit record:
+check results and findings. These are the
+checks, in the order they appear in every audit record:
 
-| Gate | What it verifies |
+| Check | What it verifies |
 |---|---|
 | 1 | GitHub truth: the bytes on the live site equal the pushed repository HEAD |
 | 1a | Live equals GitHub: any HTML difference (for example CDN rewrites) is diffed and classified |
@@ -153,10 +153,10 @@ gates, in the order they appear in every audit record:
 | 6d | The public review is discoverable in the open-reviews feed |
 | 6e | The www news post is live, when the stage warrants one |
 | 6f | The TCADMIN ticket carries the complete verified-link record |
-| 7 | Independent adversarial verifier: a fresh reviewer with a mandate to refute the publication. The audit is not done until this gate passes |
+| 7 | Independent adversarial verifier: a fresh reviewer with a mandate to refute the publication. The audit is not done until this check passes |
 | 8 | Visual inspection: the live cover page and every directory listing are screenshotted and reviewed |
 
-Gates that do not apply to a given stage (a news post for an early-stage
+Checks that do not apply to a given stage (a news post for an early-stage
 draft, for example) are recorded NA with a stated reason.
 
 ## The two reports
@@ -172,8 +172,8 @@ record), just not the formatted document:
   compared against, and the result. A condition that could not be evaluated
   (no network, no `pdftotext`, no manifest present) reports NA with the
   reason.
-- **The Publication Audit Report** carries the 15-gate table with the
-  recorded evidence for each gate, any findings with severity and impact,
+- **The Publication Audit Report** carries a table of the 15 audit checks with
+  the recorded evidence for each, any findings with severity and impact,
   and the computed verdict. This one is a TC Administration operational
   record of the publication event; you receive it on your ticket.
 
@@ -240,7 +240,7 @@ the files your build produced.
    publication-clean package.
 3. Include the `--json` record (or the exit code) with your submission; TC
    Administration renders and files the formal Validation Report at intake.
-4. TC Administration re-runs the identical gate at intake, publishes, audits
+4. TC Administration re-runs the identical checks at intake, publishes, audits
    the publication event, and files both reports to your ticket.
 
 Questions, false positives, or checks you think are missing:

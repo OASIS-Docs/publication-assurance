@@ -1,0 +1,236 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
+#
+# Convert, verify, render and check one OASIS Markdown specification: every
+# step of docs/CONVERT-AND-VERIFY.md, as one job a TC repository calls. The copy-me
+# caller is examples/converting-workflow.yml.
+#
+#   1. Convert   (with `docbook`) DocBook to Markdown, and fail if the
+#                committed Markdown is not what the conversion produces
+#   2. Render    HTML and PDF, staged at their docs.oasis-open.org path
+#   3. Verify    the rendered HTML against the published HTML
+#   4. Verify    the rendered PDF against the published PDF
+#   5. Check     the OASIS publication acceptance criteria
+#   6. Pages     page pairs for a review, with a planted fault (an artifact;
+#                the review itself needs a reviewer, see render/README.md)
+#
+# Steps 1, 3 and 4 run only when their inputs are given: a new draft with no
+# published original is rendered and checked. A published original that cannot
+# be fetched (Cloudflare, an outage) is reported as a warning, not a failure;
+# a difference from it fails the job.
+
+name: Convert and verify
+
+on:
+  workflow_call:
+    inputs:
+      markdown:
+        description: Directory holding the specification's .md and its figures
+        required: true
+        type: string
+      schemas:
+        description: Directory of the schemas it cites, staged as <stage>/schemas ("-" for none)
+        required: false
+        type: string
+        default: "-"
+      docbook:
+        description: DocBook source directory; when given, the Markdown must be what converting it produces
+        required: false
+        type: string
+        default: ""
+      profile:
+        description: Converter profile, a name shipped with the release (dmlex) or a directory in your repository
+        required: false
+        type: string
+        default: ""
+      published-html:
+        description: URL of the published HTML to verify against
+        required: false
+        type: string
+        default: ""
+      published-pdf:
+        description: URL of the published PDF to verify against
+        required: false
+        type: string
+        default: ""
+      fail-on-blockers:
+        description: Fail the job when the OASIS publication checks find a blocker
+        required: false
+        type: boolean
+        default: false
+      review-sample:
+        description: Random pages added to the page pairs (0 for no pairs)
+        required: false
+        type: number
+        default: 30
+      pa-ref:
+        description: The publication-assurance release whose tools run; leave as is
+        required: false
+        type: string
+        default: v1.12.0
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PANDOC_VERSION: 3.8.2.1
+
+jobs:
+  convert-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check out the OASIS tools
+        uses: actions/checkout@v5
+        with:
+          repository: OASIS-Docs/publication-assurance
+          ref: ${{ inputs.pa-ref }}
+          path: _pa
+
+      - name: Install pandoc, poppler, the converter's tools and Python packages
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q poppler-utils libxml2-utils graphviz m4
+          curl -fsSL -o "$RUNNER_TEMP/pandoc.deb" \
+            "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-1-amd64.deb"
+          sudo dpkg -i "$RUNNER_TEMP/pandoc.deb"
+          python3 -m pip install --quiet beautifulsoup4 pillow
+          pandoc --version | head -1
+          google-chrome --version
+
+      - name: Resolve the profile's allow files
+        id: profile
+        env:
+          PROFILE: ${{ inputs.profile }}
+        run: |
+          dir=""
+          if [ -n "$PROFILE" ]; then
+            if [ -d "$PROFILE" ]; then dir=$(cd "$PROFILE" && pwd)
+            elif [ -d "_pa/converters/docbook-to-markdown/profiles/$PROFILE" ]; then
+              dir=$(cd "_pa/converters/docbook-to-markdown/profiles/$PROFILE" && pwd)
+            else echo "::error::profile '$PROFILE' is neither a directory here nor one shipped with ${{ inputs.pa-ref }}"; exit 1; fi
+          fi
+          echo "dir=$dir" >> "$GITHUB_OUTPUT"
+          for f in allow allow-rendered allow-pdf; do
+            p="$dir/$f.json"; [ -n "$dir" ] && [ -f "$p" ] || p=""
+            echo "${f//-/_}=$p" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: 1. Convert, and check the committed Markdown is current
+        if: inputs.docbook != ''
+        env:
+          DOCBOOK: ${{ inputs.docbook }}
+          MARKDOWN: ${{ inputs.markdown }}
+          PUBLISHED_HTML: ${{ inputs.published-html }}
+          PROFILE_DIR: ${{ steps.profile.outputs.dir }}
+        run: |
+          set -o pipefail
+          [ -n "$PROFILE_DIR" ] || { echo "::error::converting DocBook needs a profile"; exit 1; }
+          url=""
+          if [ -n "$PUBLISHED_HTML" ]; then
+            if curl -fsS -o /dev/null "$PUBLISHED_HTML"; then url=$PUBLISHED_HTML
+            else echo "::warning::The published HTML could not be fetched; converting without verifying (step 3 checks it too)."; fi
+          fi
+          _pa/converters/docbook-to-markdown/build.sh --profile "$PROFILE_DIR" "$DOCBOOK" "$RUNNER_TEMP/converted" $url
+          md=$(ls "$RUNNER_TEMP"/converted/*.md)
+          git diff --no-index --exit-code "$MARKDOWN/$(basename "$md")" "$md" \
+            || { echo "::error::$MARKDOWN/$(basename "$md") is not what converting $DOCBOOK produces; commit the converted file"; exit 1; }
+
+      - name: 2. Render HTML and PDF
+        id: render
+        env:
+          CHROME: google-chrome
+          PUBCHECK: '0'
+        run: |
+          _pa/render/render.sh "${{ inputs.markdown }}" "${{ inputs.schemas }}" _publication
+          md=$(find _publication -name '*.md' ! -name README.md | head -1)
+          echo "stage=$(dirname "$md")" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$md" .md)" >> "$GITHUB_OUTPUT"
+
+      - name: 3. Verify against the published HTML
+        if: inputs.published-html != ''
+        env:
+          STAGE: ${{ steps.render.outputs.stage }}
+          NAME: ${{ steps.render.outputs.name }}
+          URL: ${{ inputs.published-html }}
+          A1: ${{ steps.profile.outputs.allow }}
+          A2: ${{ steps.profile.outputs.allow_rendered }}
+        run: |
+          set -o pipefail
+          if ! curl -fsSL -o "$RUNNER_TEMP/published.html" "$URL"; then
+            echo "::warning::The published HTML could not be fetched; the HTML comparison did not run."; exit 0; fi
+          args=(); for a in "$A1" "$A2"; do [ -n "$a" ] && args+=(--allow "$a"); done
+          status=0
+          python3 _pa/verify/verify_md.py "$STAGE/$NAME.md" "$URL" --rendered "$STAGE/$NAME.html" \
+            "${args[@]}" --json "$STAGE-verify-html.json" | grep -v '^ACCEPTED' || status=$?
+          [ -f "$STAGE-verify-html.json" ] && python3 _pa/verify/annotate.py html "$STAGE-verify-html.json"
+          exit $status
+
+      - name: 4. Verify the PDF against the published PDF
+        if: inputs.published-pdf != ''
+        env:
+          STAGE: ${{ steps.render.outputs.stage }}
+          NAME: ${{ steps.render.outputs.name }}
+          URL: ${{ inputs.published-pdf }}
+          A3: ${{ steps.profile.outputs.allow_pdf }}
+        run: |
+          set -o pipefail
+          if ! curl -fsSL -o "$RUNNER_TEMP/published.pdf" "$URL"; then
+            echo "::warning::The published PDF could not be fetched; the PDF comparison did not run."; exit 0; fi
+          args=(); [ -n "$A3" ] && args+=(--allow "$A3")
+          status=0
+          python3 _pa/verify/verify_pdf.py "$STAGE/$NAME.pdf" "$RUNNER_TEMP/published.pdf" \
+            "${args[@]}" --json "$STAGE-verify-pdf.json" | grep -v '^ACCEPTED' || status=$?
+          [ -f "$STAGE-verify-pdf.json" ] && python3 _pa/verify/annotate.py pdf "$STAGE-verify-pdf.json"
+          exit $status
+
+      - name: 5. OASIS publication checks
+        uses: ./_pa
+        with:
+          target: ${{ steps.render.outputs.stage }}
+          fail-on-blockers: ${{ inputs.fail-on-blockers }}
+          report-dir: ${{ steps.render.outputs.stage }}-pubcheck
+          summary-title: ${{ steps.render.outputs.name }}
+          # the reports go into the -rendered artifact; nothing is pushed to the repository
+          publish-branch: ''
+
+      - name: 6. Page pairs for a review
+        if: always() && inputs.published-pdf != '' && inputs.review-sample > 0 && steps.render.outcome == 'success'
+        env:
+          STAGE: ${{ steps.render.outputs.stage }}
+          NAME: ${{ steps.render.outputs.name }}
+        run: |
+          [ -f "$RUNNER_TEMP/published.pdf" ] || { echo "No published PDF; no page pairs."; exit 0; }
+          # the checks' action sets up its own Python; give that one Pillow too
+          python3 -m pip install --quiet pillow
+          python3 _pa/render/review_pairs.py make "$STAGE/$NAME.pdf" "$RUNNER_TEMP/published.pdf" \
+            _page-review/pairs --key _page-review-key/key.json --sample ${{ inputs.review-sample }}
+
+      - name: Upload the rendered package and reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.render.outputs.name || 'package' }}-rendered
+          path: |
+            _publication
+          if-no-files-found: warn
+
+      - name: Upload the page pairs (give PROMPT.md and the images to a reviewer)
+        if: always() && hashFiles('_page-review/pairs/PROMPT.md') != ''
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.render.outputs.name }}-page-pairs
+          path: _page-review/pairs
+
+      - name: Upload the page-review key (keep it from the reviewer; grade with it)
+        if: always() && hashFiles('_page-review-key/key.json') != ''
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ steps.render.outputs.name }}-page-review-key
+          path: _page-review-key

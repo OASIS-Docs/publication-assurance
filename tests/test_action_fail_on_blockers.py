@@ -21,7 +21,7 @@ from conftest import REPO_ROOT
 def _enforce():
     action = yaml.safe_load((REPO_ROOT / "action.yml").read_text())
     assert action["inputs"]["fail-on-blockers"]["default"] == "true"
-    return next(s["run"] for s in action["runs"]["steps"] if s.get("name") == "Enforce gate result")
+    return next(s["run"] for s in action["runs"]["steps"] if s.get("name") == "Enforce the check result")
 
 
 def _run(exit_code, fail_on_blockers, blockers="5"):

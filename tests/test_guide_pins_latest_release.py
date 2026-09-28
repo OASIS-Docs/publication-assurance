@@ -16,9 +16,11 @@ import re
 from conftest import REPO_ROOT
 
 PINNED = ["docs/ADOPTING.md", "docs/MARKDOWN-EDITION.md", "README.md", "examples/consumer-workflow.yml", "examples/docbook-markdown-workflow.yml",
-          "examples/consumer-workflow-matrix.yml", "action.yml"]
+          "examples/consumer-workflow-matrix.yml", "action.yml", "examples/converting-workflow.yml",
+          ".github/workflows/convert-and-verify.yml", "docs/CONVERT-AND-VERIFY.md"]
 PIN = re.compile(r"publication-assurance(?:/docbook-markdown)?@(v\d+\.\d+\.\d+)|--branch (v\d+\.\d+\.\d+)"
-                 r"|PA_REF: (v\d+\.\d+\.\d+)|refs/tags/(v\d+\.\d+\.\d+)|`@(v\d+\.\d+\.\d+)`")
+                 r"|PA_REF: (v\d+\.\d+\.\d+)|refs/tags/(v\d+\.\d+\.\d+)|`@(v\d+\.\d+\.\d+)`"
+                 r"|convert-and-verify\.yml@(v\d+\.\d+\.\d+)|default: (v\d+\.\d+\.\d+)")
 NOTE = "in the release after v1.5.0"
 
 
