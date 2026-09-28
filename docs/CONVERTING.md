@@ -54,9 +54,9 @@ DMLex source that are for the TC to decide:
 
 ![The results: the HTML and PDF match their published originals; the checks report the source's blockers](images/converting/3-results.png)
 
-A difference from the published original fails the run, and its log (signed
-in, open the job, then the step) prints every difference with the words
-around it.
+A difference from the published original fails the run. Its log prints
+every difference with the words around it; to read it, sign in, open the
+job, then open the step.
 
 **4. Download what was produced.** At the foot of the run's page:
 
@@ -73,8 +73,9 @@ The rendered PDF carries the OASIS footer and numbers its contents:
 ![A contents page of the rendered DMLex PDF, every entry numbered](images/converting/5-contents-page.png)
 
 and a page pair puts the published page (left) beside the rendered one
-(right). This one shows a fault in the published original: `csd04.xml`
-printed into two headings.
+(right). This one shows a fault in the published original: the headings
+F.1.2.1 and F.1.2.2 each carry a leaked file name, `csd04.xml` and
+`csd03.xml`.
 
 ![A page pair: published on the left, rendered on the right](images/converting/6-page-pair.png)
 
@@ -84,9 +85,9 @@ uncomment `fail-on-blockers: true` so a new blocker fails the run.
 
 ## Command reference
 
-The workflow runs the commands below. They are here to run a step on a
-laptop, and to show what each step checks. Every command is the one that
-converted DMLex.
+The workflow runs the commands below. They are here so you can run a step
+on your own machine, and to show what each step checks. Every command is
+the one that converted DMLex.
 
 | Step | Tool | You get |
 |---|---|---|

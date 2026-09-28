@@ -17,7 +17,7 @@
 # Leave out the published-* lines for a new draft that has no published
 # original: it is then rendered and checked.
 #
-# The walkthrough, and what each step checks, is docs/CONVERTING.md.
+# docs/CONVERTING.md has the walkthrough and explains what each step checks.
 
 name: Convert and verify
 
