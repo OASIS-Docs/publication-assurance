@@ -19,8 +19,8 @@ The three document-transform workflows in this repository (`step_1`, `step_2`,
 `step_3`) are thin CI wrappers. Each one wraps a small number of plain
 commands. This page lists those commands so the transforms can be read and run
 locally with no GitHub Actions involved. The other three workflows (`ci`,
-`pub-check`, `make-manifest`) run the test suite, the gate and the manifest
-emitter, and are documented in the README.
+`pub-check`, `make-manifest`) run the test suite, the publication checks and
+the manifest emitter, and are documented in the README.
 
 The rest of each transform workflow is CI plumbing and does not change the
 document:
@@ -39,7 +39,7 @@ Before these, a specification published in DocBook can be converted to
 Markdown and checked word for word against its publication
 (`converters/docbook-to-markdown/build.sh`, `verify/verify_md.py`), and after
 them `render/render.sh` runs Stage 1 and Stage 2's preprocessor for one
-document, prints the PDF in Chrome and gates it. See
+document, prints the PDF in Chrome and checks it. See
 [Conversion and local rendering](#conversion-and-local-rendering).
 
 ## Stage 1: Markdown to HTML
@@ -133,7 +133,7 @@ When the document has a table of contents (`id="table-of-contents"`),
 heading's page from the printed PDF's named destinations (`pdfinfo -dests`),
 writes the page numbers with dot leaders into a copy of the HTML, and the PDF
 is printed again until no number moves. A published OASIS PDF numbers its
-contents; the gate's `pdf-toc-pages` check reports one that does not.
+contents; the `pdf-toc-pages` check reports one that does not.
 
 The preprocessor also removes any `<base href>` from the PDF copy, after
 making relative hyperlinks absolute against it, so stylesheets and images
@@ -182,7 +182,7 @@ since wkhtmltopdf writes none, from the page each heading is printed on:
 - found in order, after the contents pages.
 
 If the numbers cannot be read or do not settle in four passes, the PDF is
-printed unnumbered, and the gate's `pdf-toc-pages` check says so.
+printed unnumbered, and the `pdf-toc-pages` check says so.
 
 A note on renderers: wkhtmltopdf is what this repository's workflows run, but
 the production pipeline has since moved to headless Chrome print-to-PDF with
@@ -211,7 +211,7 @@ date.
 converters/docbook-to-markdown/build.sh --profile dmlex SPEC_DIR OUT_DIR PUBLISHED_URL
 # any Markdown edition against its published HTML, word for word
 python3 verify/verify_md.py SPEC.md PUBLISHED_URL --allow ALLOW.json --json report.json
-# render, stage at the docs.oasis-open.org path, gate
+# render, stage at the docs.oasis-open.org path, check
 render/render.sh MD_DIR SCHEMAS_DIR OUT_ROOT
 ```
 

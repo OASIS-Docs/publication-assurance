@@ -26,6 +26,34 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.12.0 - 2026-09-28
+
+MINOR: every step of the conversion guide runs as one GitHub workflow a TC
+copies, and the guide shows it with screenshots of a real run.
+
+- **`.github/workflows/convert-and-verify.yml`** (new, reusable): convert
+  from DocBook and fail if the committed Markdown is stale; render the HTML
+  and PDF; verify both against the published originals; run the OASIS
+  publication checks; build the page pairs for a review. The HTML and PDF
+  verdicts appear as one-line notices on the run's page. Uploads the rendered
+  package with its reports, the page pairs and the review key.
+- **`examples/converting-workflow.yml`** (new): the file a TC copies, with the
+  lines to edit marked. MColetta-OASIS/lexidma runs it for DMLex v1.0 OS and
+  v1.1 WD01.
+- **`verify/annotate.py`** (new): a verifier's JSON report as a GitHub notice
+  or error.
+- **`docs/CONVERT-AND-VERIFY.md`** (new): setting the workflow up in GitHub,
+  illustrated from a real DMLex run. It and `docs/MARKDOWN-EDITION.md` link
+  to each other: the `docbook-markdown` action (v1.11.0) produces a Markdown
+  edition; this workflow also checks the PDF, runs the publication checks and
+  prepares the page review.
+- **Wording**: the guides, examples, action and workflow say "the OASIS
+  publication checks" instead of "gate". The action's last step is now
+  named "Enforce the check result".
+- **Fix**: `render/review_pairs.py make` creates the folder for the key.
+
 ### Documentation
 
 - **docs/MARKDOWN-EDITION.md** replaces docs/CONVERTING.md. It presents the

@@ -185,6 +185,7 @@ def make(a):
         os.remove(os.path.join(tmp, f))
     os.rmdir(tmp)
     canary = next(p for p in order if 'planted' in p)
+    os.makedirs(os.path.dirname(os.path.abspath(a.key)), exist_ok=True)
     with open(a.key, 'w', encoding='utf-8') as f:
         json.dump({'pairs': order, 'planted_pair': canary['pair'], 'planted': canary['planted'],
                    'published': os.path.abspath(a.published), 'rendered': os.path.abspath(a.rendered)}, f, indent=1)
