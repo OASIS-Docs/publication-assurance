@@ -1,0 +1,42 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+#
+# DROP-IN: convert, verify, render and gate an OASIS Markdown specification.
+#
+# Copy this file to your repository as  .github/workflows/convert-and-verify.yml
+# and edit the lines under `with:` (the paths, the profile and the two
+# published URLs). Every push then:
+#   1. converts the DocBook source and fails if the committed Markdown is not
+#      what the conversion produces (leave `docbook` out if you write Markdown);
+#   2. renders the HTML and PDF, staged at their docs.oasis-open.org path;
+#   3. checks the HTML against the published HTML, word for word;
+#   4. checks the PDF against the published PDF: every word, the contents'
+#      page numbers, list letters, the footer;
+#   5. runs the OASIS publication gate;
+#   6. builds page pairs for a visual review (an artifact).
+# Leave out the published-* lines for a new draft that has no published
+# original: it is then rendered and gated.
+#
+# The walkthrough, and what each step checks, is docs/CONVERTING.md.
+
+name: Convert and verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  convert-and-verify:
+    uses: OASIS-Docs/publication-assurance/.github/workflows/convert-and-verify.yml@v1.11.0
+    with:
+      markdown: dmlex-v1.0/markdown                        # EDIT: directory of your .md and figures
+      schemas: dmlex-v1.0/specification/schemas            # EDIT: your schemas directory, or "-"
+      docbook: dmlex-v1.0/specification                    # EDIT: your DocBook source, or delete this line
+      profile: dmlex                                       # EDIT: a shipped profile name, or your profile's directory
+      published-html: https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html
+      published-pdf: https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.pdf
+      # fail-on-blockers: true     # once the TC has resolved what the gate reports
