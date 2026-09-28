@@ -86,7 +86,7 @@ runs:
         curl -fsSL -o "$RUNNER_TEMP/pandoc.deb" \
           "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-1-amd64.deb"
         sudo dpkg -i "$RUNNER_TEMP/pandoc.deb" >/dev/null
-        python3 -m pip install --quiet beautifulsoup4
+        python3 -m pip install --quiet -r "$GITHUB_ACTION_PATH/../.github/src/requirements.txt"
 
     - name: Convert, and check against the published HTML
       id: convert
@@ -98,6 +98,9 @@ runs:
         PUBLISHED: ${{ inputs.published-html }}
         OUTPUT: ${{ inputs.output }}
       run: |
+        # The runner runs this with -e -o pipefail; a failed check must still
+        # record its outputs before the step fails, so errexit is off here.
+        set +e
         ROOT="$(cd "$ACTION_PATH/.." && pwd)"
         # A profile directory in the caller's repository wins over a shipped name.
         [ -d "$PROFILE" ] && PROFILE="$(cd "$PROFILE" && pwd)"
