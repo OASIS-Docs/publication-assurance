@@ -168,5 +168,5 @@ It also records two defects of the published PDF itself: its font has no `ň`
 or `ō`, and FOP printed `#` for them 15 times.
 
 It does not see where a figure is drawn or what it looks like, nor type
-size (the checks' `pdf-legibility` and `pdf-type-scale` checks measure that).
+size (the `pdf-legibility` and `pdf-type-scale` checks measure that).
 The pictures need a reviewer: `render/review_pairs.py`.

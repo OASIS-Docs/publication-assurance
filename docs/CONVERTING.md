@@ -20,7 +20,7 @@ the one that converted it.
 |---|---|---|
 | 1. Conversion | [`converters/docbook-to-markdown/build.sh`](../converters/docbook-to-markdown/README.md) | `<name>.md` and its figures |
 | 2. Text verification | [`verify/verify_md.py`](../verify/README.md) | `RESULT: PASS`, and a report listing every difference and why it is accepted |
-| 3. Rendering and checks | [`render/render.sh`](../render/README.md) | HTML and PDF staged at their `docs.oasis-open.org` path, and the publication checks' verdict |
+| 3. Rendering and checks | [`render/render.sh`](../render/README.md) | HTML and PDF staged at their `docs.oasis-open.org` path, and the result of the OASIS publication checks |
 | 4. PDF verification | [`verify/verify_pdf.py`](../verify/README.md#verify_pdf-the-rendered-pdf-against-the-published-pdf) | `RESULT: PASS` against the published PDF: every word, the contents' page numbers, the running footer |
 | 5. Page review | [`render/review_pairs.py`](../render/README.md#review_pairspy) | Published and rendered pages paired for a reviewer, with a planted fault, and a grade of the review |
 | 6. Next stage | [`pub-check/advance_stage.py`](../pub-check/README.md#cutting-the-next-stage) | `<name>` at the next stage, with every stage-bound line rewritten |
@@ -155,8 +155,8 @@ python3 publication-assurance/verify/verify_md.py out/lexidma/dmlex/v1.0/os/dmle
 ```
 
 This is how the pipeline was found turning the tab characters in 9 of DMLex's
-316 code blocks into spaces. The publication checks now check the same thing for every package
-(`html-code-sync`).
+316 code blocks into spaces. The `html-code-sync` check now looks for the same
+thing in every package.
 
 It also compares how each ordered list is numbered (`1`, `a`, `i`) and the
 contents entry by entry. Both passed unseen in the first DMLex edition: its
@@ -303,7 +303,7 @@ check the result (step 3).
 - **Long inline code shrinks the PDF.** An unbreakable `code span` wider than
   the page makes a shrink-to-fit renderer print the whole document smaller.
   NIEM NDR v6.0 printed its 12pt body at 8pt. The pipeline's print styles wrap
-  inline code, and the checks' `pdf-legibility` check measures the printed body
+  inline code, and the `pdf-legibility` check measures the printed body
   size against the declared one.
 - **Cloudflare hides email addresses.** `docs.oasis-open.org` replaces each
   address with `[email protected]` and an encoded attribute. The verifier
@@ -331,11 +331,11 @@ check the result (step 3).
   PDF, and record such a defect in the allow file with its reason.
 - **The contents need page numbers.** A PDF printed from HTML has none unless
   something writes them. The pipeline's PDF step and `render.sh` both do, and
-  the checks' `pdf-toc-pages` check reports a PDF whose contents have none, or
+  the `pdf-toc-pages` check reports a PDF whose contents have none, or
   point at the wrong pages.
 - **Tabs in code.** pandoc expands tabs to spaces unless told not to. The
-  pipeline's HTML converter now passes `--preserve-tabs`; the checks' `html-code-sync`
-  check reports a published code block that is not the source's.
+  pipeline's HTML converter now passes `--preserve-tabs`; the `html-code-sync` check
+  reports a published code block that is not the source's.
 
 ## Who owns what
 

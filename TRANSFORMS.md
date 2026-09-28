@@ -133,7 +133,7 @@ When the document has a table of contents (`id="table-of-contents"`),
 heading's page from the printed PDF's named destinations (`pdfinfo -dests`),
 writes the page numbers with dot leaders into a copy of the HTML, and the PDF
 is printed again until no number moves. A published OASIS PDF numbers its
-contents; the checks' `pdf-toc-pages` check reports one that does not.
+contents; the `pdf-toc-pages` check reports one that does not.
 
 The preprocessor also removes any `<base href>` from the PDF copy, after
 making relative hyperlinks absolute against it, so stylesheets and images
@@ -182,7 +182,7 @@ since wkhtmltopdf writes none, from the page each heading is printed on:
 - found in order, after the contents pages.
 
 If the numbers cannot be read or do not settle in four passes, the PDF is
-printed unnumbered, and the checks' `pdf-toc-pages` check says so.
+printed unnumbered, and the `pdf-toc-pages` check says so.
 
 A note on renderers: wkhtmltopdf is what this repository's workflows run, but
 the production pipeline has since moved to headless Chrome print-to-PDF with
