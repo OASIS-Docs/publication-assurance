@@ -410,10 +410,12 @@ release as the action. It has three steps in one job:
 
 [Pipeline command reference](../TRANSFORMS.md).
 
-**Worked example: DMLex.** The LexiDMA TC's DMLex Markdown editions run
-this pattern in the workflow
-[`.github/workflows/publication-assurance.yml`](https://github.com/MColetta-OASIS/lexidma/blob/markdown-conversion/.github/workflows/publication-assurance.yml).
-Condensed to one document (the DMLex workflow runs two, as a matrix), it is:
+**Worked example: DMLex.** The reusable workflow
+[`convert-and-verify.yml`](../.github/workflows/convert-and-verify.yml) runs
+this pattern with the HTML and PDF verification added; the LexiDMA TC's
+[`.github/workflows/publication-assurance.yml`](https://github.com/MColetta-OASIS/lexidma/blob/markdown-conversion/.github/workflows/publication-assurance.yml)
+calls it for two documents, and [CONVERT-AND-VERIFY.md](CONVERT-AND-VERIFY.md)
+sets it up. Written out for one document, the pattern is:
 
 ```yaml
 name: pub-check
