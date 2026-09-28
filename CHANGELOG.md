@@ -26,6 +26,12 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.11.1 - 2026-09-28
+
+PATCH: the docbook-markdown action shows its result on the run page and uploads with a current Node.
+
 ### Fixed
 
 - **docbook-markdown** posts its result as an annotation (a notice on PASS or
