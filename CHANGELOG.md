@@ -28,6 +28,30 @@ Each version is anchored by a git tag on this repository.
 
 Nothing yet.
 
+## v1.11.0 - 2026-09-28
+
+MINOR: every step of the conversion guide runs as one GitHub workflow a TC
+copies, and the guide shows it with screenshots of a real run.
+
+- **`.github/workflows/convert-and-verify.yml`** (new, reusable): convert
+  from DocBook and fail if the committed Markdown is stale; render the HTML
+  and PDF; verify both against the published originals; run the OASIS
+  publication checks; build the page pairs for a review. The HTML and PDF
+  verdicts appear as one-line notices on the run's page. Uploads the rendered
+  package with its reports, the page pairs and the review key.
+- **`examples/converting-workflow.yml`** (new): the file a TC copies, with the
+  lines to edit marked. MColetta-OASIS/lexidma runs it for DMLex v1.0 OS and
+  v1.1 WD01.
+- **`verify/annotate.py`** (new): a verifier's JSON report as a GitHub notice
+  or error.
+- **`docs/CONVERTING.md`**: opens with setup in GitHub, illustrated from a
+  real run; the commands follow as the command reference. Headings are plain
+  noun phrases.
+- **Wording**: the guides, examples, action and workflow say "the OASIS
+  publication checks" instead of "gate". The action's last step is now
+  named "Enforce the check result".
+- **Fix**: `render/review_pairs.py make` creates the folder for the key.
+
 ## v1.10.1 - 2026-09-27
 
 PATCH: `verify_pdf.py` allow rules no longer depend on how a pdftotext

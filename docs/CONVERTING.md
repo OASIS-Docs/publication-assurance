@@ -13,8 +13,80 @@ and which wants to write the next version in Markdown, in the OASIS Markdown
 template that CSAF and NIEM use. It takes you from the DocBook source to a
 Markdown file that says exactly what the published specification says, then
 to a rendered and checked package, and then to the next stage. DMLex (LEXIDMA
-TC) was the first specification converted this way. Every command below is
-the one that converted it.
+TC) was the first specification converted this way.
+
+## Setup in GitHub
+
+One file in the TC's repository runs every step below on each push. No
+software is installed on anyone's machine.
+
+**1. Copy the workflow file.** Open
+[examples/converting-workflow.yml](../examples/converting-workflow.yml),
+copy it with the copy button, and in the TC's repository choose **Add file >
+Create new file**, name it `.github/workflows/convert-and-verify.yml`, paste,
+and edit the lines under `with:`:
+
+![The workflow file to copy, with the lines to edit marked EDIT](images/converting/1-copy-this-file.png)
+
+| Line | Set it to |
+|---|---|
+| `markdown` | the folder holding the specification's `.md` and its figures |
+| `schemas` | the schemas folder, or `"-"` if there is none |
+| `docbook` | the DocBook source folder; delete the line if the TC writes Markdown |
+| `profile` | a profile shipped with the tools (`dmlex`), or the TC's own profile folder |
+| `published-html`, `published-pdf` | the published specification's URLs; delete both for a new draft |
+
+Commit the file. That commit is the first run.
+
+**2. Watch the run.** The repository's **Actions** tab lists each run. A run
+shows one job per specification. A red cross means the Markdown or the PDF
+differs from the published original, or a step could not run. Blockers
+found by the OASIS publication checks show as warnings and leave the run
+green until `fail-on-blockers` is turned on (step 5):
+
+![A finished run: one job for the published v1.0 edition, one for the v1.1 draft](images/converting/2-run.png)
+
+**3. Read the results.** The run's page states each verdict in one line,
+without opening a log. "The HTML matches the published HTML" and "The PDF
+matches the published PDF" give the counts behind them. The OASIS
+publication checks report their blockers, here the nine in the published
+DMLex source that are for the TC to decide:
+
+![The results: the HTML and PDF match their published originals; the checks report the source's blockers](images/converting/3-results.png)
+
+A difference from the published original fails the run, and its log (signed
+in, open the job, then the step) prints every difference with the words
+around it.
+
+**4. Download what was produced.** At the foot of the run's page:
+
+![The run's downloads: the rendered packages, the page pairs and the review key](images/converting/4-downloads.png)
+
+| Download | Holds |
+|---|---|
+| `<name>-rendered` | the HTML and PDF at their `docs.oasis-open.org` path, with the full reports of every check |
+| `<name>-page-pairs` | each sampled page next to its published counterpart, and `PROMPT.md`, the brief for a reviewer |
+| `<name>-page-review-key` | which pair holds the planted fault; keep it from the reviewer and grade with it (step 5 below) |
+
+The rendered PDF carries the OASIS footer and numbers its contents:
+
+![A contents page of the rendered DMLex PDF, every entry numbered](images/converting/5-contents-page.png)
+
+and a page pair puts the published page (left) beside the rendered one
+(right). This one shows a fault in the published original: `csd04.xml`
+printed into two headings.
+
+![A page pair: published on the left, rendered on the right](images/converting/6-page-pair.png)
+
+**5. Keep it running.** Every later push to the specification runs the same
+steps. Once the TC has settled what the OASIS publication checks report,
+uncomment `fail-on-blockers: true` so a new blocker fails the run.
+
+## Command reference
+
+The workflow runs the commands below. They are here to run a step on a
+laptop, and to show what each step checks. Every command is the one that
+converted DMLex.
 
 | Step | Tool | You get |
 |---|---|---|
@@ -28,7 +100,7 @@ the one that converted it.
 Word sources are not handled yet. Steps 2 to 6 do not depend on DocBook.
 They work on any Markdown edition, however it was made.
 
-## Before you start
+### Before you start
 
 You need Python 3.10 or later with the `beautifulsoup4` package
 (`pip install beautifulsoup4`), pandoc 3.x, `xmllint`, Node.js 18 or later,
@@ -44,11 +116,11 @@ sudo apt-get install libxml2-utils graphviz m4 poppler-utils
 Clone this repository at a release tag, and clone your TC's source:
 
 ```bash
-git clone --depth 1 --branch v1.10.1 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.11.0 https://github.com/OASIS-Docs/publication-assurance
 git clone https://github.com/oasis-tcs/lexidma
 ```
 
-## 1. Conversion
+### 1. Conversion
 
 ```bash
 publication-assurance/converters/docbook-to-markdown/build.sh --profile dmlex \
@@ -77,7 +149,7 @@ instead of flattening the element into paragraphs, which would keep the words
 and lose the meaning. Ask TC Administration, or add the element to
 `docbook2md.py` with a test.
 
-## 2. Text verification
+### 2. Text verification
 
 `build.sh` runs the verifier when you give it the published URL. You can also
 run it on its own, against any Markdown edition:
@@ -168,7 +240,7 @@ comparison could see either.
 **What it cannot see:** a heading's level, a list item moved to another
 level, emphasis removed. Read the Markdown diff for those, and use step 5.
 
-## 3. Rendering and checks
+### 3. Rendering and checks
 
 ```bash
 publication-assurance/render/render.sh dmlex-md lexidma/dmlex-v1.0/specification/schemas out
@@ -198,7 +270,7 @@ checks. DMLex's nine blockers come from five defects, all in its source:
 Record them for the TC to decide. Do not fix them in the conversion: the
 conversion must say what the standard says.
 
-## 4. PDF verification
+### 4. PDF verification
 
 ```bash
 python3 publication-assurance/verify/verify_pdf.py out/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.pdf \
@@ -223,7 +295,7 @@ The rest are defects of the published PDF itself: its font has no `ň` or
 prints the caption on a line of the example's code. Against the 24 September render it fails with
 133 contents entries unnumbered.
 
-## 5. Page review
+### 5. Page review
 
 The words are proven; how the pages look is not. A figure off the page, a
 page number on the wrong line of a wrapped entry, a caption beside the wrong
@@ -259,7 +331,7 @@ A rejected review is run again. It is never read as a pass.
 
 `render/compare.mjs` remains for a quick look at the HTML at named anchors.
 
-## 6. Next stage
+### 6. Next stage
 
 DocBook keeps the version and stage in one place and fills them in
 everywhere. A Markdown specification has no such variables, so its stage
