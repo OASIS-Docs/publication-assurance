@@ -120,6 +120,13 @@ runs:
           echo
           echo "Check against the published HTML: **$V**"
         } >> "$GITHUB_STEP_SUMMARY"
+        # An annotation shows on the run page to every visitor; the job
+        # summary does not show to one who is not signed in.
+        case "$V" in
+          PASS) echo "::notice title=Markdown edition::$(basename "${MD:-none}") matches the published HTML (check PASS)" ;;
+          FAIL) echo "::error title=Markdown edition::$(basename "${MD:-none}") differs from the published HTML (check FAIL); the log lists each difference" ;;
+          *) echo "::notice title=Markdown edition::$(basename "${MD:-none}") produced; no published HTML given, so not checked" ;;
+        esac
         exit "$STATUS"
 
     - name: Render HTML and PDF
@@ -140,7 +147,7 @@ runs:
 
     - name: Upload the Markdown edition
       if: always() && inputs.artifact-name != ''
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ inputs.output }}
