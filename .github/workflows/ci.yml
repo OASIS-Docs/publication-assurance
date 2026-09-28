@@ -20,6 +20,37 @@ on:
   workflow_dispatch:
 
 jobs:
+  docbook-markdown:
+    # The docbook-markdown action end to end, as a TC calls it: the DMLex
+    # DocBook source at the commit the dmlex profile was built for, checked
+    # against the snapshot of the published HTML, then rendered.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check out the DMLex DocBook source
+        uses: actions/checkout@v5
+        with:
+          repository: oasis-tcs/lexidma
+          ref: e3c0626fddc29251aaf74f3357fd6d6167b89b1d
+          path: _lexidma
+      - name: Run the action
+        id: md
+        uses: ./docbook-markdown
+        with:
+          source: _lexidma/dmlex-v1.0/specification
+          profile: dmlex
+          published-html: tests/fixtures/verify_md/dmlex-v1.0-os/published-dmlex-v1.0-os.html
+          artifact-name: markdown-edition-dmlex
+      - name: Check the outputs
+        env:
+          MD: ${{ steps.md.outputs.markdown }}
+          VERIFICATION: ${{ steps.md.outputs.verification }}
+          PACKAGE: ${{ steps.md.outputs.package }}
+        run: |
+          test "$VERIFICATION" = PASS || { echo "verification is $VERIFICATION"; exit 1; }
+          test "$(basename "$MD")" = dmlex-v1.0-os.md
+          ls "$PACKAGE"/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.pdf "$PACKAGE"/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html
+
   test:
     runs-on: ubuntu-latest
     steps:
