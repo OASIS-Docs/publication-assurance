@@ -131,7 +131,7 @@ A profile is a `profile.json` of a few lines, described in the
 Later steps can use the action's outputs: `markdown` (the file's path),
 `verification` (`PASS`, `FAIL` or `skipped`) and `package` (the rendered
 folder). To check the rendered package against the OASIS publication
-criteria too, add the publication gate after it, as the
+criteria too, add the OASIS publication checks after it, as the
 [adoption guide](ADOPTING.md) shows.
 
 ## Further reading

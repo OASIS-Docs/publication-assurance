@@ -373,15 +373,15 @@ result. Every `report-url-*` output is empty when nothing was published.
 An example that posts the blocker count as a notice:
 
 ```yaml
-      - id: gate
+      - id: checks
         uses: OASIS-Docs/publication-assurance@v1.12.0
         with:
           target: work/v1.0/csd01
 
       - if: always()
         env:
-          BLOCKERS: ${{ steps.gate.outputs.blockers }}
-          WARNINGS: ${{ steps.gate.outputs.warnings }}
+          BLOCKERS: ${{ steps.checks.outputs.blockers }}
+          WARNINGS: ${{ steps.checks.outputs.warnings }}
         run: echo "::notice::pub-check found $BLOCKERS blocker(s) and $WARNINGS warning(s)"
 ```
 
@@ -433,7 +433,7 @@ env:
   PA_REF: v1.12.0          # the release whose render/render.sh renders
 
 jobs:
-  render-and-gate:
+  render-and-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
