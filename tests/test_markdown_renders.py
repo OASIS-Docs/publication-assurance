@@ -35,7 +35,7 @@ DOCS = [
     "assets/architecture/README.md",
     "examples/eox-core-v1.0-csd01/README.md",
     "docs/ADOPTING.md",
-    "docs/CONVERTING.md",
+    "docs/MARKDOWN-EDITION.md",
     "verify/README.md",
     "converters/docbook-to-markdown/README.md",
     "render/README.md",

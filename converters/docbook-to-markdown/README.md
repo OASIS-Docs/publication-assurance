@@ -10,8 +10,10 @@ Converts an OASIS DocBook 4.5 specification into a single Markdown file in
 the OASIS Markdown template (the layout of CSAF and NIEM: logo, title block,
 front matter as level-4 headings, Notices, table of contents, numbered
 sections with explicit anchors), then checks the result against the
-published HTML with [`verify/verify_md.py`](../../verify/README.md). The
-walkthrough for a TC is [docs/CONVERTING.md](../../docs/CONVERTING.md).
+published HTML with [`verify/verify_md.py`](../../verify/README.md). A TC
+runs it through the `docbook-markdown` action; the guide is
+[docs/MARKDOWN-EDITION.md](../../docs/MARKDOWN-EDITION.md). This page is the
+reference for maintainers.
 
 | File | Role |
 |---|---|

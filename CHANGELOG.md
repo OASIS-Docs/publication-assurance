@@ -26,7 +26,15 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+### Documentation
+
+- **docs/MARKDOWN-EDITION.md** replaces docs/CONVERTING.md. It presents the
+  Markdown edition as one more output of a DocBook specification, produced by
+  the `docbook-markdown` action in one workflow step, with annotated
+  screenshots of a real run (MColetta-OASIS/lexidma, DMLex). About 900 words
+  instead of 2,544. The maintainer traps are in the converter README, and the
+  verifier, renderer, page-review and advance-stage detail in their own
+  READMEs. README, ADOPTING, TRANSFORMS and the component READMEs link to it.
 
 ## v1.11.1 - 2026-09-28
 
