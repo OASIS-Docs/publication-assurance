@@ -65,12 +65,14 @@ def test_a_passing_check_passes_and_says_so(tmp_path):
     assert outputs["markdown"].endswith("spec-v1.0-os.md")
     assert args[:2] == ["--profile", "dmlex"] and args[-1] == "https://example.org/spec.html"
     assert "**PASS**" in summary
+    assert "::notice title=Markdown edition::spec-v1.0-os.md matches the published HTML" in r.stdout
 
 
 def test_a_failed_check_records_fail_before_failing_the_step(tmp_path):
     r, outputs, _, summary = _run(tmp_path, "RESULT: FAIL", 1)
     assert r.returncode == 1
     assert outputs["verification"] == "FAIL" and "**FAIL**" in summary
+    assert "::error title=Markdown edition::" in r.stdout
 
 
 def test_no_published_html_means_no_check(tmp_path):
@@ -85,3 +87,11 @@ def test_the_shipped_example_uses_this_action():
     wf = yaml.safe_load((REPO_ROOT / "examples" / "docbook-markdown-workflow.yml").read_text())
     steps = wf["jobs"]["markdown-edition"]["steps"]
     assert any(s.get("uses", "").startswith("OASIS-Docs/publication-assurance/docbook-markdown@") for s in steps)
+
+
+def test_the_upload_runs_on_a_current_node():
+    """upload-artifact@v4 targets Node.js 20, which GitHub deprecated; every
+    run of v1.11.0 carried that warning."""
+    uses = [s.get("uses", "") for s in _action()["runs"]["steps"]]
+    upload = next(u for u in uses if u.startswith("actions/upload-artifact@"))
+    assert int(upload.split("@v")[1].split(".")[0]) >= 7, upload

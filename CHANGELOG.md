@@ -26,7 +26,13 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+### Fixed
+
+- **docbook-markdown** posts its result as an annotation (a notice on PASS or
+  when unchecked, an error on FAIL), so the run page shows it to every
+  visitor; the job summary is not shown to a visitor who is not signed in.
+  Its upload step moves to `actions/upload-artifact@v7`: v4 targets the
+  deprecated Node.js 20 and put a warning on every run.
 
 ## v1.11.0 - 2026-09-28
 
