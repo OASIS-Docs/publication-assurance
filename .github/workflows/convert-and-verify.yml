@@ -198,6 +198,8 @@ jobs:
           NAME: ${{ steps.render.outputs.name }}
         run: |
           [ -f "$RUNNER_TEMP/published.pdf" ] || { echo "No published PDF; no page pairs."; exit 0; }
+          # the gate's action sets up its own Python; give that one Pillow too
+          python3 -m pip install --quiet pillow
           python3 _pa/render/review_pairs.py make "$STAGE/$NAME.pdf" "$RUNNER_TEMP/published.pdf" \
             _page-review/pairs --key _page-review-key/key.json --sample ${{ inputs.review-sample }}
 
