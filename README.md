@@ -10,20 +10,22 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
   <a href="LICENSE"><img alt="Code: Apache-2.0" src="https://img.shields.io/badge/code-Apache--2.0-2c4a8a"></a>
   <a href="NOTICE"><img alt="Criteria prose: OASIS verbatim-only" src="https://img.shields.io/badge/criteria_prose-OASIS_verbatim--only-446CAA"></a>
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776ab">
-  <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/gate_dependencies-stdlib_only-2f9e44">
+  <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/dependencies-stdlib_only-2f9e44">
   <img alt="Checks: 178 individual, 61 classes" src="https://img.shields.io/badge/checks-178_individual_%C2%B7_61_classes-f08c00">
   <img alt="Regression corpus: 12 packages" src="https://img.shields.io/badge/regression_corpus-12_packages-6741d9">
 </p>
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-**Bringing the OASIS publication checks into a TC repository: [docs/ADOPTING.md](docs/ADOPTING.md)**, three steps and about five minutes.
+**Setup guide for TC repositories: [docs/ADOPTING.md](docs/ADOPTING.md)** (three steps, about five minutes)
 
-Before OASIS publishes a work product to `docs.oasis-open.org`, TC
-Administration runs it through the publication acceptance tests.
-`oasis-pub-check` is those tests, packaged to run in your own CI. Run them
-before your TC votes, and fix what they find while the document is still
-yours to change.
+Before a TC Specification is published to `docs.oasis-open.org`, it is run
+through the publication acceptance tests. This repository contains the
+actively maintained, latest set of those tests (`oasis-pub-check`). For TC
+convenience, it also provides example GitHub workflows to add to a TC's own
+repository, so the TC can validate a draft before submitting it to OASIS for
+publication. Run them before your TC votes, and fix what they find while the
+document is still yours to change.
 
 ---
 

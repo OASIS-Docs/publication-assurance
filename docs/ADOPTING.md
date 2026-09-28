@@ -8,10 +8,11 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 # OASIS publication checks: adoption guide
 
-This guide sets up `oasis-pub-check`, the OASIS publication acceptance tests,
-in a TC's own GitHub repository. After setup, every push checks your
-package against the same 178 conditions TC Administration runs at intake,
-and each run publishes a Validation Report you can open in a browser.
+Before a TC Specification is published to `docs.oasis-open.org`, it is run
+through the publication acceptance tests (`oasis-pub-check`). This guide adds
+those tests to a TC's own GitHub repository, so every push validates the
+draft against the same 178 conditions applied at submission, and each run
+publishes a Validation Report you can open in a browser.
 
 | Section | Read it when |
 |---|---|
@@ -24,7 +25,7 @@ and each run publishes a Validation Report you can open in a browser.
 | [Markdown rendering before the checks](#markdown-rendering-before-the-checks) | Your repository holds Markdown sources, not a rendered package |
 | [Converting a published specification](CONVERTING.md) | Your specification was written in DocBook and the next version will be Markdown: convert it, prove the Markdown says what the standard says, render, check and cut the next stage |
 | [Enforcing and report-only runs](#enforcing-and-report-only-runs) | A blocker should not fail the build, for example on a published standard |
-| [Several documents in one repository](#several-documents-in-one-repository) | The TC publishes more than one work product from this repository |
+| [Several documents in one repository](#several-documents-in-one-repository) | The TC publishes more than one specification from this repository |
 | [Fork pull requests and read-only tokens](#fork-pull-requests-and-read-only-tokens) | Contributors open pull requests from their own forks |
 | [Version pinning and upgrades](#version-pinning-and-upgrades) | You want a newer release of the checks |
 | [Local runs](#local-runs) | You want the verdict on your own machine before pushing |
