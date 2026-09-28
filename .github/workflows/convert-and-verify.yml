@@ -84,10 +84,10 @@ jobs:
   convert-and-verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check out the OASIS tools
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: OASIS-Docs/publication-assurance
           ref: ${{ inputs.pa-ref }}
@@ -166,8 +166,11 @@ jobs:
           if ! curl -fsSL -o "$RUNNER_TEMP/published.html" "$URL"; then
             echo "::warning::The published HTML could not be fetched; the HTML comparison did not run."; exit 0; fi
           args=(); for a in "$A1" "$A2"; do [ -n "$a" ] && args+=(--allow "$a"); done
+          status=0
           python3 _pa/verify/verify_md.py "$STAGE/$NAME.md" "$URL" --rendered "$STAGE/$NAME.html" \
-            "${args[@]}" --json "$STAGE-verify-html.json" | grep -v '^ACCEPTED' | tee -a "$GITHUB_STEP_SUMMARY"
+            "${args[@]}" --json "$STAGE-verify-html.json" | grep -v '^ACCEPTED' || status=$?
+          [ -f "$STAGE-verify-html.json" ] && python3 _pa/verify/annotate.py html "$STAGE-verify-html.json"
+          exit $status
 
       - name: 4. Verify the PDF against the published PDF
         if: inputs.published-pdf != ''
@@ -181,8 +184,11 @@ jobs:
           if ! curl -fsSL -o "$RUNNER_TEMP/published.pdf" "$URL"; then
             echo "::warning::The published PDF could not be fetched; the PDF comparison did not run."; exit 0; fi
           args=(); [ -n "$A3" ] && args+=(--allow "$A3")
+          status=0
           python3 _pa/verify/verify_pdf.py "$STAGE/$NAME.pdf" "$RUNNER_TEMP/published.pdf" \
-            "${args[@]}" --json "$STAGE-verify-pdf.json" | grep -v '^ACCEPTED' | tee -a "$GITHUB_STEP_SUMMARY"
+            "${args[@]}" --json "$STAGE-verify-pdf.json" | grep -v '^ACCEPTED' || status=$?
+          [ -f "$STAGE-verify-pdf.json" ] && python3 _pa/verify/annotate.py pdf "$STAGE-verify-pdf.json"
+          exit $status
 
       - name: 5. OASIS publication gate
         uses: ./_pa
@@ -190,6 +196,9 @@ jobs:
           target: ${{ steps.render.outputs.stage }}
           fail-on-blockers: ${{ inputs.fail-on-blockers }}
           report-dir: ${{ steps.render.outputs.stage }}-pubcheck
+          summary-title: ${{ steps.render.outputs.name }}
+          # the reports go into the -rendered artifact; nothing is pushed to the repository
+          publish-branch: ''
 
       - name: 6. Page pairs for a review
         if: always() && inputs.published-pdf != '' && inputs.review-sample > 0 && steps.render.outcome == 'success'
@@ -205,7 +214,7 @@ jobs:
 
       - name: Upload the rendered package and reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.render.outputs.name || 'package' }}-rendered
           path: |
@@ -214,14 +223,14 @@ jobs:
 
       - name: Upload the page pairs (give PROMPT.md and the images to a reviewer)
         if: always() && hashFiles('_page-review/pairs/PROMPT.md') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.render.outputs.name }}-page-pairs
           path: _page-review/pairs
 
       - name: Upload the page-review key (keep it from the reviewer; grade with it)
         if: always() && hashFiles('_page-review-key/key.json') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.render.outputs.name }}-page-review-key
           path: _page-review-key
