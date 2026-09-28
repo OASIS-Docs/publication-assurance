@@ -154,9 +154,9 @@ def test_a_word_written_about_every_pair_names_no_fault(tmp_path, made):
 def test_a_key_beside_the_pairs_folder_is_allowed(tmp_path, made):
     """OUT_DIR-key/ is not inside OUT_DIR, whatever its name starts with."""
     _, _, _, pub, ren = made
-    (tmp_path / "p2-key").mkdir()
     r = run("make", ren, pub, tmp_path / "p2", "--key", tmp_path / "p2-key" / "key.json", "--sample", 1, "--seed", 1)
     assert r.returncode == 0, r.stderr
+    assert (tmp_path / "p2-key" / "key.json").is_file(), "the key's folder is made when it does not exist"
 
 
 def test_short_words_that_are_on_the_page_are_still_not_evidence():
