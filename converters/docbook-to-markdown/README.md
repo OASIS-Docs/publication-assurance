@@ -158,6 +158,49 @@ the Markdown too, except the first, which is a markup error, not content.
    change from run to run. The prebuild fixes the hash seed, so a run is
    repeatable; the nodes and edges match the published `dmlex_uml.svg`.
 
+## Traps for maintainers
+
+- **Figure width.** A DocBook `<graphic contentwidth="16cm">` is sized by the
+  stylesheet: 567 pixels at 90 dpi. Without an explicit width an SVG draws at
+  its natural size, and the DMLex UML diagram ran off the page. The converter
+  writes `<img width>` from the profile's `figure_dpi`.
+- **Long inline code shrinks the PDF.** An unbreakable `code span` wider than
+  the page makes a shrink-to-fit renderer print the whole document smaller.
+  NIEM NDR v6.0 printed its 12pt body at 8pt. The pipeline's print styles wrap
+  inline code, and the gate's `pdf-legibility` check measures the printed body
+  size against the declared one.
+- **Cloudflare hides email addresses.** `docs.oasis-open.org` replaces each
+  address with `[email protected]` and an encoded attribute. The verifier
+  decodes them. A tool that reads the page without decoding them sees seven
+  missing addresses in DMLex's front matter.
+- **The published page may not be UTF-8.** DMLex's is ISO-8859-1. The verifier
+  takes the charset from the server, then the page, then the HTML default.
+- **Generated figures change from run to run.** DMLex's `nvh2dot.py` walks a
+  Python set, so its UML diagram's layout changes per run. The DMLex prebuild
+  fixes the hash seed. Compare such figures by their contents, not their
+  bytes.
+- **pandoc versions differ.** The verifier reads the Markdown through pandoc's
+  `markdown` reader, as the pipeline does, and requires 3.x; the DMLex result
+  was made with 3.8.2.1.
+- **List letters are not words.** DocBook numbers a list inside a list `a.`,
+  and one inside that `i.`, unless told otherwise. A converter that writes
+  `1.` keeps every word and changes what "point c. above" means. The
+  converter numbers them as the stylesheet does; `verify_md.py` compares the
+  numbering.
+- **A wrapped contents entry.** Its page number belongs at the end of its
+  last line. The pipeline's contents numbering puts it there (v1.10.0); it
+  used to print on the first line, with the leader running to nothing.
+- **The published PDF has defects of its own.** DMLex's prints `#` for two
+  letters its font lacks. Compare against the published HTML as well as the
+  PDF, and record such a defect in the allow file with its reason.
+- **The contents need page numbers.** A PDF printed from HTML has none unless
+  something writes them. The pipeline's PDF step and `render.sh` both do, and
+  the gate's `pdf-toc-pages` check reports a PDF whose contents have none, or
+  point at the wrong pages.
+- **Tabs in code.** pandoc expands tabs to spaces unless told not to. The
+  pipeline's HTML converter now passes `--preserve-tabs`; the gate's `html-code-sync`
+  reports a published code block that is not the source's.
+
 ## Provenance
 
 The converter is OASIS staff tooling (TC Administration), Apache-2.0 like the

@@ -1,0 +1,34 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+#
+# Markdown edition of a DocBook specification, as another output of the
+# source. Copy this file to .github/workflows/markdown-edition.yml in the TC
+# repository and set the three values under env. Guide:
+# https://github.com/OASIS-Docs/publication-assurance/blob/main/docs/MARKDOWN-EDITION.md
+
+name: Markdown edition
+
+on:
+  push:
+    paths:
+      - 'dmlex-v1.0/specification/**'        # your DocBook source
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SOURCE: dmlex-v1.0/specification            # the DocBook source directory
+  PROFILE: dmlex                              # a shipped profile, or a profile directory in this repository
+  PUBLISHED_HTML: https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html
+
+jobs:
+  markdown-edition:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: OASIS-Docs/publication-assurance/docbook-markdown@v1.10.1
+        with:
+          source: ${{ env.SOURCE }}
+          profile: ${{ env.PROFILE }}
+          published-html: ${{ env.PUBLISHED_HTML }}

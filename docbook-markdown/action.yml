@@ -1,0 +1,144 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
+#
+# Produce the Markdown edition of an OASIS DocBook specification, alongside
+# its other outputs. One step in a TC's workflow:
+#
+#   - uses: actions/checkout@v5
+#   - uses: OASIS-Docs/publication-assurance/docbook-markdown@v1.10.1
+#     with:
+#       source: dmlex-v1.0/specification
+#       profile: dmlex
+#       published-html: https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html
+#
+# The action installs everything it needs, writes <name>.md with its figures,
+# checks it word for word against the published HTML when one is given,
+# renders HTML and PDF through the OASIS pipeline, and uploads the lot as one
+# artifact. The DocBook source is only read.
+
+name: "OASIS DocBook to Markdown"
+description: "Produce the OASIS Markdown edition of a DocBook specification, checked against the published HTML, with HTML and PDF."
+author: "OASIS Open"
+
+branding:
+  icon: "file-text"
+  color: "blue"
+
+inputs:
+  source:
+    description: "The DocBook source directory, relative to the repository root (for example dmlex-v1.0/specification)."
+    required: true
+  profile:
+    description: "The specification's profile: the name of one shipped with the action (dmlex), or the path of a profile directory in your repository. See docs/MARKDOWN-FROM-DOCBOOK.md."
+    required: true
+  published-html:
+    description: "URL or path of the published HTML of the same stage. When given, the Markdown is checked against it word for word, code block for code block, and the step fails on any unexplained difference. Leave empty to skip."
+    required: false
+    default: ""
+  render:
+    description: "Also render the Markdown to HTML and PDF through the OASIS pipeline ('true' or 'false')."
+    required: false
+    default: "true"
+  schemas:
+    description: "Directory of the schemas the specification cites, staged beside the rendered package. Leave empty for none."
+    required: false
+    default: ""
+  output:
+    description: "Directory that receives the results: markdown/ (the .md and its figures) and, when rendering, package/ (the staged HTML and PDF)."
+    required: false
+    default: "markdown-edition"
+  artifact-name:
+    description: "Name of the uploaded artifact. Set to '' to skip the upload."
+    required: false
+    default: "markdown-edition"
+  pandoc-version:
+    description: "pandoc release used for the check against the published HTML."
+    required: false
+    default: "3.8.2.1"
+
+outputs:
+  markdown:
+    description: "Path of the Markdown file."
+    value: ${{ steps.convert.outputs.markdown }}
+  verification:
+    description: "PASS, FAIL, or skipped when no published-html was given."
+    value: ${{ steps.convert.outputs.verification }}
+  package:
+    description: "Directory of the rendered HTML and PDF, empty when render is false."
+    value: ${{ steps.render.outputs.package }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.x"
+
+    - name: Install the tools
+      shell: bash
+      env:
+        PANDOC_VERSION: ${{ inputs.pandoc-version }}
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq libxml2-utils graphviz m4 poppler-utils >/dev/null
+        curl -fsSL -o "$RUNNER_TEMP/pandoc.deb" \
+          "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-1-amd64.deb"
+        sudo dpkg -i "$RUNNER_TEMP/pandoc.deb" >/dev/null
+        python3 -m pip install --quiet beautifulsoup4
+
+    - name: Convert, and check against the published HTML
+      id: convert
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        SOURCE: ${{ inputs.source }}
+        PROFILE: ${{ inputs.profile }}
+        PUBLISHED: ${{ inputs.published-html }}
+        OUTPUT: ${{ inputs.output }}
+      run: |
+        ROOT="$(cd "$ACTION_PATH/.." && pwd)"
+        # A profile directory in the caller's repository wins over a shipped name.
+        [ -d "$PROFILE" ] && PROFILE="$(cd "$PROFILE" && pwd)"
+        mkdir -p "$OUTPUT/markdown"
+        ARGS=(--profile "$PROFILE" "$SOURCE" "$OUTPUT/markdown")
+        [ -n "$PUBLISHED" ] && ARGS+=("$PUBLISHED")
+        "$ROOT/converters/docbook-to-markdown/build.sh" "${ARGS[@]}" | tee "$RUNNER_TEMP/convert.log"
+        STATUS=${PIPESTATUS[0]}
+        MD="$(ls "$OUTPUT"/markdown/*.md 2>/dev/null | head -1)"
+        echo "markdown=$MD" >> "$GITHUB_OUTPUT"
+        if [ -z "$PUBLISHED" ]; then V=skipped
+        elif tail -1 "$RUNNER_TEMP/convert.log" | grep -q 'RESULT: PASS'; then V=PASS
+        else V=FAIL; fi
+        echo "verification=$V" >> "$GITHUB_OUTPUT"
+        {
+          echo "### Markdown edition: \`$(basename "${MD:-none}")\`"
+          echo
+          echo "Check against the published HTML: **$V**"
+        } >> "$GITHUB_STEP_SUMMARY"
+        exit "$STATUS"
+
+    - name: Render HTML and PDF
+      id: render
+      if: inputs.render == 'true'
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        SCHEMAS: ${{ inputs.schemas }}
+        OUTPUT: ${{ inputs.output }}
+        CHROME: google-chrome
+        PUBCHECK: "0"
+      run: |
+        ROOT="$(cd "$ACTION_PATH/.." && pwd)"
+        "$ROOT/render/render.sh" "$OUTPUT/markdown" "${SCHEMAS:--}" "$OUTPUT/package"
+        echo "package=$OUTPUT/package" >> "$GITHUB_OUTPUT"
+        echo "Rendered HTML and PDF: \`$OUTPUT/package\`" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload the Markdown edition
+      if: always() && inputs.artifact-name != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.output }}
+        if-no-files-found: error
