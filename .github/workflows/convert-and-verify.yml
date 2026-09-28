@@ -55,7 +55,7 @@ on:
         type: string
         default: ""
       fail-on-blockers:
-        description: Fail the job when the gate finds a blocker
+        description: Fail the job when the OASIS publication checks find a blocker
         required: false
         type: boolean
         default: false

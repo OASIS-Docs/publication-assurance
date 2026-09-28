@@ -406,7 +406,7 @@ release as the action. It has three steps in one job:
    cover agree.
 3. **Check.** Point `target` at the staged directory.
 
-[TRANSFORMS.md](../TRANSFORMS.md) gives every command of the pipeline.
+[Pipeline command reference](../TRANSFORMS.md).
 
 **Worked example: DMLex.** The LexiDMA TC's DMLex Markdown editions run
 this pattern in the workflow

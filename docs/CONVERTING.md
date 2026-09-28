@@ -18,12 +18,12 @@ the one that converted it.
 
 | Step | Tool | You get |
 |---|---|---|
-| 1. Convert | [`converters/docbook-to-markdown/build.sh`](../converters/docbook-to-markdown/README.md) | `<name>.md` and its figures |
-| 2. Prove it matches | [`verify/verify_md.py`](../verify/README.md) | `RESULT: PASS`, and a report listing every difference and why it is accepted |
-| 3. Render and check | [`render/render.sh`](../render/README.md) | HTML and PDF staged at their `docs.oasis-open.org` path, and the publication checks' verdict |
-| 4. Prove the PDF matches | [`verify/verify_pdf.py`](../verify/README.md#verify_pdf-the-rendered-pdf-against-the-published-pdf) | `RESULT: PASS` against the published PDF: every word, the contents' page numbers, the running footer |
-| 5. Review the pages | [`render/review_pairs.py`](../render/README.md#review_pairspy) | Published and rendered pages paired for a reviewer, with a planted fault, and a grade of the review |
-| 6. Cut the next stage | [`pub-check/advance_stage.py`](../pub-check/README.md#cutting-the-next-stage) | `<name>` at the next stage, with every stage-bound line rewritten |
+| 1. Conversion | [`converters/docbook-to-markdown/build.sh`](../converters/docbook-to-markdown/README.md) | `<name>.md` and its figures |
+| 2. Text verification | [`verify/verify_md.py`](../verify/README.md) | `RESULT: PASS`, and a report listing every difference and why it is accepted |
+| 3. Rendering and checks | [`render/render.sh`](../render/README.md) | HTML and PDF staged at their `docs.oasis-open.org` path, and the publication checks' verdict |
+| 4. PDF verification | [`verify/verify_pdf.py`](../verify/README.md#verify_pdf-the-rendered-pdf-against-the-published-pdf) | `RESULT: PASS` against the published PDF: every word, the contents' page numbers, the running footer |
+| 5. Page review | [`render/review_pairs.py`](../render/README.md#review_pairspy) | Published and rendered pages paired for a reviewer, with a planted fault, and a grade of the review |
+| 6. Next stage | [`pub-check/advance_stage.py`](../pub-check/README.md#cutting-the-next-stage) | `<name>` at the next stage, with every stage-bound line rewritten |
 
 Word sources are not handled yet. Steps 2 to 6 do not depend on DocBook.
 They work on any Markdown edition, however it was made.
@@ -48,7 +48,7 @@ git clone --depth 1 --branch v1.10.1 https://github.com/OASIS-Docs/publication-a
 git clone https://github.com/oasis-tcs/lexidma
 ```
 
-## 1. Convert
+## 1. Conversion
 
 ```bash
 publication-assurance/converters/docbook-to-markdown/build.sh --profile dmlex \
@@ -77,7 +77,7 @@ instead of flattening the element into paragraphs, which would keep the words
 and lose the meaning. Ask TC Administration, or add the element to
 `docbook2md.py` with a test.
 
-## 2. Prove it matches
+## 2. Text verification
 
 `build.sh` runs the verifier when you give it the published URL. You can also
 run it on its own, against any Markdown edition:
@@ -155,7 +155,7 @@ python3 publication-assurance/verify/verify_md.py out/lexidma/dmlex/v1.0/os/dmle
 ```
 
 This is how the pipeline was found turning the tab characters in 9 of DMLex's
-316 code blocks into spaces. pub-check now checks the same thing for every package
+316 code blocks into spaces. The publication checks now check the same thing for every package
 (`html-code-sync`).
 
 It also compares how each ordered list is numbered (`1`, `a`, `i`) and the
@@ -168,7 +168,7 @@ comparison could see either.
 **What it cannot see:** a heading's level, a list item moved to another
 level, emphasis removed. Read the Markdown diff for those, and use step 5.
 
-## 3. Render and check
+## 3. Rendering and checks
 
 ```bash
 publication-assurance/render/render.sh dmlex-md lexidma/dmlex-v1.0/specification/schemas out
@@ -198,7 +198,7 @@ checks. DMLex's nine blockers come from five defects, all in its source:
 Record them for the TC to decide. Do not fix them in the conversion: the
 conversion must say what the standard says.
 
-## 4. Prove the PDF matches
+## 4. PDF verification
 
 ```bash
 python3 publication-assurance/verify/verify_pdf.py out/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.pdf \
@@ -223,7 +223,7 @@ The rest are defects of the published PDF itself: its font has no `ň` or
 prints the caption on a line of the example's code. Against the 24 September render it fails with
 133 contents entries unnumbered.
 
-## 5. Review the pages
+## 5. Page review
 
 The words are proven; how the pages look is not. A figure off the page, a
 page number on the wrong line of a wrapped entry, a caption beside the wrong
@@ -259,7 +259,7 @@ A rejected review is run again. It is never read as a pass.
 
 `render/compare.mjs` remains for a quick look at the HTML at named anchors.
 
-## 6. Cut the next stage
+## 6. Next stage
 
 DocBook keeps the version and stage in one place and fills them in
 everywhere. A Markdown specification has no such variables, so its stage
@@ -303,7 +303,7 @@ check the result (step 3).
 - **Long inline code shrinks the PDF.** An unbreakable `code span` wider than
   the page makes a shrink-to-fit renderer print the whole document smaller.
   NIEM NDR v6.0 printed its 12pt body at 8pt. The pipeline's print styles wrap
-  inline code, and pub-check's `pdf-legibility` check measures the printed body
+  inline code, and the checks' `pdf-legibility` check measures the printed body
   size against the declared one.
 - **Cloudflare hides email addresses.** `docs.oasis-open.org` replaces each
   address with `[email protected]` and an encoded attribute. The verifier
@@ -331,11 +331,11 @@ check the result (step 3).
   PDF, and record such a defect in the allow file with its reason.
 - **The contents need page numbers.** A PDF printed from HTML has none unless
   something writes them. The pipeline's PDF step and `render.sh` both do, and
-  pub-check's `pdf-toc-pages` check reports a PDF whose contents have none, or
+  the checks' `pdf-toc-pages` check reports a PDF whose contents have none, or
   point at the wrong pages.
 - **Tabs in code.** pandoc expands tabs to spaces unless told not to. The
-  pipeline's HTML converter now passes `--preserve-tabs`; pub-check's `html-code-sync`
-  reports a published code block that is not the source's.
+  pipeline's HTML converter now passes `--preserve-tabs`; the checks' `html-code-sync`
+  check reports a published code block that is not the source's.
 
 ## Who owns what
 

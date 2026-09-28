@@ -107,5 +107,5 @@ not on the page. A grader that counted any difference as a catch passed it.
 four things:
 - the footer on page 3 against the document;
 - every contents number against the page its heading is printed on;
-- pub-check's verdict on the PDF;
+- the checks' verdict on the PDF;
 - `compare.mjs` against the published page.
