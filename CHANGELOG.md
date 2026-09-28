@@ -28,6 +28,27 @@ Each version is anchored by a git tag on this repository.
 
 Nothing yet.
 
+## v1.11.0 - 2026-09-28
+
+MINOR: the `docbook-markdown` action. A TC produces the Markdown edition of
+its DocBook specification with one workflow step.
+
+### Added
+
+- **`docbook-markdown` action** (`OASIS-Docs/publication-assurance/docbook-markdown@v1.11.0`).
+  It installs its tools, converts the DocBook source with the named profile
+  (a shipped one, or a profile directory in the TC repository), checks the
+  result word for word against the published HTML when one is given, renders
+  HTML and PDF through the pipeline, writes a job summary and uploads one
+  artifact. Outputs `markdown`, `verification` (PASS, FAIL, skipped) and
+  `package`. `examples/docbook-markdown-workflow.yml` is the copy-paste
+  workflow. CI runs the action end to end on the DMLex DocBook source.
+- Its first CI run found two faults, both fixed before release: rendering
+  needed `requests` (the action installed only BeautifulSoup), and under the
+  runner's `bash -e -o pipefail` a failed check left the step before
+  recording its outputs. `tests/test_docbook_markdown_action.py` now runs the
+  step with the runner's own flags.
+
 ## v1.10.1 - 2026-09-27
 
 PATCH: `verify_pdf.py` allow rules no longer depend on how a pdftotext
