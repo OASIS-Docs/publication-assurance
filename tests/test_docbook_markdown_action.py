@@ -52,7 +52,8 @@ def _run(tmp_path, result_line, status, published="https://example.org/spec.html
            "SOURCE": "spec/src", "PROFILE": "dmlex", "PUBLISHED": published,
            "OUTPUT": str(tmp_path / "edition"), "RUNNER_TEMP": str(tmp_path),
            "GITHUB_OUTPUT": str(out), "GITHUB_STEP_SUMMARY": str(summary)}
-    r = subprocess.run(["bash", "-c", _convert_step()], env=env, capture_output=True, text=True, cwd=tmp_path)
+    # The runner's own invocation for a composite step.
+    r = subprocess.run(["bash", "--noprofile", "--norc", "-e", "-o", "pipefail", "-c", _convert_step()], env=env, capture_output=True, text=True, cwd=tmp_path)
     outputs = dict(l.split("=", 1) for l in out.read_text().splitlines() if "=" in l)
     return r, outputs, seen.read_text().splitlines(), summary.read_text()
 
