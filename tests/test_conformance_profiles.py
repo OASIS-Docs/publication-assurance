@@ -60,3 +60,29 @@ def test_profiles_named_by_their_own_headings_keep_their_scopes(tmp_path):
     scopes = oasis_pub_check._split_profiles(md[md.index("# 3 Conformance"):md.index("# Appendix")])
     assert "3.1.1 Clause A" in scopes["Core Profile"] and "3.2.1" not in scopes["Core Profile"]
     assert "3.2.1 Clause B" in scopes["Extended Profile"] and "3.1.1" not in scopes["Extended Profile"]
+
+
+def test_a_negated_profile_sentence_does_not_begin_a_profile(tmp_path):
+    """OpenEoX eox-core csd01 follows each positive sentence with 'A Library
+    does not satisfies the "X" conformance profile if ...'. Read as a profile
+    start, it drew a 'not populated' WARN naming the negation."""
+    neg = CLAUSES.replace(
+        '* is a widget.\n\n',
+        '* is a widget.\n\nA file does not satisfies the "Widget" conformance profile if it:\n\n'
+        '* is broken.\n\nA file does not satisfy the "Widget" conformance profile when broken\n\n')
+    f = findings(HEAD + neg + TAIL, tmp_path)
+    assert [x["message"] for x in f.items if "not populated" in x["message"]] == []
+    assert f.observed["conformance-structure"]["profiles_found"] == "2"
+
+
+def test_a_remark_under_a_numbered_heading_keeps_its_old_scope():
+    """KMIP cs-profile: 'An implementation conformant to this Profile MAY
+    vary the ...' under '4.7.1 Variable Items' is not a profile sentence,
+    so its scope begins at the sentence, as before the last-profile fix."""
+    span = ("# 4 Conformance\n\n## 4.1 Core Profile\n\n### 4.1.1 Clause A\n\nText.\n\n"
+            "### 4.7.1 Variable Items\n\nAn implementation conformant to this Profile MAY vary the\n\n"
+            "items.\n")
+    scopes = oasis_pub_check._split_profiles(span)
+    remark = "An implementation conformant to this Profile MAY vary the"
+    assert scopes[remark].startswith(remark) and "4.7.1" in scopes["Core Profile"]
+

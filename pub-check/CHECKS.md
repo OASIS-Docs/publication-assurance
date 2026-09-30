@@ -233,7 +233,7 @@ Every internal fragment link must resolve to an anchor in the document.
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
 | 56 | Every internal fragment link resolves to an anchor | each internal href (#...) and the set of element ids/anchor names | every referenced fragment must exist as an id or &lt;a name&gt; | BLOCKER/WARN | all | - |
-| 57 | No link's href uses a scheme a browser cannot follow in place of a '#' fragment | each &lt;a href&gt; of the form scheme:value with no '/' after the colon (a cross-reference id such as tab:name) | the web URL schemes (http, https, mailto, ftp, data, urn, ...), a '#' fragment, or a relative path; anything else is a link that goes nowhere (CSAF v2.1 csd03: href="tab:tlp-labels-across-csaf-versions") | BLOCKER/WARN | all | - |
+| 57 | No link's href is a cross-reference written without its '#' | each &lt;a href&gt; of the form prefix:value, and the document's element ids and '{#id}' text | an href beginning with a pandoc-crossref prefix (tab:, tbl:, fig:, sec:, eq:, lst:), or one that is itself an id of the document, is a link that goes nowhere (CSAF v2.1 csd03: href="tab:tlp-labels-across-csaf-versions"); any other scheme (did:, isbn:, urn:, ...) or relative path passes | BLOCKER/WARN | all | - |
 | 58 | The HTML carries a linked table of contents | the count of internal fragment links | at least one expected (a spec HTML without any is missing its TOC links) | WARN | all | - |
 
 ### html-code-sync
@@ -253,7 +253,7 @@ Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths.
 |---|---|---|---|---|---|---|
 | 61 | No stale pandoc title-block header in the HTML | the HTML body | the &lt;header id="title-block-header"&gt; element must be absent (lint D2) | BLOCKER | all | - |
 | 62 | No CI runner paths in HTML hrefs or srcs | every href/src attribute in the HTML | the /home/runner/ path prefix must not occur (lint D3) | BLOCKER | all | - |
-| 63 | No visible text block of the HTML prints pandoc caption syntax or an attribute block | each visible text block (paragraph, cell, list item, heading) outside &lt;pre&gt;, &lt;code&gt;, scripts and comments | a block starting 'Table: ', 'Figure: ' or 'Listing: ', or carrying '{#id}', is Markdown the renderer did not read; the id it names is missing from the HTML (CSAF v2.1 csd03: 5 table captions) | BLOCKER | all | - |
+| 63 | No visible text block of the HTML ends with a pandoc attribute block printed as text | each visible text block (paragraph, cell, list item, heading) outside &lt;pre&gt;, &lt;code&gt;, &lt;kbd&gt;, &lt;samp&gt;, &lt;var&gt;, scripts and comments | a block whose text ends with '{#id}' or '{#id .class ...}' (a leaked caption 'Table: ...{#id}', or a heading's id) is Markdown the renderer did not read; the id it names is missing from the HTML (CSAF v2.1 csd03: 5 table captions). Caption words alone, '{{#...', and a URI template such as /files{#path} pass | BLOCKER | all | - |
 | 64 | The document title appears in exactly one H1 | the count of &lt;h1&gt; and &lt;h1big&gt; (cover-title) elements matching the title text | exactly 1 (more renders the title twice on the PDF cover, lint D1) | BLOCKER | all | - |
 
 ### html-title

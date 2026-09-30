@@ -12,6 +12,8 @@ severity: BLOCKER on the markdown track, WARN on DOCX-native.
 
 from __future__ import annotations
 
+import pytest
+
 from conftest import oasis_pub_check
 
 GOOD = ('<p><a href="#s1">1</a> <a href="https://example.org/">w</a> '
@@ -45,3 +47,34 @@ def test_web_schemes_fragments_and_relative_links_pass():
 def test_docx_native_track_warns():
     got = scheme_findings(GOOD + '<a href="fig:one">f</a>', severity=oasis_pub_check.WARN)
     assert [s for s, _ in got] == ["WARN"]
+
+
+# Registered non-web identifiers and ordinary links a specification uses.
+# The reviewer (30 Sep 2026) found did:, isbn:, hdl:, ark:, cpe: and x-foo:
+# reported as BLOCKERs under the old list-of-web-schemes rule.
+PASSING = ["tel:+15555550100", "doi:10.1000/182", "javascript:void(0)", "MAILTO:a@b.c",
+           "did:example:123456789abcdefghi", "isbn:9780141036144", "hdl:20.1000/100",
+           "ark:12025/654xz321", "cpe:2.3:a:vendor:product:1.0", "x-foo:bar",
+           "urn:oasis:names:tc:csaf", "ns:element.html"]
+
+
+@pytest.mark.parametrize("href", PASSING)
+def test_registered_schemes_and_relative_paths_pass(href):
+    assert scheme_findings(GOOD + f'<a href="{href}">x</a>') == []
+
+
+@pytest.mark.parametrize("href", ["tab:x#y", "tab:x?y", "tbl:users", "fig:one", "sec:intro",
+                                  "eq:energy", "lst:code", "TAB:upper"])
+def test_every_crossref_prefix_blocks_whatever_follows(href):
+    got = scheme_findings(GOOD + f'<a href="{href}">x</a>')
+    assert [s for s, _ in got] == ["BLOCKER"], href
+
+
+def test_any_prefix_blocks_when_the_document_has_that_id():
+    got = scheme_findings(GOOD + '<h2 id="ns:element.html">E</h2><a href="ns:element.html">e</a>')
+    assert [s for s, _ in got] == ["BLOCKER"] and "write href=\"#ns:element.html\"" in got[0][1]
+
+
+def test_a_target_whose_id_leaked_as_text_is_named():
+    got = scheme_findings(GOOD + '<p>Table: Labels{#tab:labels}</p><a href="tab:labels">t</a>')
+    assert len(got) == 1 and "'{#tab:labels}' is printed as text" in got[0][1]

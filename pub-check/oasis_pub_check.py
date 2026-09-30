@@ -715,50 +715,91 @@ def _title_heading_count(html_text: str, title: str) -> int:
                if norm(m.group(2)) == title.lower())
 
 
-# URI schemes a published specification legitimately links with. Anything
-# else in the scheme position of an <a href> is a link the browser cannot
-# follow. Only a non-hierarchical value (no '/' after the colon) is judged:
-# that is the shape of a cross-reference id written without its '#'.
-WEB_SCHEMES = frozenset({
-    "http", "https", "mailto", "ftp", "ftps", "sftp", "data", "tel", "urn", "file",
-    "news", "nntp", "irc", "ircs", "ssh", "git", "ldap", "ldaps", "xmpp", "sip",
-    "sips", "doi", "tag", "javascript", "about", "blob", "ws", "wss", "geo", "sms",
-    "magnet", "webcal", "feed", "info", "oid", "cid", "mid"})
-_SCHEME_HREF = re.compile(r"^([A-Za-z][A-Za-z0-9+.-]+):([^/?#\s]*)$")
+# Prefixes pandoc-crossref gives its reference ids ([@tbl:x], [tab](tab:x)).
+# An href that begins with one is a cross-reference no filter resolved; a
+# browser reads the prefix as a URL scheme and the link goes nowhere.
+CROSSREF_PREFIXES = ("tab", "tbl", "fig", "sec", "eq", "lst")
+_SCHEME_PREFIX = re.compile(r"^([A-Za-z][A-Za-z0-9+.-]*):")
 
 
-def _non_web_scheme_hrefs(hrefs: list[str]) -> list[tuple[str, str]]:
-    """(href, scheme) for every href whose scheme is not a web URL scheme and
-    whose value is not a hierarchical URI: e.g. href="tab:tlp-labels" left by
-    a pandoc-crossref reference ([tab](tab:...)) that no filter resolved."""
+def _crossref_hrefs(hrefs: list[str], ids: set[str]) -> list[tuple[str, str]]:
+    """(href, scheme) for every scheme-shaped href that is a cross-reference
+    written without its '#': it begins with a pandoc-crossref prefix
+    (href="tab:tlp-labels", also tab:x#y and tab:x?y), or '#' + href names
+    an id of this same document (an element id, or a '{#id}' leaked as
+    text). Any other scheme passes: did:, isbn:, hdl:, ark:, cpe:, x-foo:
+    and urn: are registered identifiers a specification cites, and
+    ns:element.html is a relative path, unless the document has that id."""
     out = []
     for h in sorted(set(hrefs)):
-        m = _SCHEME_HREF.match(h.strip())
-        if m and m.group(1).lower() not in WEB_SCHEMES and m.group(2):
+        m = _SCHEME_PREFIX.match(h.strip())
+        if m and (m.group(1).lower() in CROSSREF_PREFIXES or h.strip() in ids):
             out.append((h, m.group(1)))
     return out
 
 
 _BLOCK_BREAK = re.compile(r"</?(?:p|div|li|td|th|tr|caption|figcaption|dt|dd|h[1-6]|blockquote|br)\b[^>]*>", re.I)
-_CAPTION_TEXT = re.compile(r"^(?:Table|Figure|Listing):\s+\S")
-_ATTR_TEXT = re.compile(r"\{#[A-Za-z][\w:.-]*(?:\s[^{}]*)?\}")
+# A pandoc attribute block closing a block's text: '{#id}', '{#id .class}',
+# '{#id key=value}'. Not '{{#each}}' (Handlebars), and not a URI template
+# ('/files{#path}', RFC 6570), whose word before the brace carries '/' or ':'.
+_ATTR_AT_END = re.compile(
+    r"(?<!\{)\{#(?P<id>[A-Za-z][\w:.-]*)"
+    r"(?:\s+(?:\.[A-Za-z][\w-]*|#[A-Za-z][\w:.-]*|[A-Za-z][\w-]*=(?:\"[^\"]*\"|[^\s}]+)))*\s*\}\s*$")
+_LEAKED_ID = re.compile(r"(?<!\{)\{#([A-Za-z][\w:.-]*)[\s}]")
+# Inline elements whose content is code or computer text, not prose.
+_LITERAL_INLINE = re.compile(r"<(code|kbd|samp|var)\b[^>]*>(.*?)</\1>", re.S | re.I)
 
 
-def _markdown_syntax_as_text(html_text: str) -> list[str]:
-    """Visible text blocks of the HTML that print pandoc caption syntax
-    ('Table: ...', 'Figure: ...') or a pandoc attribute block ('{#id}').
-    A renderer that did not read the caption left the Markdown on the page,
-    and the id it carried was never set (CSAF v2.1 csd03: 5 tables). Code is
-    code: <pre>, <code>, scripts, styles and comments are not read."""
+def _literal_safe(m: re.Match) -> str:
+    """The text of a code/kbd/samp/var element with the characters the
+    residue patterns read ('{', ':') masked, so it can never form a hit but
+    still reads back in the message."""
+    return m.group(2).replace("{", "\x00").replace(":", "\x01")
+
+
+def _prose_blocks(html_text: str) -> list[str]:
+    """Visible text of each block of the HTML, code excluded: comments,
+    <pre>, <script>, <style> and <template> are dropped, and the text of
+    <code>, <kbd>, <samp> and <var> is masked (see _literal_safe)."""
     body = re.sub(r"<!--.*?-->|<(pre|script|style|template)\b.*?</\1>", "\n", html_text, flags=re.S | re.I)
-    body = re.sub(r"<code\b[^>]*>(.*?)</code>",
-                  lambda m: m.group(1).replace("{", "\x00"), body, flags=re.S | re.I)
+    body = _LITERAL_INLINE.sub(_literal_safe, body)
     out = []
     for block in _BLOCK_BREAK.split(body):
         text = re.sub(r"\s+", " ", html_lib.unescape(re.sub(r"<[^>]+>", "", block))).strip()
-        if text and (_CAPTION_TEXT.match(text) or _ATTR_TEXT.search(text)):
-            out.append(text.replace("\x00", "{"))
+        if text:
+            out.append(text)
     return out
+
+
+def _leaked_attribute(text: str) -> bool:
+    """True when a block's text ends with a pandoc attribute block that is
+    not the tail of a URI template."""
+    m = _ATTR_AT_END.search(text)
+    if not m:
+        return False
+    word = text[:m.start()].rsplit(" ", 1)[-1]
+    return "/" not in word and ":" not in word
+
+
+def _unmask(text: str) -> str:
+    return text.replace("\x00", "{").replace("\x01", ":")
+
+
+def _markdown_syntax_as_text(html_text: str) -> list[str]:
+    """Visible text blocks of the HTML that end with a pandoc attribute
+    block ('{#id}'), which a renderer that did not read it left on the page:
+    a leaked table caption ('Table: ...{#id}') or a heading's '{#id}'. The
+    id it carried was never set (CSAF v2.1 csd03: 5 tables). Caption words
+    alone ('Figure: see below', a cell reading 'Table: users') are ordinary
+    text, so the '{#id}' is what is judged. Code is code: <pre>, <code>,
+    <kbd>, <samp>, <var>, scripts, styles and comments are not read."""
+    return [_unmask(t) for t in _prose_blocks(html_text) if _leaked_attribute(t)]
+
+
+def _leaked_ids(html_text: str) -> set[str]:
+    """Ids named by a '{#id}' printed as prose text (never set as ids)."""
+    return {m.group(1) for t in _markdown_syntax_as_text(html_text)
+            for m in _LEAKED_ID.finditer(t + " ")}
 
 
 def check_html(html_text: str, stem: str, f: Findings,
@@ -771,12 +812,13 @@ def check_html(html_text: str, stem: str, f: Findings,
     p.feed(html_text)
     title = " ".join(p.title.split())
     f.observe("html-title", title=title or "(absent)")
-    bad_scheme = _non_web_scheme_hrefs(p.hrefs)
+    markdown_as_text = _markdown_syntax_as_text(html_text)
+    leaked_ids = _leaked_ids(html_text)
+    bad_scheme = _crossref_hrefs(p.hrefs, p.ids | leaked_ids)
     f.observe("html-anchors",
               internal_links=len(set(p.internal_hrefs)), anchors=len(p.ids),
               unresolved=len({h for h in p.internal_hrefs if h not in p.ids}),
               non_web_scheme_links=[h for h, _ in bad_scheme])
-    markdown_as_text = _markdown_syntax_as_text(html_text)
     f.observe("html-residue",
               title_block_headers=len(re.findall(r'<header\s+id="title-block-header"', html_text, re.I)),
               runner_paths=len(set(re.findall(r'(?:href|src)="(/home/runner/[^"]*)"', html_text))),
@@ -825,6 +867,8 @@ def check_html(html_text: str, stem: str, f: Findings,
     for h, scheme in bad_scheme:
         target = h if h in p.ids else h.split(":", 1)[1] if h.split(":", 1)[1] in p.ids else ""
         hint = (f" The document has the anchor '#{target}': write href=\"#{target}\"." if target
+                else f" Its target's '{{#{h}}}' is printed as text, so that id is not set either: "
+                     f"fix the caption, then write href=\"#{h}\"." if h in leaked_ids
                 else " If it names a table, figure or section of this document, link its anchor "
                      "with '#' (and give the target that id).")
         f.add(anchor_severity, "html-anchors",
@@ -2688,6 +2732,11 @@ PROFILE_HEADING_LINE = re.compile(
     r"([^\n.!?]{1,80}\b(?:Profile|Level)\b[^\n.!?]{0,20})[ \t]*$",
     re.M | re.I)
 
+# A profile sentence ('A file satisfies the "X" conformance profile if it:'),
+# and its negation, which only says when the profile is not met.
+PROFILE_SATISFIES = re.compile(r"\bsatisf(?:y|ies)\b", re.I)
+PROFILE_NEGATION = re.compile(r"\bnot\s+(?:satisf|conform)", re.I)
+
 # Clause identifiers, in priority order per spec algorithm step 8: (a) a
 # numbered heading (decimal, e.g. '8.1'), optionally carrying a bracketed
 # stable target-id ('[PREFIX-C-N]') that -- when present -- is the citable
@@ -2818,7 +2867,10 @@ def _split_profiles(span: str) -> dict[str, str]:
     ('This clause covers the Core Profile requirements.') is never misread
     as a profile-scope boundary -- real profile headings are short,
     unpunctuated titles."""
-    marks = [(m.start(), m.group(1).strip()) for m in PROFILE_HEADING_LINE.finditer(span)]
+    # 'A Library does not satisfy the "X" conformance profile if ...' states
+    # when a profile fails; it never begins one (OpenEoX eox-core csd01).
+    marks = [(m.start(), m.group(1).strip()) for m in PROFILE_HEADING_LINE.finditer(span)
+             if not PROFILE_NEGATION.search(m.group(0))]
     if not marks:
         return {"(default)": span}
     # A profile named in a sentence directly under its clause heading
@@ -2827,14 +2879,18 @@ def _split_profiles(span: str) -> dict[str, str]:
     # Splitting at the sentence credited every clause heading to the profile
     # before it, so the last profile was always reported as having no
     # clauses (CSAF v2.1 csd03, Sep 2026).
-    # The mark must be a plain sentence (not itself a heading or a clause
-    # line) and the clause heading its immediately preceding non-blank line.
+    # The mark must be a plain sentence that says what satisfies the profile
+    # (not itself a heading or a clause line, and not a remark such as 'An
+    # implementation conformant to this Profile MAY vary the ...' under a
+    # '4.7.1 Variable Items' heading, KMIP cs-profile), and the clause
+    # heading its immediately preceding non-blank line.
     clause_starts = {m.start() for m in CLAUSE_ID.finditer(span)}
     moved = []
     for k, (pos, name) in enumerate(marks):
         own_line = span[pos:].split("\n", 1)[0].lstrip()
         prev_line = span[:pos].rstrip().rfind("\n") + 1
         if (pos not in clause_starts and not own_line.startswith("#")
+                and PROFILE_SATISFIES.search(own_line)
                 and prev_line in clause_starts and prev_line > (moved[-1][0] if moved else -1)):
             pos = prev_line
         moved.append((pos, name))
@@ -7524,9 +7580,9 @@ CONDITION_DOCS: list[dict] = [
          pulls="every href/src attribute in the HTML",
          compares_to="the /home/runner/ path prefix must not occur (lint D3)"),
     dict(check="html-residue", sig="Pandoc caption or attribute syntax is printed as text", applies="all",
-         condition="No visible text block of the HTML prints pandoc caption syntax or an attribute block",
-         pulls="each visible text block (paragraph, cell, list item, heading) outside <pre>, <code>, scripts and comments",
-         compares_to="a block starting 'Table: ', 'Figure: ' or 'Listing: ', or carrying '{#id}', is Markdown the renderer did not read; the id it names is missing from the HTML (CSAF v2.1 csd03: 5 table captions)"),
+         condition="No visible text block of the HTML ends with a pandoc attribute block printed as text",
+         pulls="each visible text block (paragraph, cell, list item, heading) outside <pre>, <code>, <kbd>, <samp>, <var>, scripts and comments",
+         compares_to="a block whose text ends with '{#id}' or '{#id .class ...}' (a leaked caption 'Table: ...{#id}', or a heading's id) is Markdown the renderer did not read; the id it names is missing from the HTML (CSAF v2.1 csd03: 5 table captions). Caption words alone, '{{#...', and a URI template such as /files{#path} pass"),
     dict(check="html-residue", sig="<h1> elements", applies="all",
          condition="The document title appears in exactly one H1",
          pulls="the count of <h1> and <h1big> (cover-title) elements matching the title text",
@@ -7539,9 +7595,9 @@ CONDITION_DOCS: list[dict] = [
          compares_to="every referenced fragment must exist as an id or <a name>"),
     dict(check="html-anchors", sig="is not a web URL scheme", applies="all",
          severity="BLOCKER/WARN",  # dynamic: the same anchor_severity as an unresolved fragment
-         condition="No link's href uses a scheme a browser cannot follow in place of a '#' fragment",
-         pulls="each <a href> of the form scheme:value with no '/' after the colon (a cross-reference id such as tab:name)",
-         compares_to="the web URL schemes (http, https, mailto, ftp, data, urn, ...), a '#' fragment, or a relative path; anything else is a link that goes nowhere (CSAF v2.1 csd03: href=\"tab:tlp-labels-across-csaf-versions\")"),
+         condition="No link's href is a cross-reference written without its '#'",
+         pulls="each <a href> of the form prefix:value, and the document's element ids and '{#id}' text",
+         compares_to="an href beginning with a pandoc-crossref prefix (tab:, tbl:, fig:, sec:, eq:, lst:), or one that is itself an id of the document, is a link that goes nowhere (CSAF v2.1 csd03: href=\"tab:tlp-labels-across-csaf-versions\"); any other scheme (did:, isbn:, urn:, ...) or relative path passes"),
     dict(check="html-anchors", sig="no internal (fragment) links at all", applies="all",
          condition="The HTML carries a linked table of contents",
          pulls="the count of internal fragment links",
