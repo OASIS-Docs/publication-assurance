@@ -15,7 +15,7 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=178)
+![oasis-pub-check: the acceptance criteria](../assets/gate.png?v=181)
 
 `oasis_pub_check.py` is the executable form of the publication acceptance
 criteria: the TC-side version of the checks OASIS TC Administration
@@ -33,7 +33,7 @@ Characteristics:
 - No configuration. Every expectation is derived from the package itself:
   its own front matter, its own CSS, its own schema `$id`s, its own publish
   path.
-- 178 individual checks across 61 check classes. `--list-checks` asserts
+- 181 individual checks across 61 check classes. `--list-checks` asserts
   that inventory against the code, and every count advertised anywhere in
   this repository comes from it.
 - It combines the intake acceptance criteria with the publication
@@ -134,13 +134,13 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | double-slash | 1 | BLOCKER | A double slash inside a relative path 404s on the CDN. |
 | extension-conformance | 1 | WARN | Principal and Multi-Part named-part filename extensions should match a common OASIS publication rendering format, not an invented or proprietary token. |
 | extension-count | 4 | BLOCKER/WARN | A delivery item must carry exactly one file extension after its document-identifier stem: BLOCKER, relaxed to WARN at wd stage (Naming Directives v1.7 s4/s9). Compound archive extensions (`tar.gz`, `tar.bz2`, `tar.xz`) count as one. Every other file in the package gets the same double-extension and missing-extension test as a non-blocking advisory. |
-| fence-collapse | 1 | BLOCKER | An opening code fence with trailing text collapses the whole block under pandoc. |
+| fence-collapse | 2 | BLOCKER/WARN | An opening code fence with trailing text collapses the whole block under pandoc. |
 | filenames | 6 | BLOCKER/WARN | Delivery items are named for the published stage, one basename, all formats present. |
 | front-matter | 12 | BLOCKER/WARN | The This/Latest stage URL blocks must match the package's actual publish path. |
 | generator | 1 | BLOCKER | DOCX-native renders must come from Microsoft Word, matching the TC's precedent. |
-| html-anchors | 2 | BLOCKER/WARN | Every internal fragment link must resolve to an anchor in the document. |
+| html-anchors | 3 | BLOCKER/WARN | Every internal fragment link must resolve to an anchor in the document. |
 | html-code-sync | 2 | BLOCKER/WARN | Every fenced code block of the Markdown source is published in the HTML unchanged, tabs and indentation included. |
-| html-residue | 3 | BLOCKER | Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths. |
+| html-residue | 4 | BLOCKER | Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths. |
 | html-title | 2 | BLOCKER/WARN | The HTML title element must be an actual document title with no working residue. |
 | image-policy | 11 | BLOCKER/WARN | Images must be self-contained, inert, and within the pipeline's size caps. |
 | junk-files | 2 | BLOCKER | OS and editor junk must not be in the package. |
@@ -202,7 +202,7 @@ same command on either side of the gate (`--emit-manifest`):
   [OpenDocument releases](https://docs.oasis-open.org/office/OpenDocument/v1.4/csd01/OpenDocument-v1.4-csd01-manifest.txt)
   carry the precedent.
 
-![The verification chain](../assets/chain.png?v=178)
+![The verification chain](../assets/chain.png?v=181)
 
 If the package includes a `manifest.json` conforming to
 [`manifest-schema.json`](manifest-schema.json), the intake side can verify

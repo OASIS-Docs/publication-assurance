@@ -90,3 +90,34 @@ def test_a_bare_appendix_letter_is_a_contents_entry():
         assert E.match(line), line
     for line in ("A lexicographic resource contains entries.", "a. Conformant widgets"):
         assert not E.match(line), line
+
+
+def test_invisible_characters_before_the_page_number_are_not_read_as_text(monkeypatch):
+    """Typst prints U+2060 WORD JOINER before each contents page number, so
+    the number did not stand alone after the leader and all 59 entries of
+    CSAF v2.1 csd03 (Sep 2026) read as unnumbered. pdftotext's output is
+    served by a stub here: the characters are the fixture."""
+    titles = [f"{k}. Section {k}" for k in range(1, 7)]
+    marks = ["⁠", "​", "﻿", "⁠", " ", "⁠"]
+    toc = "Table of Contents\n" + "".join(
+        f"{t}{' ' * 30}{mark}{k + 1}\n" for k, (t, mark) in enumerate(zip(titles, marks), 1))
+    pages = {1: toc} | {k + 1: f"{t}\nBody text {k}.\n" for k, t in enumerate(titles, 1)}
+
+    def run(cmd, **kw):
+        class R:
+            stdout = ""
+        if cmd[0] == "pdfinfo":
+            R.stdout = f"Pages:          {len(pages)}\n"
+        elif "-f" in cmd:
+            R.stdout = pages[int(cmd[cmd.index("-f") + 1])]
+        else:
+            R.stdout = "\f".join(pages[n] for n in sorted(pages))
+        return R
+
+    monkeypatch.setattr(oasis_pub_check.shutil, "which", lambda name: name)
+    monkeypatch.setattr(oasis_pub_check.subprocess, "run", run)
+    f = oasis_pub_check.Findings()
+    oasis_pub_check.check_pdf_toc_pages("typst.pdf", f)
+    assert [x["message"] for x in f.items if x["check"] == "pdf-toc-pages"] == []
+    assert f.observed["pdf-toc-pages"]["with_page_numbers"] == "6"
+    assert f.observed["pdf-toc-pages"]["wrong"] == "0"

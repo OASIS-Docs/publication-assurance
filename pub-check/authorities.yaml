@@ -1,5 +1,5 @@
 snapshot_date: '2026-07-21'
-policy_grounded_count: 94
+policy_grounded_count: 95
 note: Corpus digests in corpus/MANIFEST.json. Quotes are verbatim, mechanically proven.
 conditions:
   artifact-naming/filename embeds a stage/revision token:
@@ -1612,6 +1612,22 @@ conditions:
   html-anchors/has no matching anchor in the HTML:
     check: html-anchors
     sig: has no matching anchor in the HTML
+    criteria:
+    - AC-CONTENT-06
+    authorities:
+    - criterion: AC-CONTENT-06
+      criterion_statement: The package's table of contents SHOULD accurately and currently reflect the
+        document's actual section numbers and headings.
+      doc: handbook-WPQualityChecklist.txt
+      doc_label: 'TC Handbook: WPQualityChecklist'
+      url: https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html
+      section: Editorial quality verification checklist, key areas
+      quote: 'Document consistency: section numbers, cross-references, defined term capitalization, and
+        table of contents are current and internally consistent.'
+      severity: WARN
+  html-anchors/is not a web URL scheme:
+    check: html-anchors
+    sig: is not a web URL scheme
     criteria:
     - AC-CONTENT-06
     authorities:

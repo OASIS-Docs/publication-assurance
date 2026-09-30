@@ -4,14 +4,14 @@ SPDX-License-Identifier: Apache-2.0
 Authored by Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-![OASIS Publication Assurance](assets/hero.png?v=178)
+![OASIS Publication Assurance](assets/hero.png?v=181)
 
 <p align="center">
   <a href="LICENSE"><img alt="Code: Apache-2.0" src="https://img.shields.io/badge/code-Apache--2.0-2c4a8a"></a>
   <a href="NOTICE"><img alt="Criteria prose: OASIS verbatim-only" src="https://img.shields.io/badge/criteria_prose-OASIS_verbatim--only-446CAA"></a>
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776ab">
   <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/dependencies-stdlib_only-2f9e44">
-  <img alt="Checks: 178 individual, 61 classes" src="https://img.shields.io/badge/checks-178_individual_%C2%B7_61_classes-f08c00">
+  <img alt="Checks: 181 individual, 61 classes" src="https://img.shields.io/badge/checks-181_individual_%C2%B7_61_classes-f08c00">
   <img alt="Regression corpus: 12 packages" src="https://img.shields.io/badge/regression_corpus-12_packages-6741d9">
 </p>
 
@@ -39,7 +39,7 @@ target could not be read. Two ways to run it:
 ### 1. On your machine
 
 ```bash
-git clone --depth 1 --branch v1.12.0 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.13.0 https://github.com/OASIS-Docs/publication-assurance
 python3 publication-assurance/pub-check/oasis_pub_check.py <package>
 ```
 
@@ -47,7 +47,7 @@ Add `--json` for machine-readable output, or `--emit-manifest` to also
 write the two release manifests: `manifest.json` and the `<stem>-manifest.txt`
 Work Product Manifest File.
 
-![oasis-pub-check output](assets/gate.png?v=178)
+![oasis-pub-check output](assets/gate.png?v=181)
 
 ### 2. In your TC repo on GitHub
 
@@ -98,7 +98,7 @@ URL shapes and what happens when nothing is published:
 
 ## Publication acceptance test cases: an overview
 
-The 178 individual checks (61 check classes; `--list-checks` asserts the
+The 181 individual checks (61 check classes; `--list-checks` asserts the
 inventory from the code) cover six areas:
 
 - **Naming and stages**: stage tokens, version directories, filename
@@ -129,9 +129,9 @@ candidate whose blocker set TC Administration had already established by hand.
 
 ## Criteria sources
 
-![How a criterion is sourced from policy](assets/authority.png?v=178)
+![How a criterion is sourced from policy](assets/authority.png?v=181)
 
-Every acceptance criterion cites the rule it enforces. 97 of the 178 checks
+Every acceptance criterion cites the rule it enforces. 98 of the 181 checks
 trace to a verbatim clause in the governing corpus; the rest are operational
 rules from correction rounds. The full criterion-to-clause map, with the exact
 quoted text and its source, is [`AUTHORITIES.md`](pub-check/AUTHORITIES.md).
@@ -147,9 +147,9 @@ tool's own registry, on every run.
 
 ## Where the checks sit: validation and audit
 
-![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=178)
+![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=181)
 
-Your TC runs oasis-pub-check in its own CI to check all 178 conditions, each reported as the value the tool pulled from the
+Your TC runs oasis-pub-check in its own CI to check all 181 conditions, each reported as the value the tool pulled from the
 package set against the value it was compared to, in full. TC Administration
 re-runs the identical code at intake (checklist step 4b) and wraps it with the
 15 mandatory audit checks only a human or a live check can do: byte identity
@@ -177,7 +177,7 @@ emits a `nide-manifest` that pub-check hash-verifies at intake. A green
 manifest lets intake confirm the published bytes match the build the TC
 approved.
 
-![How pub-check dovetails with nide](assets/architecture/nide-bridge.png?v=178)
+![How pub-check dovetails with nide](assets/architecture/nide-bridge.png?v=181)
 
 ## Repository structure
 
@@ -189,12 +189,12 @@ publication-assurance/
 ├── CHANGELOG.md                     # Versioned audit trail: which issue drove which criteria
 ├── action.yml                       # The drop-in GitHub Action a TC calls in one step
 ├── pub-check/                       # The acceptance criteria
-│   ├── oasis_pub_check.py           #   178 individual checks in 61 classes, stdlib only
+│   ├── oasis_pub_check.py           #   181 individual checks in 61 classes, stdlib only
 │   ├── CHECKS.md                    #   the acceptance criteria catalog, generated from the code
 │   ├── AUTHORITIES.md               #   the criterion-to-clause map (verbatim OASIS policy)
 │   ├── render_checks_md.py          #   the generator (keeps CHECKS.md in sync)
 │   ├── manifest-schema.json         #   provenance manifest contract
-│   ├── authorities.yaml             #   the authority map as data (source of the 97 figure)
+│   ├── authorities.yaml             #   the authority map as data (source of the 98 figure)
 │   ├── crosswalk.json               #   condition -> acceptance criterion, both directions checked
 │   ├── criteria.yaml                #   the acceptance criteria themselves, with their quotes
 │   ├── corpus/                      #   the 25 snapshotted policy pages + MANIFEST.json (sha256)

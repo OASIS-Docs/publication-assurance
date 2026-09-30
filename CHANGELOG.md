@@ -28,6 +28,61 @@ Each version is anchored by a git tag on this repository.
 
 Nothing yet.
 
+## v1.13.0 - 2026-09-30
+
+MINOR: from a re-audit of the published CSAF v2.1 CSD03 package. Three new
+conditions (181 checks in 61 classes), and five fixes to existing ones: the
+package drew 96 BLOCKERs and 3 WARNs it should not have, and missed a broken
+link and five leaked table captions.
+
+### New conditions
+
+- **html-anchors**: a link whose href uses a scheme a browser cannot follow,
+  with no `/` after the colon, reads as a cross-reference id written without
+  its `#` (CSAF: `href="tab:tlp-labels-across-csaf-versions"`). BLOCKER on
+  the Markdown track and WARN on DOCX-native, the same as an unresolved
+  fragment, because the failure is the same: the link goes nowhere.
+- **html-residue**: pandoc caption syntax (`Table: ...`, `Figure: ...`) or an
+  attribute block (`{#id}`) printed as visible text in the HTML. CSAF prints
+  five such table captions, and the ids they carried are missing. BLOCKER,
+  like the other pandoc and pipeline residue in this class.
+- **fence-collapse**: one WARN listing the fences whose info string carries
+  trailing text but which the published HTML shows as code blocks (next item).
+
+### Fixed
+
+- **fence-collapse** no longer blocks a fence the HTML shows rendered. Pandoc's
+  gfm and commonmark readers render ```` ```yaml <!--json-path(...)--> ```` as a
+  code block; its default markdown reader, which the OASIS pipeline's step 1
+  runs, collapses it to inline code. The check now looks at the HTML's `<pre>`
+  blocks (the comparison html-code-sync makes). A flagged block the HTML
+  shows rendered is reported in the one portability WARN. A flagged block the
+  HTML does not show as code, or a package with no HTML, is still a BLOCKER.
+  CSAF v2.1 csd03: 96 BLOCKERs become 1 WARN.
+- **pdf-toc-pages** ignores invisible format characters (U+2060 WORD JOINER,
+  U+200B, U+FEFF) and reads other spaces (U+00A0) as spaces. Typst prints a
+  WORD JOINER before every contents page number, so all 59 entries read as
+  unnumbered. CSAF v2.1 csd03 now reads 55 numbered entries (the 4 extra
+  were body headings, counted as contents because their titles did not match)
+  and passes.
+- **conformance-structure**: a profile named in a sentence directly under its
+  clause heading now begins at that heading. Each clause was credited to the
+  profile before it, so the last profile was always reported empty (CSAF v2.1
+  csd01 and csd03). A "clause removed" WARN on CSAF v2.0 cs02 and csd02 now
+  names the right clause (9.1.10, not 9.1.14).
+- **public-review-metadata**: when the review itself cannot be confirmed, the
+  INFO note states whether the companion file is present in the live stage
+  directory. It said the file "must be present" while the file was there.
+- **front-matter**: a URL ends at the `>` of a Markdown autolink. Messages
+  printed a stray `>` after every URL, and a URL cited as `<url>` in the
+  References did not match the same URL cited in Related work, which the
+  check exempts. CSAF v2.1 csd03 and three CSAF v2.0 packages each lose one
+  such WARN.
+
+The criterion-to-clause map is regenerated: the new html-anchors condition
+answers to AC-CONTENT-06 (cross-references internally consistent), the other
+two are operational. 98 of the 181 conditions trace to written policy.
+
 ## v1.12.0 - 2026-09-28
 
 MINOR: every step of the conversion guide runs as one GitHub workflow a TC
