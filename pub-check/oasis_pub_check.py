@@ -60,6 +60,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import unicodedata
 import urllib.parse
 import zipfile
 from html.parser import HTMLParser
@@ -143,6 +144,7 @@ class _AnchorParser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.ids: set[str] = set()
         self.internal_hrefs: list[str] = []
+        self.hrefs: list[str] = []
         self.title = ""
         self._in_title = False
 
@@ -154,6 +156,8 @@ class _AnchorParser(HTMLParser):
             self.ids.add(d["name"])
         if tag == "a" and d.get("href", "").startswith("#"):
             self.internal_hrefs.append(d["href"][1:])
+        if tag == "a" and d.get("href"):
+            self.hrefs.append(d["href"])
         if tag == "title":
             self._in_title = True
 
@@ -598,15 +602,21 @@ def check_front_matter(md_text: str, items: dict[str, str], version: str, stage:
             f.add(BLOCKER, "front-matter", f"Latest-stage URL not under /{version}/: {u}")
     # any other docs URL declaring a different version is a stale-draft tell,
     # except legitimate citations in the Previous-Stage / Related-Work blocks
-    legit = set(stage_urls_from_md(md_text, "Previous"))
+    # A URL ends at whitespace or at the '<'/'>' of a Markdown autolink
+    # (<https://...>), and trailing sentence punctuation is not part of it.
+    # Reading through the '>' printed a stray '>' after every URL in these
+    # messages, and a URL cited as <url> in References did not match the
+    # same URL cited bare in Related work (CSAF v2.1 csd03, Sep 2026).
+    url_end = lambda u: u.rstrip(".,);:")
+    legit = {url_end(u) for u in stage_urls_from_md(md_text, "Previous")}
     rw = re.search(r"^#+ Related [Ww]ork.*?$(.*?)^#+ ", md_text, re.M | re.S)
     if rw:
-        legit |= set(re.findall(r"https?://\S+?(?=[)\s\\]|$)", rw.group(1)))
-    for u in sorted(set(re.findall(r"https?://docs\.oasis-open\.org/\S+", md_text)) - legit):
+        legit |= {url_end(u) for u in re.findall(r"https?://[^\s<>]+?(?=[)\s\\<>]|$)", rw.group(1))}
+    for u in sorted({url_end(u) for u in re.findall(r"https?://docs\.oasis-open\.org/[^\s<>]+", md_text)} - legit):
         m = re.search(r"/v(\d+\.\d+)/", u)
         if m and f"v{m.group(1)}" != version and "/templates/" not in u:
             f.add(WARN, "front-matter",
-                  f"URL declares version v{m.group(1)} (package is {version}): {u.rstrip('.,)')}"
+                  f"URL declares version v{m.group(1)} (package is {version}): {u}"
                   " -- confirm this is an intentional external reference.")
     return base
 
@@ -705,6 +715,52 @@ def _title_heading_count(html_text: str, title: str) -> int:
                if norm(m.group(2)) == title.lower())
 
 
+# URI schemes a published specification legitimately links with. Anything
+# else in the scheme position of an <a href> is a link the browser cannot
+# follow. Only a non-hierarchical value (no '/' after the colon) is judged:
+# that is the shape of a cross-reference id written without its '#'.
+WEB_SCHEMES = frozenset({
+    "http", "https", "mailto", "ftp", "ftps", "sftp", "data", "tel", "urn", "file",
+    "news", "nntp", "irc", "ircs", "ssh", "git", "ldap", "ldaps", "xmpp", "sip",
+    "sips", "doi", "tag", "javascript", "about", "blob", "ws", "wss", "geo", "sms",
+    "magnet", "webcal", "feed", "info", "oid", "cid", "mid"})
+_SCHEME_HREF = re.compile(r"^([A-Za-z][A-Za-z0-9+.-]+):([^/?#\s]*)$")
+
+
+def _non_web_scheme_hrefs(hrefs: list[str]) -> list[tuple[str, str]]:
+    """(href, scheme) for every href whose scheme is not a web URL scheme and
+    whose value is not a hierarchical URI: e.g. href="tab:tlp-labels" left by
+    a pandoc-crossref reference ([tab](tab:...)) that no filter resolved."""
+    out = []
+    for h in sorted(set(hrefs)):
+        m = _SCHEME_HREF.match(h.strip())
+        if m and m.group(1).lower() not in WEB_SCHEMES and m.group(2):
+            out.append((h, m.group(1)))
+    return out
+
+
+_BLOCK_BREAK = re.compile(r"</?(?:p|div|li|td|th|tr|caption|figcaption|dt|dd|h[1-6]|blockquote|br)\b[^>]*>", re.I)
+_CAPTION_TEXT = re.compile(r"^(?:Table|Figure|Listing):\s+\S")
+_ATTR_TEXT = re.compile(r"\{#[A-Za-z][\w:.-]*(?:\s[^{}]*)?\}")
+
+
+def _markdown_syntax_as_text(html_text: str) -> list[str]:
+    """Visible text blocks of the HTML that print pandoc caption syntax
+    ('Table: ...', 'Figure: ...') or a pandoc attribute block ('{#id}').
+    A renderer that did not read the caption left the Markdown on the page,
+    and the id it carried was never set (CSAF v2.1 csd03: 5 tables). Code is
+    code: <pre>, <code>, scripts, styles and comments are not read."""
+    body = re.sub(r"<!--.*?-->|<(pre|script|style|template)\b.*?</\1>", "\n", html_text, flags=re.S | re.I)
+    body = re.sub(r"<code\b[^>]*>(.*?)</code>",
+                  lambda m: m.group(1).replace("{", "\x00"), body, flags=re.S | re.I)
+    out = []
+    for block in _BLOCK_BREAK.split(body):
+        text = re.sub(r"\s+", " ", html_lib.unescape(re.sub(r"<[^>]+>", "", block))).strip()
+        if text and (_CAPTION_TEXT.match(text) or _ATTR_TEXT.search(text)):
+            out.append(text.replace("\x00", "{"))
+    return out
+
+
 def check_html(html_text: str, stem: str, f: Findings,
                anchor_severity: str = BLOCKER) -> None:
     """`anchor_severity` is BLOCKER on the markdown track (the author controls
@@ -715,12 +771,16 @@ def check_html(html_text: str, stem: str, f: Findings,
     p.feed(html_text)
     title = " ".join(p.title.split())
     f.observe("html-title", title=title or "(absent)")
+    bad_scheme = _non_web_scheme_hrefs(p.hrefs)
     f.observe("html-anchors",
               internal_links=len(set(p.internal_hrefs)), anchors=len(p.ids),
-              unresolved=len({h for h in p.internal_hrefs if h not in p.ids}))
+              unresolved=len({h for h in p.internal_hrefs if h not in p.ids}),
+              non_web_scheme_links=[h for h, _ in bad_scheme])
+    markdown_as_text = _markdown_syntax_as_text(html_text)
     f.observe("html-residue",
               title_block_headers=len(re.findall(r'<header\s+id="title-block-header"', html_text, re.I)),
-              runner_paths=len(set(re.findall(r'(?:href|src)="(/home/runner/[^"]*)"', html_text))))
+              runner_paths=len(set(re.findall(r'(?:href|src)="(/home/runner/[^"]*)"', html_text))),
+              markdown_caption_or_attribute_text=len(markdown_as_text))
     if re.search(r"(?i)[\s\-–—](tmp|draft|wip)$", title):
         f.add(BLOCKER, "html-title", f"HTML <title> carries working residue: '{title}'")
     if title and stem.split("-")[0].replace("_", " ") and len(title) < 8:
@@ -735,6 +795,12 @@ def check_html(html_text: str, stem: str, f: Findings,
     for m in sorted(set(re.findall(r'(?:href|src)="(/home/runner/[^"]*)"', html_text))):
         f.add(BLOCKER, "html-residue",
               f"CI runner path leaked into the HTML: {m} (lint D3).")
+    for text in markdown_as_text:
+        f.add(BLOCKER, "html-residue",
+              f"Pandoc caption or attribute syntax is printed as text in the HTML: '{text}'. "
+              f"The renderer did not read it as a caption or an id, so readers see raw "
+              f"Markdown and links to that id go nowhere. Render the source with a reader "
+              f"that supports the syntax, or write the caption and anchor another way.")
     if title:
         dup = _title_heading_count(html_text, title)
         if dup > 1:
@@ -754,6 +820,17 @@ def check_html(html_text: str, stem: str, f: Findings,
     if missing:
         f.add(INFO, "html-anchors",
               f"{len(missing)} of {len(set(p.internal_hrefs))} internal links unresolved.")
+    # Same failure as an unresolved fragment (the link goes nowhere), so the
+    # same severity: BLOCKER on the markdown track, WARN on DOCX-native.
+    for h, scheme in bad_scheme:
+        target = h if h in p.ids else h.split(":", 1)[1] if h.split(":", 1)[1] in p.ids else ""
+        hint = (f" The document has the anchor '#{target}': write href=\"#{target}\"." if target
+                else " If it names a table, figure or section of this document, link its anchor "
+                     "with '#' (and give the target that id).")
+        f.add(anchor_severity, "html-anchors",
+              f"Link href '{h}': '{scheme}:' is not a web URL scheme, so a browser cannot "
+              f"follow the link. It reads as an internal cross-reference written without "
+              f"its '#'.{hint}")
     if not p.internal_hrefs:
         f.add(WARN, "html-anchors", "HTML contains no internal (fragment) links at all; "
                                     "expected a linked Table of Contents.")
@@ -774,16 +851,26 @@ def check_md_links(md_text: str, f: Findings) -> None:
                   f"period and backslash into the href and eats the line break. Use '. \\'.")
 
 
-def check_md_fences(md_text: str, f: Findings) -> None:
+def check_md_fences(md_text: str, f: Findings, html_text: str = "") -> None:
     """Absorbed from publisher-toolkit preprocess_md.py (lint D6): an opening
     code fence whose info string carries trailing text (``` yaml <!-- note -->)
     is not recognized as a fence by pandoc's classic fenced_code_blocks -- the
     whole block collapses to inline code and loses its formatting. Shipped
     once (DPS prov-meta, 28 yaml blocks, May 2026; editor-flagged blocker).
-    The curly-attribute form (```{.lang title="x"}) is fine."""
+    The curly-attribute form (```{.lang title="x"}) is fine.
+
+    Whether it collapses depends on the reader: pandoc's gfm and commonmark
+    readers render such a fence as a code block, its default markdown reader
+    (the one the OASIS pipeline's step 1 runs) does not. So the published
+    HTML decides. A flagged block the HTML publishes as a <pre> block rendered
+    (CSAF v2.1 csd03, Sep 2026: 96 such fences, every one a <pre> in the
+    HTML); the finding is then one WARN about the Markdown's portability, not
+    a BLOCKER per fence. A flagged block the HTML does not carry as a <pre>
+    block, or a package with no HTML to show it, stays a BLOCKER."""
     in_fence = False
     delim = ""
     f.observe("fence-collapse", fences_scanned=len(re.findall(r"^\s{0,3}(?:`{3,}|~{3,})", md_text, re.M)))
+    flagged = []
     for i, line in enumerate(md_text.splitlines(), 1):
         m = re.match(r"^(\s{0,3})(`{3,}|~{3,})(.*)$", line)
         if not m:
@@ -796,11 +883,53 @@ def check_md_fences(md_text: str, f: Findings) -> None:
         in_fence = True
         delim = marker[0]
         if info and not info.startswith("{") and re.match(r"^[\w+-]+\s+\S", info):
-            f.add(BLOCKER, "fence-collapse",
-                  f"Line {i}: opening fence info string carries trailing text "
-                  f"('{info[:40]}...'): pandoc does not recognize it as a fence and "
-                  f"the block collapses to inline code. Use ```{{.lang title=\"...\"}} "
-                  f"or drop the trailing text.")
+            flagged.append((i, info))
+    rendered = _fences_rendered_in_html(md_text, html_text, {i for i, _ in flagged}) if html_text else set()
+    for i, info in flagged:
+        if i in rendered:
+            continue
+        shown = " and the published HTML does not carry it as a code block" if html_text else ""
+        f.add(BLOCKER, "fence-collapse",
+              f"Line {i}: opening fence info string carries trailing text "
+              f"('{info[:40]}...'): pandoc does not recognize it as a fence and "
+              f"the block collapses to inline code{shown}. Use ```{{.lang title=\"...\"}} "
+              f"or drop the trailing text.")
+    ok = sorted(rendered)
+    f.observe("fence-collapse", trailing_text_fences=len(flagged), rendered_as_code_in_html=len(ok))
+    if ok:
+        f.add(WARN, "fence-collapse",
+              f"{len(ok)} code fence(s) carry trailing text in the info string (Markdown lines "
+              f"{', '.join(map(str, ok))}). The published HTML shows each as a code block, so "
+              f"they render with a gfm or commonmark reader, but pandoc's default markdown "
+              f"reader (the OASIS pipeline's step 1) collapses them to inline code: the "
+              f"Markdown source renders only with a gfm/commonmark reader or a preprocessor. "
+              f"Use ```{{.lang title=\"...\"}} or drop the trailing text.")
+
+
+def _fences_rendered_in_html(md_text: str, html_text: str, lines: set[int]) -> set[int]:
+    """Of the fenced blocks opening at `lines`, the ones the HTML publishes
+    as a <pre> block with the same text. Every other compared block is
+    matched first, so a flagged block is credited only with a <pre> no
+    well-formed fence already accounts for."""
+    blocks, _ = _md_fenced_blocks(md_text)
+    remaining = collections.Counter(_html_pre_blocks(html_text))
+    for line, block in blocks:
+        if line not in lines and remaining[block]:
+            remaining[block] -= 1
+    out = set()
+    for line, block in blocks:
+        if line in lines and block and remaining[block]:
+            remaining[block] -= 1
+            out.add(line)
+    return out
+
+
+def _html_pre_blocks(html_text: str) -> list[str]:
+    """The text of every <pre> block in the HTML, as compared (_code_norm);
+    comments, scripts, templates and styles removed first."""
+    body = re.sub(r"<!--.*?-->|<(script|template|style)\b.*?</\1>", " ", html_text, flags=re.S | re.I)
+    return [_code_norm(html_lib.unescape(re.sub(r"<[^>]+>", "", m.group(1))))
+            for m in re.finditer(r"<pre\b[^>]*>(.*?)</pre>", body, re.S | re.I)]
 
 
 def _code_norm(text: str) -> str:
@@ -887,9 +1016,7 @@ def check_html_code_sync(md_text: str, html_text: str, f: Findings) -> None:
     Markdown has fences. Blocks whose HTML is not their text are not
     compared (_md_fenced_blocks)."""
     blocks, skipped = _md_fenced_blocks(md_text)
-    body = re.sub(r"<!--.*?-->|<(script|template|style)\b.*?</\1>", " ", html_text, flags=re.S | re.I)
-    pres = [_code_norm(html_lib.unescape(re.sub(r"<[^>]+>", "", m.group(1))))
-            for m in re.finditer(r"<pre\b[^>]*>(.*?)</pre>", body, re.S | re.I)]
+    pres = _html_pre_blocks(html_text)
     f.observe("html-code-sync", markdown_fenced_blocks=len(blocks), not_compared=skipped,
               html_pre_blocks=len(pres))
     if not blocks:
@@ -931,6 +1058,16 @@ def _without_line_numbers(lines: list[str]) -> list[str]:
     return [re.sub(r"^\s*\d{1,5}(?=\s{2,}\S|\s*$)", "", l) for l in lines]
 
 
+def _visible(text: str) -> str:
+    """Text as a reader sees it: invisible format characters (Unicode Cf:
+    U+2060 WORD JOINER, U+200B ZERO WIDTH SPACE, U+FEFF, soft hyphen and the
+    like) removed, and every other kind of space (U+00A0, U+202F, ...) read
+    as a plain space. Typst prints a WORD JOINER before each contents page
+    number, which hid all 59 numbers of CSAF v2.1 csd03 from _TOC_NUMBER."""
+    return "".join("" if unicodedata.category(c) == "Cf"
+                   else " " if unicodedata.category(c) == "Zs" else c for c in text)
+
+
 def _toc_title(entry: str) -> str:
     return re.sub(r"\s+", " ", _TOC_NUMBER.sub("", entry)).strip().rstrip(".").strip()
 
@@ -959,7 +1096,7 @@ def check_pdf_toc_pages(pdf_path: str, f: Findings) -> None:
         if n not in cache:
             text = subprocess.run([pdftotext, "-f", str(n), "-l", str(n), "-layout", pdf_path, "-"],
                                   capture_output=True, text=True, timeout=60).stdout
-            cache[n] = _without_line_numbers([l for l in text.splitlines() if l.strip()])
+            cache[n] = _without_line_numbers([l for l in _visible(text).splitlines() if l.strip()])
         return cache[n]
 
     try:
@@ -1002,8 +1139,8 @@ def check_pdf_toc_pages(pdf_path: str, f: Findings) -> None:
               f"its {len(entries)} entries: a reader of the PDF cannot find a section by it.")
         return
     try:
-        whole = subprocess.run([pdftotext, "-layout", pdf_path, "-"], capture_output=True,
-                               text=True, timeout=180).stdout.split("\f")
+        whole = _visible(subprocess.run([pdftotext, "-layout", pdf_path, "-"], capture_output=True,
+                                        text=True, timeout=180).stdout).split("\f")
     except Exception:  # noqa: BLE001
         return
     flat_pages = [re.sub(r"\s+", " ", " ".join(_without_line_numbers(p.splitlines()))).lower()
@@ -2684,6 +2821,24 @@ def _split_profiles(span: str) -> dict[str, str]:
     marks = [(m.start(), m.group(1).strip()) for m in PROFILE_HEADING_LINE.finditer(span)]
     if not marks:
         return {"(default)": span}
+    # A profile named in a sentence directly under its clause heading
+    # ('### 9.1.36 Conformance Clause 36: X' then 'A set of artifacts
+    # satisfies the "X" conformance profile if it:') begins at that heading.
+    # Splitting at the sentence credited every clause heading to the profile
+    # before it, so the last profile was always reported as having no
+    # clauses (CSAF v2.1 csd03, Sep 2026).
+    # The mark must be a plain sentence (not itself a heading or a clause
+    # line) and the clause heading its immediately preceding non-blank line.
+    clause_starts = {m.start() for m in CLAUSE_ID.finditer(span)}
+    moved = []
+    for k, (pos, name) in enumerate(marks):
+        own_line = span[pos:].split("\n", 1)[0].lstrip()
+        prev_line = span[:pos].rstrip().rfind("\n") + 1
+        if (pos not in clause_starts and not own_line.startswith("#")
+                and prev_line in clause_starts and prev_line > (moved[-1][0] if moved else -1)):
+            pos = prev_line
+        moved.append((pos, name))
+    marks = moved
     out = {}
     for i, (pos, name) in enumerate(marks):
         end = marks[i + 1][0] if i + 1 < len(marks) else len(span)
@@ -5423,12 +5578,23 @@ def check_public_review_metadata(base: str, stage: str, stem: str,
         tier = "Tier 3 (operator-declared public review for this revision)"
 
     if not tier:
+        # Say what was observed: the message used to tell the reader the file
+        # "must be present" while the listing beside it showed it present and
+        # live (CSAF v2.1 csd03, Sep 2026).
+        if expected in live_names:
+            state = (f"{expected} is present in the live stage directory {base}, as Naming "
+                     f"Directives v1.7 s5.2 requires for a public review; nothing is missing")
+        elif status == 200:
+            state = (f"{expected} is not in the live stage directory {base}: if a public "
+                     f"review was opened, it must be present per Naming Directives v1.7 s5.2 "
+                     f"/ TC Handbook Naming")
+        else:
+            state = (f"the live stage directory {base} could not be listed (http status "
+                     f"{status or '(unreachable)'}), so whether {expected} is present is unknown")
         f.add(INFO, "public-review-metadata",
               f"Could not confirm from the published record whether {stage} underwent "
               f"a TC public review (no live comment-resolution-log for this revision, "
-              f"no downstream cs/errata stage evidence found). Manually confirm with "
-              f"TC Admin; if a public review was opened, {expected} must be present "
-              f"per Naming Directives v1.7 s5.2 / TC Handbook Naming.")
+              f"no downstream cs/errata stage evidence found). Observed: {state}.")
         return
 
     if tier_detail:
@@ -7067,7 +7233,7 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
     # ---- source add-ons ---------------------------------------------------
     if md_text:
         check_md_links(md_text, f)
-        check_md_fences(md_text, f)
+        check_md_fences(md_text, f, html_text)
         if html_text:
             check_html_code_sync(md_text, html_text, f)
         check_policy(md_text, html_text, version, stage, f)
@@ -7357,6 +7523,10 @@ CONDITION_DOCS: list[dict] = [
          condition="No CI runner paths in HTML hrefs or srcs",
          pulls="every href/src attribute in the HTML",
          compares_to="the /home/runner/ path prefix must not occur (lint D3)"),
+    dict(check="html-residue", sig="Pandoc caption or attribute syntax is printed as text", applies="all",
+         condition="No visible text block of the HTML prints pandoc caption syntax or an attribute block",
+         pulls="each visible text block (paragraph, cell, list item, heading) outside <pre>, <code>, scripts and comments",
+         compares_to="a block starting 'Table: ', 'Figure: ' or 'Listing: ', or carrying '{#id}', is Markdown the renderer did not read; the id it names is missing from the HTML (CSAF v2.1 csd03: 5 table captions)"),
     dict(check="html-residue", sig="<h1> elements", applies="all",
          condition="The document title appears in exactly one H1",
          pulls="the count of <h1> and <h1big> (cover-title) elements matching the title text",
@@ -7367,6 +7537,11 @@ CONDITION_DOCS: list[dict] = [
          condition="Every internal fragment link resolves to an anchor",
          pulls="each internal href (#...) and the set of element ids/anchor names",
          compares_to="every referenced fragment must exist as an id or <a name>"),
+    dict(check="html-anchors", sig="is not a web URL scheme", applies="all",
+         severity="BLOCKER/WARN",  # dynamic: the same anchor_severity as an unresolved fragment
+         condition="No link's href uses a scheme a browser cannot follow in place of a '#' fragment",
+         pulls="each <a href> of the form scheme:value with no '/' after the colon (a cross-reference id such as tab:name)",
+         compares_to="the web URL schemes (http, https, mailto, ftp, data, urn, ...), a '#' fragment, or a relative path; anything else is a link that goes nowhere (CSAF v2.1 csd03: href=\"tab:tlp-labels-across-csaf-versions\")"),
     dict(check="html-anchors", sig="no internal (fragment) links at all", applies="all",
          condition="The HTML carries a linked table of contents",
          pulls="the count of internal fragment links",
@@ -7384,7 +7559,11 @@ CONDITION_DOCS: list[dict] = [
     dict(check="fence-collapse", sig="collapses to inline code", applies="md",
          condition="No opening code fence carries trailing text in its info string",
          pulls="each opening fence line's info string",
-         compares_to="a bare language token or curly-attribute form; trailing text collapses the block (lint D6)"),
+         compares_to="a bare language token or curly-attribute form; trailing text collapses the block (lint D6). BLOCKER when the package has no HTML, or the HTML does not carry the block as a <pre> block"),
+    dict(check="fence-collapse", sig="renders only with a gfm/commonmark reader", applies="md",
+         condition="A fence with trailing text in its info string, which the published HTML nonetheless shows as a code block, is reported once as a portability warning",
+         pulls="the opening line of each fence with trailing info-string text, and the HTML's <pre> blocks (the same comparison html-code-sync makes)",
+         compares_to="pandoc's gfm and commonmark readers render such a fence as code; its default markdown reader (the OASIS pipeline's step 1) collapses it, so the Markdown renders only with a gfm/commonmark reader or a preprocessor"),
     # image-policy
     dict(check="image-policy", sig="Empty <img src>", applies="all",
          condition="No empty img src attributes",

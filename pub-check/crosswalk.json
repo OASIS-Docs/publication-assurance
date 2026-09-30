@@ -10,11 +10,11 @@
   "partial": 19,
   "missing": 30,
   "conditions_total": 96,
-  "policy_grounded": 94,
-  "operational_extra": 80,
-  "total_conditions": 178,
-  "total_signatures": 174,
-  "policy_grounded_conditions": 97
+  "policy_grounded": 95,
+  "operational_extra": 82,
+  "total_conditions": 181,
+  "total_signatures": 177,
+  "policy_grounded_conditions": 98
  },
  "criteria": [
   {
@@ -848,6 +848,11 @@
    "status": "operational-extra"
   },
   {
+   "check": "fence-collapse",
+   "sig": "renders only with a gfm/commonmark reader",
+   "status": "operational-extra"
+  },
+  {
    "check": "filenames",
    "sig": "Missing delivery format(s)",
    "status": "policy-grounded",
@@ -1007,6 +1012,14 @@
   },
   {
    "check": "html-anchors",
+   "sig": "is not a web URL scheme",
+   "status": "policy-grounded",
+   "criteria": [
+    "AC-CONTENT-06"
+   ]
+  },
+  {
+   "check": "html-anchors",
    "sig": "no internal (fragment) links at all",
    "status": "policy-grounded",
    "criteria": [
@@ -1031,6 +1044,11 @@
   {
    "check": "html-residue",
    "sig": "CI runner path leaked into the HTML",
+   "status": "operational-extra"
+  },
+  {
+   "check": "html-residue",
+   "sig": "Pandoc caption or attribute syntax is printed as text",
    "status": "operational-extra"
   },
   {
