@@ -483,9 +483,9 @@
       "check": "html-residue",
       "sig": "Pandoc caption or attribute syntax is printed as text",
       "applies": "all",
-      "condition": "No visible text block of the HTML prints pandoc caption syntax or an attribute block",
-      "pulls": "each visible text block (paragraph, cell, list item, heading) outside <pre>, <code>, scripts and comments",
-      "compares_to": "a block starting 'Table: ', 'Figure: ' or 'Listing: ', or carrying '{#id}', is Markdown the renderer did not read; the id it names is missing from the HTML (CSAF v2.1 csd03: 5 table captions)",
+      "condition": "No visible text block of the HTML ends with a pandoc attribute block printed as text",
+      "pulls": "each visible text block (paragraph, cell, list item, heading) outside <pre>, <code>, <kbd>, <samp>, <var>, scripts and comments",
+      "compares_to": "a block whose text ends with '{#id}' or '{#id .class ...}' (a leaked caption 'Table: ...{#id}', or a heading's id) is Markdown the renderer did not read; the id it names is missing from the HTML (CSAF v2.1 csd03: 5 table captions). Caption words alone, '{{#...', and a URI template such as /files{#path} pass",
       "severity": "BLOCKER"
     },
     {
@@ -511,9 +511,9 @@
       "sig": "is not a web URL scheme",
       "applies": "all",
       "severity": "BLOCKER/WARN",
-      "condition": "No link's href uses a scheme a browser cannot follow in place of a '#' fragment",
-      "pulls": "each <a href> of the form scheme:value with no '/' after the colon (a cross-reference id such as tab:name)",
-      "compares_to": "the web URL schemes (http, https, mailto, ftp, data, urn, ...), a '#' fragment, or a relative path; anything else is a link that goes nowhere (CSAF v2.1 csd03: href=\"tab:tlp-labels-across-csaf-versions\")"
+      "condition": "No link's href is a cross-reference written without its '#'",
+      "pulls": "each <a href> of the form prefix:value, and the document's element ids and '{#id}' text",
+      "compares_to": "an href beginning with a pandoc-crossref prefix (tab:, tbl:, fig:, sec:, eq:, lst:), or one that is itself an id of the document, is a link that goes nowhere (CSAF v2.1 csd03: href=\"tab:tlp-labels-across-csaf-versions\"); any other scheme (did:, isbn:, urn:, ...) or relative path passes"
     },
     {
       "check": "html-anchors",
