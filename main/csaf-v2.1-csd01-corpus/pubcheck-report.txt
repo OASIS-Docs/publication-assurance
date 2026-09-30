@@ -2,7 +2,6 @@
 [WARN   ] front-matter  URL declares version v1.2 (package is v2.1): https://docs.oasis-open.org/csaf/csaf-cvrf/v1.2/cs01/csaf-cvrf-v1.2-cs01.html -- confirm this is an intentional external reference.
 [WARN   ] front-matter  URL declares version v1.2 (package is v2.1): https://docs.oasis-open.org/csaf/csaf-cvrf/v1.2/csaf-cvrf-v1.2.html -- confirm this is an intentional external reference.
 [WARN   ] revision-collision Stage /csd01/ is already published at https://docs.oasis-open.org/csaf/csaf/v2.1/csd01/: a NEW submission for v2.1 must use the next revision number instead. Ignore this warning if you are re-checking the published package itself.
-[WARN   ] conformance-structure Conformance section (profile 'A program satisfies the "CSAF superseder" conformance profile if the program:') is not populated with numbered clauses: no clause identifiers were extracted.
 [WARN   ] pdf-sync      PDF cites https://docs.oasis-open.org/csaf/csaf/v2.0/ (package is v2.1); expected only as a previous-stage reference -- confirm.
 [WARN   ] pdf-toc-pages The PDF's table of contents gives no page number for 356 of its 356 entries: a reader of the PDF cannot find a section by it.
 [WARN   ] md-links      Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/aggregator.json
@@ -22,4 +21,4 @@
 [INFO   ] pdf-fonts     Package declares no local font authority (no font-family in its HTML/CSS); font check skipped.
 [INFO   ] manifest      No manifest.json in the package. Emit one (--emit-manifest or your own tool) and intake verification becomes automatic.
 
-1 blocker(s), 18 warning(s) -> NOT PUBLISHABLE
+1 blocker(s), 17 warning(s) -> NOT PUBLISHABLE

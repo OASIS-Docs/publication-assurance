@@ -22,11 +22,6 @@
       "message": "Published stages already live under https://docs.oasis-open.org/csaf/csaf/v2.1/: csd01, csd02, csd03."
     },
     {
-      "severity": "WARN",
-      "check": "conformance-structure",
-      "message": "Conformance section (profile 'A program satisfies the \"CSAF superseder\" conformance profile if the program:') is not populated with numbered clauses: no clause identifiers were extracted."
-    },
-    {
       "severity": "INFO",
       "check": "content-labels",
       "message": "Appendix/Annex heading 'Appendix A. Acknowledgments <a id='acknowledgments'></a>' (markdown line 11935) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt."
@@ -486,6 +481,15 @@
     },
     {
       "check": "html-residue",
+      "sig": "Pandoc caption or attribute syntax is printed as text",
+      "applies": "all",
+      "condition": "No visible text block of the HTML ends with a pandoc attribute block printed as text",
+      "pulls": "each visible text block (paragraph, cell, list item, heading) outside <pre>, <code>, <kbd>, <samp>, <var>, scripts and comments",
+      "compares_to": "a block whose text ends with '{#id}' or '{#id .class ...}' (a leaked caption 'Table: ...{#id}', or a heading's id) is Markdown the renderer did not read; the id it names is missing from the HTML (CSAF v2.1 csd03: 5 table captions). Caption words alone, '{{#...', and a URI template such as /files{#path} pass",
+      "severity": "BLOCKER"
+    },
+    {
+      "check": "html-residue",
       "sig": "<h1> elements",
       "applies": "all",
       "condition": "The document title appears in exactly one H1",
@@ -501,6 +505,15 @@
       "condition": "Every internal fragment link resolves to an anchor",
       "pulls": "each internal href (#...) and the set of element ids/anchor names",
       "compares_to": "every referenced fragment must exist as an id or <a name>"
+    },
+    {
+      "check": "html-anchors",
+      "sig": "is not a web URL scheme",
+      "applies": "all",
+      "severity": "BLOCKER/WARN",
+      "condition": "No link's href is a cross-reference written without its '#'",
+      "pulls": "each <a href> of the form prefix:value, and the document's element ids and '{#id}' text",
+      "compares_to": "an href beginning with a pandoc-crossref prefix (tab:, tbl:, fig:, sec:, eq:, lst:), or one that is itself an id of the document, is a link that goes nowhere (CSAF v2.1 csd03: href=\"tab:tlp-labels-across-csaf-versions\"); any other scheme (did:, isbn:, urn:, ...) or relative path passes"
     },
     {
       "check": "html-anchors",
@@ -535,8 +548,17 @@
       "applies": "md",
       "condition": "No opening code fence carries trailing text in its info string",
       "pulls": "each opening fence line's info string",
-      "compares_to": "a bare language token or curly-attribute form; trailing text collapses the block (lint D6)",
+      "compares_to": "a bare language token or curly-attribute form; trailing text collapses the block (lint D6). BLOCKER when the package has no HTML, or the HTML does not carry the block as a <pre> block",
       "severity": "BLOCKER"
+    },
+    {
+      "check": "fence-collapse",
+      "sig": "renders only with a gfm/commonmark reader",
+      "applies": "md",
+      "condition": "A fence with trailing text in its info string, which the published HTML nonetheless shows as a code block, is reported once as a portability warning",
+      "pulls": "the opening line of each fence with trailing info-string text, and the HTML's <pre> blocks (the same comparison html-code-sync makes)",
+      "compares_to": "pandoc's gfm and commonmark readers render such a fence as code; its default markdown reader (the OASIS pipeline's step 1) collapses it, so the Markdown renders only with a gfm/commonmark reader or a preprocessor",
+      "severity": "WARN"
     },
     {
       "check": "image-policy",
@@ -1809,11 +1831,13 @@
     "html-anchors": {
       "internal_links": "391",
       "anchors": "1281",
-      "unresolved": "0"
+      "unresolved": "0",
+      "non_web_scheme_links": "(none)"
     },
     "html-residue": {
       "title_block_headers": "0",
-      "runner_paths": "0"
+      "runner_paths": "0",
+      "markdown_caption_or_attribute_text": "0"
     },
     "vml-fallback": {
       "vml_images": "0",
@@ -1852,7 +1876,7 @@
       "modal_top_level": "1",
       "modal_confidence": "high",
       "profiles_found": "9",
-      "clauses_extracted": "24",
+      "clauses_extracted": "25",
       "stability": "no-op (first publication)"
     },
     "image-policy": {
@@ -1987,7 +2011,9 @@
       "links_scanned": "208"
     },
     "fence-collapse": {
-      "fences_scanned": "970"
+      "fences_scanned": "970",
+      "trailing_text_fences": "0",
+      "rendered_as_code_in_html": "0"
     },
     "html-code-sync": {
       "markdown_fenced_blocks": "485",
