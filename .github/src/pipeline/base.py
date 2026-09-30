@@ -30,11 +30,53 @@ from __future__ import annotations
 import logging
 import os
 import re
+import signal
 import subprocess
 from abc import ABC, abstractmethod
 from typing import Sequence
 
 logger = logging.getLogger(__name__)
+
+
+class ToolTimeout(subprocess.TimeoutExpired):
+    """An external tool did not finish within its bound and was stopped."""
+
+    def __str__(self) -> str:
+        return (f"{self.cmd[0]} did not finish within {self.timeout:g} s and was "
+                f"stopped: {' '.join(map(str, self.cmd))}")
+
+
+def run_tool(cmd: Sequence[str], *, timeout: float, capture: bool = True,
+             check: bool = True) -> subprocess.CompletedProcess[str]:
+    """Run an external tool, bounded by ``timeout`` seconds.
+
+    Every external tool the PDF step runs goes through here: wkhtmltopdf and
+    pandoc (:meth:`PipelineStep._run_subprocess`), and poppler's pdfinfo and
+    pdftotext (toc_pages). With no bound, one tool that never exits holds the
+    step until the job is killed, with nothing in the log to say which. The
+    tool runs in its own process group, so a timeout stops it and anything it
+    started; :class:`ToolTimeout` (a :class:`subprocess.TimeoutExpired`) then
+    names the tool and the bound. ``capture`` and ``check`` behave as in
+    :func:`subprocess.run`.
+    """
+    cmd = list(cmd)
+    pipe = subprocess.PIPE if capture else None
+    with subprocess.Popen(cmd, stdout=pipe, stderr=pipe, text=True,
+                          start_new_session=True) as proc:
+        try:
+            out, err = proc.communicate(timeout=timeout)
+        except BaseException as exc:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+            proc.wait()
+            if isinstance(exc, subprocess.TimeoutExpired):
+                raise ToolTimeout(cmd, timeout) from None
+            raise
+    if check and proc.returncode:
+        raise subprocess.CalledProcessError(proc.returncode, cmd, out, err)
+    return subprocess.CompletedProcess(cmd, proc.returncode, out, err)
 
 
 class PipelineStep(ABC):
@@ -67,6 +109,10 @@ class PipelineStep(ABC):
 
     #: Output subdirectory (relative to the HTML file) for localized CSS.
     styles_subdir: str = "styles"
+
+    #: Seconds an external tool (pandoc, wkhtmltopdf) may run before it is
+    #: stopped and :class:`ToolTimeout` raised. Far above any real render.
+    subprocess_timeout: float = 1800
 
     # -------------------------- shared helpers --------------------------
 
@@ -115,12 +161,15 @@ class PipelineStep(ABC):
         (used for pandoc). With ``capture=True`` output is captured as text and
         returned on the completed process (used for wkhtmltopdf). A non-zero
         exit is logged and the :class:`subprocess.CalledProcessError` re-raised.
+        A run longer than :attr:`subprocess_timeout` is stopped, logged, and
+        :class:`ToolTimeout` raised.
         """
         logger.debug("Running command: %s", " ".join(cmd))
         try:
-            if capture:
-                return subprocess.run(cmd, check=True, capture_output=True, text=True)
-            return subprocess.run(cmd, check=True)
+            return run_tool(cmd, timeout=self.subprocess_timeout, capture=capture)
+        except ToolTimeout as exc:
+            logger.error("%s", exc)
+            raise
         except subprocess.CalledProcessError as exc:
             logger.error(
                 "Command failed with exit code %s: %s",
