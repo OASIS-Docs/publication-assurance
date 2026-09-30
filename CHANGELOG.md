@@ -37,15 +37,23 @@ link and five leaked table captions.
 
 ### New conditions
 
-- **html-anchors**: a link whose href uses a scheme a browser cannot follow,
-  with no `/` after the colon, reads as a cross-reference id written without
-  its `#` (CSAF: `href="tab:tlp-labels-across-csaf-versions"`). BLOCKER on
+- **html-anchors**: a link whose href is a cross-reference id written without
+  its `#` (CSAF: `href="tab:tlp-labels-across-csaf-versions"`). An href is
+  one when it begins with a pandoc-crossref prefix (`tab:`, `tbl:`, `fig:`,
+  `sec:`, `eq:`, `lst:`, whatever follows, so `tab:x#y` too), or when it is
+  itself an id of the same document, set or leaked as `{#id}` text. Any other
+  scheme passes: `did:`, `isbn:`, `hdl:`, `ark:`, `cpe:`, `x-...:`, `urn:`,
+  `tel:`, `doi:`, and a relative path such as `ns:element.html`. BLOCKER on
   the Markdown track and WARN on DOCX-native, the same as an unresolved
   fragment, because the failure is the same: the link goes nowhere.
-- **html-residue**: pandoc caption syntax (`Table: ...`, `Figure: ...`) or an
-  attribute block (`{#id}`) printed as visible text in the HTML. CSAF prints
-  five such table captions, and the ids they carried are missing. BLOCKER,
-  like the other pandoc and pipeline residue in this class.
+- **html-residue**: a pandoc attribute block (`{#id}`, `{#id .class}`)
+  printed as the end of a block's visible text in the HTML, as in a leaked
+  caption `Table: ...{#id}`. CSAF prints five such table captions, and the
+  ids they carried are missing. Caption words alone ("Figure: see below", a
+  cell reading "Table: users"), `{{#each}}`, a URI template such as
+  `/files{#path}`, and text in `<code>`, `<pre>`, `<kbd>`, `<samp>` or
+  `<var>` pass. BLOCKER, like the other pandoc and pipeline residue in this
+  class.
 - **fence-collapse**: one WARN listing the fences whose info string carries
   trailing text but which the published HTML shows as code blocks (next item).
 
@@ -66,10 +74,17 @@ link and five leaked table captions.
   were body headings, counted as contents because their titles did not match)
   and passes.
 - **conformance-structure**: a profile named in a sentence directly under its
-  clause heading now begins at that heading. Each clause was credited to the
-  profile before it, so the last profile was always reported empty (CSAF v2.1
-  csd01 and csd03). A "clause removed" WARN on CSAF v2.0 cs02 and csd02 now
-  names the right clause (9.1.10, not 9.1.14).
+  clause heading ("A file satisfies the "X" conformance profile if it:") now
+  begins at that heading. Each clause was credited to the profile before it,
+  so the last profile was always reported empty (CSAF v2.1 csd01 and csd03).
+  A "clause removed" WARN on CSAF v2.0 cs02 and csd02 now names the right
+  clause (9.1.10, not 9.1.14). Only a sentence that says what satisfies a
+  profile moves: a remark such as "An implementation conformant to this
+  Profile MAY vary the ..." under a numbered heading keeps its old scope
+  (KMIP cs-profile, PKCS #11 profiles). A negated sentence ("A Library does
+  not satisfy the "X" conformance profile if ...") no longer begins a
+  profile at all: OpenEoX eox-core csd01 printed one per Library profile, so
+  those profiles read as empty.
 - **public-review-metadata**: when the review itself cannot be confirmed, the
   INFO note states whether the companion file is present in the live stage
   directory. It said the file "must be present" while the file was there.
