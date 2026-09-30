@@ -452,7 +452,9 @@ class PdfRenderer(PipelineStep):
         unless something writes them. If the numbers cannot be read, or do
         not settle in four passes, the PDF is printed from the unnumbered
         HTML again, so no number that was not checked ships; the gate's
-        pdf-toc-pages check then reports the unnumbered contents."""
+        pdf-toc-pages check then reports the unnumbered contents. A poppler
+        tool that fails or times out (toc_pages.TOOL_TIMEOUT) counts as
+        numbers that cannot be read."""
         from .toc_pages import main as number
         text = self.html_file.read_text(encoding="utf-8", errors="replace")
         if 'id="table-of-contents"' not in text:
@@ -463,7 +465,7 @@ class PdfRenderer(PipelineStep):
             for _ in range(4):
                 try:
                     changed = number(str(self.html_file), str(self.output_pdf), str(numbered))
-                except (LookupError, OSError, subprocess.CalledProcessError) as e:
+                except (LookupError, OSError, subprocess.SubprocessError) as e:
                     logger.warning(f"contents left unnumbered: {e}")
                     break
                 if not changed:

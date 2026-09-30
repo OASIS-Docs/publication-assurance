@@ -10,17 +10,35 @@ page, for every heading id. This reads those pages back (poppler's
 pdfinfo -dests) and writes them into the HTML's table of contents, with dot
 leaders, as a published OASIS PDF shows them. The caller prints again and
 repeats until the pages stop moving: step 2 (pdf_renderer.PdfRenderer) with
-wkhtmltopdf, and render/render.sh with Chrome. Standard library only, so it
-also runs as a script.
+wkhtmltopdf, and render/render.sh with Chrome. Standard library only (with
+base.py beside it), so it also runs as a script. Each poppler tool is bounded
+by TOOL_TIMEOUT seconds.
 
 Usage: toc_pages.py IN.html PRINTED.pdf OUT.html
 Prints the number of entries numbered and how many changed since IN.html.
-Exit 2 when the HTML has no table of contents or an entry has no page.
+Exit 1 when the HTML has no table of contents or an entry has no page, or
+when a poppler tool fails or does not finish within TOOL_TIMEOUT.
 """
 import html
+import os
 import re
 import subprocess
 import sys
+
+try:
+    from .base import run_tool
+except ImportError:  # run as a script, or loaded by path: base.py sits beside this file
+    import importlib.util
+    _spec = importlib.util.spec_from_file_location(
+        '_oasis_pipeline_base', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'base.py'))
+    _base = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_base)
+    run_tool = _base.run_tool
+
+# Seconds pdfinfo or pdftotext may run: either reads a 300-page PDF in about
+# a second, and one that hangs would otherwise hold the PDF step until the
+# job is killed.
+TOOL_TIMEOUT = 300
 
 CSS = """<style id="toc-pages">
 /* Positioned boxes, not flexbox: wkhtmltopdf's QtWebKit ignores flexbox,
@@ -39,7 +57,7 @@ CSS = """<style id="toc-pages">
 
 
 def dests(pdf):
-    out = subprocess.run(['pdfinfo', '-dests', pdf], capture_output=True, text=True, check=True).stdout
+    out = run_tool(['pdfinfo', '-dests', pdf], timeout=TOOL_TIMEOUT).stdout
     return {m.group(2): int(m.group(1)) for m in re.finditer(r'^\s*(\d+)\s+\[[^\]]*\]\s+"([^"]*)"', out, re.M)}
 
 
@@ -56,8 +74,7 @@ def text_pages(pdf, entries):
     heading mid-sentence. The contents pages are skipped (their lines are the
     titles), and entries are found in order, so a repeated title ("Overview")
     is taken after the one before it."""
-    text = subprocess.run(['pdftotext', '-layout', pdf, '-'], capture_output=True, text=True,
-                          check=True).stdout.split('\f')
+    text = run_tool(['pdftotext', '-layout', pdf, '-'], timeout=TOOL_TIMEOUT).stdout.split('\f')
     pages = [_lines(t) for t in text]
     titles = [t for _, t in entries]
     title_set = set(titles)
@@ -179,3 +196,5 @@ if __name__ == '__main__':
         main(*sys.argv[1:])
     except LookupError as e:
         sys.exit(str(e))
+    except subprocess.SubprocessError as e:
+        sys.exit(f'toc_pages.py: {e}')

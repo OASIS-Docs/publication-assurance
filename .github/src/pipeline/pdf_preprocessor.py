@@ -208,6 +208,20 @@ class PdfPreprocessor(PipelineStep):
         size: A4 portrait;
         margin: 2.5cm 2cm 2.5cm 2cm;
     }
+
+    /* A code block prints as one block. The OASIS Markdown stylesheet
+       (markdown-styles-v1.8.1-cn_final.css) sets code, kbd, pre, samp
+       {display: inline}, so with the border, padding and box-decoration-break
+       above every line of a <pre> printed in its own box: 447 of 667
+       multi-line blocks in the CSAF v2.1 CSD03 PDF, in Chrome and in
+       wkhtmltopdf. A pandoc-highlighted block (div.sourceCode > pre.sourceCode
+       > code.sourceCode) also took the .sourceCode and language frames on all
+       three elements. The <pre> keeps the one frame; the <code> inside it
+       (pre code[class] outranks .sourceCode) and the wrapping div draw
+       nothing. Inline <code> stays inline. */
+    pre { display: block !important; }
+    pre code, pre code[class] { border: none !important; padding: 0 !important; background: none !important; }
+    div.sourceCode { border: none !important; padding: 0 !important; background: none !important; }
     """
 
     def preprocess(self) -> None:

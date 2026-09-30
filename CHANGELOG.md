@@ -78,6 +78,23 @@ link and five leaked table captions.
   References did not match the same URL cited in Related work, which the
   check exempts. CSAF v2.1 csd03 and three CSAF v2.0 packages each lose one
   such WARN.
+- **Pipeline, step 2, code blocks**: a multi-line code block prints as one
+  block. The OASIS Markdown stylesheet sets `pre {display: inline}`, so with
+  the print styles' border and padding each line of a `<pre>` printed in its
+  own box (447 of 667 multi-line blocks in the CSAF v2.1 CSD03 PDF, in Chrome
+  and in wkhtmltopdf). `PdfPreprocessor` now prints `<pre>` as a block, and
+  no longer frames the `<code>` inside it or pandoc's `div.sourceCode`
+  wrapper, which printed a frame inside a frame. Inline `<code>` is
+  unchanged. publisher-toolkit carried these rules as a local override.
+- **Pipeline, step 2, timeouts**: every external tool the PDF step runs has a
+  time limit: poppler's `pdfinfo` and `pdftotext` in `toc_pages.py` (300 s),
+  and wkhtmltopdf and pandoc through `PipelineStep._run_subprocess` (1800 s,
+  the `subprocess_timeout` attribute). A tool that never exited held the step
+  until the job was killed. The shared helper `base.run_tool` runs the tool
+  in its own process group, stops the group at the limit, and raises
+  `ToolTimeout` (a `subprocess.TimeoutExpired`) naming the tool and the
+  limit. A timed-out poppler tool leaves the contents unnumbered, as a
+  failed one does; `toc_pages.py` run as a script exits 1 with the message.
 
 The criterion-to-clause map is regenerated: the new html-anchors condition
 answers to AC-CONTENT-06 (cross-references internally consistent), the other
