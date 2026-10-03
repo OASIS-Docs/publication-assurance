@@ -26,7 +26,14 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+PATCH: message text only, no new criteria.
+
+- **md-links**: the dual-link warning (`[url](url)`) said "prefer a bare URL
+  (autolinked)". A bare URL is not a link in the PDF, so following that advice
+  lost the link. It now recommends the angle-bracket autolink `<https://...>`,
+  which renders as a link in both the HTML and the PDF and which the check
+  already accepts. Raised by the CSAF editor on oasis-tcs/csaf PR #1635.
+  Pinned by `tests/test_md_dual_link.py`.
 
 ## v1.13.0 - 2026-09-30
 

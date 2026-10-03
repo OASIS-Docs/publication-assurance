@@ -886,8 +886,9 @@ def check_md_links(md_text: str, f: Findings) -> None:
     for m in re.finditer(r"\[<?(\S+?)>?\]\((\S+?)\)", md_text):
         if m.group(1) == m.group(2) and m.group(1).startswith("http"):
             f.add(WARN, "md-links",
-                  f"Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: "
-                  f"{m.group(2)}")
+                  f"Dual link [url](url); write the URL in angle brackets, <https://...>, "
+                  f"which renders as a link in both the HTML and the PDF, or give it real "
+                  f"anchor text: {m.group(2)}")
     for i, line in enumerate(md_text.splitlines(), 1):
         if re.search(r"https?://\S+\.\\$", line):
             f.add(BLOCKER, "md-links",
@@ -7606,7 +7607,7 @@ CONDITION_DOCS: list[dict] = [
     dict(check="md-links", sig="Dual link", applies="md",
          condition="No dual `[url](url)` links in the markdown",
          pulls="every `[text](target)` link where text is itself a URL",
-         compares_to="text and target being the same URL calls for a bare autolink or real anchor text"),
+         compares_to="text and target being the same URL calls for an angle-bracket autolink `<https://...>` (a link in both the HTML and the PDF) or real anchor text"),
     dict(check="md-links", sig="pandoc autolink pulls the", applies="md",
          condition="No bare URL runs into '.\\' without a space",
          pulls="each markdown line ending a URL with .\\",
