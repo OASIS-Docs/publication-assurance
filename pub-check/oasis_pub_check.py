@@ -886,8 +886,9 @@ def check_md_links(md_text: str, f: Findings) -> None:
     for m in re.finditer(r"\[<?(\S+?)>?\]\((\S+?)\)", md_text):
         if m.group(1) == m.group(2) and m.group(1).startswith("http"):
             f.add(WARN, "md-links",
-                  f"Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: "
-                  f"{m.group(2)}")
+                  f"Dual link [url](url); write the URL in angle brackets, <https://...>, "
+                  f"which renders as a link in both the HTML and the PDF, or give it real "
+                  f"anchor text: {m.group(2)}")
     for i, line in enumerate(md_text.splitlines(), 1):
         if re.search(r"https?://\S+\.\\$", line):
             f.add(BLOCKER, "md-links",
@@ -2858,6 +2859,21 @@ def _html_to_lines(fragment: str) -> str:
     return t
 
 
+_QUOTE_TRANSLATE = str.maketrans({
+    "\u201c": '"', "\u201d": '"', "\u201e": '"', "\u201f": '"', "\u00ab": '"', "\u00bb": '"',
+    "\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201b": "'", "\u2032": "'",
+})
+
+
+def _fold_typography(text: str) -> str:
+    """Fold curly quotes, apostrophes and Unicode dashes to ASCII, so the
+    stage-to-stage clause comparison is not fooled by an editor (or a
+    converter) straightening a quote: oasis-tcs/csaf PR #1638 changed the
+    quotes around one profile name and clauses 9.1.4 to 9.1.9 were each
+    reported as removed (CSAF branch head 73614d6, Oct 2026)."""
+    return _normalize_dashes(text.translate(_QUOTE_TRANSLATE))
+
+
 def _split_profiles(span: str) -> dict[str, str]:
     """Split a Conformance section's span into named-profile scopes
     (algorithm step 7), or one implicit '(default)' scope when no
@@ -2898,7 +2914,7 @@ def _split_profiles(span: str) -> dict[str, str]:
     out = {}
     for i, (pos, name) in enumerate(marks):
         end = marks[i + 1][0] if i + 1 < len(marks) else len(span)
-        out[name] = span[pos:end]
+        out[_fold_typography(name)] = span[pos:end]
     return out
 
 
@@ -2907,7 +2923,8 @@ def _extract_clauses(scope_text: str) -> list[tuple[str, str]]:
     document order (algorithm step 8). Priority per match: a bracketed
     target id > the clause's own decimal heading number > an inline
     'Clause N' label. Content hash is a normalized (whitespace-collapsed,
-    case-folded) digest of the text up to the next clause match."""
+    case-folded, quotes and dashes folded to ASCII) digest of the text up to
+    the next clause match."""
     matches = list(CLAUSE_ID.finditer(scope_text))
     out = []
     for i, m in enumerate(matches):
@@ -2917,7 +2934,7 @@ def _extract_clauses(scope_text: str) -> list[tuple[str, str]]:
             continue
         end = matches[i + 1].start() if i + 1 < len(matches) else len(scope_text)
         body = scope_text[m.end():end][:400]
-        norm = re.sub(r"\s+", " ", body).strip().lower()
+        norm = re.sub(r"\s+", " ", _fold_typography(body)).strip().lower()
         out.append((cid, hashlib.sha256(norm.encode()).hexdigest()))
     return out
 
@@ -7606,7 +7623,7 @@ CONDITION_DOCS: list[dict] = [
     dict(check="md-links", sig="Dual link", applies="md",
          condition="No dual `[url](url)` links in the markdown",
          pulls="every `[text](target)` link where text is itself a URL",
-         compares_to="text and target being the same URL calls for a bare autolink or real anchor text"),
+         compares_to="text and target being the same URL calls for an angle-bracket autolink `<https://...>` (a link in both the HTML and the PDF) or real anchor text"),
     dict(check="md-links", sig="pandoc autolink pulls the", applies="md",
          condition="No bare URL runs into '.\\' without a space",
          pulls="each markdown line ending a URL with .\\",

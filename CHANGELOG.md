@@ -26,7 +26,22 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+PATCH: fixes inside two existing checks, no new criteria.
+
+- **md-links**: the dual-link warning (`[url](url)`) said "prefer a bare URL
+  (autolinked)". A bare URL is not a link in the PDF, so following that advice
+  lost the link. It now recommends the angle-bracket autolink `<https://...>`,
+  which renders as a link in both the HTML and the PDF and which the check
+  already accepts. Raised by the CSAF editor on oasis-tcs/csaf PR #1635.
+  Pinned by `tests/test_md_dual_link.py`.
+- **conformance-structure**: the stage-to-stage clause comparison folds curly
+  quotes, apostrophes and Unicode dashes to ASCII before comparing profile
+  names and clause text. oasis-tcs/csaf PR #1638 straightened the quotes
+  around "CSAF Converter" in one profile sentence, and clauses 9.1.4 to 9.1.9
+  were each reported as removed. On the CSAF branch head 73614d6, staged as
+  csd04, the six false warnings go (11 warnings to 5) and nothing else
+  changes. A real removal, or a real wording change at CS to OS, is still
+  reported. Pinned by `tests/test_conformance_typography.py`.
 
 ## v1.13.0 - 2026-09-30
 
