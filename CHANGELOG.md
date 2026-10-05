@@ -26,6 +26,10 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.13.1 - 2026-10-05
+
 PATCH: fixes inside two existing checks, no new criteria.
 
 - **md-links**: the dual-link warning (`[url](url)`) said "prefer a bare URL
