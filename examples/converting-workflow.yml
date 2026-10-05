@@ -31,7 +31,7 @@ permissions:
 
 jobs:
   convert-and-verify:
-    uses: OASIS-Docs/publication-assurance/.github/workflows/convert-and-verify.yml@v1.13.0
+    uses: OASIS-Docs/publication-assurance/.github/workflows/convert-and-verify.yml@v1.13.1
     with:
       markdown: dmlex-v1.0/markdown                        # EDIT: directory of your .md and figures
       schemas: dmlex-v1.0/specification/schemas            # EDIT: your schemas directory, or "-"
