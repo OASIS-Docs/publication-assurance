@@ -26,7 +26,7 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-PATCH: message text only, no new criteria.
+PATCH: fixes inside two existing checks, no new criteria.
 
 - **md-links**: the dual-link warning (`[url](url)`) said "prefer a bare URL
   (autolinked)". A bare URL is not a link in the PDF, so following that advice
