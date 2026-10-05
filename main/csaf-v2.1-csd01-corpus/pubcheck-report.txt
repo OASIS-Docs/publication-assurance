@@ -4,9 +4,9 @@
 [WARN   ] revision-collision Stage /csd01/ is already published at https://docs.oasis-open.org/csaf/csaf/v2.1/csd01/: a NEW submission for v2.1 must use the next revision number instead. Ignore this warning if you are re-checking the published package itself.
 [WARN   ] pdf-sync      PDF cites https://docs.oasis-open.org/csaf/csaf/v2.0/ (package is v2.1); expected only as a previous-stage reference -- confirm.
 [WARN   ] pdf-toc-pages The PDF's table of contents gives no page number for 356 of its 356 entries: a reader of the PDF cannot find a section by it.
-[WARN   ] md-links      Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/aggregator.json
-[WARN   ] md-links      Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/csaf.json
-[WARN   ] md-links      Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/meta.json
+[WARN   ] md-links      Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/aggregator.json
+[WARN   ] md-links      Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/csaf.json
+[WARN   ] md-links      Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/meta.json
 [WARN   ] md-links      ...and 7 more 'md-links' warnings (--json lists all).
 [WARN   ] date-sync     Copyright year 2022 does not match the document date year 2025.
 [WARN   ] cover-hr      Horizontal rule between the OASIS logo and the title: the publication CSS treats <hr/> as a page break, which opens the PDF with a blank page. Harmless in other renderers; remove if publishing through the OASIS HTML-to-PDF path.

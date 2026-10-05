@@ -79,52 +79,52 @@
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/aggregator.json"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/aggregator.json"
     },
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/csaf.json"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/csaf.json"
     },
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/meta.json"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/meta.json"
     },
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/provider.json"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://docs.oasis-open.org/csaf/csaf/v2.1/schema/provider.json"
     },
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://www.oasis-open.org/committees/csaf/ipr.php"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://www.oasis-open.org/committees/csaf/ipr.php"
     },
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://www.first.org/cvss/cvss-v2.0.json"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://www.first.org/cvss/cvss-v2.0.json"
     },
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://www.first.org/cvss/cvss-v3.0.json"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://www.first.org/cvss/cvss-v3.0.json"
     },
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://www.first.org/cvss/cvss-v3.1.json"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://www.first.org/cvss/cvss-v3.1.json"
     },
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://www.first.org/cvss/cvss-v4.0.json"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://www.first.org/cvss/cvss-v4.0.json"
     },
     {
       "severity": "WARN",
       "check": "md-links",
-      "message": "Dual link [url](url); prefer a bare URL (autolinked) or real anchor text: https://certcc.github.io/SSVC/data/schema/v1/Decision_Point_Value_Selection-1-0-1.schema.json"
+      "message": "Dual link [url](url); write the URL in angle brackets, <https://...>, which renders as a link in both the HTML and the PDF, or give it real anchor text: https://certcc.github.io/SSVC/data/schema/v1/Decision_Point_Value_Selection-1-0-1.schema.json"
     },
     {
       "severity": "WARN",
@@ -530,7 +530,7 @@
       "applies": "md",
       "condition": "No dual `[url](url)` links in the markdown",
       "pulls": "every `[text](target)` link where text is itself a URL",
-      "compares_to": "text and target being the same URL calls for a bare autolink or real anchor text",
+      "compares_to": "text and target being the same URL calls for an angle-bracket autolink `<https://...>` (a link in both the HTML and the PDF) or real anchor text",
       "severity": "WARN"
     },
     {
