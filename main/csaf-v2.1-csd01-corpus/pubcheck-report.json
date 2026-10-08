@@ -538,8 +538,8 @@
       "sig": "pandoc autolink pulls the",
       "applies": "md",
       "condition": "No bare URL runs into '.\\' without a space",
-      "pulls": "each markdown line ending a bare URL with .\\ (a URL opened by '<' or '(' and closed by '>' or ')' before the period passes)",
-      "compares_to": "the safe form '. \\' (otherwise pandoc pulls the period and backslash into the href)",
+      "pulls": "each markdown line outside code blocks (fenced or indented) whose closing backslash a URL runs into, read as pandoc 3.8.2.1 reads a bare URL: any scheme on its list, in any case; ended by a closed '<...>', '[...]' or link target; an autolink '<...\\>' counts",
+      "compares_to": "the safe form '. \\' (otherwise pandoc pulls the backslash, and any period before it, into the href)",
       "severity": "BLOCKER"
     },
     {
