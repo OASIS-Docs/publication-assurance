@@ -16,10 +16,13 @@ into the directory they check.
 from __future__ import annotations
 
 import importlib.util
+import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
@@ -83,3 +86,14 @@ def stage_from_corpus(dest: Path, corpus_stage: Path, *,
                                      entries=entries),
             encoding="utf-8")
     return stage
+
+
+@pytest.fixture(autouse=True)
+def _no_runner_context(monkeypatch):
+    """No test sees the GitHub Actions runner's own GITHUB_* variables (the
+    pull request event, head ref, repository, output and summary files); a
+    test that wants one sets it. Run in process on a pull request,
+    publish_report.main() read the runner's event as a fork's and returned 0
+    before pushing anything (PR #69, CI run 37780127932)."""
+    for name in [k for k in os.environ if k.startswith("GITHUB_")]:
+        monkeypatch.delenv(name)

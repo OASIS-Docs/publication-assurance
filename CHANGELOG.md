@@ -28,6 +28,41 @@ Each version is anchored by a git tag on this repository.
 
 PATCH: a fix inside existing checks, no new criteria.
 
+- **Publishing the report** (`pub-check/publish_report.py`): a matrix job
+  could lose its report without a word. When two jobs push to the reports
+  branch at once, git's message for the loser names both commits
+  (`is at <sha> but expected <sha>`), and the test for a token without write access
+  matched a bare `403` anywhere in that message, so a SHA or a directory
+  name containing 403 turned a lost race into "the workflow token cannot
+  write to this repository": no retry, exit 0, report never published. CI
+  run 37773095988 dropped one of six reports, most likely this way: the run
+  kept no stderr, but the whole six-job test took 2.4 seconds, too short for
+  retries to run out, and this was the only way a report was dropped in 185
+  rounds of six concurrent publishes on Linux. The test now matches
+  GitHub's own refusal (`The requested URL returned error: 403`), and the
+  protection-rule test matches `GH006` and `GH013` only as GitHub's error
+  codes, not inside a branch name. An adversarial review of the fix found
+  four more ways to lose or misreport a report, all fixed:
+  - A lost race is retried for up to 300 seconds instead of 10 times: 3 of
+    30 jobs, with 2 seconds of latency per git call, ran out of attempts.
+  - Only git's lost-race reasons are retried (`fetch first`,
+    `non-fast-forward`, `cannot lock ref`, `incorrect old value provided`,
+    `reference already exists`, `failed to update ref`). Before, any
+    message containing "rejected" was, so a push GitHub's large-file check
+    refused was retried and reported as "the branch kept moving".
+  - Two titles that make the same folder name ("CSAF v2.1 (prose)" and
+    "csaf v2.1 prose", or two that differ only after 80 characters) no
+    longer overwrite each other's report: the second gets a folder named
+    for its title, and keeps it from run to run.
+  - A Pages API answer that is not a JSON object no longer crashes the
+    script after the report has landed.
+  A publish that was tried and did not land (the branch kept moving, or
+  git failed) now exits 1 with the reason on stderr; the action runs the
+  step with `continue-on-error`, so the checks' result is unchanged, and a
+  test now holds that setting in place. Publishing that is off, a fork's
+  pull request and a token without write access still exit 0 with the
+  reason stated. Pinned by `tests/test_publish_report.py`.
+
 - **md-links** and **all checks that read Markdown prose** (through
   `strip_code_blocks`), a third pass on where code is, each case rendered
   with pandoc 3.8.2.1 first:

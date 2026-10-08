@@ -284,7 +284,9 @@ runs:
         echo "oasis-pub-check exit code: ${exit_code}"
 
     # Commit this run's report files to publish-branch and state their full
-    # URLs. Never fails the checks: a reason is recorded instead. Skipped when
+    # URLs. Never fails the checks: a reason is recorded instead, and a
+    # publish that was tried and did not land exits 1, which marks only this
+    # continue-on-error step. Skipped when
     # the target could not be read (exit 2): there is no report to publish,
     # and every URL output and the publish note stay empty.
     - name: Publish the report files
