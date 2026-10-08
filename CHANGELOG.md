@@ -26,6 +26,10 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.13.2 - 2026-10-08
+
 PATCH: a fix inside an existing check, no new criteria.
 
 - **md-links**: the rule for a URL that runs into `.\` (a period, then a
