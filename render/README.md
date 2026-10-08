@@ -26,8 +26,9 @@ Requirements:
 - pandoc 3.x;
 - Python 3.10 or later with `beautifulsoup4`;
 - poppler (`pdfinfo`, `pdftotext`);
-- Node.js 18 or later (`render.sh` installs `puppeteer-core` next to itself on
-  first run);
+- Node.js 18 or later with `npm` (`render.sh` installs `puppeteer-core` next
+  to itself on first run);
+- `rsync`, which stages the files;
 - Chrome or Chromium (set `CHROME` if it is not found).
 
 ```bash
@@ -47,11 +48,25 @@ render/render.sh MD_DIR SCHEMAS_DIR OUT_ROOT     # SCHEMAS_DIR "-" when there ar
   y" on the right. Nothing in the footer comes from the day of the render.
 - **Contents.** Chrome cannot number a table of contents as it prints.
   `.github/src/pipeline/toc_pages.py` (shared with step 2) reads each heading's page from the PDF and writes it in, and
-  the PDF is printed again until no number moves.
+  the PDF is printed again until no number moves. Numbering can push a
+  heading onto the next page, so this can take several prints. After four
+  passes with numbers still moving, the script prints the PDF with its
+  contents unnumbered and says so on stderr, so that no unchecked page
+  number is printed.
 - **Check.** The script runs `pub-check/oasis_pub_check.py` on the staged
-  package, and its exit status is the checks': 0 publishable, 1 blockers.
-  With `PUBCHECK=0` it stops after staging; CI then runs the checks through the
-  action.
+  package. With `PUBCHECK=0` it stops after staging; CI then runs the checks
+  through the action.
+
+Exit status:
+
+| Exit | Meaning |
+|---|---|
+| 0 | The package is publishable (warnings do not fail it), or `PUBCHECK=0` and staging finished |
+| 1 | The checks found blockers, or step 1 (Markdown to HTML) failed. Step 1's log is printed above the line "Step 1 (Markdown to HTML) failed" |
+| 2 | `MD_DIR` does not hold exactly one specification `.md`; `footer.py` could not find the "This stage" URL, the date line or the copyright line in the document; or no Chrome or Chromium was found |
+
+Any other command that fails stops the script with that command's own
+status.
 
 `render.sh` prints with Chrome, which GitHub's runners and most desktops
 already have. The pipeline's own PDF step prints with wkhtmltopdf. Both
@@ -67,15 +82,16 @@ CHROME=/path/to/chrome node render/compare.mjs PUBLISHED RENDERED OUT_DIR cover,
 
 For each anchor, both pages are scrolled to the element and the viewport is
 captured as `<n>-<anchor>-published.png` and `<n>-<anchor>-rendered.png`.
-`cover` is the top of the page, and `toc` finds either contents list. An
-anchor missing on either side exits 1: the editions differ in structure
-there. The pictures are for a person to read. The verifier
+`cover` is the top of the page, and `toc` finds either contents list. With
+no anchor list the default is `cover,toc`. An anchor missing on either side
+exits 1: the editions differ in structure there. Fewer than three arguments
+exits 2 with the usage line. The pictures are for a person to read. The verifier
 ([`verify/`](../verify/README.md)) is the check on the words.
 
 ## review_pairs.py
 
 ```bash
-python3 render/review_pairs.py make RENDERED.pdf PUBLISHED.pdf OUT_DIR --key KEY.json [--sample 30] [--seed N] [--plant KIND]
+python3 render/review_pairs.py make RENDERED.pdf PUBLISHED.pdf OUT_DIR --key KEY.json [--sample 30] [--seed N] [--dpi 100] [--plant KIND]
 python3 render/review_pairs.py grade KEY.json REVIEW.json [RERUN.json...]
 ```
 
@@ -85,15 +101,19 @@ random pages) with the published page sharing most of its words, aligned in
 document order, and writes each pair as one image (published left) with the
 reviewer's brief, `PROMPT.md`. One more pair is a planted fault: a real page
 with its footer, a band of text, or (on a contents page) its page numbers
-erased on the right. `KEY.json` records which; keep it where the reviewer
-cannot read it (`make` refuses a key inside `OUT_DIR`).
+erased on the right. `--plant` chooses the fault: `footer`, `right-column`
+(on a contents page, its page numbers) or `text-lines` (a band of text);
+without it the kind is chosen at random. `--dpi` sets the resolution of the
+page images (default 100). `KEY.json` records the planted pair and fault;
+keep it where the reviewer cannot read it (`make` refuses a key inside
+`OUT_DIR`).
 
 The brief asks for lines copied from both sides before any judgement, and
 every kind of element on each side. `grade` counts as evidence only a
 distinct line of eight or more letters and digits that is not on most pages
 (a bracket, "1" or a footer proves nothing), needs three of those per side
-(fewer on a page with fewer), and rejects a pair whose lines are not on its
-page. It accepts the review only when the planted fault is named for what it
+(fewer on a page with fewer), and rejects a pair when fewer than four in five
+of its copied lines are on its pages. It accepts the review only when the planted fault is named for what it
 is ("page numbers", "footer", "missing"), and not by a word the reviewer
 writes about most pairs.
 It prints every other difference for a person to rule on. Pass a re-run of
@@ -105,9 +125,22 @@ not on the page. A grader that counted any difference as a catch passed it.
 
 ## Tests
 
-`tests/test_render.py` renders the DMLex v1.0 OS Markdown edition and checks
-four things:
+`tests/test_render.py` renders the DMLex v1.0 OS Markdown edition and checks:
 - the footer on page 3 against the document;
-- every contents number against the page its heading is printed on;
-- the checks' verdict on the PDF;
-- `compare.mjs` against the published page.
+- the rendered PDF against the live published PDF with `verify_pdf.py`,
+  which must find all 171 contents entries numbered;
+- the checks' verdict on the PDF: no blocker about the PDF, and the title
+  printed once on the cover;
+- every contents number against the page its heading is printed on, and the
+  pages found by heading text against the PDF's named destinations (step 2's
+  method, since wkhtmltopdf writes no named destinations);
+- `compare.mjs` against the published page, including a missing anchor and
+  an anchor that exists but is invisible;
+- a small Committee Note whose "This stage" URL is written as a link, staged
+  at that URL's path, with its one contents entry numbered.
+
+Without Chrome, pandoc and Node.js these tests skip; CI sets
+`REQUIRE_CHROME=1`, which makes a missing tool a failure instead. Four more
+tests run `footer.py` alone: the footer read from the DMLex document, a
+Committee Note marked Non-Standards Track, a document without its date
+refused, and a copyright year range with a retired Committee Note stage.

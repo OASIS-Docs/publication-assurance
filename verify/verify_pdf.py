@@ -5,9 +5,10 @@
 """Verify a rendered PDF against the published PDF of the same specification.
 
 verify_md.py compares HTML, where a table of contents has no page numbers on
-either side. A PDF's contents do, and the DMLex Markdown edition's first
-renders had none against the published standard's 133: no HTML comparison
-could see it. This compares the two PDFs' text, every page, the way
+either side. A PDF's contents do. The DMLex Markdown edition's first
+renders listed 133 contents entries with no page numbers, against the
+published standard's 171 numbered entries, and no HTML comparison could
+see it. This compares the two PDFs' text, every page, the way
 verify_md.py compares the HTML:
 
 - Words. Both PDFs are read with pdftotext -layout; running header and
@@ -43,10 +44,10 @@ source lays its labels out anew): there the two sides must hold the same
 characters, in any order. A rule that accepted nothing fails the run.
 
 What it cannot see: where a figure is drawn, what it looks like, and type
-size (the gate's pdf-legibility and pdf-type-scale checks measure that). Use
+size (the pdf-legibility and pdf-type-scale checks in pub-check measure that). Use
 render/review_pairs.py for the pictures.
 
-Usage: verify_pdf.py RENDERED.pdf PUBLISHED.pdf|URL [--allow FILE]... [--json OUT]
+Usage: verify_pdf.py RENDERED.pdf PUBLISHED.pdf|URL [--allow FILE]... [--json OUT] [--context N]
 Exit 0 when every check passes, 1 when any fails, 2 when an input cannot be read.
 """
 import argparse
@@ -148,7 +149,7 @@ def running_lines(pages):
 
 def contents_lines(pages):
     """{(page, line index): line}: the table of contents, found the way the
-    gate's pdf-toc-pages check finds it."""
+    pdf-toc-pages check in pub-check finds it."""
     out, started, seen = {}, False, set()
     for n, lines in enumerate(pages[:25]):
         head = next((i for i, l in enumerate(lines)

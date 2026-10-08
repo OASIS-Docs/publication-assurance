@@ -4,7 +4,8 @@
 # Authored by Michael Coletta, Technical Advisor to OASIS Open.
 #
 # Render one OASIS Markdown specification through this repository's pipeline,
-# stage it where it would sit on docs.oasis-open.org, and run the gate on it.
+# stage it where it would sit on docs.oasis-open.org, and run the OASIS
+# publication checks on it.
 #
 #   render/render.sh MD_DIR SCHEMAS_DIR OUT_ROOT
 #
@@ -13,19 +14,21 @@
 # OUT_ROOT     receives the staged tree, e.g. OUT_ROOT/lexidma/dmlex/v1.0/os/
 #
 # The stage path comes from the "This stage" URL in the Markdown, so the
-# directory, the file names and the cover are the ones the gate checks
-# against each other. Markdown to HTML is the pipeline's step 1 and the PDF
+# directory, the file names and the cover are the ones the checks compare
+# with each other. Markdown to HTML is the pipeline's step 1 and the PDF
 # preprocessor is step 2's (type scale, code wrapping); the PDF itself is
 # printed by headless Chrome through print_pdf.mjs, with the footer read from
 # the document by footer.py (see print_pdf.mjs for why not wkhtmltopdf).
 #
-# Exit status is the gate's: 0 publishable, 1 blockers. PUBCHECK=0 stops
-# after staging (CI then runs the gate through the published action).
-# Needs pandoc 3.x, python3 with beautifulsoup4, poppler (pdfinfo), Node.js 18 or later
-# (puppeteer-core is installed next to this script on first run) and Chrome or
-# Chromium (CHROME overrides discovery).
+# Exit status: 0 publishable; 1 blockers, or step 1 failed; 2 when MD_DIR
+# does not hold exactly one .md, footer.py cannot read the document, or no
+# Chrome is found. PUBCHECK=0 stops after staging (CI then runs the checks
+# through the published action).
+# Needs pandoc 3.x, python3 with beautifulsoup4, poppler (pdfinfo), rsync,
+# Node.js 18 or later with npm (puppeteer-core is installed next to this script
+# on first run) and Chrome or Chromium (CHROME overrides discovery).
 set -euo pipefail
-case "${1:-}" in -h|--help|"") sed -n '5,28p' "$0" | sed 's/^# \{0,1\}//'; exit 0;; esac
+case "${1:-}" in -h|--help|"") sed -n '5,29p' "$0" | sed 's/^# \{0,1\}//'; exit 0;; esac
 HERE=$(cd "$(dirname "$0")" && pwd)
 PA=$(cd "$HERE/.." && pwd)
 MD_DIR=$(cd "$1" && pwd)
@@ -87,7 +90,7 @@ done
 rm -f "$STAGE/.$NAME-pdf.html" "$STAGE/.$NAME-pdf-numbered.html"
 test -s "$STAGE/$NAME.pdf"
 
-# 4. The gate. Exit 0 means publishable; warnings do not fail.
+# 4. The checks. Exit 0 means publishable; warnings do not fail.
 echo "Staged: $STAGE"
 [ "${PUBCHECK:-1}" = 0 ] && exit 0
 python3 "$PA/pub-check/oasis_pub_check.py" "$STAGE"

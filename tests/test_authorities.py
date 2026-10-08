@@ -125,3 +125,48 @@ def test_authorities_yaml_and_the_catalog_cover_the_same_conditions():
     assert yaml_keys == cw_keys, (
         "authorities.yaml and crosswalk.json disagree about which conditions are "
         "policy-grounded; re-run gen_authorities.py")
+
+
+def _grounded_and_total():
+    grounded = sum(REGISTRY[(c["check"], c["sig"])].get("sites", 1)
+                   for c in CROSSWALK["conditions"] if c["status"] == "policy-grounded")
+    return grounded, sum(d.get("sites", 1) for d in REGISTRY.values())
+
+
+OPERATIONAL_CLAIMS = [re.compile(r"The (?:other|remaining) (\d+) are operational")]
+
+
+@pytest.mark.parametrize("rel", ["PUBLICATION-QUALITY.md", "pub-check/AUTHORITIES.md"])
+def test_the_advertised_operational_count_is_total_minus_grounded(rel):
+    """PUBLICATION-QUALITY.md said 73 operational rules while the catalog said
+    83 (found 8 Oct 2026): the subset is phrased so the total-count patterns in
+    test_advertised_counts.py cannot see it, so it is pinned here."""
+    grounded, total = _grounded_and_total()
+    flat = re.sub(r"\s+", " ", (REPO_ROOT / rel).read_text(encoding="utf-8"))
+    found = [int(n) for pat in OPERATIONAL_CLAIMS for n in pat.findall(flat)]
+    assert found, f"{rel} no longer states the operational count in a form this test reads"
+    assert set(found) == {total - grounded}, (
+        f"{rel} says {sorted(set(found))} operational conditions; "
+        f"{total} - {grounded} grounded = {total - grounded}")
+
+
+def test_every_catalog_entry_states_the_severity_the_tool_reports():
+    """Each authority carries its acceptance criterion's severity, which is not
+    always the tool's: revision-collision showed five BLOCKER clauses for a
+    condition the tool reports as WARN. Every entry therefore says what the
+    tool reports, read here from the registry rather than trusted."""
+    inventory = {(c["check"], c["sig"]): c["severity"]
+                 for c in oasis_pub_check.conditions_inventory()}
+    catalog = (PUB / "AUTHORITIES.md").read_text(encoding="utf-8")
+    stated = {}
+    for m in re.finditer(r"^### ([^:\n]+): (.+)\n\nAcceptance criteria: [^\n]*\n\n"
+                         r"Severity in pub-check: (\S+)$", catalog, flags=re.M):
+        sig = m.group(2).replace("&lt;", "<").replace("&gt;", ">")
+        stated[(m.group(1), sig)] = m.group(3)
+    expected = {(r["check"], r["sig"]): inventory[(r["check"], r["sig"])]
+                for r in AUTHORITIES["conditions"].values()}
+    assert set(stated) == set(expected), (
+        f"entries with no severity line: {sorted(set(expected) - set(stated))[:5]}; "
+        f"severity lines for no entry: {sorted(set(stated) - set(expected))[:5]}")
+    wrong = {k: (stated[k], expected[k]) for k in expected if stated[k] != expected[k]}
+    assert not wrong, f"catalog severity disagrees with the tool (catalog, tool): {wrong}"

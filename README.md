@@ -87,6 +87,7 @@ URL shapes and what happens when nothing is published:
 | **[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit checks, a worked example. **Start here for the review model.** |
 | **[pub-check/README.md](pub-check/README.md)** | The class-level summary of what it checks, with severities and the regression corpus. |
 | **[pub-check/CHECKS.md](pub-check/CHECKS.md)** | A check fired and you want the exact one. Full catalog, generated from the code. |
+| **[docs/WORKED-EXAMPLES.md](docs/WORKED-EXAMPLES.md)** | A finding you have not met before: recent CSAF and DMLex cases, each with the message, what it meant and the fix at source. |
 | **[TRANSFORMS.md](TRANSFORMS.md)** | Building from Markdown and want the pipeline command by command. |
 | **[docs/MARKDOWN-EDITION.md](docs/MARKDOWN-EDITION.md)** | A Markdown edition of a DocBook specification, as one more output of its source (the `docbook-markdown` action). |
 | **[docs/CONVERT-AND-VERIFY.md](docs/CONVERT-AND-VERIFY.md)** | The whole check of a converted specification in one copy-me GitHub workflow: convert, render, verify the HTML and PDF against the published originals, run the OASIS publication checks, build page pairs for review. |
@@ -199,12 +200,15 @@ publication-assurance/
 │   ├── criteria.yaml                #   the acceptance criteria themselves, with their quotes
 │   ├── corpus/                      #   the 25 snapshotted policy pages + MANIFEST.json (sha256)
 │   ├── render_summary.py            #   the Step Summary renderer the Action calls
+│   ├── validation_report.py         #   the full Validation Report from one --json run
+│   ├── publish_report.py            #   commits a run's reports to the pubcheck-reports branch
 │   ├── advance_stage.py             #   cuts the next stage of a Markdown spec (dry run by default)
 │   ├── rules/                       #   oasis.rules.yaml, the criteria as data for nide
 │   └── README.md                    #   checks, severities, corpus (canonical criteria)
 ├── verify/                          # An edition vs what was published, word for word
 │   ├── verify_md.py                 #   Markdown and its HTML vs the published HTML (stdlib + pandoc 3.x)
-│   └── verify_pdf.py                #   the rendered PDF vs the published PDF (stdlib + poppler)
+│   ├── verify_pdf.py                #   the rendered PDF vs the published PDF (stdlib + poppler)
+│   └── annotate.py                  #   a verifier's verdict as a GitHub Actions annotation
 ├── converters/docbook-to-markdown/  # DocBook to OASIS Markdown, then verify_md
 │   ├── build.sh                     #   resolve, prebuild, convert, copy images, verify
 │   ├── docbook2md.py                #   the converter (stdlib)
@@ -217,13 +221,18 @@ publication-assurance/
 │   └── review_pairs.py              #   PDF page pairs for a reviewer, a planted fault, the grade
 ├── harvest/                         # Learn from every run: records in, candidate check improvements out
 │   └── harvest.py                   #   re-runs the checks on recorded packages, reads audits and adjudications
+├── docbook-markdown/action.yml      # The one-step action for a DocBook specification's Markdown edition
 ├── docs/ADOPTING.md                 # Adoption guide: the publication checks in a TC's own repository
 ├── docs/MARKDOWN-EDITION.md         # A Markdown edition of a DocBook specification (the docbook-markdown action)
 ├── docs/CONVERT-AND-VERIFY.md       # Convert, render, verify and check in one GitHub workflow, with screenshots
+├── docs/WORKED-EXAMPLES.md          # Findings from recent publications and the fix at source for each
+├── docs/images/                     # The screenshots the guides use
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all checks
 ├── examples/                        # Worked example + the regression corpus
 │   ├── consumer-workflow.yml        #   the drop-in TC workflow (copy this)
 │   ├── consumer-workflow-matrix.yml #   a multi-package caller that uploads the reports
+│   ├── converting-workflow.yml      #   the convert-and-verify caller (copy this to convert and verify)
+│   ├── docbook-markdown-workflow.yml #  the docbook-markdown caller
 │   ├── eox-core-v1.0-csd01/         #   the Validation Report from a publication
 │   ├── csaf/                        #   archived CSAF work products (v2.0 lineage, v2.1 csd01)
 │   └── csaf-cvrf/                   #   archived CSAF-CVRF v1.2 work products
@@ -259,7 +268,10 @@ publication-assurance/
 │   ├── styles/                      # OASIS markdown-styles CSS lineage (v1.1 → v1.8.1)
 │   └── workflows/                   # ci (this repo's own test suite), step_1 (MD→HTML),
 │                                    #   step_2 (HTML→PDF), step_3 (zip), pub-check (the
-│                                    #   publication checks), make-manifest (the release manifests)
+│                                    #   publication checks), make-manifest (the release manifests),
+│                                    #   convert-and-verify (the reusable workflow TCs call),
+│                                    #   gate-change-review (a checker change records its review),
+│                                    #   move-v1 (moves the v1 tag to each release)
 ├── LICENSE                          # Apache-2.0 (software tier)
 └── NOTICE                           # The three-tier IP statement
 ```
@@ -273,16 +285,27 @@ regression net: a fixture per fixed defect, plus smoke coverage over the CLI
 contract that `gate.py`, the composite action and the publication runbook
 depend on.
 
-The checker itself is stdlib-only. The tests need three packages the checker
-does not, and none is on the system Python, so use a venv:
+The checker itself is stdlib-only. The tests need packages the checker does
+not, and none is on the system Python, so use a venv. These are the packages
+CI installs:
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install pytest beautifulsoup4 PyYAML   # bs4: the pipeline; PyYAML: the criteria
+pip install pytest beautifulsoup4 PyYAML requests pillow
+# bs4 and requests: the pipeline; PyYAML: the criteria; Pillow: review_pairs.py
+pip install pymupdf    # optional: the PDF type-scale and Validation Report PDF tests
 pytest tests/ -v                                    # the full suite
 pytest tests/test_delivery_items.py -v              # one file
 pytest tests/test_delivery_items.py::test_index_html_is_never_selected_as_the_delivery_item
 ```
+
+Some tests also run external tools: pandoc 3.8.2.1 (the release the
+`verify_md.py` fixtures were made with), wkhtmltopdf, Chrome and poppler. A
+test whose tool is missing is skipped. CI installs the tools and sets
+`REQUIRE_PANDOC`, `REQUIRE_WKHTMLTOPDF`, `REQUIRE_CHROME` and
+`REQUIRE_CONVERTER` where they apply, so a missing tool there fails the run.
+A test that reads docs.oasis-open.org is skipped when the site cannot be
+reached.
 
 The suite runs on every push and pull request
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), and a red run
@@ -295,8 +318,8 @@ artifacts under `tests/fixtures/`; the corpus is read, never modified.
 
 ## Key technologies
 
-Python 3.10+ · Pandoc · BeautifulSoup4 · Prettier · wkhtmltopdf (this repository)
-/ headless Chrome + CSS Paged Media (current production) · GitHub Actions ·
+Python 3.10+ · Pandoc · BeautifulSoup4 · Prettier · wkhtmltopdf and headless
+Chrome with CSS Paged Media (publisher-toolkit prints with either) · GitHub Actions ·
 poppler (`pdftotext`/`pdffonts`, optional, for the PDF cross-checks)
 
 ## License
@@ -329,4 +352,4 @@ The OASIS name and logo are trademarks of OASIS Open.
 
 ---
 
-**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [Markdown edition of a DocBook specification](docs/MARKDOWN-EDITION.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)
+**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [Markdown edition of a DocBook specification](docs/MARKDOWN-EDITION.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [Worked examples from recent publications](docs/WORKED-EXAMPLES.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)

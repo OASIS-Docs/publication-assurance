@@ -18,7 +18,7 @@ Versioning follows the publisher-toolkit convention:
 
 - **MAJOR**: a breaking contract change (exit-code semantics, `--json`
   shape, retired nide rule ids).
-- **MINOR**: a new check, check class, or nide rule (the gate got stricter).
+- **MINOR**: a new check, check class, or nide rule (the checks got stricter).
 - **PATCH**: a fix inside an existing check, or documentation/diagram
   corrections (no new criteria).
 
@@ -26,7 +26,29 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+No check changed, and the counts stay at 181 conditions in 61 classes.
+`harvest.py`'s report headings were reworded, three class summaries in
+`CHECKS.md` name the v1.13 conditions, and three conformance-structure
+condition descriptions say that quotes and dashes are folded.
+
+- **docs/WORKED-EXAMPLES.md** (new): seven findings from CSAF v2.0 and v2.1 and
+  from DMLex, each with the message, what it meant and the fix at source.
+- **Corrections found by reading every guide against the code**: the
+  operational count in the TC guide (83, not 73); the severity pub-check
+  reports, now stated on every entry of `AUTHORITIES.md` beside the
+  criterion's; every cause of exit 2; the DMLex contents counts (171
+  published entries, 133 unnumbered in the first renders); `render.sh` exit
+  codes and its four-pass limit on contents numbering; the conversion leaving a refused `.md` on
+  disk; the step 2 code-block and time-limit behaviour in `TRANSFORMS.md`;
+  the nine workflows; the test dependencies CI installs; flags and tools no
+  README described (`annotate.py`, `--context`, `--dpi`, `--plant`,
+  `--images-prefix`, `advance_stage.py --allow-dirty`, `--out`, `--formats`).
+- **docbook-markdown/action.yml** pinned v1.11.1 and pointed at a guide that
+  does not exist. Both are fixed, and the file is now in the pin test.
+- **New tests**: `tests/test_doc_links.py` (every relative link in the guides,
+  and every `docs/*.md` a workflow or action names, resolves);
+  `tests/test_authorities.py` pins the operational count and each catalog
+  entry's tool severity against the registry.
 
 ## v1.13.1 - 2026-10-05
 

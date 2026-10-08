@@ -49,9 +49,9 @@ severity if the condition fails. The file is generated from the tool's own
 condition registry by `render_checks_md.py`, and `--list-checks` asserts the
 registry against the implementation on every run.
 
-The gate is input-format agnostic. A TC generates its own outputs from
+The checks are input-format agnostic. A TC generates its own outputs from
 whatever source format it authors in (Markdown, Word, ODT, DocBook/XML,
-LaTeX, anything else), and what the gate validates is the output contract:
+LaTeX, anything else), and what the checks validate is the output contract:
 conformant HTML and PDF, with the authoritative source travelling beside
 them. Conditions marked `md`, `docx`, or `odt` in the Applies column are add-ons
 that engage only when that source format is present in the package; every
@@ -128,15 +128,15 @@ CLASS_DESCRIPTIONS = {
     "filenames": "Delivery items are named for the published stage, one basename, all formats present.",
     "front-matter": "The This/Latest stage URL blocks must match the package's actual publish path.",
     "generator": "DOCX-native renders must come from Microsoft Word, matching the TC's precedent.",
-    "html-anchors": "Every internal fragment link must resolve to an anchor in the document.",
-    "html-residue": "Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths.",
+    "html-anchors": "Every internal fragment link must resolve to an anchor in the document, and no link may be a cross-reference written without its `#`.",
+    "html-residue": "Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths, caption or attribute syntax printed as text.",
     "html-title": "The HTML title element must be an actual document title with no working residue.",
     "image-policy": "Images must be self-contained, inert, and within the pipeline's size caps.",
     "junk-files": "OS and editor junk must not be in the package.",
     "link-mismatch": "A visible URL and its link target must agree.",
     "logo": "The cover logo should be the canonical OASIS template logo.",
     "manifest": "A packaged manifest.json must verify against the files on disk.",
-    "md-links": "Markdown link forms that render wrong under pandoc autolinking.",
+    "md-links": "Markdown link forms that render wrong: dual `[url](url)` links and URLs that pandoc autolinking runs into.",
     "odt-integrity": "The ODT source must be a valid, macro-free OpenDocument container.",
     "package-refs": "Files the document cites under its own stage path must be included in the package.",
     "pdf-cover": "The rendered PDF cover must carry the title exactly once and no CI paths.",

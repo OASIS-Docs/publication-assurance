@@ -27,11 +27,11 @@ How the two layers of the OASIS publication quality architecture dovetail:
   value it was compared to, shown in full (rendered landscape so the
   values stay legible).
 - Layer 2, the publication audit, is human and adversarial, event-side. 15
-  mandatory gates run against live ground truth the tool cannot see: byte
+  mandatory audit checks run against live ground truth the tool cannot see: byte
   identity, render class vs precedent, live roster, Naming Directives, index
   chain, zip integrity, four announcement channels, ticket record, an
   independent adversarial verifier, and a visual inspection of the live
-  pages. Every gate
+  pages. Every audit check
   needs recorded evidence, and the verdict is computed from that record.
   Its output is the Publication Audit Report.
 - The dovetail is intake checklist step 4b, which requires running
@@ -49,7 +49,7 @@ The prose companion to these diagrams is
 Two swim lanes, TC side (Layer 1) and TC Administration side (Layer 2). The
 shared `pub-check` engine sits in the seam between them with dovetail keys
 seating into both lanes: the identical code running on both sides, the TC in
-CI on the left, checklist step 4b on the right. The audit gates that need
+CI on the left, checklist step 4b on the right. The audit checks that need
 live ground truth are laid out as a chip grid, the independent adversarial
 verifier is called out separately, and both report artifacts flow down to
 the shared TCADMIN ticket and `_audit/` record. Primary explainer figure for
@@ -68,7 +68,7 @@ slide in a deck, or a sidebar summary next to the primary diagram.
 The *cross-tool* dovetail: how pub-check (OASIS intake) interoperates with
 Stefan Hagen's `nide` (TC-side authoring). Two engine lanes with a shared
 seam. The rules flow one way (OASIS authors `oasis.rules.yaml`, nide pulls it
-via `extends: oasis`, both gates evaluate it), the package and its
+via `extends: oasis`, both tools evaluate it), the package and its
 `nide-manifest` flow the other (nide emits, pub-check hash-verifies the
 delivered bytes). nide and pub-check evaluate the same rules file and verify
 the same manifest. Distinct from the two diagrams

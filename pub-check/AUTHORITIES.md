@@ -13,11 +13,15 @@ This catalog records, for the acceptance-criteria checks that trace to **written
 
 The check name and signature match the tool's own catalog (`CHECKS.md`); the `AC-*` ids are the policy-derived acceptance criteria in `criteria.yaml`.
 
+Each entry gives the severity pub-check reports for the condition, then each clause with, in brackets, the severity of the acceptance criterion it supports. The two can differ in either direction. Where the tool cannot tell a legitimate case from a failure it reports a warning: `revision-collision` also fires when a package that is already published is checked again, so it warns although the criterion behind it is a blocker. `rfc-keywords` goes the other way: the tool blocks a document that uses the normative key words (MUST, SHOULD, MAY and the rest) without citing RFC 2119. `CHECKS.md` is the record of what the tool reports.
+
 ## artifact-naming
 
 ### artifact-naming: filename embeds a stage/revision token
 
 Acceptance criteria: AC-NAMING-31
+
+Severity in pub-check: WARN
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (WARN)
   > it is considered inadvisable to incorporate instance-specific [ stage ][ revision ] data for any release in filenames other than in the document identifier files, as required
@@ -27,6 +31,8 @@ Acceptance criteria: AC-NAMING-31
 ### authors: Authors section is empty or placeholder-only
 
 Acceptance criteria: AC-FRONTMATTER-18
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: TechnicalReports](https://docs.oasis-open.org/TChandbook/Reference/TechnicalReports.html)**, Key characteristics (BLOCKER)
   > A Technical Report has one or more named Authors . This distinguishes it from Committee Notes, which list editors. Authorship is recorded on the cover page and is part of the definition of the work product type.
@@ -39,6 +45,8 @@ Acceptance criteria: AC-FRONTMATTER-18
 
 Acceptance criteria: AC-FRONTMATTER-18
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: TechnicalReports](https://docs.oasis-open.org/TChandbook/Reference/TechnicalReports.html)**, Key characteristics (BLOCKER)
   > A Technical Report has one or more named Authors . This distinguishes it from Committee Notes, which list editors. Authorship is recorded on the cover page and is part of the definition of the work product type.
 - **[TC Handbook: Glossary](https://docs.oasis-open.org/TChandbook/Concepts/Glossary.html)**, Technical Report (TR) (BLOCKER)
@@ -50,6 +58,8 @@ Acceptance criteria: AC-FRONTMATTER-18
 
 Acceptance criteria: AC-FRONTMATTER-18
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: TechnicalReports](https://docs.oasis-open.org/TChandbook/Reference/TechnicalReports.html)**, Key characteristics (BLOCKER)
   > A Technical Report has one or more named Authors . This distinguishes it from Committee Notes, which list editors. Authorship is recorded on the cover page and is part of the definition of the work product type.
 - **[TC Handbook: Glossary](https://docs.oasis-open.org/TChandbook/Concepts/Glossary.html)**, Technical Report (TR) (BLOCKER)
@@ -60,6 +70,8 @@ Acceptance criteria: AC-FRONTMATTER-18
 ### authors: unresolved 'will be filled in' placeholder
 
 Acceptance criteria: AC-FRONTMATTER-18
+
+Severity in pub-check: WARN
 
 - **[TC Handbook: TechnicalReports](https://docs.oasis-open.org/TChandbook/Reference/TechnicalReports.html)**, Key characteristics (BLOCKER)
   > A Technical Report has one or more named Authors . This distinguishes it from Committee Notes, which list editors. Authorship is recorded on the cover page and is part of the definition of the work product type.
@@ -74,6 +86,8 @@ Acceptance criteria: AC-FRONTMATTER-18
 
 Acceptance criteria: AC-NAMING-10, AC-NAMING-11
 
+Severity in pub-check: BLOCKER/WARN
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > A directory must not contain two or more names (filenames or directory names) that differ ONLY in case.
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.2 Stage (BLOCKER)
@@ -84,6 +98,8 @@ Acceptance criteria: AC-NAMING-10, AC-NAMING-11
 ### case: Mixed-case path in docs.oasis-open.org URL
 
 Acceptance criteria: AC-NAMING-11
+
+Severity in pub-check: WARN
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.2 Stage (BLOCKER)
   > A stage abbreviation (with a revision number) must be used in lower case as a discrete path component for document identifier, document URI, and in principal document filenames.
@@ -96,12 +112,16 @@ Acceptance criteria: AC-NAMING-11
 
 Acceptance criteria: AC-CONTENT-11
 
+Severity in pub-check: WARN
+
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.6 Public Review (BLOCKER)
   > the TC shall prepare a comment resolution log, approve it by Full Majority Vote and submit it to the OASIS TC Administrator.
 
 ### comment-resolution-log: resembling the required comment-resolution-log is present but misnamed
 
 Acceptance criteria: AC-NAMING-22
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.2 Stage (BLOCKER)
   > The "comment resolution log" filename follows the pattern: [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-comment-resolution-log.[ext]
@@ -114,6 +134,8 @@ Acceptance criteria: AC-NAMING-22
 
 Acceptance criteria: AC-CONTENT-10
 
+Severity in pub-check: WARN
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Key principles (WARN)
   > Clause numbering must be unique and stable across revisions.
 
@@ -121,12 +143,16 @@ Acceptance criteria: AC-CONTENT-10
 
 Acceptance criteria: AC-CONTENT-10
 
+Severity in pub-check: WARN
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Key principles (WARN)
   > Clause numbering must be unique and stable across revisions.
 
 ### conformance-structure: Conformance section is a buried subsection
 
 Acceptance criteria: AC-CONTENT-03
+
+Severity in pub-check: BLOCKER/WARN
 
 - **[TC Handbook: Conformance](https://docs.oasis-open.org/TChandbook/Reference/Conformance.html)**, Required structure of the conformance section (Policy requirement) (BLOCKER)
   > A separate, top-level numbered section of the work product (not a subsection buried elsewhere).
@@ -139,12 +165,16 @@ Acceptance criteria: AC-CONTENT-03
 
 Acceptance criteria: AC-CONTENT-10
 
+Severity in pub-check: BLOCKER/WARN
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Key principles (WARN)
   > Clause numbering must be unique and stable across revisions.
 
 ### conformance-structure: OS conformance clause numbering differs from approved CS
 
 Acceptance criteria: AC-CONTENT-09
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: Conformance](https://docs.oasis-open.org/TChandbook/Reference/Conformance.html)**, OASIS Standard os (BLOCKER)
   > Conformance clauses are preserved unchanged from the approved Committee Specification. Amendments to a published OASIS Standard follow the Approved Errata process.
@@ -153,12 +183,16 @@ Acceptance criteria: AC-CONTENT-09
 
 Acceptance criteria: AC-CONTENT-09
 
+Severity in pub-check: WARN
+
 - **[TC Handbook: Conformance](https://docs.oasis-open.org/TChandbook/Reference/Conformance.html)**, OASIS Standard os (BLOCKER)
   > Conformance clauses are preserved unchanged from the approved Committee Specification. Amendments to a published OASIS Standard follow the Approved Errata process.
 
 ### conformance-structure: not populated with numbered clauses
 
 Acceptance criteria: AC-CONTENT-01
+
+Severity in pub-check: WARN
 
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.6 Conformance Clauses (BLOCKER)
   > A Standards Track Work Product that is approved by the TC at the Committee Specification Public Review Draft, Committee Specification or OASIS Standard level must include a separate section, listing a set of numbered conformance clauses , to which any implementation of the specification must adhere in order to claim conformance to the specification (or any optional portion thereof).
@@ -177,6 +211,8 @@ Acceptance criteria: AC-CONTENT-01
 
 Acceptance criteria: AC-CONTENT-08
 
+Severity in pub-check: WARN
+
 - **[TC Handbook: Conformance](https://docs.oasis-open.org/TChandbook/Reference/Conformance.html)**, Normative versus non-normative content (WARN)
   > Appendices and examples that are not part of the conformance requirements should be marked "Non-normative".
 - **[TC Handbook: Conformance](https://docs.oasis-open.org/TChandbook/Reference/Conformance.html)**, Normative versus non-normative content (WARN)
@@ -187,6 +223,8 @@ Acceptance criteria: AC-CONTENT-08
 ### date-sync: Copyright year
 
 Acceptance criteria: AC-FRONTMATTER-16
+
+Severity in pub-check: WARN
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, File formats and document repository (Policy requirement) (BLOCKER)
   > All Work Products must use the OASIS file naming scheme and must include the OASIS copyright notice.
@@ -199,6 +237,8 @@ Acceptance criteria: AC-FRONTMATTER-16
 
 Acceptance criteria: AC-NAMING-17
 
+Severity in pub-check: WARN
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (WARN)
   > File extensions should conform to industry best practice — matching well-known IANA MIME Media Types .
 
@@ -207,6 +247,8 @@ Acceptance criteria: AC-NAMING-17
 ### extension-count: carries more than one file extension after the stem
 
 Acceptance criteria: AC-NAMING-16
+
+Severity in pub-check: BLOCKER/WARN
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > A single file(name) extension must be used in each filename except for a recognized set of extensionless filenames in common use.
@@ -217,6 +259,8 @@ Acceptance criteria: AC-NAMING-16
 
 Acceptance criteria: AC-NAMING-16
 
+Severity in pub-check: BLOCKER/WARN
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > A single file(name) extension must be used in each filename except for a recognized set of extensionless filenames in common use.
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 9 Notes - Filenames without extensions (BLOCKER)
@@ -225,6 +269,8 @@ Acceptance criteria: AC-NAMING-16
 ### extension-count: outside the recognized common-use set
 
 Acceptance criteria: AC-NAMING-16
+
+Severity in pub-check: WARN
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > A single file(name) extension must be used in each filename except for a recognized set of extensionless filenames in common use.
@@ -237,6 +283,8 @@ Acceptance criteria: AC-NAMING-16
 
 Acceptance criteria: AC-FORMATS-01
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.2 File Formats (BLOCKER)
   > All approved versions of OASIS Deliverables must be published in (1) editable source, (2) HTML or XHTML, and (3) PDF formats.
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, File formats and document repository (BLOCKER)
@@ -245,6 +293,8 @@ Acceptance criteria: AC-FORMATS-01
 ### filenames: No authoritative source artifact
 
 Acceptance criteria: AC-FORMATS-03, AC-FORMATS-02
+
+Severity in pub-check: WARN
 
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.2 File Formats (BLOCKER)
   > Editable formats of all versions of TC documents must be delivered to the TC’s document repository.
@@ -261,6 +311,8 @@ Acceptance criteria: AC-FORMATS-03, AC-FORMATS-02
 
 Acceptance criteria: AC-FORMATS-01
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.2 File Formats (BLOCKER)
   > All approved versions of OASIS Deliverables must be published in (1) editable source, (2) HTML or XHTML, and (3) PDF formats.
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, File formats and document repository (BLOCKER)
@@ -269,6 +321,8 @@ Acceptance criteria: AC-FORMATS-01
 ### filenames: carries a working token
 
 Acceptance criteria: AC-NAMING-14
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Filename pattern (BLOCKER)
   > The standard filename pattern for single-part work products is: Naming Directives v1.7 [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber].[ext]
@@ -283,6 +337,8 @@ Acceptance criteria: AC-NAMING-14
 
 Acceptance criteria: AC-NAMING-14
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Filename pattern (BLOCKER)
   > The standard filename pattern for single-part work products is: Naming Directives v1.7 [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber].[ext]
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
@@ -295,6 +351,8 @@ Acceptance criteria: AC-NAMING-14
 ### filenames: does not end in '-
 
 Acceptance criteria: AC-NAMING-05, AC-NAMING-14
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Filename pattern (BLOCKER)
   > [stage-abbrev][revisionNumber] : one of the current stage abbreviations above, followed immediately by a two-digit revision number (e.g., csd01 , cs02 ). For os , omit the revision number entirely.
@@ -323,6 +381,8 @@ Acceptance criteria: AC-NAMING-05, AC-NAMING-14
 
 Acceptance criteria: AC-FRONTMATTER-04
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Latest stage) (BLOCKER)
   > This is the only URI that may be updated (overwritten) when a newer version is published.
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Three required cover-page URIs (Policy requirement) (BLOCKER)
@@ -333,6 +393,8 @@ Acceptance criteria: AC-FRONTMATTER-04
 ### front-matter: Latest-stage URL must point at the version root
 
 Acceptance criteria: AC-FRONTMATTER-04
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Latest stage) (BLOCKER)
   > This is the only URI that may be updated (overwritten) when a newer version is published.
@@ -345,6 +407,8 @@ Acceptance criteria: AC-FRONTMATTER-04
 
 Acceptance criteria: AC-FRONTMATTER-04
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Latest stage) (BLOCKER)
   > This is the only URI that may be updated (overwritten) when a newer version is published.
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Three required cover-page URIs (Policy requirement) (BLOCKER)
@@ -356,6 +420,8 @@ Acceptance criteria: AC-FRONTMATTER-04
 
 Acceptance criteria: AC-FRONTMATTER-04
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Latest stage) (BLOCKER)
   > This is the only URI that may be updated (overwritten) when a newer version is published.
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Three required cover-page URIs (Policy requirement) (BLOCKER)
@@ -366,6 +432,8 @@ Acceptance criteria: AC-FRONTMATTER-04
 ### front-matter: No 'This stage' URL block
 
 Acceptance criteria: AC-FRONTMATTER-01
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (BLOCKER)
   > Every Work Product must display its persistent URIs on the cover page. OASIS Naming Directives v1.7 requires exactly three URI fields, each serving a distinct and permanent role.
@@ -382,6 +450,8 @@ Acceptance criteria: AC-FRONTMATTER-01
 
 Acceptance criteria: AC-FRONTMATTER-01
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (BLOCKER)
   > Every Work Product must display its persistent URIs on the cover page. OASIS Naming Directives v1.7 requires exactly three URI fields, each serving a distinct and permanent role.
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Policy requirement) (BLOCKER)
@@ -396,6 +466,8 @@ Acceptance criteria: AC-FRONTMATTER-01
 ### front-matter: Stage URL is not under
 
 Acceptance criteria: AC-NAMING-24, AC-PACKAGING-19
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: CommitteeSpecDrafts](https://docs.oasis-open.org/TChandbook/Reference/CommitteeSpecDrafts.html)**, Submitting a CSD for publication (BLOCKER)
   > Staff publish the CSD to the OASIS Library at a URI following the pattern: https://docs.oasis-open.org/[tc-shortname]/[WP-abbrev]/[version]/csd[NN]/
@@ -416,6 +488,8 @@ Acceptance criteria: AC-NAMING-24, AC-PACKAGING-19
 
 Acceptance criteria: AC-NAMING-24
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: CommitteeSpecDrafts](https://docs.oasis-open.org/TChandbook/Reference/CommitteeSpecDrafts.html)**, Submitting a CSD for publication (BLOCKER)
   > Staff publish the CSD to the OASIS Library at a URI following the pattern: https://docs.oasis-open.org/[tc-shortname]/[WP-abbrev]/[version]/csd[NN]/
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, URI pattern (BLOCKER)
@@ -428,6 +502,8 @@ Acceptance criteria: AC-NAMING-24
 ### front-matter: This-stage block does not list
 
 Acceptance criteria: AC-FORMATS-01, AC-FRONTMATTER-01
+
+Severity in pub-check: WARN
 
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.2 File Formats (BLOCKER)
   > All approved versions of OASIS Deliverables must be published in (1) editable source, (2) HTML or XHTML, and (3) PDF formats.
@@ -448,6 +524,8 @@ Acceptance criteria: AC-FORMATS-01, AC-FRONTMATTER-01
 
 Acceptance criteria: AC-NAMING-24
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: CommitteeSpecDrafts](https://docs.oasis-open.org/TChandbook/Reference/CommitteeSpecDrafts.html)**, Submitting a CSD for publication (BLOCKER)
   > Staff publish the CSD to the OASIS Library at a URI following the pattern: https://docs.oasis-open.org/[tc-shortname]/[WP-abbrev]/[version]/csd[NN]/
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, URI pattern (BLOCKER)
@@ -460,6 +538,8 @@ Acceptance criteria: AC-NAMING-24
 ### front-matter: which is not a file in the package
 
 Acceptance criteria: AC-FRONTMATTER-02
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (This stage) (BLOCKER)
   > The exact published artifact at this version and stage (e.g., …/csd01/… ). Unique; never reused for a different document.
@@ -474,6 +554,8 @@ Acceptance criteria: AC-FRONTMATTER-02
 
 Acceptance criteria: AC-CONTENT-06
 
+Severity in pub-check: BLOCKER/WARN
+
 - **[TC Handbook: WPQualityChecklist](https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html)**, Editorial quality verification checklist, key areas (WARN)
   > Document consistency: section numbers, cross-references, defined term capitalization, and table of contents are current and internally consistent.
 
@@ -481,12 +563,16 @@ Acceptance criteria: AC-CONTENT-06
 
 Acceptance criteria: AC-CONTENT-06
 
+Severity in pub-check: BLOCKER/WARN
+
 - **[TC Handbook: WPQualityChecklist](https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html)**, Editorial quality verification checklist, key areas (WARN)
   > Document consistency: section numbers, cross-references, defined term capitalization, and table of contents are current and internally consistent.
 
 ### html-anchors: no internal (fragment) links at all
 
 Acceptance criteria: AC-CONTENT-06
+
+Severity in pub-check: WARN
 
 - **[TC Handbook: WPQualityChecklist](https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html)**, Editorial quality verification checklist, key areas (WARN)
   > Document consistency: section numbers, cross-references, defined term capitalization, and table of contents are current and internally consistent.
@@ -496,6 +582,8 @@ Acceptance criteria: AC-CONTENT-06
 ### junk-files: Junk file in package
 
 Acceptance criteria: AC-NAMING-09, AC-NAMING-13
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > Filenames and directory names must neither begin nor end with a punctuation character (period or hyphen).
@@ -512,6 +600,8 @@ Acceptance criteria: AC-NAMING-09, AC-NAMING-13
 
 Acceptance criteria: AC-PACKAGING-18
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.6 Using Appropriate URI References (BLOCKER)
   > The OASIS member-only (private, password-protected) URI references created by OASIS [Kavi] tools must not be cited in TC mailing list messages, Wiki pages, TC public web pages, JIRA tickets, specifications, meeting minutes, or in any TC "documents" that are or may become public.
 
@@ -520,6 +610,8 @@ Acceptance criteria: AC-PACKAGING-18
 ### multi-part-naming: bare canonical filename in a multi-part package
 
 Acceptance criteria: AC-NAMING-20
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Multi-part work products (BLOCKER)
   > For work products published in multiple parts, insert a part identifier between the stage designator and the extension: Naming Directives v1.7 [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-[partNumber]-[partName].[ext]
@@ -532,6 +624,8 @@ Acceptance criteria: AC-NAMING-20
 
 Acceptance criteria: AC-NAMING-19
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.3 Multi-Part Work Products (BLOCKER)
   > any such multi-part Work Product must have a single Work Product name and version number
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Multi-part work products (BLOCKER)
@@ -541,6 +635,8 @@ Acceptance criteria: AC-NAMING-19
 
 Acceptance criteria: AC-NAMING-19
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.3 Multi-Part Work Products (BLOCKER)
   > any such multi-part Work Product must have a single Work Product name and version number
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Multi-part work products (BLOCKER)
@@ -549,6 +645,8 @@ Acceptance criteria: AC-NAMING-19
 ### multi-part-naming: missing part identifier
 
 Acceptance criteria: AC-NAMING-20
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Multi-part work products (BLOCKER)
   > For work products published in multiple parts, insert a part identifier between the stage designator and the extension: Naming Directives v1.7 [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-[partNumber]-[partName].[ext]
@@ -561,6 +659,8 @@ Acceptance criteria: AC-NAMING-20
 
 Acceptance criteria: AC-NAMING-32
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > beginning with the number "1" (for Part 1) and increasing monotonically (2, 3, 4, ...) for other parts
 
@@ -568,12 +668,16 @@ Acceptance criteria: AC-NAMING-32
 
 Acceptance criteria: AC-NAMING-32
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > beginning with the number "1" (for Part 1) and increasing monotonically (2, 3, 4, ...) for other parts
 
 ### multi-part-naming: part numbering is not monotonically increasing / contains a gap
 
 Acceptance criteria: AC-NAMING-32
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > beginning with the number "1" (for Part 1) and increasing monotonically (2, 3, 4, ...) for other parts
@@ -583,6 +687,8 @@ Acceptance criteria: AC-NAMING-32
 ### name-chars: must never be used in a filename or directory name that is used in a document URI
 
 Acceptance criteria: AC-NAMING-08, AC-NAMING-07
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 3 Name Characters for Files and Directories (BLOCKER)
   > An UNDERSCORE must never be used in a filename or directory name that is used in a document URI
@@ -597,12 +703,16 @@ Acceptance criteria: AC-NAMING-08, AC-NAMING-07
 
 Acceptance criteria: AC-NAMING-07
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 3 Name Characters for Files and Directories (BLOCKER)
   > TCs must use only the sixty-four characters from among alphanumerics [A-Za-z0-9] and the two punctuation characters: "." (PERIOD), and "-" (HYPHEN)
 
 ### name-chars: no other character is permitted anywhere in the package
 
 Acceptance criteria: AC-NAMING-07
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 3 Name Characters for Files and Directories (BLOCKER)
   > TCs must use only the sixty-four characters from among alphanumerics [A-Za-z0-9] and the two punctuation characters: "." (PERIOD), and "-" (HYPHEN)
@@ -613,6 +723,8 @@ Acceptance criteria: AC-NAMING-07
 
 Acceptance criteria: AC-PACKAGING-05
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.5 Computer Language Definitions (BLOCKER)
   > Each text file must be referenced from the Work Product; and
 
@@ -622,6 +734,8 @@ Acceptance criteria: AC-PACKAGING-05
 
 Acceptance criteria: AC-PACKAGING-21
 
+Severity in pub-check: WARN
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 8 XML Namespace Identifiers and Namespace Documents (BLOCKER)
   > no (file-system) regular files, directories/folders, or symbolic links matching information resources may make use of these URI strings for resource identification.
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, XML namespace rule (/ns/) (Policy requirement) (BLOCKER)
@@ -630,6 +744,8 @@ Acceptance criteria: AC-PACKAGING-21
 ### ns-segment: reuses the reserved /ns/ segment
 
 Acceptance criteria: AC-PACKAGING-21
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 8 XML Namespace Identifiers and Namespace Documents (BLOCKER)
   > no (file-system) regular files, directories/folders, or symbolic links matching information resources may make use of these URI strings for resource identification.
@@ -641,6 +757,8 @@ Acceptance criteria: AC-PACKAGING-21
 ### pdf-sync: does not contain the canonical this-stage base URL
 
 Acceptance criteria: AC-FRONTMATTER-01
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (BLOCKER)
   > Every Work Product must display its persistent URIs on the cover page. OASIS Naming Directives v1.7 requires exactly three URI fields, each serving a distinct and permanent role.
@@ -659,6 +777,8 @@ Acceptance criteria: AC-FRONTMATTER-01
 
 Acceptance criteria: AC-FRONTMATTER-03
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Previous stage) (BLOCKER)
   > The immediately preceding published instance of this Work Product (e.g., prior CSD revision or CS). Write "N/A" if this is the first published version.
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.2 Required Document URIs (BLOCKER)
@@ -667,6 +787,8 @@ Acceptance criteria: AC-FRONTMATTER-03
 ### previous-stage: the Previous-Stage block is empty or N/A
 
 Acceptance criteria: AC-FRONTMATTER-03
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Previous stage) (BLOCKER)
   > The immediately preceding published instance of this Work Product (e.g., prior CSD revision or CS). Write "N/A" if this is the first published version.
@@ -679,12 +801,16 @@ Acceptance criteria: AC-FRONTMATTER-03
 
 Acceptance criteria: AC-NAMING-33
 
+Severity in pub-check: WARN
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.2 Stage (BLOCKER)
   > This HTML file provides a publication history of the Work Product, and serves to document the occurrence of the public review.
 
 ### public-review-metadata: does not carry the required companion file
 
 Acceptance criteria: AC-NAMING-21
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.2 Stage (BLOCKER)
   > The "public review metadata" filename follows the pattern: [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html
@@ -697,6 +823,8 @@ Acceptance criteria: AC-NAMING-21
 
 Acceptance criteria: AC-CONTENT-05
 
+Severity in pub-check: WARN
+
 - **[TC Handbook: WPQualityChecklist](https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html)**, Editorial quality verification checklist, key areas (WARN)
   > Normative vs. informative content: sections marked consistently; normative references listed separately from informative references.
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 9 Notes - Track (WARN)
@@ -705,6 +833,8 @@ Acceptance criteria: AC-CONTENT-05
 ### references-split: is not labeled Normative References / Informative References
 
 Acceptance criteria: AC-CONTENT-05
+
+Severity in pub-check: WARN
 
 - **[TC Handbook: WPQualityChecklist](https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html)**, Editorial quality verification checklist, key areas (WARN)
   > Normative vs. informative content: sections marked consistently; normative references listed separately from informative references.
@@ -716,6 +846,8 @@ Acceptance criteria: AC-CONTENT-05
 ### revision-collision: is already published at
 
 Acceptance criteria: AC-FRONTMATTER-02, AC-PACKAGING-16, AC-NAMING-30
+
+Severity in pub-check: WARN
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (This stage) (BLOCKER)
   > The exact published artifact at this version and stage (e.g., …/csd01/… ). Unique; never reused for a different document.
@@ -748,6 +880,8 @@ Acceptance criteria: AC-FRONTMATTER-02, AC-PACKAGING-16, AC-NAMING-30
 
 Acceptance criteria: AC-CONTENT-07
 
+Severity in pub-check: WARN
+
 - **[TC Handbook: WPQualityChecklist](https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html)**, Editorial quality verification checklist, key areas (WARN)
   > Keyword guidelines: RFC 2119 / BCP 14 keywords (MUST, SHALL, SHOULD, MAY, etc.) used consistently and declared in a keywords section where employed.
 - **[TC Handbook: Conformance](https://docs.oasis-open.org/TChandbook/Reference/Conformance.html)**, Normative versus non-normative content (WARN)
@@ -756,6 +890,8 @@ Acceptance criteria: AC-CONTENT-07
 ### rfc-keywords: does not cite RFC 2119
 
 Acceptance criteria: AC-CONTENT-07
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: WPQualityChecklist](https://docs.oasis-open.org/TChandbook/Reference/WPQualityChecklist.html)**, Editorial quality verification checklist, key areas (WARN)
   > Keyword guidelines: RFC 2119 / BCP 14 keywords (MUST, SHALL, SHOULD, MAY, etc.) used consistently and declared in a keywords section where employed.
@@ -767,6 +903,8 @@ Acceptance criteria: AC-CONTENT-07
 ### schema-id: not valid JSON (
 
 Acceptance criteria: AC-FORMATS-04
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.5 Computer Language Definitions (BLOCKER)
   > All normative computer language definitions must also be provided in separate plain text files;
@@ -784,6 +922,8 @@ Acceptance criteria: AC-FORMATS-04
 ### stage-name: is missing its two-digit number
 
 Acceptance criteria: AC-NAMING-05, AC-NAMING-04
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: Naming](https://docs.oasis-open.org/TChandbook/Reference/Naming.html)**, Filename pattern (BLOCKER)
   > [stage-abbrev][revisionNumber] : one of the current stage abbreviations above, followed immediately by a two-digit revision number (e.g., csd01 , cs02 ). For os , omit the revision number entirely.
@@ -812,6 +952,8 @@ Acceptance criteria: AC-NAMING-05, AC-NAMING-04
 
 Acceptance criteria: AC-NAMING-02, AC-NAMING-03
 
+Severity in pub-check: BLOCKER
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, File naming and URI pattern (BLOCKER)
   > Standards Track: csd , cs , os , errata (the os stage never carries a revision number).
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.2 Stage (BLOCKER)
@@ -828,6 +970,8 @@ Acceptance criteria: AC-NAMING-02, AC-NAMING-03
 ### stage-name: uses a retired/invalid stage token
 
 Acceptance criteria: AC-NAMING-01
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: PublicReviews](https://docs.oasis-open.org/TChandbook/Reference/PublicReviews.html)**, What changed since the 2010 handbook / Stage names removed (BLOCKER)
   > Do not use csprd or cnprd in any filename, URI, or cover page.
@@ -846,6 +990,8 @@ Acceptance criteria: AC-NAMING-01
 
 Acceptance criteria: AC-NAMING-01
 
+Severity in pub-check: WARN
+
 - **[TC Handbook: PublicReviews](https://docs.oasis-open.org/TChandbook/Reference/PublicReviews.html)**, What changed since the 2010 handbook / Stage names removed (BLOCKER)
   > Do not use csprd or cnprd in any filename, URI, or cover page.
 - **[TC Handbook: CommitteeSpecs](https://docs.oasis-open.org/TChandbook/Reference/CommitteeSpecs.html)**, Naming and URIs after approval (BLOCKER)
@@ -861,6 +1007,8 @@ Acceptance criteria: AC-NAMING-01
 
 Acceptance criteria: AC-NAMING-02
 
+Severity in pub-check: WARN
+
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, File naming and URI pattern (BLOCKER)
   > Standards Track: csd , cs , os , errata (the os stage never carries a revision number).
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.2 Stage (BLOCKER)
@@ -871,6 +1019,8 @@ Acceptance criteria: AC-NAMING-02
 ### stage-token: embeds a stage-abbreviation token
 
 Acceptance criteria: AC-FRONTMATTER-04
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Latest stage) (BLOCKER)
   > This is the only URI that may be updated (overwritten) when a newer version is published.
@@ -884,6 +1034,8 @@ Acceptance criteria: AC-FRONTMATTER-04
 ### stage-uri-live: URI returns HTTP
 
 Acceptance criteria: AC-FRONTMATTER-03, AC-FRONTMATTER-04
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (Previous stage) (BLOCKER)
   > The immediately preceding published instance of this Work Product (e.g., prior CSD revision or CS). Write "N/A" if this is the first published version.
@@ -902,6 +1054,8 @@ Acceptance criteria: AC-FRONTMATTER-03, AC-FRONTMATTER-04
 
 Acceptance criteria: AC-CONTENT-01
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS TC Process (2017-05-26)](https://www.oasis-open.org/policies-guidelines/tc-process-2017-05-26/)**, 2.2.6 Conformance Clauses (BLOCKER)
   > A Standards Track Work Product that is approved by the TC at the Committee Specification Public Review Draft, Committee Specification or OASIS Standard level must include a separate section, listing a set of numbered conformance clauses , to which any implementation of the specification must adhere in order to claim conformance to the specification (or any optional portion thereof).
 - **[TC Handbook: Conformance](https://docs.oasis-open.org/TChandbook/Reference/Conformance.html)**, When conformance clauses are required (Policy requirement) (BLOCKER)
@@ -916,6 +1070,8 @@ Acceptance criteria: AC-CONTENT-01
 ### template: Required front-matter section missing
 
 Acceptance criteria: AC-FRONTMATTER-01, AC-FRONTMATTER-08, AC-FRONTMATTER-16
+
+Severity in pub-check: BLOCKER
 
 - **[TC Handbook: WPQualityRequirements](https://docs.oasis-open.org/TChandbook/Reference/WPQualityRequirements.html)**, Cover-page metadata and the three required URIs (BLOCKER)
   > Every Work Product must display its persistent URIs on the cover page. OASIS Naming Directives v1.7 requires exactly three URI fields, each serving a distinct and permanent role.
@@ -942,6 +1098,8 @@ Acceptance criteria: AC-FRONTMATTER-01, AC-FRONTMATTER-08, AC-FRONTMATTER-16
 
 Acceptance criteria: AC-FRONTMATTER-12
 
+Severity in pub-check: BLOCKER/WARN
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 7 Work Product Title/Name and Acronym (WARN)
   > Preferably, a title should not begin with the name "OASIS" except on the recommendation of Project Administration for special cases.
 
@@ -950,6 +1108,8 @@ Acceptance criteria: AC-FRONTMATTER-12
 ### title-version: Version composition does not follow the required
 
 Acceptance criteria: AC-FRONTMATTER-10, AC-NAMING-06
+
+Severity in pub-check: BLOCKER/WARN
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.1 Version (BLOCKER)
   > A Version identifier must also be incorporated into a Work Product name/title , where a title should be composed from a suitable name/identifier followed immediately (without punctuation) by the word "Version" and the Version number
@@ -964,12 +1124,16 @@ Acceptance criteria: AC-FRONTMATTER-10, AC-NAMING-06
 
 Acceptance criteria: AC-FRONTMATTER-10
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.1 Version (BLOCKER)
   > A Version identifier must also be incorporated into a Work Product name/title , where a title should be composed from a suitable name/identifier followed immediately (without punctuation) by the word "Version" and the Version number
 
 ### title-version: does not incorporate a Version identifier
 
 Acceptance criteria: AC-FRONTMATTER-10
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.1 Version (BLOCKER)
   > A Version identifier must also be incorporated into a Work Product name/title , where a title should be composed from a suitable name/identifier followed immediately (without punctuation) by the word "Version" and the Version number
@@ -980,12 +1144,16 @@ Acceptance criteria: AC-FRONTMATTER-10
 
 Acceptance criteria: AC-PACKAGING-17
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.5 URI Aliases (BLOCKER)
   > TCs must not use URI aliasing by any means, including, for example, unauthorized: (a) use of META-refresh elements, (b) preparing files with identical content under two different filenames within a given published instance, or (c) constructing URIs for canonical OASIS resources by using redirects supported by services on other Internet domains
 
 ### uri-alias: Previous-stage front-matter cites a redirect
 
 Acceptance criteria: AC-PACKAGING-17
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.5 URI Aliases (BLOCKER)
   > TCs must not use URI aliasing by any means, including, for example, unauthorized: (a) use of META-refresh elements, (b) preparing files with identical content under two different filenames within a given published instance, or (c) constructing URIs for canonical OASIS resources by using redirects supported by services on other Internet domains
@@ -994,12 +1162,16 @@ Acceptance criteria: AC-PACKAGING-17
 
 Acceptance criteria: AC-PACKAGING-17
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.5 URI Aliases (BLOCKER)
   > TCs must not use URI aliasing by any means, including, for example, unauthorized: (a) use of META-refresh elements, (b) preparing files with identical content under two different filenames within a given published instance, or (c) constructing URIs for canonical OASIS resources by using redirects supported by services on other Internet domains
 
 ### uri-alias: including a delivery/manifest-cited file
 
 Acceptance criteria: AC-PACKAGING-17
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.5 URI Aliases (BLOCKER)
   > TCs must not use URI aliasing by any means, including, for example, unauthorized: (a) use of META-refresh elements, (b) preparing files with identical content under two different filenames within a given published instance, or (c) constructing URIs for canonical OASIS resources by using redirects supported by services on other Internet domains
@@ -1008,6 +1180,8 @@ Acceptance criteria: AC-PACKAGING-17
 
 Acceptance criteria: AC-PACKAGING-17
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.5 URI Aliases (BLOCKER)
   > TCs must not use URI aliasing by any means, including, for example, unauthorized: (a) use of META-refresh elements, (b) preparing files with identical content under two different filenames within a given published instance, or (c) constructing URIs for canonical OASIS resources by using redirects supported by services on other Internet domains
 
@@ -1015,12 +1189,16 @@ Acceptance criteria: AC-PACKAGING-17
 
 Acceptance criteria: AC-PACKAGING-17
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.5 URI Aliases (BLOCKER)
   > TCs must not use URI aliasing by any means, including, for example, unauthorized: (a) use of META-refresh elements, (b) preparing files with identical content under two different filenames within a given published instance, or (c) constructing URIs for canonical OASIS resources by using redirects supported by services on other Internet domains
 
 ### uri-alias: none of which is a delivery/manifest-cited file
 
 Acceptance criteria: AC-PACKAGING-17
+
+Severity in pub-check: WARN
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 6.5 URI Aliases (BLOCKER)
   > TCs must not use URI aliasing by any means, including, for example, unauthorized: (a) use of META-refresh elements, (b) preparing files with identical content under two different filenames within a given published instance, or (c) constructing URIs for canonical OASIS resources by using redirects supported by services on other Internet domains
@@ -1030,6 +1208,8 @@ Acceptance criteria: AC-PACKAGING-17
 ### uri-chars: Underscore in a document (cover-page) URI
 
 Acceptance criteria: AC-NAMING-08
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 3 Name Characters for Files and Directories (BLOCKER)
   > An UNDERSCORE must never be used in a filename or directory name that is used in a document URI
@@ -1043,6 +1223,8 @@ Acceptance criteria: AC-NAMING-08
 ### version-naming: does not embed the version segment
 
 Acceptance criteria: AC-NAMING-06, AC-NAMING-14
+
+Severity in pub-check: WARN
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > [version-id] is a versioning identifier component composed of the single character "v" (lower case), followed by a numeric string matching the rules for Version
@@ -1063,6 +1245,8 @@ Acceptance criteria: AC-NAMING-06, AC-NAMING-14
 
 Acceptance criteria: AC-NAMING-06
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > [version-id] is a versioning identifier component composed of the single character "v" (lower case), followed by a numeric string matching the rules for Version
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 5.1 Version (BLOCKER)
@@ -1073,6 +1257,8 @@ Acceptance criteria: AC-NAMING-06
 ### version-naming: the files were renamed
 
 Acceptance criteria: AC-NAMING-06, AC-NAMING-14
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 4 Name Construction Rules for Files and Directories (BLOCKER)
   > [version-id] is a versioning identifier component composed of the single character "v" (lower case), followed by a numeric string matching the rules for Version
@@ -1095,12 +1281,16 @@ Acceptance criteria: AC-NAMING-06, AC-NAMING-14
 
 Acceptance criteria: AC-PACKAGING-24
 
+Severity in pub-check: BLOCKER
+
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 8 Namespace Identifiers (BLOCKER)
   > While either "http" or "https" may be used in defining a namespace name, they are not interchangeable. One or the other must be used consistently.
 
 ### xml-namespace: does not match the required
 
 Acceptance criteria: AC-PACKAGING-20
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 8 XML Namespace Identifiers and Namespace Documents (BLOCKER)
   > An XML namespace name identified by an HTTP scheme URI reference must conform to the pattern: http://docs.oasis-open.org/ [tc-shortname]/ns/xxxx
@@ -1112,6 +1302,8 @@ Acceptance criteria: AC-PACKAGING-20
 ### xml-namespace: not on the URN-grandfather allowlist
 
 Acceptance criteria: AC-PACKAGING-25
+
+Severity in pub-check: BLOCKER
 
 - **[OASIS Naming Directives v1.7 (2 Jan 2024)](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html)**, 8 Namespace Identifiers (BLOCKER)
   > URN-based XML namespaces must not be declared otherwise, since they lack a standard, ubiquitous resolution method using DNS[+HTTP].

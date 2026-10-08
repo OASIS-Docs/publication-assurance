@@ -18,9 +18,17 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 The three document-transform workflows in this repository (`step_1`, `step_2`,
 `step_3`) are thin CI wrappers. Each one wraps a small number of plain
 commands. This page lists those commands so the transforms can be read and run
-locally with no GitHub Actions involved. The other three workflows (`ci`,
-`pub-check`, `make-manifest`) run the test suite, the publication checks and
-the manifest emitter, and are documented in the README.
+locally with no GitHub Actions involved. The repository has six other
+workflows:
+
+| Workflow file | Role |
+|---|---|
+| `ci.yml` | Runs the test suite on every push and pull request. |
+| `pub-check.yml` | Runs the OASIS publication checks on one stage directory, started by hand. |
+| `make-manifest.yml` | Writes the release manifests for a stage directory, started by hand. |
+| `convert-and-verify.yml` | The reusable workflow a TC repository calls to convert, render, verify and check one Markdown specification ([guide](docs/CONVERT-AND-VERIFY.md)). |
+| `gate-change-review.yml` | Requires a pull request that changes the checker to record an adversarial review. |
+| `move-v1.yml` | Moves the floating `v1` tag to each v1.x.y release when it is published. |
 
 The rest of each transform workflow is CI plumbing and does not change the
 document:
@@ -44,26 +52,45 @@ document, prints the PDF in Chrome and checks it. See
 
 ## Stage 1: Markdown to HTML
 
-Three commands, in order:
+One command runs the whole stage:
 
 ```bash
-# 1. Normalize the markdown in place
-prettier --write spec.md
+python3 .github/src/step_1_markdown_to_html_converter_V3_0.py \
+  path/to/spec.md "$(pwd)" path/to/dir --md-format --md-to-html
+```
 
-# 2. Base conversion (the invocation in .github/src/pipeline/html_converter.py)
+It needs `prettier`, `pandoc`, and the Python packages `beautifulsoup4` and
+`requests`. The HTML is written next to the Markdown, with the same name. The
+step 1 workflow runs the same script twice, first with `--md-format` and then
+with `--md-to-html`. Either flag can be given on its own.
+
+`--md-format` formats the Markdown in place:
+
+```bash
+prettier --write spec.md
+```
+
+`--md-to-html` then runs pandoc (the invocation in
+`.github/src/pipeline/html_converter.py`) and the Python post-processor
+described below:
+
+```bash
 pandoc spec.md \
   -f markdown+autolink_bare_uris-implicit_figures \
   --preserve-tabs \
   --no-highlight \
   -c https://docs.oasis-open.org/styles/markdown-styles-v1.7.3.css \
   -s \
-  --metadata title="<document title>" \
-  -o temp_output.html
-
-# 3. OASIS-specific HTML fix-ups (see list below)
-python3 .github/src/step_1_markdown_to_html_converter_V3_0.py \
-  path/to/spec.md "$(pwd)" path/to/dir --md-format --md-to-html
+  -o .pandoc-tmp-<pid>.html \
+  --metadata title="<document title>"
 ```
+
+The title is the Markdown's first level-one heading. pandoc writes to a
+scratch file named for the process (`.pandoc-tmp-<pid>.html`) in the output
+directory, so two conversions running at once cannot overwrite each other's
+output. The scratch file is removed afterwards. If a `styles/styles.css` sits
+beside the output, `-c` points at that file and not at the published
+stylesheet. prettier and pandoc each have a time limit of 1800 seconds.
 
 `--preserve-tabs` keeps a tab in a code block a tab: without it pandoc expands
 tabs to spaces, and 9 of the 316 code blocks in DMLex no longer matched the
@@ -80,23 +107,41 @@ carries a hand-authored Table of Contents at its own position in the source.
 The Python post-processor (`HtmlConverter._post_process_html` in
 `.github/src/pipeline/html_converter.py`, reached through the
 `step_1_markdown_to_html_converter_V3_0.py` shim) is where the OASIS-specific
-knowledge lives. It applies, in order:
+knowledge lives. Its 13 transforms are listed in `HtmlConverter.TRANSFORMS`
+and run in this order:
 
-1. Drops the pandoc-generated `<header>` block and stray `<nav>` TOC
-   (the document carries its own Table of Contents section).
-2. Injects a `<meta name="description">` derived from the abstract.
-3. Removes any `<base href>` tag. A base href silently breaks
-   fragment-only links (`#section`) in the TOC.
-4. Enforces exactly one OASIS logo image, pointing at the canonical
+1. `strip-pandoc-header`: removes pandoc's title block
+   (`<header id="title-block-header">`).
+2. `inject-meta-description`: adds a `<meta name="description">`, taken from
+   a `description:` line in the Markdown (front matter or an HTML comment).
+3. `remove-base-href`: removes any `<base>` tag. A base href breaks
+   fragment-only links (`#section`) in the table of contents.
+4. `drop-logo-figures`: removes the `<figure>` wrapper pandoc puts around the
+   OASIS logo, whose caption would print the alt text.
+5. `drop-nav-blocks`: removes stray `<nav>` contents blocks. The document
+   carries its own Table of Contents section.
+6. `enforce-single-logo`: keeps exactly one OASIS logo, as the first element
+   of the body, pointing at
    `https://docs.oasis-open.org/templates/OASISLogo-v3.0.png`.
-5. Normalizes the top banner block (logo / title / stage lines).
-6. Removes duplicate heading anchor IDs (pandoc emits duplicates for
-   repeated heading text; only the first survives).
-7. Rewrites same-document anchors so they work both as a local file and
-   under the published `docs.oasis-open.org` URL.
-8. Converts remaining plain-text URLs to `<a>` links.
-9. Optionally localizes remote CSS and images next to the HTML
-   (`HTML_LOCALIZE_CSS=1`).
+7. `fix-top-banner`: normalises the logo and title banner. It removes stray
+   `<hr>` elements, adds a styled one, and turns the first `<h1>` into
+   `<h1big>`.
+8. `remove-duplicate-heading-anchors`: removes an anchor inside a heading
+   that repeats the heading's own id.
+9. `normalize-same-doc-anchors`: rewrites a link to this same document as a
+   fragment-only link, so the contents work both as a local file and under
+   the published `docs.oasis-open.org` URL.
+10. `linkify-plain-urls`: turns a bare `http` or `https` URL in a paragraph
+    that has no other markup into an `<a>` link.
+11. `localize-css`: downloads remote stylesheets into `styles/` beside the
+    HTML and points the `<link>` tags at the copies. It runs only when `HTML_LOCALIZE_CSS` is
+    `1`, `true` or `yes`.
+12. `localize-images`: always runs. It downloads every remote image into
+    `images/` and points `src` at the copy, dropping `srcset`. An image that
+    cannot be fetched is removed from the HTML.
+13. `relativize-same-scope-links`: rewrites absolute links, stylesheets,
+    scripts and images under the document's own published directory as
+    relative paths.
 
 ## Stage 2: HTML to PDF
 
@@ -143,6 +188,14 @@ The injected CSS also caps every image at the line width
 (`img { max-width: 100%; height: auto; }`), so a figure with no width of its
 own prints inside the margins instead of at its natural size.
 
+The injected CSS prints each code block as one block (since v1.13.0). The
+OASIS Markdown stylesheet sets `pre { display: inline }`, which printed every
+line of a code block in its own box: 447 of the 667 multi-line blocks in the
+pipeline's Chrome and wkhtmltopdf renders of CSAF v2.1 CSD03 (the published
+CSD03 PDF was made with Typst 0.15.0, not this pipeline). The preprocessor sets `pre { display: block }` and
+removes the frame from the `<code>` inside a `<pre>` and from pandoc's
+`div.sourceCode` wrapper. Inline `<code>` is unchanged.
+
 The injected CSS also sets the print type scale in points: body 10pt, code
 blocks and inline code 9pt, tables 9pt (code in tables 8.5pt), h1 16pt, h2
 14pt, h3 12pt, h4 11pt, h5 and h6 10pt, matching the OASIS DocBook and Word
@@ -161,11 +214,20 @@ with more than one top-level HTML file is refused. A TC render
 script such as the DMLex `tools/publication-assurance/render.sh` runs command 1
 and then prints with headless Chrome.
 
+Every external tool in Stage 2 has a time limit (since v1.13.0):
+`wkhtmltopdf` 1800 seconds, and `pdfinfo` and `pdftotext` 300 seconds each.
+Each tool runs in its own process group, which is stopped when the limit is
+reached, and the error names the tool. A `wkhtmltopdf` that runs out of time
+fails the render. A `pdfinfo` or `pdftotext` that runs out of time, or fails,
+leaves the contents unnumbered, and the `pdf-toc-pages` check reports it.
+
 Where TC PDFs are made matters here. The step 2 workflow in this repository
 runs only when started by hand, and no TC repository calls it. TC PDFs built
-through the Publication Console come from publisher-toolkit's own step 2,
-which renders on Letter paper and does not run this preprocessor, so the
-code-wrap and image-cap rules do not reach those PDFs yet.
+through the Publication Console come from publisher-toolkit's step 2, which
+copies this stage's code into `lib/pa_pipeline` (the release it copied is
+recorded in `lib/pa_pipeline/VENDORED.json`). Both of its renderers, Chrome
+and `wkhtmltopdf`, run this preprocessor and print on A4 with the footer
+described above.
 
 Everything in the footer is read from the document being rendered, never from
 the day of the render:
@@ -184,11 +246,10 @@ since wkhtmltopdf writes none, from the page each heading is printed on:
 If the numbers cannot be read or do not settle in four passes, the PDF is
 printed unnumbered, and the `pdf-toc-pages` check says so.
 
-A note on renderers: wkhtmltopdf is what this repository's workflows run, but
-the production pipeline has since moved to headless Chrome print-to-PDF with
-CSS Paged Media (an injected `@page` block supplies the running header and
-footer natively) because plain pandoc-plus-wkhtmltopdf output was not adequate
-for the requirement. wkhtmltopdf's limits, for anyone evaluating alternatives:
+A note on renderers: wkhtmltopdf is what this repository's workflows run.
+publisher-toolkit can also print with headless Chrome, using CSS Paged Media:
+an injected `@page` block sets A4 and the footer, with no running header.
+wkhtmltopdf's limits, for anyone evaluating alternatives:
 untagged PDF, no bookmarks/outline, no PDF/A conformance, and internal links
 that depend on the anchor fix-ups from Stage 1. A toolchain that produces a
 tagged PDF with a real outline (for example typst) improves on each of those
@@ -221,9 +282,9 @@ OASIS PDFs carry, read from the document (name, track, copyright line,
 document date, page), and the table of contents is numbered from the printed
 pages. For a DocBook specification, the [`docbook-markdown` action](docs/MARKDOWN-EDITION.md) runs this for you.
 
-Every defect class these transforms guard against (the lint series D1-D7 and
-the post-render assertions A1/A2) is enforceable in a TC's own build before
-submission, via [oasis-pub-check](pub-check/):
+Every defect class these transforms guard against (the lint codes D1, D2, D3,
+D6 and D7, and the post-render assertions A1 and A2) can be checked in a TC's
+own build before submission, with [oasis-pub-check](pub-check/):
 `python3 pub-check/oasis_pub_check.py <stage-dir>`.
 
 ---

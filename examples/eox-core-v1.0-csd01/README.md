@@ -19,15 +19,16 @@ This is the standard record every TC receives for every publication.
 Running `oasis_pub_check.py` yourself gives you the
 findings, the exit code, and with `--json` the full per-condition record
 (the same conditions, observed values, and comparisons shown in this
-report). The formatted report is rendered by TC Administration at intake from that same
-per-condition data and filed to your ticket.
+report). The GitHub action renders this same report on every run, and
+`pub-check/validation_report.py` renders it from a `--json` record; TC
+Administration renders it again at intake and files it to your ticket.
 
-The publication is also audited at the event level (15 mandatory gates:
+The publication is also audited at the event level (15 mandatory audit checks:
 byte identity, index chains, announcements, an independent adversarial
 verifier); that Publication Audit Report is a TC Administration operational
 record filed to the ticket. This example carries only the Validation Report.
 
-The publication's history shows what the gate catches: the TC's first release
+The publication's history shows what the checks catch: the TC's first release
 candidate carried 13 blockers, the same set the manual intake review found.
 The third release candidate ran clean and was published.
 

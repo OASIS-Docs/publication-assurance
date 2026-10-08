@@ -127,6 +127,7 @@ A profile is a `profile.json` of a few lines, described in the
 | `schemas` | none | A schemas folder to place beside the rendered HTML and PDF |
 | `output` | `markdown-edition` | Where the results are written during the run |
 | `artifact-name` | `markdown-edition` | The artifact's name. Empty for no upload |
+| `pandoc-version` | `3.8.2.1` | The pandoc release the action installs. The word-for-word check reads the Markdown with it |
 
 Later steps can use the action's outputs: `markdown` (the file's path),
 `verification` (`PASS`, `FAIL` or `skipped`) and `package` (the rendered

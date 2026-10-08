@@ -488,9 +488,19 @@ cannot read (a wrong `target:` path) fails the step in either mode.
           fail-on-blockers: false    # report only: blockers never fail the run
 ```
 
-In a matrix the setting can come from the matrix entry, as in the DMLex
-workflow: `fail-on-blockers: ${{ matrix.enforce }}`, with `enforce: true`
-on a draft the TC holds to the checks and `enforce: false` on the published standard.
+In a matrix, such as
+[`examples/consumer-workflow-matrix.yml`](../examples/consumer-workflow-matrix.yml),
+each entry can carry its own setting. Give each entry an `enforce` value,
+`true` for a draft the TC holds to the checks and `false` for the published
+standard, and pass it to the action:
+
+```yaml
+      - uses: OASIS-Docs/publication-assurance@v1.13.1
+        with:
+          target: ${{ matrix.package.target }}
+          fail-on-blockers: ${{ matrix.package.enforce }}
+```
+
 Switch a draft to `true` once its blockers are resolved, so a new one
 cannot slip in.
 

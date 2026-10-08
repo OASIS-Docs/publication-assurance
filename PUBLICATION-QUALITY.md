@@ -118,7 +118,7 @@ the code.
 [`pub-check/AUTHORITIES.md`](pub-check/AUTHORITIES.md) gives the clause for
 each, and the corpus those clauses were quoted from ships beside it in
 [`pub-check/corpus/`](pub-check/corpus/), hashed, so your TC can check any of
-them. The other 73 are operational rules from correction rounds, with no
+them. The other 83 are operational rules from correction rounds, with no
 single written clause behind them; `pub-check/crosswalk.json` says which are
 which.
 
@@ -161,11 +161,14 @@ draft, for example) are recorded NA with a stated reason.
 
 ## The two reports
 
-Both layers produce a standard report. TC Administration renders both at
-intake and files them to your TCADMIN ticket and to the TC's `_audit/`
-record; your own run of the tool gives you the identical underlying data
-(the findings, the exit code, and with `--json` the full per-condition
-record), just not the formatted document:
+Both layers produce a standard report. The Validation Report comes from the
+TC's own run as well as from intake: the GitHub action renders it on every run
+and, when the run can write to the repository, publishes it to the
+`pubcheck-reports` branch, and
+`pub-check/validation_report.py` renders it locally from a `--json` record
+([docs/ADOPTING.md](docs/ADOPTING.md) has both). TC Administration renders it
+again at intake, from the identical checks, and files it with the Publication
+Audit Report to your TCADMIN ticket and to the TC's `_audit/` record:
 
 - **The Validation Report** itemizes every condition: the condition
   verified, the value the tool pulled from your package, the value it was
@@ -201,6 +204,10 @@ The TC included acknowledgment placeholders deliberately at CSD stage, the
 tool recorded it, the triage noted it must clear before CS, and nobody had
 to exchange an email about it.
 
+[docs/WORKED-EXAMPLES.md](docs/WORKED-EXAMPLES.md) has more recent cases from
+CSAF v2.1 and the DMLex Markdown edition, each with the finding, what it meant
+and the fix at source.
+
 ## Running it yourself
 
 ```bash
@@ -222,10 +229,10 @@ python3 pub-check/oasis_pub_check.py <target> --emit-manifest
 ```
 
 Single file, Python 3.10+, standard library only. `poppler-utils`
-(`pdftotext`, `pdffonts`) is optional and enables the PDF cross-checks. In
-CI, the whole job is checkout, Python, one command:
-[`.github/workflows/pub-check.yml`](.github/workflows/pub-check.yml) is the
-complete working example.
+(`pdftotext`, `pdffonts`) is optional and enables the PDF cross-checks. In a
+TC repository's CI, the checks run through this repository's GitHub action:
+[`examples/consumer-workflow.yml`](examples/consumer-workflow.yml) is the
+workflow to copy, and [docs/ADOPTING.md](docs/ADOPTING.md) walks through it.
 
 If your build also emits a `manifest.json` conforming to
 [`pub-check/manifest-schema.json`](pub-check/manifest-schema.json) (per-file
@@ -235,11 +242,12 @@ the files your build produced.
 
 ## Adoption
 
-1. Add the one-command CI job, or run the tool by hand before the vote.
+1. Add the workflow from `examples/consumer-workflow.yml`, or run the tool
+   by hand before the vote.
 2. Fix blockers before the TC votes; the vote then approves a
    publication-clean package.
-3. Include the `--json` record (or the exit code) with your submission; TC
-   Administration renders and files the formal Validation Report at intake.
+3. Link the Validation Report from your run (or include the `--json`
+   record) with your submission.
 4. TC Administration re-runs the identical checks at intake, publishes, audits
    the publication event, and files both reports to your ticket.
 
