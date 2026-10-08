@@ -7821,7 +7821,7 @@ CONDITION_DOCS: list[dict] = [
          compares_to="text and target being the same URL calls for an angle-bracket autolink `<https://...>` (a link in both the HTML and the PDF) or real anchor text"),
     dict(check="md-links", sig="pandoc autolink pulls the", applies="md",
          condition="No bare URL runs into '.\\' without a space",
-         pulls="each markdown line outside code blocks (fenced or indented) whose closing backslash a URL runs into, read as pandoc 3.8.2.1 reads a bare URL: any scheme on its list, in any case; ended by a closed '<...>', '[...]' or '](...)'; an autolink '<...\\>' counts",
+         pulls="each markdown line outside code blocks (fenced or indented) whose closing backslash a URL runs into, read as pandoc 3.8.2.1 reads a bare URL: any scheme on its list, in any case; ended by a closed '<...>', '[...]' or link target; an autolink '<...\\>' counts",
          compares_to="the safe form '. \\' (otherwise pandoc pulls the backslash, and any period before it, into the href)"),
     # fence-collapse
     dict(check="fence-collapse", sig="collapses to inline code", applies="md",
