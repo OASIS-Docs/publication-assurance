@@ -34,9 +34,9 @@ stylesheet.
 
 OASIS WORK PRODUCTS. The following are OASIS Work Products, extracts of
 them, or copies altered to reproduce a defect, kept for regression testing.
-None is relicensed by this file: each retains its own OASIS copyright, IPR, and license notices
-as published, per the OASIS IPR Policy and the IPR Mode of the Technical
-Committee or Open Project that produced it.
+None is relicensed by this file: each retains its own OASIS copyright, IPR,
+and license notices as published, per the OASIS IPR Policy and the IPR Mode
+of the Technical Committee or Open Project that produced it.
   - examples/csaf/ and examples/csaf-cvrf/: Common Security Advisory
     Framework and CSAF Common Vulnerability Reporting Framework
     specification packages (OASIS CSAF TC, Non-Assertion Mode), with their
