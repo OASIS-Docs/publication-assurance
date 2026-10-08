@@ -25,12 +25,12 @@ Any other documentation file in this repository that carries its own
 OASIS SPECIFICATION STYLESHEETS. The 16 markdown-styles-v1.*.css files
 under .github/styles/ are OASIS specification stylesheets; the copies under
 .github/custom_layout/ and .github/src/test/styles/ are symlinks to them.
-They were written for OASIS by Paul Knight (change-log initials "pk", 2018
-to 2023), with the v1.7.3a variant contributed by "dk" (2020), as each
-file's own change log records. Current versions are published at
-https://docs.oasis-open.org/templates/css/. Copyright OASIS Open. Where a
-file's header still carries an "Authored by" line, that line does not
-describe who wrote the stylesheet.
+.github/src/style.css is v1.7.3a re-indented, and .github/styles/md.css is a
+reformatted subset of the same rules. They were written for OASIS by Paul
+Knight (change-log initials "pk", 2018 to 2023), with the v1.7.3a variant
+contributed by "dk" (2020), as the files' own change logs record. Current
+versions are published at https://docs.oasis-open.org/templates/css/.
+Copyright OASIS Open.
 
 OASIS WORK PRODUCTS. The following are OASIS Work Products, extracts of
 them, or copies altered to reproduce a defect, kept for regression testing.
