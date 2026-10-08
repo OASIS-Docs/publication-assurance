@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Regression fixtures for title-version's title resolution.
 
 title-version checks the Version token in the rendered cover-page title. It

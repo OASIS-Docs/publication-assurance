@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Every relative link in the documentation must point at a file that exists.
 
 The DocBook action told its readers to "See docs/MARKDOWN-FROM-DOCBOOK.md", a

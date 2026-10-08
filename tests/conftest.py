@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Pytest config for the oasis-pub-check acceptance criteria.
 
 `pub-check/` is a hyphenated directory, so the checker cannot be imported as a

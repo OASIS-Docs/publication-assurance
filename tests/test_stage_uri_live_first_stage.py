@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """stage-uri-live: the first stage of a new version may cite Latest-stage
 URIs in its own version root, which its publication creates. Every other
 Previous- or Latest-stage URI must still retrieve.

@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Regression fixtures for how the checker reads a package's place in the
 docs.oasis-open.org layout, and for two title defects found beside it.
 

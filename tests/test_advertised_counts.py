@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Every advertised check count must equal what the tool actually runs.
 
 `--list-checks` asserts the condition registry against the code, so the

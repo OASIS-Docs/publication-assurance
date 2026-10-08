@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """A pull request that changes a check must record an adversarial review.
 
 PR #9 (Sep 2026) exempted stage-uri-live Latest URIs. Its first draft passed

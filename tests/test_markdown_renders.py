@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The shipped markdown must render as prose, not as HTML.
 
 GitHub Flavored Markdown allows inline HTML, so an angle-bracketed token in a

@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The PDF preprocessor must let inline code wrap.
 
 With white-space: nowrap, one long inline path (DMLex v1.0 s3.2.1, 1118px on

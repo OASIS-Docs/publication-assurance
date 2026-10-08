@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The PDF prints the OASIS print type scale: body 10pt, code 9pt, footer 8pt.
 
 The OASIS Markdown stylesheet sets screen sizes only (12pt body and tables,
