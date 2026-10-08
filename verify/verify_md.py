@@ -51,7 +51,7 @@ Rule kinds: text (default), heading, link, and image (a changed image source,
 The generated tables of contents are left out of the word comparison and
 compared on their own, entry by entry, as the headings they list.
 
-Usage: verify_md.py SPEC.md PUBLISHED.html|URL [--root DIR] [--allow FILE]... [--json OUT] [--rendered HTML]
+Usage: verify_md.py SPEC.md PUBLISHED.html|URL [--root DIR] [--allow FILE]... [--json OUT] [--rendered HTML] [--context N]
 Exit 0 when every check passes, 1 when any fails, 2 when the input cannot be read.
 """
 import argparse

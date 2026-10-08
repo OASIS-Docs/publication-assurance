@@ -28,7 +28,7 @@ Its companion `verify_pdf.py` compares the rendered PDF with the published
 PDF ([below](#verify_pdf-the-rendered-pdf-against-the-published-pdf)).
 
 ```bash
-python3 verify/verify_md.py SPEC.md PUBLISHED [--root DIR] [--allow FILE] (repeat --allow for more than one file) [--json OUT] [--rendered HTML]
+python3 verify/verify_md.py SPEC.md PUBLISHED [--root DIR] [--allow FILE] (repeat --allow for more than one file) [--json OUT] [--rendered HTML] [--context N]
 ```
 
 | Argument | Meaning |
@@ -38,6 +38,7 @@ python3 verify/verify_md.py SPEC.md PUBLISHED [--root DIR] [--allow FILE] (repea
 | `--root DIR` | Where the Markdown's image paths are resolved (default: the Markdown's directory) |
 | `--allow FILE` | Accepted deviations, each with a reason (below); give it more than once to combine files |
 | `--json OUT` | The full report, every difference in full |
+| `--context N` | How many tokens of preceding text to print with each difference (default 8) |
 | `--rendered HTML` | Verify this rendering of `SPEC.md`, the pipeline's step 1 output, instead of reading `SPEC.md` with pandoc. This is the HTML that is published, so it is the stronger check; add the profile's `allow-rendered.json` for what step 1 changes on purpose |
 
 Exit `0` when every check passes, `1` when any fails, `2` when an input
@@ -128,13 +129,18 @@ pages (`render/review_pairs.py`), or read the diff of the Markdown itself.
 ## verify_pdf: the rendered PDF against the published PDF
 
 ```bash
-python3 verify/verify_pdf.py RENDERED.pdf PUBLISHED.pdf|URL [--allow FILE]... [--json OUT]
+python3 verify/verify_pdf.py RENDERED.pdf PUBLISHED.pdf|URL [--allow FILE]... [--json OUT] [--context N]
 ```
 
+`--context N` sets how many tokens of preceding text are printed with each
+difference (default 8). Exit `0` when every check passes, `1` when any
+fails, `2` when an input cannot be read.
+
 An HTML contents list has no page numbers, so no HTML comparison can see a
-PDF whose contents have none. The DMLex edition's first renders had none
-against the published standard's 170, and passed every HTML check and a
-side-by-side look at the contents page. `verify_pdf.py` reads both PDFs with
+PDF whose contents have none. The DMLex edition's first renders listed 133
+contents entries with no page numbers, against the published standard's 171
+numbered entries, and they passed every HTML check and a side-by-side look
+at the contents page. `verify_pdf.py` reads both PDFs with
 `pdftotext -layout` (poppler) and compares them the way `verify_md.py`
 compares the HTML, every page:
 
@@ -170,3 +176,19 @@ or `ō`, and FOP printed `#` for them 15 times.
 It does not see where a figure is drawn or what it looks like, nor type
 size (the `pdf-legibility` and `pdf-type-scale` checks measure that).
 The pictures need a reviewer: `render/review_pairs.py`.
+
+## annotate: the verdict on the run page
+
+```bash
+python3 verify/annotate.py html|pdf REPORT.json
+```
+
+`annotate.py` reads the `--json` report of `verify_md.py` (`html`) or
+`verify_pdf.py` (`pdf`) and prints one GitHub Actions annotation: a notice
+when the edition matched, an error when it did not. The line gives the main
+figures: words compared, unexplained and accepted differences, and either the
+code blocks and contents entries (HTML) or the numbered contents entries and
+pages without a footer (PDF). Anyone who can open the run sees an
+annotation; reading a step's log needs a sign-in. The verdict is in the
+annotation. The tool exits `0` whenever it has printed one, and `1` with its
+usage text when its arguments are wrong.

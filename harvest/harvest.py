@@ -2,18 +2,20 @@
 # Copyright 2026 OASIS Open
 # SPDX-License-Identifier: Apache-2.0
 # Authored by Michael Coletta, Technical Advisor to OASIS Open.
-"""Learn from every gate run: read what runs left behind, propose what to change.
+"""Learn from every run of the OASIS publication checks: read what runs left
+behind, propose what to change.
 
 Reads a directory tree of run records and prints what they say about the
-gate itself, as candidates a person reviews (never as changes to the gate):
+checks themselves, as candidates a person reviews (never as changes to the
+checks):
 
 - Validation reports: `oasis_pub_check.py --json` output, or the Validation
   Report JSON (`condition_detail`). With --rerun, each report whose package
-  is still on disk (`target_local_path`) is gated again with the current
-  checker, and the two verdicts are compared: a finding the gate no longer
-  raises, or one it newly raises.
+  is still on disk (`target_local_path`) is checked again with the current
+  checker, and the two verdicts are compared: a finding the checks no longer
+  raise, or one they newly raise.
 - Publication audits (`findings` carrying a `classification`): defects a
-  person found at intake. One that names no check class is a defect the gate
+  person found at intake. One that names no check class is a defect the checks
   passed, a candidate for a new check.
 - Adjudications (--adjudications FILE, a JSON list of {"slug", "check",
   "verdict": "false-positive" | "real", "source"}): a finding TC
@@ -141,10 +143,10 @@ def harvest(dirs, pub_check=PUB_CHECK, do_rerun=False, adjudications=None):
 
 
 def markdown(h):
-    out = [f"# Gate harvest, {datetime.date.today().isoformat()}", "",
+    out = [f"# Publication checks harvest, {datetime.date.today().isoformat()}", "",
            f"{h['validation_reports']} validation reports over {h['packages']} packages, "
            f"{h['audits']} publication audits.", ""]
-    out += ["## Verdicts the current gate would change", ""]
+    out += ["## Verdicts the current checks would change", ""]
     for c in h["verdicts_changed"]:
         out.append(f"- **{c['slug']}** (report made with {c['then']} checks): "
                    f"no longer raised {c['no_longer_raised'] or 'none'}; newly raised {c['newly_raised'] or 'none'}")
@@ -189,7 +191,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("dirs", nargs="+")
     ap.add_argument("--pub-check", default=PUB_CHECK)
-    ap.add_argument("--rerun", action="store_true", help="gate each report's package again, where it is on disk")
+    ap.add_argument("--rerun", action="store_true", help="check each report's package again, where it is on disk")
     ap.add_argument("--adjudications")
     ap.add_argument("--proposals", help="write draft proposals into this directory")
     ap.add_argument("--json")

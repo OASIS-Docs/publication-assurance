@@ -16,7 +16,7 @@ import re
 from conftest import REPO_ROOT
 
 PINNED = ["docs/ADOPTING.md", "docs/MARKDOWN-EDITION.md", "README.md", "examples/consumer-workflow.yml", "examples/docbook-markdown-workflow.yml",
-          "examples/consumer-workflow-matrix.yml", "action.yml", "examples/converting-workflow.yml",
+          "examples/consumer-workflow-matrix.yml", "action.yml", "docbook-markdown/action.yml", "examples/converting-workflow.yml",
           ".github/workflows/convert-and-verify.yml", "docs/CONVERT-AND-VERIFY.md"]
 PIN = re.compile(r"publication-assurance(?:/docbook-markdown)?@(v\d+\.\d+\.\d+)|--branch (v\d+\.\d+\.\d+)"
                  r"|PA_REF: (v\d+\.\d+\.\d+)|refs/tags/(v\d+\.\d+\.\d+)|`@(v\d+\.\d+\.\d+)`"
@@ -48,6 +48,7 @@ def test_the_pin_patterns_actually_match():
     """A pin check whose pattern matches nothing passes on any document."""
     found = pins()
     assert len(found["docs/ADOPTING.md"]) >= 1 and found["examples/consumer-workflow.yml"]
+    assert found["docbook-markdown/action.yml"], "no pin found in the docbook-markdown action's usage comment"
 
 
 def test_the_publishing_note_goes_when_publishing_is_released():

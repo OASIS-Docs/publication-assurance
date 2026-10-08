@@ -6,7 +6,7 @@
 # its other outputs. One step in a TC's workflow:
 #
 #   - uses: actions/checkout@v5
-#   - uses: OASIS-Docs/publication-assurance/docbook-markdown@v1.11.1
+#   - uses: OASIS-Docs/publication-assurance/docbook-markdown@v1.13.1
 #     with:
 #       source: dmlex-v1.0/specification
 #       profile: dmlex
@@ -30,7 +30,7 @@ inputs:
     description: "The DocBook source directory, relative to the repository root (for example dmlex-v1.0/specification)."
     required: true
   profile:
-    description: "The specification's profile: the name of one shipped with the action (dmlex), or the path of a profile directory in your repository. See docs/MARKDOWN-FROM-DOCBOOK.md."
+    description: "The specification's profile: the name of one shipped with the action (dmlex), or the path of a profile directory in your repository. See docs/MARKDOWN-EDITION.md."
     required: true
   published-html:
     description: "URL or path of the published HTML of the same stage. When given, the Markdown is checked against it word for word, code block for code block, and the step fails on any unexplained difference. Leave empty to skip."

@@ -59,6 +59,17 @@ converters/docbook-to-markdown/build.sh --profile dmlex lexidma/dmlex-v1.0/speci
 at `e3c0626` and requires the Markdown edition committed in
 MColetta-OASIS/lexidma, byte for byte.
 
+`build.sh` calls the converter itself. To run it on a DocBook file whose
+XIncludes are already resolved:
+
+```bash
+python3 converters/docbook-to-markdown/docbook2md.py merged.xml out.md [--profile profile.json] [--images-prefix PREFIX]
+```
+
+`--images-prefix` is put in front of every image path the Markdown writes
+(default: none), for images that sit in a different directory from the
+Markdown file.
+
 ## Profiles
 
 `profile.json` holds what is specific to one specification. Everything else
@@ -120,8 +131,11 @@ uses DocBook the converter does not yet handle.
 
 ## What it refuses
 
-The conversion stops (exit 1, the reason on stderr) rather than write
-something that reads differently from the publication:
+The converter refuses (exit 1, the reason on stderr) rather than pass on
+something that reads differently from the publication. It writes the `.md`
+before it reports, so the refused file stays in `OUT_DIR` for inspection;
+`build.sh` stops there, and copies no images and runs no verification. Do not
+publish or commit a file from a refused run. It refuses:
 
 - an element it does not handle (`UNHANDLED block <...>`), rather than
   flattening it into paragraphs. Tables (`table`, `informaltable`) are the
@@ -169,7 +183,7 @@ the Markdown too, except the first, which is a markup error, not content.
 - **Long inline code shrinks the PDF.** An unbreakable `code span` wider than
   the page makes a shrink-to-fit renderer print the whole document smaller.
   NIEM NDR v6.0 printed its 12pt body at 8pt. The pipeline's print styles wrap
-  inline code, and the gate's `pdf-legibility` check measures the printed body
+  inline code, and the `pdf-legibility` check measures the printed body
   size against the declared one.
 - **Cloudflare hides email addresses.** `docs.oasis-open.org` replaces each
   address with `[email protected]` and an encoded attribute. The verifier
@@ -197,10 +211,10 @@ the Markdown too, except the first, which is a markup error, not content.
   PDF, and record such a defect in the allow file with its reason.
 - **The contents need page numbers.** A PDF printed from HTML has none unless
   something writes them. The pipeline's PDF step and `render.sh` both do, and
-  the gate's `pdf-toc-pages` check reports a PDF whose contents have none, or
+  the `pdf-toc-pages` check reports a PDF whose contents have none, or
   point at the wrong pages.
 - **Tabs in code.** pandoc expands tabs to spaces unless told not to. The
-  pipeline's HTML converter now passes `--preserve-tabs`; the gate's `html-code-sync`
+  pipeline's HTML converter now passes `--preserve-tabs`; the `html-code-sync` check
   reports a published code block that is not the source's.
 
 ## Provenance
