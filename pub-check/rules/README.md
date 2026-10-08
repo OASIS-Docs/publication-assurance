@@ -48,14 +48,14 @@ acceptance criteria in this repository.
   this file; a retired rule is dropped and its id retired with it.
 - The severity vocabulary is `BLOCKER` and `WARN`. A BLOCKER fails the
   build (exit 1); a WARN reports and passes (unless run `--strict`).
-- This file is a subset of the gate. It carries the conditions expressible
+- This file is a subset of the checks. It carries the conditions expressible
   against the assembled document as the authoring engine sees it, before
   rendering. The full acceptance criteria remain
   [`oasis_pub_check.py`](../oasis_pub_check.py) and its generated catalog
   [`CHECKS.md`](../CHECKS.md), which also verify the rendered artifacts
   (HTML, PDF, schemas, package layout) a source-side rules engine
-  cannot reach. A green `nide quality` run predicts a green gate run; the
-  full gate still runs at intake.
+  cannot reach. A green `nide quality` run predicts a green pub-check run;
+  the full set of checks still runs at intake.
 
 ## Rule allocation between nide and pub-check
 
@@ -66,8 +66,8 @@ nide rule in this file, so nide catches it at authoring time. If it can only
 be checked on the **delivered package** (filenames on disk, published URIs,
 cross-file agreement, PDF fonts, the zip, multi-part layout), it stays
 exclusively in pub-check Python. A criterion that
-spans both domains contributes its safe, source-provable subset here and names
-the rest explicitly as `pub_check_only` in the authority-mapping record. A rule
+spans both domains contributes its safe, source-provable subset here, and the
+rest stays in pub-check. A rule
 is added here only after it is evaluated against the published corpus.
 
 ## How the rules map to the acceptance criteria

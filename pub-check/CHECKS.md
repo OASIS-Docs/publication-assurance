@@ -25,9 +25,9 @@ severity if the condition fails. The file is generated from the tool's own
 condition registry by `render_checks_md.py`, and `--list-checks` asserts the
 registry against the implementation on every run.
 
-The gate is input-format agnostic. A TC generates its own outputs from
+The checks are input-format agnostic. A TC generates its own outputs from
 whatever source format it authors in (Markdown, Word, ODT, DocBook/XML,
-LaTeX, anything else), and what the gate validates is the output contract:
+LaTeX, anything else), and what the checks validate is the output contract:
 conformant HTML and PDF, with the authoritative source travelling beside
 them. Conditions marked `md`, `docx`, or `odt` in the Applies column are add-ons
 that engage only when that source format is present in the package; every
@@ -108,10 +108,10 @@ Standards Track Conformance section structure: the section sits at top level rat
 | 13 | At least one Conformance heading is a genuine top-level numbered section (not nested deeper than the document's modal top-level depth, and not under an Annex/Appendix ancestor) | every heading's nesting level, leading number prefix, and Annex/Appendix ancestor chain (markdown ATX headings, or rendered HTML h1-h6 on the DOCX-native track), with code-block content stripped first | handbook-Conformance.txt: 'a separate, top-level numbered section of the work product (not a subsection buried elsewhere)'; BLOCKER at cs/os (WARN at wd/csd, or when the modal-depth signal itself is low-confidence) | BLOCKER/WARN | all | - |
 | 14 | Each conformance profile scope yields at least one extracted clause identifier | numbered sub-headings and paragraph-leading 'Clause N'/bracketed target-id labels within the Conformance section span, scoped per named profile | handbook-WPQualityRequirements.txt: 'a set of numbered conformance clauses to which any implementation must adhere'; BLOCKER at cs/os, WARN at wd/csd; an empty Conformance section is reported at either tier | WARN | all | - |
 | 15 | No clause identifier repeats within the same profile scope | the extracted clause-identifier set, scoped per named conformance profile (Core/Extended-style sub-headings matching 'Profile'/'Level') | handbook-Conformance.txt: 'individually numbered conformance clauses ... so that implementers and Statements of Use can cite specific clauses by number'; BLOCKER at cs/os, WARN at wd/csd | BLOCKER/WARN | all | - |
-| 16 | Every (profile, clause number) pair in the previous stage is still present in this stage (append-only extension is fine; removal/renumbering, including a whole profile silently disappearing, is flagged) | the ((profile, clause number) -&gt; content hash) map extracted from the resolvable previous-stage artifact, diffed against this stage's map | handbook-WPQualityRequirements.txt 'Key principles': 'Clause numbering must be unique and stable across revisions'. Guidelines-sourced (recommended, not mandatory) so WARN-tier informational, never BLOCKER, and never fired for the CS-&gt;OS transition (that gets the zero-tolerance override instead) | WARN | all | - |
-| 17 | A (profile, clause number) pair missing from this stage does not reappear under a DIFFERENT number in the same profile with the same content (a disguised renumber-via-delete-and-re-add) | content-hash collisions between a previous-stage clause and any current-stage clause, scoped within the same profile | the same Guidelines stability principle as 'removed/renumbered'; WARN-tier informational | WARN | all | - |
+| 16 | Every (profile, clause number) pair in the previous stage is still present in this stage (append-only extension is fine; removal/renumbering, including a whole profile silently disappearing, is flagged) | the ((profile, clause number) -&gt; content hash) map extracted from the resolvable previous-stage artifact, diffed against this stage's map | handbook-WPQualityRequirements.txt 'Key principles': 'Clause numbering must be unique and stable across revisions'. Guidelines-sourced (recommended, not mandatory) so WARN-tier informational, never BLOCKER, and never fired for the CS-&gt;OS transition (that gets the zero-tolerance override instead); profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing | WARN | all | - |
+| 17 | A (profile, clause number) pair missing from this stage does not reappear under a DIFFERENT number in the same profile with the same content (a disguised renumber-via-delete-and-re-add) | content-hash collisions between a previous-stage clause and any current-stage clause, scoped within the same profile | the same Guidelines stability principle as 'removed/renumbered'; WARN-tier informational; profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing | WARN | all | - |
 | 18 | At the CS-&gt;OS transition, the current (profile, clause id) key set is a byte-for-byte match to the approved-CS key set, scoped per profile, so a whole profile silently dropped while a surviving profile happens to reuse its bare clause numbers is still caught | the (profile, clause-identifier) sets extracted from the OS package and from the artifact named by its Previous-stage URI (verified to be the approved CS by stage token), each parsed with the extractor matching that artifact's own format (markdown or rendered HTML) | handbook-Conformance.txt 'OASIS Standard os': 'Conformance clauses are preserved unchanged from the approved Committee Specification' (TC Process 2.9): zero tolerance, always BLOCKER | BLOCKER | all | - |
-| 19 | A clause whose (profile, number) key is unchanged at CS-&gt;OS is flagged for manual confirmation when its content hash changed | content-hash comparison, per (profile, clause number) key, between the approved CS and the OS package, restricted to keys present in both sets | handbook-WPQualityRequirements.txt 'Allowed changes during publication': coordinated non-material changes are permitted (TC Process 2.2.4); not itself a zero-tolerance failure, so WARN/manual-review, never an automatic BLOCKER | WARN | all | - |
+| 19 | A clause whose (profile, number) key is unchanged at CS-&gt;OS is flagged for manual confirmation when its content hash changed | content-hash comparison, per (profile, clause number) key, between the approved CS and the OS package, restricted to keys present in both sets | handbook-WPQualityRequirements.txt 'Allowed changes during publication': coordinated non-material changes are permitted (TC Process 2.2.4); not itself a zero-tolerance failure, so WARN/manual-review, never an automatic BLOCKER; profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing | WARN | all | - |
 | 20 | At the CS-&gt;OS transition, the approved-CS baseline artifact must be resolvable to verify clause-set preservation at all | the resolution outcome (local sibling stage directory, then network fetch) of the Previous-stage URI naming the approved CS | TC Process 2.9's preservation obligation cannot be verified for a Standards Track OS approval if the CS baseline is unreachable, so it is elevated to BLOCKER rather than reported as a silent WARN | BLOCKER | all | - |
 | 21 | A general (non-CS-&gt;OS) stability diff that could not resolve its previous-stage artifact says so in the report | the resolution outcome of the Previous-stage URI | the general stability check is WARN-tier informational; an unresolvable prior artifact (first publication is a separate, silent no-op) still surfaces the gap as a WARN | WARN | all | - |
 
@@ -228,7 +228,7 @@ DOCX-native renders must come from Microsoft Word, matching the TC's precedent.
 
 ### html-anchors
 
-Every internal fragment link must resolve to an anchor in the document.
+Every internal fragment link must resolve to an anchor in the document, and no link may be a cross-reference written without its `#`.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
@@ -247,7 +247,7 @@ Every fenced code block of the Markdown source is published in the HTML unchange
 
 ### html-residue
 
-Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths.
+Pipeline residue in the HTML: duplicate title H1, stale pandoc header, CI paths, caption or attribute syntax printed as text.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
@@ -321,7 +321,7 @@ A packaged manifest.json must verify against the files on disk.
 
 ### md-links
 
-Markdown link forms that render wrong under pandoc autolinking.
+Markdown link forms that render wrong: dual `[url](url)` links and URLs that pandoc autolinking runs into.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
