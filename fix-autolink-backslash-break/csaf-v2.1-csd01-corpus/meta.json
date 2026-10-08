@@ -1,0 +1,13 @@
+{
+  "folder": "fix-autolink-backslash-break/csaf-v2.1-csd01-corpus",
+  "pdf": true,
+  "publication_ready": false,
+  "published": "2026-10-08 04:46:02",
+  "published_at": "2026-10-08T04:46:02.005067+00:00",
+  "ref": "fix/autolink-backslash-break",
+  "run_url": "https://github.com/OASIS-Docs/publication-assurance/actions/runs/37729026796",
+  "source_sha": "a5fc81d298d8901ac602e9bbaa80bcb0f615c7d3",
+  "target": "examples/csaf/v2.1/csd01",
+  "title": "CSAF v2.1 CSD01 (corpus)",
+  "verdict": "NOT publication-ready: 1 blocker(s). 48 of 59 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 17 warning, 10 informational."
+}
