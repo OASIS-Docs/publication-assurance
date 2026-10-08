@@ -208,6 +208,13 @@ _MD_QUOTE_RE = re.compile(r" {0,3}> ?")
 _MD_MARKER_RE = re.compile(r"(?:[-*+]|\(?(?:\d+|#|@\w*|[A-Za-z]|[ivxlcdmIVXLCDM]+)[.)]|[:~])(?=[ \t]|$)"
                            r"(?<![A-Z]\.)|[A-Z]\.(?=  |\t)")  # 'A.' needs two spaces
 _MD_FOOTNOTE_RE = re.compile(r"\[\^[^\]]+\]:")
+# A block-level HTML tag pandoc reads as a raw HTML block when it is alone on
+# its line (pandoc's blockHtmlTags; <div> is a native div and has no raw block).
+_MD_HTML_BLOCK_RE = re.compile(
+    r"<(/?)(address|article|aside|blockquote|body|canvas|caption|center|col|colgroup|dd|details|dir|dl|dt"
+    r"|fieldset|figcaption|figure|footer|form|h[1-6]|head|header|hgroup|hr|html|isindex|main|menu|meta"
+    r"|noframes|nav|ol|output|p|pre|section|summary|table|tbody|textarea|thead|tfoot|frameset|li|td|th|tr"
+    r"|ul|script|style)\b[^>]*(?<!/)>[ \t]*", re.I)
 
 
 def _blank_indented_code(text: str) -> str:
@@ -221,22 +228,32 @@ def _blank_indented_code(text: str) -> str:
     Nothing is blanked between a line of dashes with text below it and one
     with a blank line below it: a multiline table's rows, or YAML metadata. A
     blank line holds only spaces and tabs (a no-break space continues the
-    paragraph)."""
+    paragraph). A fence with a closing line is blanked too, inside a list
+    item or quote as at the top level (the top-level unindented fences are
+    already gone). After a block HTML tag alone on its line, a quote may
+    start, and the blocks inside give up as many spaces as the next line is
+    indented, so code needs that many more."""
     lines = text.split("\n")
     out = []
-    depth, items, blank_depth, outer = 0, [], 0, {}
+    depth, items, blank_depth, outer, html, skip_to = 0, [], 0, {}, [], -1
     prev_blank, prev_first, in_code, in_table, after_heading = True, False, False, False, False
+    after_tag, prev_para = False, False
     for n, raw in enumerate(lines):
+        if n <= skip_to:
+            out.append("")
+            continue
         line, d = raw.expandtabs(4), 0
-        while (q := _MD_QUOTE_RE.match(line)) and (d < depth or prev_blank or after_heading or in_code):
+        while ((q := _MD_QUOTE_RE.match(line))
+               and (d < depth or prev_blank or after_heading or in_code or after_tag)):
             line, d = line[q.end():], d + 1  # a quote cannot interrupt a paragraph
         if not line.strip(" \t"):
             out.append(raw)
             if d != depth:
                 outer[depth] = items  # a quote inside a list item leaves the item open
                 depth, items, in_code, in_table = d, outer.get(d, []) if d < depth else [], False, False
-            prev_blank, after_heading, blank_depth = True, False, d
+            prev_blank, after_heading, blank_depth, prev_para = True, False, d, False
             continue
+        lazy = d < depth and prev_para  # a line continuing a quote's paragraph
         if prev_blank and blank_depth not in (0, d):
             prev_blank = False  # after an empty '>' line, an unquoted line continues the quote
         if d != depth:
@@ -253,12 +270,28 @@ def _blank_indented_code(text: str) -> str:
             while items and ind < items[-1]:
                 items.pop()
         underlined = n + 1 < len(lines) and bool(re.fullmatch(r"(?:=+|-+)[ \t]*", lines[n + 1]))
-        if (ind >= (items[-1] if items else 0) + 4 and not in_table and not underlined
+        col = items[-1] if items else 0
+        gobble = html[-1][1] if html and html[-1][2] == depth else 0
+        if (ind >= col + 4 + gobble and not in_table and not underlined
                 and (prev_blank or in_code or after_heading)):
             out.append("")
-            prev_blank, prev_first, in_code, after_heading = False, False, True, False
+            prev_blank, prev_first, in_code, after_heading, after_tag, prev_para = False, False, True, False, False, False
             continue
         body = line[ind:]
+        fence = re.match(r"(`{3,}|~{3,})", body)
+        # after paragraph text only a backtick fence at the block's own text
+        # column starts code; a '~~~' line there is text
+        if (fence and not in_table and "`" not in body[fence.end():]
+                and (not prev_para or (fence.group(1)[0] == "`" and ind == col))):
+            close = _md_fence_close(lines, n, depth, col, fence.group(1))
+            if close is not None:
+                out.append("")
+                skip_to = close
+                prev_blank, prev_first, in_code, after_heading, after_tag, prev_para = True, False, False, False, False, False
+                blank_depth = depth
+                continue
+        base = col + gobble
+        tag = _MD_HTML_BLOCK_RE.fullmatch(body) if ind - base <= 3 and not lazy else None
         heading = False
         if prev_first and not in_table and ind == 0 and re.fullmatch(r"(?:=+|-+)[ \t]*", body):
             heading = True  # a setext underline
@@ -270,7 +303,9 @@ def _blank_indented_code(text: str) -> str:
             heading = True  # a <div> tag alone on its line ends a block too
         elif prev_blank and ind <= 3 and re.fullmatch(r"<!--.*-->[ \t]*", body):
             heading = True  # as does a comment alone on its line, after a blank one
-        elif m := _MD_FOOTNOTE_RE.match(body) or _MD_MARKER_RE.match(body):
+        elif ((m := _MD_FOOTNOTE_RE.match(body) or _MD_MARKER_RE.match(body))
+              and (not prev_para or items or body[0] in ":~[")):
+            # a list cannot interrupt a paragraph, except inside another list
             while items and items[-1] > ind:
                 items.pop()
             rest = body[m.end():]
@@ -279,9 +314,45 @@ def _blank_indented_code(text: str) -> str:
                 items.append(max(4, ind))
             else:
                 items.append(ind + m.end() + (gap if 0 < gap <= 4 and rest.strip() else 1))
+        if tag and tag.group(1):
+            names = [name for name, _, _ in html]
+            if tag.group(2).lower() in names:
+                del html[len(names) - 1 - names[::-1].index(tag.group(2).lower()):]
+        elif tag:  # the blocks inside give up the next line's indent, past the item's text
+            nxt, k = (lines[n + 1] if n + 1 < len(lines) else "").expandtabs(4), 0
+            while k < depth and (q := _MD_QUOTE_RE.match(nxt)):
+                nxt, k = nxt[q.end():], k + 1
+            html.append((tag.group(2).lower(), max(0, len(nxt) - len(nxt.lstrip(" ")) - col), depth))
         out.append(raw)
         prev_first, prev_blank, in_code, after_heading = prev_blank, False, False, heading
+        after_tag = bool(tag)
+        prev_para = not (heading or tag or in_table or body.startswith(("|", "\\end"))
+                         or re.fullmatch(r"(?:[-*_][ \t]*){3,}", body))
     return "\n".join(out)
+
+
+def _md_fence_close(lines: list[str], n: int, depth: int, col: int, fence: str) -> int | None:
+    """Index of the line closing the fence opened on lines[n] (the same
+    character, at least as many, nothing after), inside the same quote and
+    list item; None when the quote or item ends first, or the text does.
+    pandoc reads a fence with no closing line as text."""
+    prev_blank = False
+    for k in range(n + 1, len(lines)):
+        line, d = lines[k].expandtabs(4), 0
+        while d < depth and (q := _MD_QUOTE_RE.match(line)):
+            line, d = line[q.end():], d + 1
+        if not line.strip(" \t"):
+            if d < depth:
+                return None
+            prev_blank = True
+            continue
+        ind = len(line) - len(line.lstrip(" "))
+        if prev_blank and (d < depth or ind < col):
+            return None
+        if ind < col + 4 and re.fullmatch(re.escape(fence[0]) + "{%d,}[ \t]*" % len(fence), line[ind:]):
+            return k
+        prev_blank = False
+    return None
 
 
 _PACKAGE_STEM_RE = None

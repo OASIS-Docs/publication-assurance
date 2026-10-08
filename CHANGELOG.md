@@ -26,7 +26,30 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+PATCH: a fix inside existing checks, no new criteria.
+
+- **md-links** and **all checks that read Markdown prose** (through
+  `strip_code_blocks`), a third pass on where code is, each case rendered
+  with pandoc 3.8.2.1 first:
+  - A fenced code block inside a list item or a blockquote, or indented one
+    to three spaces, is now code, as an unindented one already was. A fence
+    counts only with its closing line inside the same item or quote; after
+    paragraph text, only a backtick fence at the block's own text column
+    starts code (pandoc reads `~~~` there as text).
+  - After a block-level HTML tag alone on its line (`<pre>`, `<section>`,
+    `<table>` and the rest of pandoc's list; not `<div>`), a quote may start
+    on the next line, and the blocks inside give up as many spaces as that
+    next line is indented. So `<pre>`, a whitespace-only line, then a
+    four-space URL is a paragraph pandoc links (missed before), and
+    `<pre>` then `>     url` is code in a quote (blocked before).
+  - A list marker straight after paragraph text no longer opens a list item,
+    as in pandoc.
+  - CRLF line endings: pub-check reads the Markdown in text mode, so `\r`
+    never reaches the checks. Pinned by a test; nothing changed.
+  Pinned by `tests/test_md_backslash_break.py`, now 151 cases. Over the 12
+  corpus packages the findings are unchanged (272 before and after); on the
+  OData v4.02 Part 1, OData Vocabularies v4.0 and CSAF v2.1 CSD03 packages
+  they are unchanged too (54, 32 and 38).
 
 ## v1.13.2 - 2026-10-08
 

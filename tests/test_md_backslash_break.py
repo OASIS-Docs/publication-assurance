@@ -317,3 +317,105 @@ def test_an_indented_or_raw_looking_url_that_pandoc_links_still_blocks(md, line)
 ])
 def test_round_two_review_counterexamples_still_block(md, line):
     assert backslash_blocker_lines(md + "next line\n") == [line]
+
+
+# Round three, each rendered with pandoc 3.8.2.1. A block-level HTML tag
+# alone on its line (other than <div>) opens pandoc's raw HTML block: the
+# next line may open a quote, and every block inside gives up as many spaces
+# as the line after the tag is indented, so a whitespace-only line there
+# stops four-space code. A fence needs its closing line; inside a list item
+# or a quote it is code as at the top level.
+@pytest.mark.parametrize("md", [
+    # <pre>, then <blockquote><pre><code>
+    f"<pre>\n>     {U}\n",
+    f"<section>\n>     {U}\n",
+    # an empty line after the tag leaves four spaces for code
+    f"<pre>\n\n    {U}\n",
+    f"<section>\n \n</section>\n\n    {U}\n",
+    # <div> gives up no spaces
+    f"<div>\n \n    {U}\n",
+    # fenced code inside a list item or a quote: <pre><code>
+    f"- item\n\n  ```\n  {U}\n  ```\n",
+    f"1. item\n\n   ~~~\n   {U}\n   ~~~\n",
+    f"- item\n  ```\n  {U}\n  ```\n",
+    f"- item\n\n    ```\n    {U}\n    ```\n",
+    f"- item\n\n  ```\n  x\n\n  {U}\n  ```\n",
+    f"- item\n\n  ````\n  ```\n  {U}\n  ````\n",
+    f"- item\n\n  ```\n{U}\n  ```\n",
+    f"> q\n>\n> ```\n> {U}\n> ```\n",
+    f"> ```\n{U}\n> ```\n",
+    # '- x' straight after a paragraph line is not a list item (pandoc reads
+    # 'Para - x'), so four spaces after the blank line are top-level code
+    f"Para\n- x\n\n    {U}\n",
+    # a fence indented one to three spaces at the top level
+    f"  ```\n  {U}\n  ```\n",
+])
+def test_round_three_code_does_not_block(md):
+    assert backslash_blockers(md + "next line\n") == []
+
+
+@pytest.mark.parametrize("md, line", [
+    # the whitespace-only line sets the spaces given up: href="https://x.org/y.\\"
+    (f"<pre>\n \n    {U}\n", "Line 3"),
+    (f"<pre>\n\t\n    {U}\n", "Line 3"),
+    (f"<section>\n \n    {U}\n", "Line 3"),
+    (f"<pre>\n \n\n    {U}\n", "Line 4"),
+    (f"<pre>\n \nx\n\n    {U}\n", "Line 5"),
+    (f"<ul>\n<li>\n \n    {U}\n", "Line 4"),
+    # text after the tag: the next line continues that paragraph
+    (f"<pre> x\n>     {U}\n", "Line 2"),
+    # a fence indented past the item's text cannot interrupt its paragraph:
+    # '~~~' is text, href="https://x.org/y.\\"
+    (f"- item\n   ~~~\n   {U}\n   ~~~\n", "Line 3"),
+    # a fence with no closing line is text
+    (f"- item\n\n  ```\n  {U}\n", "Line 4"),
+])
+def test_round_three_near_misses_still_block(md, line):
+    assert backslash_blocker_lines(md + "next line\n") == [line]
+
+
+def test_crlf_never_reaches_the_rule(tmp_path):
+    # pub-check reads the Markdown with read_text, in text mode, so '\r\n'
+    # arrives as '\n'. pandoc reads the same file the same way:
+    # <pre><code>https://x.org/a.\\</code></pre>, then href="https://x.org/b.\\"
+    p = tmp_path / "crlf.md"
+    p.write_bytes(b"Para.\r\n\r\n    https://x.org/a.\\\r\n\r\nSee https://x.org/b.\\\r\nnext\r\n")
+    text = oasis_pub_check.read_text(str(p))
+    assert "\r" not in text
+    assert backslash_blocker_lines(text) == ["Line 5"]
+
+
+# Found by the adversarial review of round three: the first version of it
+# hid each of these defects (pandoc links the URL) or blocked real code.
+@pytest.mark.parametrize("md, line", [
+    # a list opens after a table row, a close tag or code, so six spaces
+    # after its blank line are the item's paragraph, not code
+    (f"| a |\n|---|\n| b |\n1.  item\n\n      see {U}\n", "Line 6"),
+    (f"</section>\n-   item\n\n      see {U}\n", "Line 4"),
+    (f"Para.\n\n    code\n1.  item\n\n      see {U}\n", "Line 6"),
+    # '~~~' at the item's text column, after its text, is text
+    (f"- item\n  ~~~\n  see {U}\n  ~~~\n", "Line 3"),
+    (f"> para\n> ~~~\n> see {U}\n> ~~~\n", "Line 3"),
+    # a backtick in a tilde fence's info string makes it text
+    (f"- item\n\n  ~~~ a`b\n  see {U}\n  ~~~\n", "Line 4"),
+    # a fence whose closing line comes after its item has ended is text
+    (f"- item\n\n  ```\n  see {U}\n\nPara\n\n```\n", "Line 4"),
+    # inside a multiline table a fence line is a cell's text
+    (f"---\n2) x\n  ```\n  see {U}\n  ```\n(1) x\n---\n\n", "Line 4"),
+    # a tag line continuing a quote's paragraph opens nothing
+    (f"> q\n<section>\n>     see {U}\n", "Line 3"),
+])
+def test_round_three_review_counterexamples_still_block(md, line):
+    assert backslash_blocker_lines(md + "next line\n") == [line]
+
+
+@pytest.mark.parametrize("md", [
+    # the spaces a tag's blocks give up are counted past the item's text
+    f"- item\n\n  <section>\n  text\n\n      code {U}\n",
+    # a nested tag is recognised past the enclosing block's indent
+    f"<table>\n  <tr>\n    <td>\n\n      code {U}\n    </td>\n  </tr>\n</table>\n",
+    # the indent a tag's blocks give up does not reach into a quote
+    f"<section>\n \n\n>     {U}\n",
+])
+def test_round_three_review_code_does_not_block(md):
+    assert backslash_blockers(md + "next line\n") == []
