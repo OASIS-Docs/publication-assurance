@@ -26,7 +26,28 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-No check changed, and the counts stay at 181 conditions in 61 classes.
+PATCH: a fix inside an existing check, no new criteria.
+
+- **md-links**: the rule for a URL that runs into `.\` (a period, then a
+  backslash line break) blocked any URL, so
+  `Schema: <https://example.org/x/aggregator.json>.\` drew a BLOCKER although
+  pandoc renders it with its href intact and the line break kept. Writing a
+  dual link as `<https://...>`, as v1.13.1 advises, could therefore draw a
+  BLOCKER at the end of a line. The rule now passes a URL that is closed
+  before the period: one opened by `<` and closed by `>`, or opened by `(` and
+  closed by `)` (an autolink, a link target, a URL in parentheses). A bare
+  URL still blocks, and so does a URL whose `<` or `(` is never closed before
+  `.\`, or whose only closing parenthesis pairs with one inside it
+  (`(https://.../Foo_(bar).\`): pandoc swallows the period and backslash in
+  each. An adversarial review of the first version of this fix, which
+  exempted any URL after `<` or `(`, found ten such inputs; six are now
+  tests. Each case was rendered with pandoc 3.8.2.1 first. Pinned by
+  `tests/test_md_backslash_break.py`. Over the 12 corpus packages the findings
+  are unchanged (272 before and after, offline); no corpus file has a line
+  ending in `.\`, so the corpus does not exercise this rule.
+
+Documentation: apart from md-links above, no check changed, and the counts
+stay at 181 conditions in 61 classes.
 `harvest.py`'s report headings were reworded, three class summaries in
 `CHECKS.md` name the v1.13 conditions, and three conformance-structure
 condition descriptions say that quotes and dashes are folded.
