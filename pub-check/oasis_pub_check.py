@@ -889,8 +889,16 @@ def check_md_links(md_text: str, f: Findings) -> None:
                   f"Dual link [url](url); write the URL in angle brackets, <https://...>, "
                   f"which renders as a link in both the HTML and the PDF, or give it real "
                   f"anchor text: {m.group(2)}")
+    # A URL that pandoc has closed before the period is safe: 'Schema:
+    # <https://...>.\' and '[x](https://...).\' keep their href and the line
+    # break. So a URL opened by '<' blocks only when no '>' closes it before
+    # '.\', and one opened by '(' only when no ')' closes it (a balanced pair
+    # inside the URL, as in .../Foo_(bar), does not close it). Any other URL
+    # is bare and blocks.
     for i, line in enumerate(md_text.splitlines(), 1):
-        if re.search(r"https?://\S+\.\\$", line):
+        if re.search(r"(?:^|[^<(])https?://\S+\.\\$"
+                     r"|<https?://[^\s>]+\.\\$"
+                     r"|\(https?://(?:[^\s()]|\([^\s()]*\))*\.\\$", line):
             f.add(BLOCKER, "md-links",
                   f"Line {i}: bare URL runs into '.\\' with no space; pandoc autolink pulls the "
                   f"period and backslash into the href and eats the line break. Use '. \\'.")
@@ -7626,7 +7634,7 @@ CONDITION_DOCS: list[dict] = [
          compares_to="text and target being the same URL calls for an angle-bracket autolink `<https://...>` (a link in both the HTML and the PDF) or real anchor text"),
     dict(check="md-links", sig="pandoc autolink pulls the", applies="md",
          condition="No bare URL runs into '.\\' without a space",
-         pulls="each markdown line ending a URL with .\\",
+         pulls="each markdown line ending a bare URL with .\\ (a URL opened by '<' or '(' and closed by '>' or ')' before the period passes)",
          compares_to="the safe form '. \\' (otherwise pandoc pulls the period and backslash into the href)"),
     # fence-collapse
     dict(check="fence-collapse", sig="collapses to inline code", applies="md",
