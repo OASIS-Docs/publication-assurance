@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The same package must produce the same report every time it is checked.
 
 Nine finding loops iterated a `set()` directly, so under Python's per-process

@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """A figure wider than the printable page must not reach the PDF unnoticed.
 
 DMLex v1.0 (Sep 2026): the Markdown edition's 49 figures carried no width, so

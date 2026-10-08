@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The step 2 workflow script runs the pipeline TRANSFORMS.md documents.
 
 .github/scripts/step_2_convert_html_to_pdf_V2_0.sh ran `wkhtmltopdf

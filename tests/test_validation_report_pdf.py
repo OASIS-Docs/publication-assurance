@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The Validation Report's PDF carries the whole report in its text layer.
 
 validation_report.py --pdf prints the HTML report with headless Chrome. A PDF

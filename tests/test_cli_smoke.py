@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Smoke coverage over the checker's entry points.
 
 These pin the CLI contract the runbook, the composite action and gate.py all

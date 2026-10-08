@@ -2,11 +2,15 @@ OASIS Publication Assurance
 Copyright 2025-2026 OASIS Open
 
 SOFTWARE (the document-processing pipeline under .github/, the pub-check
-publication-readiness gate code under pub-check/, including pub_check.py and
-manifest-schema.json, the conversion verifier under verify/, the
-converters under converters/, the renderer under render/, and the run
-harvester under harvest/) is authored by Michael Coletta, Technical Advisor to
-OASIS Open, and licensed under the Apache License, Version 2.0 (see LICENSE).
+publication-readiness gate code under pub-check/, including oasis_pub_check.py
+and manifest-schema.json, the conversion verifier under verify/, the
+converters under converters/, the renderer under render/, the run harvester
+under harvest/, the composite action in action.yml, the Git hooks under
+.githooks/, the example workflows under examples/, and the test code under
+tests/) is authored by Michael Coletta, Technical Advisor to OASIS Open, and
+licensed under the Apache License, Version 2.0 (see LICENSE). The third-party
+and OASIS material listed below is not part of that grant except where it says
+so.
 
 DOCUMENTATION PROSE (TRANSFORMS.md, PUBLICATION-QUALITY.md,
 pub-check/README.md, and the generated pub-check/CHECKS.md, which together
@@ -15,11 +19,46 @@ state the OASIS publication acceptance criteria) is Copyright (c) OASIS Open
 its notice retained; derivative works are not permitted without prior
 written authorization from OASIS Open. These documents are the canonical
 statement of the criteria; the Apache-2.0 grant does NOT extend to them.
+Any other documentation file in this repository that carries its own
+"All Rights Reserved" notice is governed by that notice, not by Apache-2.0.
 
-The OASIS specification packages archived in this repository (csaf/,
-csaf-cvrf/), the published specification text used as test fixtures under
-tests/fixtures/, and the published text quoted in the allow rules under
-converters/*/profiles/ are OASIS Work Products. They are NOT relicensed by this file:
-each package retains its own OASIS copyright, IPR, and license notices as
-published, per the OASIS IPR Policy. The OASIS name and logo are trademarks
-of OASIS Open and are not licensed under Apache-2.0.
+OASIS SPECIFICATION STYLESHEETS. The 16 markdown-styles-v1.*.css files
+under .github/styles/ are OASIS specification stylesheets; the copies under
+.github/custom_layout/ and .github/src/test/styles/ are symlinks to them.
+.github/src/style.css is v1.7.3a re-indented, and .github/styles/md.css is a
+reformatted subset of the same rules. They were written for OASIS by Paul
+Knight (change-log initials "pk", 2018 to 2023), with the v1.7.3a variant
+contributed by "dk" (2020), as the files' own change logs record. Current
+versions are published at https://docs.oasis-open.org/templates/css/.
+Copyright OASIS Open.
+
+OASIS WORK PRODUCTS. The following are OASIS Work Products, extracts of
+them, or copies altered to reproduce a defect, kept for regression testing.
+None is relicensed by this file: each retains its own OASIS copyright, IPR,
+and license notices as published, per the OASIS IPR Policy and the IPR Mode
+of the Technical Committee or Open Project that produced it.
+  - examples/csaf/ and examples/csaf-cvrf/: Common Security Advisory
+    Framework and CSAF Common Vulnerability Reporting Framework
+    specification packages (OASIS CSAF TC, Non-Assertion Mode), with their
+    JSON schemas.
+  - .github/src/test/: TOSCA Version 2.0 csd06 package files (OASIS TOSCA
+    TC) and CACAO Layout Extension Version 1.0 cs01 (OASIS CACAO TC), used
+    as pipeline test inputs.
+  - tests/fixtures/: published specification text and figures used as test
+    fixtures, including DMLex (OASIS LEXIDMA TC), UBL 2.5 (OASIS UBL TC),
+    OData (OASIS OData TC), and NIEMOpen (an OASIS Open Project, whose
+    work products carry the license terms of that project).
+  - converters/*/profiles/: published Work Product text quoted in the
+    converter allow rules.
+
+OASIS POLICY DOCUMENTS. pub-check/corpus/ holds dated snapshots (see
+pub-check/corpus/MANIFEST.json) of the OASIS TC Process, the OASIS Committee
+Operations Process, the OASIS Naming Directives, and pages of the OASIS TC
+Handbook, fetched from www.oasis-open.org and docs.oasis-open.org.
+Copyright OASIS Open. They are reproduced verbatim so that a quoted
+authority can be checked, are not licensed under Apache-2.0, and the live
+documents remain authoritative.
+
+TRADEMARKS. The OASIS name and logo (including assets/OASISLogo-v3.0.png and
+its copy under tests/fixtures/) are trademarks of OASIS Open and are not
+licensed under Apache-2.0.

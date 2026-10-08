@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Regression fixtures for the Work Product Manifest File emitter.
 
 Two defects, both found staging UBL v2.5 as an OASIS Standard:

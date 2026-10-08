@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Regression fixtures for stage-uri-live, the v1.2.0 check class.
 
 The Previous-stage and Latest-stage cover blocks name files that are not in

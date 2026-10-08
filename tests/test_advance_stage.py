@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """advance_stage.py cuts the next stage of an OASIS Markdown spec.
 
 DMLex v1.1 WD01 (Sep 2026) was cut from the v1.0 OS Markdown edition by a

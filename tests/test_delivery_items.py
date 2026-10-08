@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Regression fixtures for find_delivery_items (fixed in 14ad114).
 
 The delivery item per format is the file whose stem ends in -<stage>; when no

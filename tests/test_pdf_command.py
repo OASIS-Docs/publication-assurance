@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The wkhtmltopdf command the pipeline builds, asserted token for token.
 
 `build_command` carried a literal running header, 'Common Security Advisory

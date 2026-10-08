@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Measure the type sizes a PDF actually prints, from its text layer.
 
 Every text span is classed as footer (below the 25mm bottom margin), header

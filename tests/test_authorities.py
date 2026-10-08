@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The policy authority behind each check, verified rather than asserted.
 
 `AUTHORITIES.md` quotes OASIS policy at 94 check signatures. Until now the

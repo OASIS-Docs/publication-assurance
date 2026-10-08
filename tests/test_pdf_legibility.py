@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The PDF's body text must print near the size the stylesheet declares.
 
 DMLex v1.0 (Sep 2026): one unwrappable inline path widened the page and Chrome

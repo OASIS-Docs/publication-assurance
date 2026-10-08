@@ -1,3 +1,7 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
+
 # Generate the release manifests for a stage directory:
 # manifest.json (machine contract) and <stem>-manifest.txt (the Work
 # Product Manifest File, the staff record published beside the release).

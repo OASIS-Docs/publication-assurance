@@ -326,21 +326,29 @@ poppler (`pdftotext`/`pdffonts`, optional, for the PDF cross-checks)
 
 Three tiers, stated precisely in [NOTICE](NOTICE):
 
-1. **Software** (the document-processing pipeline under `.github/` and the
-   publication checks under `pub-check/`) is licensed under the
+1. **Software** (the document-processing pipeline under `.github/`, the
+   publication checks under `pub-check/`, the verifier, converters, renderer
+   and harvester under `verify/`, `converters/`, `render/` and `harvest/`,
+   the composite action, and the tests) is licensed under the
    [Apache License, Version 2.0](LICENSE).
    Copyright OASIS Open. Authored by Michael Coletta, Technical Advisor to
-   OASIS Open. Every source file carries an SPDX header.
+   OASIS Open. Every source code file carries an SPDX header.
 2. **Acceptance-criteria documentation** (`TRANSFORMS.md`,
    `PUBLICATION-QUALITY.md`, `pub-check/README.md`, and the generated
    `pub-check/CHECKS.md`) is Copyright OASIS Open, All Rights Reserved:
    verbatim distribution is permitted with notices retained; derivative
    works require prior written authorization from OASIS Open. These
    documents are the canonical statement of the OASIS publication
-   acceptance criteria.
-3. **Archived OASIS specification packages** (`examples/csaf/`, `examples/csaf-cvrf/`) are
-   OASIS Work Products and retain their own published OASIS copyright, IPR,
-   and license notices. Nothing in this repository relicenses them.
+   acceptance criteria. Other documents that carry their own "All Rights
+   Reserved" notice are governed by that notice.
+3. **OASIS material reproduced for testing and reference** keeps its own
+   published OASIS copyright, IPR, and license notices; nothing in this
+   repository relicenses it. That covers the archived specification
+   packages (`examples/csaf/`, `examples/csaf-cvrf/`), the specification
+   text in `tests/fixtures/` and `.github/src/test/`, the policy snapshots
+   in `pub-check/corpus/`, and the OASIS specification stylesheets under
+   `.github/styles/` and `.github/custom_layout/`. NOTICE names the source
+   of each.
 
 The OASIS name and logo are trademarks of OASIS Open.
 

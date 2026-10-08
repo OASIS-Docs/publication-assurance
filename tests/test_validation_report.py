@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The full Validation Report covers every check the tool carries.
 
 pub-check/validation_report.py turns one --json run into the per-check report

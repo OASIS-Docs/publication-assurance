@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """Publishing a run's report files to the reports branch, and linking them.
 
 pub-check/publish_report.py commits the files to an orphan branch and states

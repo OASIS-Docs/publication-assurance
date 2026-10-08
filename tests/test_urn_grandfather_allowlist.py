@@ -1,3 +1,6 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
 """The URN-grandfather allowlist is a policy record, so pin it.
 
 Naming Directives s8 permits URN-based namespaces only for TCs that used them
