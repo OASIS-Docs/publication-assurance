@@ -67,6 +67,22 @@ PATCH: a fix inside an existing check, no new criteria.
   indented code. On the OData v4.02 CSD02 Part 1 and Vocabularies v4.0 CSD03
   packages, 37 lines are now treated as code, every one of them inside a
   `<pre>` block in pandoc's output, and the findings are unchanged (54 and 32).
+- **md-links** and **all checks that read Markdown prose**, a second pass on
+  where code is: an indented code block inside a blockquote (after its `>`
+  and one space), inside a list item (four spaces past the item's text
+  column, so `- item` needs six and `1. item` seven), and straight after a
+  heading or a `<div>` line was still read as prose, so a URL in it drew a
+  false BLOCKER. These are now treated as code, as pandoc 3.8.2.1 renders
+  them. A line indented less than an item's text after a blank line leaves
+  the item, so `10.  item` followed by a four-space line is top-level code.
+  md-links also skips URLs in HTML comments, in `<pre>`, `<script>`,
+  `<style>` and `<textarea>` elements, and in a `$$` math block. Inline
+  `$...$` math is not skipped: pandoc reads it within each list item, table
+  cell and attribute, which a scan of the whole text cannot follow. Pinned by
+  `tests/test_md_backslash_break.py`, now 113 cases. Over the 12 corpus
+  packages the findings are unchanged (272 before and after); on the OData
+  v4.02 Part 1, OData Vocabularies v4.0 and CSAF v2.1 CSD03 packages they
+  are unchanged too (54, 32 and 38).
 
 Documentation: apart from md-links above, no check changed, and the counts
 stay at 181 conditions in 61 classes.

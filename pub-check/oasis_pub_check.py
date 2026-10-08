@@ -200,45 +200,87 @@ def strip_code_blocks(text: str, kind: str) -> str:
     return text
 
 
-# A line that opens a list item, a definition or a footnote. Inside one,
-# pandoc reads a line indented four spaces after a blank line as a further
-# paragraph of that item, not as code. Loose on purpose (it also takes 'A. '
-# and 'a) '): a line it takes for an item is left as prose.
-_MD_ITEM_RE = re.compile(r"\s*(?:[-*+]|\(?(?:\d+|#|@\w*|[A-Za-z]|[ivxlcdmIVXLCDM]+)[.)])(?:\s|$)"
-                         r"|\s{0,3}[:~]\s|\s{0,3}\[\^[^\]]+\]:")
+# A blockquote's '>' and the one space after it; the line opening a list
+# item or definition (its marker), or a footnote. Loose on purpose (it also
+# takes 'A. ' and 'a) '): a line it wrongly takes for an item only raises the
+# indent its code needs.
+_MD_QUOTE_RE = re.compile(r" {0,3}> ?")
+_MD_MARKER_RE = re.compile(r"(?:[-*+]|\(?(?:\d+|#|@\w*|[A-Za-z]|[ivxlcdmIVXLCDM]+)[.)]|[:~])(?=[ \t]|$)"
+                           r"(?<![A-Z]\.)|[A-Z]\.(?=  |\t)")  # 'A.' needs two spaces
+_MD_FOOTNOTE_RE = re.compile(r"\[\^[^\]]+\]:")
 
 
 def _blank_indented_code(text: str) -> str:
-    """Blank pandoc's indented code blocks: lines indented four spaces or a
-    tab that follow a blank line or another such line. Not inside a list
-    item, definition or footnote, where pandoc continues the item instead;
-    that lasts until an unindented line after a blank line. Nor between a
-    line of dashes with text below it and one with a blank line below it: a
-    multiline table's rows, or YAML metadata. A blank line holds only spaces
-    and tabs (a no-break space continues the paragraph). An indented line
-    straight after a heading, which pandoc also reads as code, is left as
-    prose."""
+    """Blank pandoc's indented code blocks: lines indented four spaces (tabs
+    to columns of four) past where their block's text starts, that follow a
+    blank line, another such line or a heading. Inside a blockquote the '>'
+    and one space come off first. Inside a list item, definition or footnote
+    the text starts at the item's text column (four for a footnote), so a
+    line indented less than that past it is a further paragraph; a line after
+    a blank line that is indented less than the item's text leaves the item.
+    Nothing is blanked between a line of dashes with text below it and one
+    with a blank line below it: a multiline table's rows, or YAML metadata. A
+    blank line holds only spaces and tabs (a no-break space continues the
+    paragraph)."""
     lines = text.split("\n")
     out = []
-    prev_blank, in_code, in_item, in_table = True, False, False, False
-    for n, line in enumerate(lines):
+    depth, items, blank_depth, outer = 0, [], 0, {}
+    prev_blank, prev_first, in_code, in_table, after_heading = True, False, False, False, False
+    for n, raw in enumerate(lines):
+        line, d = raw.expandtabs(4), 0
+        while (q := _MD_QUOTE_RE.match(line)) and (d < depth or prev_blank or after_heading or in_code):
+            line, d = line[q.end():], d + 1  # a quote cannot interrupt a paragraph
         if not line.strip(" \t"):
-            out.append(line)
-            prev_blank = True
+            out.append(raw)
+            if d != depth:
+                outer[depth] = items  # a quote inside a list item leaves the item open
+                depth, items, in_code, in_table = d, outer.get(d, []) if d < depth else [], False, False
+            prev_blank, after_heading, blank_depth = True, False, d
             continue
-        if (line.startswith(("    ", "\t")) and not in_item and not in_table
-                and (prev_blank or in_code)):
+        if prev_blank and blank_depth not in (0, d):
+            prev_blank = False  # after an empty '>' line, an unquoted line continues the quote
+        if d != depth:
+            prev_blank = prev_blank or d > depth  # a quote's first line starts a block
+            after_heading = after_heading and d > depth
+            if depth == 0 and d > 0 and prev_blank:  # a quote indented less than the item's text leaves it
+                qind = len(raw.expandtabs(4)) - len(raw.expandtabs(4).lstrip(" "))
+                while items and qind < items[-1]:
+                    items.pop()
+            outer[depth] = items
+            depth, items, in_code, in_table = d, outer.get(d, []) if d < depth else [], False, False
+        ind = len(line) - len(line.lstrip(" "))
+        if prev_blank:
+            while items and ind < items[-1]:
+                items.pop()
+        underlined = n + 1 < len(lines) and bool(re.fullmatch(r"(?:=+|-+)[ \t]*", lines[n + 1]))
+        if (ind >= (items[-1] if items else 0) + 4 and not in_table and not underlined
+                and (prev_blank or in_code or after_heading)):
             out.append("")
-            prev_blank, in_code = False, True
+            prev_blank, prev_first, in_code, after_heading = False, False, True, False
             continue
-        if re.fullmatch(r"[ \t]*-{3,}[- \t]*", line):
+        body = line[ind:]
+        heading = False
+        if prev_first and not in_table and ind == 0 and re.fullmatch(r"(?:=+|-+)[ \t]*", body):
+            heading = True  # a setext underline
+        elif re.fullmatch(r"[ \t]*-{3,}[- \t]*", line):
             in_table = n + 1 < len(lines) and bool(lines[n + 1].strip(" \t"))
-        if _MD_ITEM_RE.match(line):
-            in_item = True
-        elif prev_blank and not line[0].isspace():
-            in_item = False
-        out.append(line)
-        prev_blank, in_code = False, False
+        elif prev_blank and ind == 0 and re.match(r"#{1,6}(?:[ \t]|$)", body):
+            heading = True
+        elif ind <= 3 and re.fullmatch(r"</?div\b[^>]*>[ \t]*", body, re.I):
+            heading = True  # a <div> tag alone on its line ends a block too
+        elif prev_blank and ind <= 3 and re.fullmatch(r"<!--.*-->[ \t]*", body):
+            heading = True  # as does a comment alone on its line, after a blank one
+        elif m := _MD_FOOTNOTE_RE.match(body) or _MD_MARKER_RE.match(body):
+            while items and items[-1] > ind:
+                items.pop()
+            rest = body[m.end():]
+            gap = len(rest) - len(rest.lstrip(" "))
+            if body.startswith("[^"):
+                items.append(max(4, ind))
+            else:
+                items.append(ind + m.end() + (gap if 0 < gap <= 4 and rest.strip() else 1))
+        out.append(raw)
+        prev_first, prev_blank, in_code, after_heading = prev_blank, False, False, heading
     return "\n".join(out)
 
 
@@ -937,7 +979,7 @@ def check_md_links(md_text: str, f: Findings) -> None:
     # inside an autolink '<...\>' that ends the line. One that pandoc ends
     # first is safe: 'Schema: <https://...>.\', '[x](https://...).\',
     # '"https://...".\' keep their href and the line break.
-    for i, line in enumerate(md_text.splitlines(), 1):
+    for i, line in enumerate(_blank_raw_html_and_math(md_text).splitlines(), 1):
         if "\\" not in line:
             continue
         hit = bool(_EMAIL_AUTOLINK_END_RE.search(line))  # <a@x.org.\>
@@ -964,6 +1006,27 @@ def check_md_links(md_text: str, f: Findings) -> None:
                   f"before it); pandoc autolink pulls the backslash, and any period before it, "
                   f"into the href and eats the line break. End the URL first: '. \\' or "
                   f"'<url>.\\'.")
+
+
+def _blank_raw_html_and_math(text: str) -> str:
+    """Blank what pandoc passes through as raw HTML or reads as display
+    math, so a URL there is not taken for a link: HTML comments, <pre>,
+    <script>, <style> and <textarea> elements, and a $$...$$ block opening a
+    line. Line breaks are kept. Inline $...$ math is left alone: pandoc reads
+    it inside each list item, table cell and attribute, which a scan of the
+    whole text cannot follow."""
+
+    def blank(m: re.Match) -> str:
+        return re.sub(r"[^\n]", " ", m.group(0))
+
+    def raw(m: re.Match) -> str:
+        if m.group(1) and m.group(2).rfind("<!--") > m.group(2).rfind("-->"):
+            return m.group(0)  # an unclosed comment inside hides the close tag from pandoc
+        return blank(m)
+
+    text = re.sub(r"(?<!\\)(?:<!--(?:-?>|.*?--!?>)"
+                  r"|<(pre|script|style|textarea)\b[^>]*(?<!/)>(.*?)</\1\s*>)", raw, text, flags=re.S | re.I)
+    return re.sub(r"(?m)^ {0,3}\$\$(?:(?!\n[ \t]*\n).)+?\$\$", blank, text, flags=re.S)
 
 
 # The schemes pandoc 3.8.2.1 reads as a bare URL (src/Text/Pandoc/URI.hs),
@@ -7821,7 +7884,7 @@ CONDITION_DOCS: list[dict] = [
          compares_to="text and target being the same URL calls for an angle-bracket autolink `<https://...>` (a link in both the HTML and the PDF) or real anchor text"),
     dict(check="md-links", sig="pandoc autolink pulls the", applies="md",
          condition="No bare URL runs into '.\\' without a space",
-         pulls="each markdown line outside code blocks (fenced or indented) whose closing backslash a URL runs into, read as pandoc 3.8.2.1 reads a bare URL: any scheme on its list, in any case; ended by a closed '<...>', '[...]' or link target; an autolink '<...\\>' counts",
+         pulls="each markdown line outside code blocks (fenced or indented, in quotes and list items as pandoc reads them), HTML comments, <pre>, <script>, <style> and <textarea> elements and $$ math blocks, whose closing backslash a URL runs into, read as pandoc 3.8.2.1 reads a bare URL: any scheme on its list, in any case; ended by a closed '<...>', '[...]' or link target; an autolink '<...\\>' counts",
          compares_to="the safe form '. \\' (otherwise pandoc pulls the backslash, and any period before it, into the href)"),
     # fence-collapse
     dict(check="fence-collapse", sig="collapses to inline code", applies="md",

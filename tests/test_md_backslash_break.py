@@ -208,3 +208,112 @@ def test_review_counterexamples_that_must_block(md, line):
 ])
 def test_review_counterexamples_that_must_not_block(line):
     assert backslash_blockers(line + "\nnext line\n") == []
+
+
+# Round two: code, raw HTML and math that pandoc renders without a link, and
+# the indented lines in those places that are still prose. Each rendered with
+# pandoc 3.8.2.1.
+U = "https://x.org/y.\\"
+
+
+@pytest.mark.parametrize("md", [
+    # <blockquote><pre><code>: inside a quote, '>' and one space come off
+    # first, then four spaces make code
+    f"> q\n>\n>     {U}\n",
+    f"> > q\n> >\n> >     {U}\n",
+    # in a list item, code starts four spaces past the item's text column
+    f"- item\n\n      {U}\n",
+    f"1. item\n\n       {U}\n",
+    f"-   item\n\n        {U}\n",
+    f"- item\n\n  - sub\n\n        {U}\n",
+    f"- item\n\n  - sub\n\n  back\n\n      {U}\n",
+    # a line indented less than a wide marker's text column ends the list,
+    # and four spaces at the top level are code
+    f"10.  item\n\n    {U}\n",
+    # a footnote or definition takes its text four spaces in, code eight
+    f"Text[^1].\n\n[^1]: Note.\n\n        {U}\n",
+    f"Term\n:   def\n\n        {U}\n",
+    # an indented line straight after a heading is code
+    f"# H\n    {U}\n",
+    f"H\n=\n    {U}\n",
+    f"H\n---\n    {U}\n",
+    # raw HTML: a comment, <pre> and <script> pass through untouched
+    f"<!--\n{U}\n-->\n",
+    f"Text <!-- see {U}\n--> more\n",
+    f"<pre>\n{U}\n</pre>\n",
+    f"Text <pre>{U}\n</pre>\n",
+    f"<script>\n{U}\n</script>\n",
+    # a quote's first line starts a block, even straight after code
+    f"    code\n>     {U}\n",
+    # a <div> line ends a paragraph, so the indented line is code
+    f"Text\n<div>\n    {U}\n",
+    # a quote indented less than the item's text ends the list
+    f"-   item\n\n    para\n\n   > q\n\n    see {U}\n",
+    # 'A.' with one space is not a list marker, so this is top-level code
+    f"A. Smith\n\n    {U}\n",
+    # display math: <span class="math display">, no link
+    f"$$\n{U}\n$$\n",
+])
+def test_a_url_in_code_raw_html_or_math_does_not_block(md):
+    assert backslash_blockers(md + "next line\n") == []
+
+
+@pytest.mark.parametrize("md, line", [
+    # '>' and one space, then three: a paragraph, href="https://x.org/y.\\"
+    (f"> q\n>\n>    {U}\n", "Line 3"),
+    # a tab after '>' reaches only column 4
+    (f"> q\n>\n>\t{U}\n", "Line 3"),
+    # no blank line inside the quote: the paragraph continues
+    (f"> q\n>     {U}\n", "Line 2"),
+    # short of the item's text column plus four: a further paragraph
+    (f"- item\n\n     {U}\n", "Line 3"),
+    (f"1. item\n\n      {U}\n", "Line 3"),
+    (f"-   item\n\n    {U}\n", "Line 3"),
+    (f"- item\n\n  - sub\n\n      {U}\n", "Line 5"),
+    # a heading two lines up does not make the line code
+    (f"# H\n\npara\n    {U}\n", "Line 4"),
+    # text after a closed comment, a <div>, and a '$' that opens no math
+    (f"<!-- a --> {U}\n", "Line 1"),
+    (f"<div>\n{U}\n</div>\n", "Line 2"),
+    (f"Text $ {U}\n", "Line 1"),
+    # '$3' cannot close math, so '$5 ...' is not math
+    (f"Cost $5 see {U}\nfor $3\n", "Line 1"),
+    # YAML metadata: an abstract's block scalar is Markdown, and the
+    # template renders it with href="https://x.org/y.\\"
+    (f"---\ntitle: x\nabstract: |\n  a\n\n    {U}\n---\n", "Line 6"),
+])
+def test_an_indented_or_raw_looking_url_that_pandoc_links_still_blocks(md, line):
+    assert backslash_blocker_lines(md + "next line\n") == [line]
+
+
+# Found by the adversarial review of round two: each blocked before this
+# change, and the first version of it hid the defect.
+@pytest.mark.parametrize("md, line", [
+    # a comment line does not end a paragraph: the indented line continues it
+    (f"para\n<!-- note -->\n    {U}\nmore\n", "Line 3"),
+    # an indented '#' or underline is not a heading
+    (f" # H\n    {U}\n", "Line 2"),
+    (f"H\n  ===\n    {U}\n", "Line 3"),
+    # a line with an underline below it is a heading, href="https://x.org/y.\\"
+    (f"> q\n>\n>     {U}\n---\n", "Line 3"),
+    (f"para\n\n    {U}\n---\n", "Line 3"),
+    # a quote cannot interrupt a paragraph: all three lines are one paragraph
+    (f"Para.\n>\n>     see {U}\n", "Line 3"),
+    # after an empty '>' line, an unquoted line continues the quote
+    (f"> q\n>\n    see {U}\n", "Line 3"),
+    # a quote at the item's text column stays in the item, and so does the
+    # text after it
+    (f"1. item\n\n   para\n\n   > q\n\n    see {U}\n", "Line 7"),
+    # an unquoted line after a quoted comment continues the quote
+    (f"> <!-- -->\n    {U}\n", "Line 2"),
+    # pandoc reads '$...$' inside each list item and code span, so a '$' in
+    # the next item or in code does not close math around the URL
+    (f"- Basic: $5 {U}\n- Pro: US$ 10\n", "Line 1"),
+    (f"Set ``$HOME`` and see {U}\nthen ``$PATH`` too\n", "Line 1"),
+    # an escaped '<', a comment closed at once, a self-closing <pre/>
+    (f"\\<!-- {U}\n-->\n", "Line 1"),
+    (f"<!--> {U}\n-->\n", "Line 1"),
+    (f"<pre/>\n{U}\n</pre>\n", "Line 2"),
+])
+def test_round_two_review_counterexamples_still_block(md, line):
+    assert backslash_blocker_lines(md + "next line\n") == [line]
