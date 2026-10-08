@@ -163,7 +163,8 @@ draft, for example) are recorded NA with a stated reason.
 
 Both layers produce a standard report. The Validation Report comes from the
 TC's own run as well as from intake: the GitHub action renders it on every run
-and publishes it to the repository's `pubcheck-reports` branch, and
+and, when the run can write to the repository, publishes it to the
+`pubcheck-reports` branch, and
 `pub-check/validation_report.py` renders it locally from a `--json` record
 ([docs/ADOPTING.md](docs/ADOPTING.md) has both). TC Administration renders it
 again at intake, from the identical checks, and files it with the Publication
@@ -202,6 +203,10 @@ the observed-vs-expected table:
 The TC included acknowledgment placeholders deliberately at CSD stage, the
 tool recorded it, the triage noted it must clear before CS, and nobody had
 to exchange an email about it.
+
+[docs/WORKED-EXAMPLES.md](docs/WORKED-EXAMPLES.md) has more recent cases from
+CSAF v2.1 and the DMLex Markdown edition, each with the finding, what it meant
+and the fix at source.
 
 ## Running it yourself
 

@@ -87,6 +87,7 @@ URL shapes and what happens when nothing is published:
 | **[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit checks, a worked example. **Start here for the review model.** |
 | **[pub-check/README.md](pub-check/README.md)** | The class-level summary of what it checks, with severities and the regression corpus. |
 | **[pub-check/CHECKS.md](pub-check/CHECKS.md)** | A check fired and you want the exact one. Full catalog, generated from the code. |
+| **[docs/WORKED-EXAMPLES.md](docs/WORKED-EXAMPLES.md)** | A finding you have not met before: recent CSAF and DMLex cases, each with the message, what it meant and the fix at source. |
 | **[TRANSFORMS.md](TRANSFORMS.md)** | Building from Markdown and want the pipeline command by command. |
 | **[docs/MARKDOWN-EDITION.md](docs/MARKDOWN-EDITION.md)** | A Markdown edition of a DocBook specification, as one more output of its source (the `docbook-markdown` action). |
 | **[docs/CONVERT-AND-VERIFY.md](docs/CONVERT-AND-VERIFY.md)** | The whole check of a converted specification in one copy-me GitHub workflow: convert, render, verify the HTML and PDF against the published originals, run the OASIS publication checks, build page pairs for review. |
@@ -224,6 +225,7 @@ publication-assurance/
 ├── docs/ADOPTING.md                 # Adoption guide: the publication checks in a TC's own repository
 ├── docs/MARKDOWN-EDITION.md         # A Markdown edition of a DocBook specification (the docbook-markdown action)
 ├── docs/CONVERT-AND-VERIFY.md       # Convert, render, verify and check in one GitHub workflow, with screenshots
+├── docs/WORKED-EXAMPLES.md          # Findings from recent publications and the fix at source for each
 ├── docs/images/                     # The screenshots the guides use
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all checks
 ├── examples/                        # Worked example + the regression corpus
@@ -350,4 +352,4 @@ The OASIS name and logo are trademarks of OASIS Open.
 
 ---
 
-**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [Markdown edition of a DocBook specification](docs/MARKDOWN-EDITION.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)
+**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [Markdown edition of a DocBook specification](docs/MARKDOWN-EDITION.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [Worked examples from recent publications](docs/WORKED-EXAMPLES.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)

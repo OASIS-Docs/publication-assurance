@@ -112,8 +112,8 @@ The brief asks for lines copied from both sides before any judgement, and
 every kind of element on each side. `grade` counts as evidence only a
 distinct line of eight or more letters and digits that is not on most pages
 (a bracket, "1" or a footer proves nothing), needs three of those per side
-(fewer on a page with fewer), and rejects a pair whose lines are not on its
-page. It accepts the review only when the planted fault is named for what it
+(fewer on a page with fewer), and rejects a pair when fewer than four in five
+of its copied lines are on its pages. It accepts the review only when the planted fault is named for what it
 is ("page numbers", "footer", "missing"), and not by a word the reviewer
 writes about most pairs.
 It prints every other difference for a person to rule on. Pass a re-run of
