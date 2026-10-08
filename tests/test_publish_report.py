@@ -262,10 +262,6 @@ def test_a_branch_that_never_stops_moving_fails_the_step_and_says_so(
     monkeypatch.setattr(publish_report, "RETRY_SECONDS", 2)
     out = tmp_path / "github-output"
     out.write_text("")
-    # In process, so the runner's own variables must go too, as runner_env()
-    # leaves them out of a subprocess: CI's pull request event read as a fork.
-    for k in ("GITHUB_HEAD_REF", "GITHUB_EVENT_PATH"):
-        monkeypatch.delenv(k, raising=False)
     for k, v in {**runner_env(remote), "GITHUB_OUTPUT": str(out)}.items():
         monkeypatch.setenv(k, v)
     monkeypatch.setattr(sys, "argv", [str(PUBLISH), "--files", str(files),
@@ -349,6 +345,7 @@ def test_a_fork_pull_request_is_not_published(tmp_path, files, remote):
     event = tmp_path / "event.json"
     event.write_text(json.dumps({"pull_request": {"head": {"repo": {"full_name": "someone/tc"}}}}))
     r, out, _ = publish(tmp_path, files, remote, extra_env={"GITHUB_EVENT_PATH": str(event)})
+    assert r.returncode == 0, r.stderr
     assert "pull request from a fork" in out["report_publish_note"]
     assert git(remote, "branch", "--list").split() == ["main"]
 
@@ -438,6 +435,8 @@ def test_a_multi_line_reason_stays_one_workflow_command(tmp_path, files, remote)
     lines = [l for l in r.stdout.splitlines() if l.startswith("::")]
     assert len(lines) == 1 and lines[0].startswith("::notice title=Validation report::"), r.stdout
     assert "\n" not in out["report_publish_note"]
+    assert out["report_publish_note"].startswith("publishing failed:"), out
+    assert r.returncode == 1 and "Report not published: publishing failed:" in r.stderr
 
 
 PAYLOAD = ("**pwned** <img src=x onerror=alert(1)> $x$ @octocat #1 "
@@ -471,6 +470,7 @@ def test_a_hostile_title_reaches_every_step_summary_block_as_plain_text(files, t
                              f"--title={PAYLOAD}", "--links-md", str(links)],
                             capture_output=True, text=True, env=env)
     assert result.returncode == 0, result.stderr
+    assert "Report not published: publishing is off" in links.read_text()
     assert_inert(links.read_text())
 
     summary = tmp_path / "summary.md"
