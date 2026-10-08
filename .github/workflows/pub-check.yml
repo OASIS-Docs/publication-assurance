@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # Authored by Michael Coletta, Technical Advisor to OASIS Open.
 
-# pub-check: run the publication gate on a stage directory.
+# pub-check: run the OASIS publication checks on a stage directory.
 #
-# This workflow is deliberately thin. The gate is ONE command:
+# This workflow is deliberately thin. The checks are ONE command:
 #     python3 pub-check/oasis_pub_check.py <stage-dir>
 # Everything else below is checkout, a Python runtime, and poppler-utils
 # for the optional PDF cross-check. There is no other logic in here.
@@ -31,5 +31,5 @@ jobs:
       - name: Install pdftotext (optional PDF cross-check)
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
 
-      - name: Run the gate
+      - name: Run the OASIS publication checks
         run: python3 pub-check/oasis_pub_check.py "${{ github.event.inputs.stage_dir }}"
