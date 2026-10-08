@@ -6,7 +6,7 @@
 # its other outputs. One step in a TC's workflow:
 #
 #   - uses: actions/checkout@v5
-#   - uses: OASIS-Docs/publication-assurance/docbook-markdown@v1.13.1
+#   - uses: OASIS-Docs/publication-assurance/docbook-markdown@v1.13.2
 #     with:
 #       source: dmlex-v1.0/specification
 #       profile: dmlex
