@@ -30,8 +30,8 @@ PATCH: a fix inside existing checks, no new criteria.
 
 - **Publishing the report** (`pub-check/publish_report.py`): a matrix job
   could lose its report without a word. When two jobs push to the reports
-  branch at once, git's message for the loser names both commits ("is at
-  <sha> but expected <sha>"), and the test for a token without write access
+  branch at once, git's message for the loser names both commits
+  (`is at <sha> but expected <sha>`), and the test for a token without write access
   matched a bare `403` anywhere in that message, so a SHA or a directory
   name containing 403 turned a lost race into "the workflow token cannot
   write to this repository": no retry, exit 0, report never published. CI
