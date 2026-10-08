@@ -45,6 +45,28 @@ PATCH: a fix inside an existing check, no new criteria.
   `tests/test_md_backslash_break.py`. Over the 12 corpus packages the findings
   are unchanged (272 before and after, offline); no corpus file has a line
   ending in `.\`, so the corpus does not exercise this rule.
+- **md-links**, the same rule, the gaps left above: it matched only `http://`
+  and `https://` in lower case and only a line ending in `.\` exactly, so it
+  missed `HTTPS://`, `ftp://`, `mailto:` and `urn:` URLs, a space after the
+  backslash, `<https://x.org/y.\>`, and a URL running into a bare `\`
+  (`https://x.org/y\`), all of which pandoc reads into the href, losing the
+  line break. It also blocked lines pandoc renders correctly:
+  `"https://x.org/y".\`, `*https://x.org/y*.\`, a URL in link text such as
+  `[https://x.org/y](https://x.org/y).\`, and a URL in an indented code
+  block. The rule now reads a URL as pandoc 3.8.2.1's bare-URL reader does
+  (its scheme list, in any letter case, and its rules for where a URL ends),
+  skips URLs inside a closed `[...]` or link target, and counts autolinks
+  that end in `\>`. Each case was rendered with pandoc first. Pinned by
+  `tests/test_md_backslash_break.py`, now 63 cases.
+- **All checks that read Markdown prose** (through `strip_code_blocks`): an
+  indented code block (four spaces or a tab after a blank line) is now treated
+  as code, as fenced blocks already were. Inside a list item, footnote,
+  definition or multiline table, where pandoc reads such a line as a further
+  paragraph, it is still read as prose. Over the 12 corpus packages the
+  findings are unchanged (272 before and after, offline); the corpus has no
+  indented code. On the OData v4.02 CSD02 Part 1 and Vocabularies v4.0 CSD03
+  packages, 37 lines are now treated as code, every one of them inside a
+  `<pre>` block in pandoc's output, and the findings are unchanged (54 and 32).
 
 Documentation: apart from md-links above, no check changed, and the counts
 stay at 181 conditions in 61 classes.

@@ -326,7 +326,7 @@ Markdown link forms that render wrong: dual `[url](url)` links and URLs that pan
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
 | 86 | No dual `[url](url)` links in the markdown | every `[text](target)` link where text is itself a URL | text and target being the same URL calls for an angle-bracket autolink `&lt;https://...&gt;` (a link in both the HTML and the PDF) or real anchor text | WARN | md | - |
-| 87 | No bare URL runs into '.\' without a space | each markdown line ending a bare URL with .\ (a URL opened by '&lt;' or '(' and closed by '&gt;' or ')' before the period passes) | the safe form '. \' (otherwise pandoc pulls the period and backslash into the href) | BLOCKER | md | - |
+| 87 | No bare URL runs into '.\' without a space | each markdown line outside code blocks (fenced or indented) whose closing backslash a URL runs into, read as pandoc 3.8.2.1 reads a bare URL: any scheme on its list, in any case; ended by a closed '&lt;...&gt;', '[...]' or link target; an autolink '&lt;...\&gt;' counts | the safe form '. \' (otherwise pandoc pulls the backslash, and any period before it, into the href) | BLOCKER | md | - |
 
 ### member-uri
 

@@ -184,19 +184,62 @@ def read_text(path: str) -> str:
 
 
 def strip_code_blocks(text: str, kind: str) -> str:
-    """Blank out fenced/code content so residue and link checks only see prose.
-    Replacement preserves line numbers."""
+    """Blank out fenced, indented and inline code so residue and link checks
+    only see prose. Replacement preserves line numbers."""
 
     def blank(m: re.Match) -> str:
         return "\n" * m.group(0).count("\n")
 
     if kind == "md":
         text = re.sub(r"^(```|~~~).*?^\1\s*$", blank, text, flags=re.M | re.S)
+        text = _blank_indented_code(text)
         text = re.sub(r"(?<!`)`[^`\n]+`(?!`)", " ", text)
     else:
         text = re.sub(r"<pre\b.*?</pre>", blank, text, flags=re.S | re.I)
         text = re.sub(r"<code\b.*?</code>", blank, text, flags=re.S | re.I)
     return text
+
+
+# A line that opens a list item, a definition or a footnote. Inside one,
+# pandoc reads a line indented four spaces after a blank line as a further
+# paragraph of that item, not as code. Loose on purpose (it also takes 'A. '
+# and 'a) '): a line it takes for an item is left as prose.
+_MD_ITEM_RE = re.compile(r"\s*(?:[-*+]|\(?(?:\d+|#|@\w*|[A-Za-z]|[ivxlcdmIVXLCDM]+)[.)])(?:\s|$)"
+                         r"|\s{0,3}[:~]\s|\s{0,3}\[\^[^\]]+\]:")
+
+
+def _blank_indented_code(text: str) -> str:
+    """Blank pandoc's indented code blocks: lines indented four spaces or a
+    tab that follow a blank line or another such line. Not inside a list
+    item, definition or footnote, where pandoc continues the item instead;
+    that lasts until an unindented line after a blank line. Nor between a
+    line of dashes with text below it and one with a blank line below it: a
+    multiline table's rows, or YAML metadata. A blank line holds only spaces
+    and tabs (a no-break space continues the paragraph). An indented line
+    straight after a heading, which pandoc also reads as code, is left as
+    prose."""
+    lines = text.split("\n")
+    out = []
+    prev_blank, in_code, in_item, in_table = True, False, False, False
+    for n, line in enumerate(lines):
+        if not line.strip(" \t"):
+            out.append(line)
+            prev_blank = True
+            continue
+        if (line.startswith(("    ", "\t")) and not in_item and not in_table
+                and (prev_blank or in_code)):
+            out.append("")
+            prev_blank, in_code = False, True
+            continue
+        if re.fullmatch(r"[ \t]*-{3,}[- \t]*", line):
+            in_table = n + 1 < len(lines) and bool(lines[n + 1].strip(" \t"))
+        if _MD_ITEM_RE.match(line):
+            in_item = True
+        elif prev_blank and not line[0].isspace():
+            in_item = False
+        out.append(line)
+        prev_blank, in_code = False, False
+    return "\n".join(out)
 
 
 _PACKAGE_STEM_RE = None
@@ -889,19 +932,163 @@ def check_md_links(md_text: str, f: Findings) -> None:
                   f"Dual link [url](url); write the URL in angle brackets, <https://...>, "
                   f"which renders as a link in both the HTML and the PDF, or give it real "
                   f"anchor text: {m.group(2)}")
-    # A URL that pandoc has closed before the period is safe: 'Schema:
-    # <https://...>.\' and '[x](https://...).\' keep their href and the line
-    # break. So a URL opened by '<' blocks only when no '>' closes it before
-    # '.\', and one opened by '(' only when no ')' closes it (a balanced pair
-    # inside the URL, as in .../Foo_(bar), does not close it). Any other URL
-    # is bare and blocks.
+    # A URL blocks when pandoc reads the line's closing backslash into it:
+    # '.\' (or any URL character, then '\') at the end of a bare URL, or
+    # inside an autolink '<...\>' that ends the line. One that pandoc ends
+    # first is safe: 'Schema: <https://...>.\', '[x](https://...).\',
+    # '"https://...".\' keep their href and the line break.
     for i, line in enumerate(md_text.splitlines(), 1):
-        if re.search(r"(?:^|[^<(])https?://\S+\.\\$"
-                     r"|<https?://[^\s>]+\.\\$"
-                     r"|\(https?://(?:[^\s()]|\([^\s()]*\))*\.\\$", line):
+        if "\\" not in line:
+            continue
+        hit = bool(_EMAIL_AUTOLINK_END_RE.search(line))  # <a@x.org.\>
+        closed = _closed_link_spans(line)
+        covered = 0
+        for m in _BARE_URI_SCHEME_RE.finditer(line):
+            if (m.start() < covered or any(a < m.start() < b for a, b in closed)
+                    or not _bare_uri_may_start(line, m.start())):
+                continue
+            end = _pandoc_bare_uri_end(line, m.end())
+            if end is None:
+                continue
+            # an autolink '<scheme:...>' runs on past the URL to the '>'
+            auto = re.match(r"([^\s>]*)>\s*$", line[end:]) if line[m.start() - 1:m.start()] == "<" else None
+            if auto and auto.group(1):
+                end += len(auto.group(1))
+            covered = end
+            # the end of the line, a '>' that ends it, or a grid-table cell border
+            if line[:end].endswith("\\") and re.fullmatch(r"\s*(?:>\s*|\|.*)?", line[end:]):
+                hit = True
+        if hit:
             f.add(BLOCKER, "md-links",
-                  f"Line {i}: bare URL runs into '.\\' with no space; pandoc autolink pulls the "
-                  f"period and backslash into the href and eats the line break. Use '. \\'.")
+                  f"Line {i}: URL runs into the closing backslash ('.\\' or '\\' with no space "
+                  f"before it); pandoc autolink pulls the backslash, and any period before it, "
+                  f"into the href and eats the line break. End the URL first: '. \\' or "
+                  f"'<url>.\\'.")
+
+
+# The schemes pandoc 3.8.2.1 reads as a bare URL (src/Text/Pandoc/URI.hs),
+# matched in any letter case.
+_PANDOC_URI_SCHEMES = frozenset("""
+    aaa aaas about acap acct acr adiumxtra afp afs aim appdata apt attachment aw barion
+    beshare bitcoin blob bolo browserext callto cap chrome chrome-extension cid coap
+    coaps com-eventbrite-attendee content crid cvs data dav dict dis dlna-playcontainer
+    dlna-playsingle dns dntp dtn dvb ed2k example facetime fax feed feedready file
+    filesystem finger fish ftp geo gg git gizmoproject go gopher graph gtalk h323 ham
+    hcp http https hxxp hxxps hydrazone iax icap icon im imap info iotdisco ipn ipp ipps
+    irc irc6 ircs iris iris.beep iris.lwz iris.xpc iris.xpcs isostore itms jabber jar
+    jms keyparc lastfm ldap ldaps lvlt magnet mailserver mailto maps market message mid
+    mms modem mongodb moz ms-access ms-browser-extension ms-drive-to ms-enrollment
+    ms-excel ms-gamebarservices ms-getoffice ms-help ms-infopath ms-media-stream-id
+    ms-officeapp ms-project ms-powerpoint ms-publisher ms-search-repair
+    ms-secondary-screen-controller ms-secondary-screen-setup ms-settings
+    ms-settings-airplanemode ms-settings-bluetooth ms-settings-camera
+    ms-settings-cellular ms-settings-cloudstorage ms-settings-connectabledevices
+    ms-settings-displays-topology ms-settings-emailandaccounts ms-settings-language
+    ms-settings-location ms-settings-lock ms-settings-nfctransactions
+    ms-settings-notifications ms-settings-power ms-settings-privacy
+    ms-settings-proximity ms-settings-screenrotation ms-settings-wifi
+    ms-settings-workplace ms-spd ms-sttoverlay ms-transit-to ms-virtualtouchpad ms-visio
+    ms-walk-to ms-whiteboard ms-whiteboard-cmd ms-word msnim msrp msrps mtqp mumble
+    mupdate mvn news nfs ni nih nntp notes ocf oid onenote onenote-cmd opaquelocktoken
+    pack palm paparazzi pkcs11 platform pop pres prospero proxy pwid psyc qb query redis
+    rediss reload res resource rmi rsync rtmfp rtmp rtsp rtsps rtspu secondlife service
+    session sftp sgn shttp sieve sip sips skype smb sms smtp snews snmp soap.beep
+    soap.beeps soldat spotify ssh steam stun stuns submit svn tag teamspeak tel teliaeid
+    telnet tftp things thismessage tip tn3270 tool turn turns tv udp unreal urn ut2004
+    v-event vemmi ventrilo videotex vnc view-source wais webcal wpid ws wss wtai wyciwyg
+    xcon xcon-userid xfire xmlrpc.beep xmlrpc.beeps xmpp xri ymsgr z39.50 z39.50r
+    z39.50s doi gemini isbn javascript pmid
+""".split())
+_BARE_URI_SCHEME_RE = re.compile(
+    r"(?<![^\W_])(?:"
+    + "|".join(map(re.escape, sorted(_PANDOC_URI_SCHEMES, key=len, reverse=True)))
+    + r"):", re.I)
+
+
+# An email autolink whose text runs into '\>' at the end of the line, as
+# pandoc reads one: a mailbox and a domain that each start with a letter or
+# digit, then anything up to the '>'.
+_EMAIL_AUTOLINK_END_RE = re.compile(
+    r"<[^\W_][\w!\"#$%&'*+/=?^{|}~;-]*(?:\.[^\W_][\w!\"#$%&'*+/=?^{|}~;-]*)*"
+    r"@(?:[^\W_]|-(?=[^\W_]))+(?:\.(?:[^\W_]|-(?=[^\W_]))+)*[^\s>]*\\>\s*$")
+
+
+def _bare_uri_may_start(line: str, p: int) -> bool:
+    """pandoc does not start a URL just after '.' or '@' (a citation), or
+    after a backslash that escapes it; it does after an escaped '\\.', '\\@'
+    or '\\\\'."""
+    c = line[p - 1:p]
+    if c not in (".", "@", "\\"):
+        return True
+    before = line[:p] if c == "\\" else line[:p - 1]
+    odd = (len(before) - len(before.rstrip("\\"))) % 2 == 1
+    return not odd if c == "\\" else odd
+
+
+def _closed_link_spans(line: str) -> list[tuple[int, int]]:
+    """(open, close) of each '[...]' that closes on the line, and of each
+    '(...)' target that directly follows one and closes. pandoc reads the
+    text inside these on its own, so a URL in a link's text or in a closed
+    link target ends at the bracket: '[x](https://x.org/y)\\' keeps its
+    line break."""
+    spans, opens = [], []
+    for j, c in enumerate(line):
+        if c == "[" and line[j - 1:j] != "\\":
+            opens.append(j)
+        elif c == "]" and opens and line[j - 1:j] != "\\":
+            spans.append((opens.pop(), j))
+            if line[j + 1:j + 2] == "(":
+                depth = 0
+                for k in range(j + 1, len(line)):
+                    if line[k - 1] != "\\":
+                        depth += {"(": 1, ")": -1}.get(line[k], 0)
+                    if depth == 0:
+                        spans.append((j + 1, k))
+                        break
+    return spans
+
+
+def _pandoc_bare_uri_end(line: str, start: int) -> int | None:
+    """Where pandoc's bare-URI reader (Text.Pandoc.Parsing.General.uri,
+    pandoc 3.8.2.1) ends a URL whose 'scheme:' ends at `start`; None when it
+    reads no URL there. Letters, digits and #$%+/@\\_-&= are URL characters;
+    any other mark (a run of commas counts as one) stays in the URL only when
+    a URL character follows it, and a bracketed chunk such as '(bar)' is taken
+    whole. So '.\\' at the end of a line is in the URL."""
+
+    def url_char(j: int) -> bool:
+        return j < len(line) and (line[j].isalnum() or line[j] in "#$%+/@\\_-&=")
+
+    def chunk(j: int) -> int:
+        k = j
+        while url_char(k):
+            k += 1
+        if k > j:
+            return k
+        while k < len(line) and line[k] == ",":
+            k += 1
+        if k == j and k < len(line) and not line[k].isspace() and line[k] not in "<>":
+            k += 1
+        return k if k > j and url_char(k) else j
+
+    if line[start:start + 1] in ("*", "_", "]"):
+        return None
+    j = start
+    while True:
+        k = j
+        for left, right in ("()", "{}", "[]"):
+            inner = chunk(j + 1) if line[j:j + 1] == left else j + 1
+            if inner > j + 1 and line[inner:inner + 1] == right:
+                k = inner + 1
+                break
+        if k == j:
+            k = chunk(j)
+        if k == j:
+            break
+        j = k
+    if j == start:
+        return None
+    return j + 1 if line[j:j + 1] == "/" else j
 
 
 def check_md_fences(md_text: str, f: Findings, html_text: str = "") -> None:
@@ -7634,8 +7821,8 @@ CONDITION_DOCS: list[dict] = [
          compares_to="text and target being the same URL calls for an angle-bracket autolink `<https://...>` (a link in both the HTML and the PDF) or real anchor text"),
     dict(check="md-links", sig="pandoc autolink pulls the", applies="md",
          condition="No bare URL runs into '.\\' without a space",
-         pulls="each markdown line ending a bare URL with .\\ (a URL opened by '<' or '(' and closed by '>' or ')' before the period passes)",
-         compares_to="the safe form '. \\' (otherwise pandoc pulls the period and backslash into the href)"),
+         pulls="each markdown line outside code blocks (fenced or indented) whose closing backslash a URL runs into, read as pandoc 3.8.2.1 reads a bare URL: any scheme on its list, in any case; ended by a closed '<...>', '[...]' or link target; an autolink '<...\\>' counts",
+         compares_to="the safe form '. \\' (otherwise pandoc pulls the backslash, and any period before it, into the href)"),
     # fence-collapse
     dict(check="fence-collapse", sig="collapses to inline code", applies="md",
          condition="No opening code fence carries trailing text in its info string",
