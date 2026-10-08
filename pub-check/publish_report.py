@@ -37,7 +37,9 @@ from __future__ import annotations
 import argparse
 import base64
 import datetime
+import hashlib
 import html
+import http.client
 import json
 import os
 import random
@@ -61,7 +63,15 @@ FILES = {  # name on the runner -> name on the branch
     "oasis-pub-check.json": "pubcheck-report.json",
     "oasis-pub-check.txt": "pubcheck-report.txt",
 }
-ATTEMPTS = 10           # a matrix pushes to one branch; each retry re-applies on the new tip
+# A matrix pushes to one branch and each lost race re-applies on the new tip,
+# so a job may wait for every other job's push. Retrying for a time, not a
+# count: ten attempts let 3 of 30 jobs lose with 2 s of latency per git call.
+RETRY_SECONDS = 300
+# How git reports a push that lost a race: refused before sending (fetch
+# first, non-fast-forward) or by the server's ref update. Anything else (a
+# hook, a large file) is not a race and is not retried.
+RACE = re.compile(r"\((?:fetch first|non-fast-forward|incorrect old value provided|"
+                  r"reference already exists|failed to update ref)\)|cannot lock ref")
 BOT = ("github-actions[bot]", "41898282+github-actions[bot]@users.noreply.github.com")
 PAGES_HOWTO = "Settings > Pages > Deploy from a branch > {branch} / (root)"
 MARKER = ".pubcheck-reports"   # at the root of every branch this script created
@@ -154,12 +164,11 @@ class Branch:
         r = self.git("push", "-q", "origin", f"HEAD:refs/heads/{self.branch}", check=False)
         if r.returncode == 0:
             return self.git("rev-parse", "HEAD").stdout.strip()
-        if re.search(r"non-fast-forward|fetch first|rejected|cannot lock ref", r.stderr) \
-                and not denied(r.stderr):
-            return None
         reason = denied(r.stderr)
         if reason:
             raise NotPublished(reason)
+        if RACE.search(r.stderr):
+            return None
         raise PublishFailed(f"git push failed: {r.stderr.strip()}")
 
 
@@ -171,9 +180,26 @@ def denied(stderr: str) -> str | None:
                  r"Authentication failed|could not read Username", stderr):
         return ("the workflow token cannot write to this repository; give the job "
                 "`permissions: contents: write`")
-    if re.search(r"protected branch|GH006|GH013|rule violations", stderr):
+    # GH006 and GH013 only as GitHub's error codes: git echoes the branch
+    # name in every push message, and a branch may be named reports-GH013.
+    if re.search(r"error: GH0(?:06|13):|protected branch|rule violations", stderr):
         return "a branch protection rule or ruleset refuses pushes to the reports branch"
     return None
+
+
+def own_folder(root: str, folder: str, meta: dict) -> str:
+    """`folder`, unless it holds the report of a different title that slugs
+    alike ("CSAF v2.1 (prose)", "csaf v2.1 prose"): then a folder named for
+    this title, so neither matrix job overwrites the other's report. A title
+    keeps the same folder from run to run."""
+    try:
+        with open(os.path.join(root, folder, "meta.json")) as f:
+            there = json.load(f)
+    except (OSError, ValueError):
+        return folder
+    if isinstance(there, dict) and there.get("title") == meta["title"]:
+        return folder
+    return f"{folder}-{hashlib.sha256(meta['title'].encode()).hexdigest()[:8]}"
 
 
 def write_run(root: str, folder: str, files: str, meta: dict) -> None:
@@ -251,7 +277,9 @@ def pages_site(api: str, repo: str, token: str, branch: str) -> tuple[str | None
             if exc.code == 404:
                 return None, "GitHub Pages is not enabled for this repository"
             continue    # 401/403: try unauthenticated, then give up
-        except (urllib.error.URLError, OSError, ValueError):
+        except (urllib.error.URLError, OSError, ValueError, http.client.HTTPException):
+            break
+        if not isinstance(site, dict):
             break
         src = site.get("source") or {}
         if src.get("branch") == branch and src.get("path", "/") == "/" and site.get("html_url"):
@@ -312,7 +340,7 @@ def main() -> int:
     except (OSError, ValueError, KeyError, TypeError):
         data, rec, verdict = {}, None, "The gate produced no readable --json report."
     title = " ".join((args.title or data.get("target", "package")).split())
-    folder = folder_for(env, args.title, data.get("target", "package"))
+    folder = base_folder = folder_for(env, args.title, data.get("target", "package"))
     urls: dict = {}
     pages_why = ""
     failed = False
@@ -338,20 +366,25 @@ def main() -> int:
                 "pdf": os.path.isfile(os.path.join(args.files, "pubcheck-validation.pdf"))}
         remote = f"{server}/{repo}.git"
         sha = None
-        for attempt in range(ATTEMPTS):
+        lost = 0
+        deadline = time.monotonic() + RETRY_SECONDS
+        while True:
             with tempfile.TemporaryDirectory(prefix="pubcheck-publish-") as work:
                 branch = Branch(work, remote, args.branch, token)
                 branch.checkout()
+                folder = meta["folder"] = own_folder(work, base_folder, meta)
                 write_run(work, folder, args.files, meta)
                 sha = branch.commit_and_push(
                     f"pub-check report: {folder} (run {env.get('GITHUB_RUN_ID', '')})")
             if sha:
                 break
+            lost += 1
+            if time.monotonic() >= deadline:
+                raise PublishFailed(f"the reports branch kept moving; {lost} pushes lost the "
+                                    f"race in {RETRY_SECONDS} seconds")
             # Someone else pushed first. Random backoff, so a matrix that
             # collided once does not collide again in lockstep.
-            time.sleep(random.uniform(0.5, 2.0 + attempt))
-        if not sha:
-            raise PublishFailed(f"the reports branch kept moving; {ATTEMPTS} pushes lost the race")
+            time.sleep(random.uniform(0.5, min(2.0 + lost, 10.0)))
         q = urllib.parse.quote
         base = f"{server}/{repo}/blob/{q(args.branch, safe='/')}/{folder}"
         urls = {"md": f"{base}/pubcheck-validation.md",

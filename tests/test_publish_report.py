@@ -137,6 +137,10 @@ def test_concurrent_matrix_calls_all_land(tmp_path, files, remote):
     push that loses the race must fetch, re-apply on the new tip and push
     again, so no job's report is dropped."""
     env = runner_env(remote)
+    pushes = remote.parent / "pushes.log"
+    hook = remote / "hooks" / "pre-receive"
+    hook.write_text(f"#!/bin/sh\necho push >> '{pushes}'\n")
+    hook.chmod(0o755)
     procs = [subprocess.Popen([sys.executable, str(PUBLISH), "--files", str(files),
                                f"--title=job-{i}", "--links-md", str(tmp_path / f"l{i}")],
                               env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -149,6 +153,9 @@ def test_concurrent_matrix_calls_all_land(tmp_path, files, remote):
     said = {i: (rc, err, out) for i, ((out, err), rc) in enumerate(results)
             if rc or err or "Report not published" in out}
     assert not missing and not said, f"reports lost to the race: {missing}; jobs: {said}"
+    # A push that git refuses before sending never reaches the hook, so more
+    # than six pushes means at least one job lost on the server and retried.
+    assert len(pushes.read_text().split()) > 6, "no push lost the race; the test proved nothing"
 
 
 def competing_publisher(remote, *, every_push: bool, sha_contains: str = "") -> Path:
@@ -156,9 +163,11 @@ def competing_publisher(remote, *, every_push: bool, sha_contains: str = "") -> 
     job read its tip and before git updates it, as another matrix job's push
     does. git then refuses the job's push itself, as in a real collision; on
     Linux (the CI runner) its message names both commits: `cannot lock ref
-    ...: is at <sha> but expected <sha>`. The competing commit's SHA
-    contains sha_contains. With every_push=False only the first push meets
-    a competitor. Returns the file that records each competing commit."""
+    ...: is at <sha> but expected <sha>`. git on macOS leaves the SHAs out,
+    so the hook also names the competing commit on its own stderr, as a
+    server's hook may. The competing commit's SHA contains sha_contains.
+    With every_push=False only the first push meets a competitor. Returns
+    the file that records each competing commit."""
     log = remote.parent / "competitors.log"
     hook = remote / "hooks" / "pre-receive"
     hook.write_text(
@@ -176,7 +185,8 @@ def competing_publisher(remote, *, every_push: bool, sha_contains: str = "") -> 
         f"  case $new in *{sha_contains}*) break;; esac\n"
         "done\n"
         "git update-ref refs/heads/pubcheck-reports \"$new\" \"$tip\"\n"
-        'echo "$new" >> "$log"\n')
+        'echo "$new" >> "$log"\n'
+        'echo "another job pushed $new" >&2\n')
     hook.chmod(0o755)
     return log
 
@@ -217,16 +227,21 @@ LOST_RACES = [
     "(incorrect old value provided)\nerror: failed to push some refs to 'file:///tmp/s/OASIS/tc.git'",
     "To file:///tmp/tmpv5d9t403/server/OASIS/tc.git\n ! [rejected]        HEAD -> pubcheck-reports "
     "(fetch first)\nerror: failed to push some refs to 'file:///tmp/tmpv5d9t403/server/OASIS/tc.git'",
+    "To https://github.com/OASIS/tc.git\n ! [rejected]        HEAD -> reports-GH013 "
+    "(fetch first)\nerror: failed to push some refs to 'https://github.com/OASIS/tc.git'",
 ]
 
 
-@pytest.mark.parametrize("stderr", LOST_RACES, ids=["sha", "path"])
+@pytest.mark.parametrize("stderr", LOST_RACES, ids=["sha", "path", "branch"])
 def test_a_403_inside_a_sha_or_a_path_is_not_a_refusal(stderr):
     """The same fault on any platform: a lost race whose message holds 403
-    in a SHA or a directory name is a race, not a token without write access.
-    GitHub's real refusal still reads as one."""
+    in a SHA or a directory name, or a GitHub error code in the branch name,
+    is a race, not a refusal. GitHub's real refusals still read as ones."""
     publish_report = publish_module()
     assert publish_report.denied(stderr) is None
+    assert publish_report.RACE.search(stderr)
+    assert "protection rule" in publish_report.denied(
+        "remote: error: GH013: Repository rule violations found for refs/heads/reports.")
     assert "contents: write" in publish_report.denied(
         "remote: Write access to repository not granted.\nfatal: unable to access "
         "'https://github.com/OASIS/tc.git/': The requested URL returned error: 403")
@@ -244,6 +259,7 @@ def test_a_branch_that_never_stops_moving_fails_the_step_and_says_so(
     log = competing_publisher(remote, every_push=True)
     publish_report = publish_module()
     monkeypatch.setattr(publish_report.time, "sleep", lambda s: None)
+    monkeypatch.setattr(publish_report, "RETRY_SECONDS", 2)
     out = tmp_path / "github-output"
     out.write_text("")
     for k, v in {**runner_env(remote), "GITHUB_OUTPUT": str(out)}.items():
@@ -251,10 +267,56 @@ def test_a_branch_that_never_stops_moving_fails_the_step_and_says_so(
     monkeypatch.setattr(sys, "argv", [str(PUBLISH), "--files", str(files),
                                       "--links-md", str(tmp_path / "links.md")])
     assert publish_report.main() == 1
-    assert len(log.read_text().split()) == publish_report.ATTEMPTS
+    lost = len(log.read_text().split())
+    assert lost >= 2, "it never retried"
     note = dict(line.split("=", 1) for line in out.read_text().splitlines())["report_publish_note"]
-    assert note == f"the reports branch kept moving; {publish_report.ATTEMPTS} pushes lost the race"
+    assert note == f"the reports branch kept moving; {lost} pushes lost the race in 2 seconds"
     assert f"Report not published: {note}" in capsys.readouterr().err
+
+
+def test_a_refused_push_that_is_not_a_race_fails_at_once_and_says_why(tmp_path, files, remote):
+    """Review of the race fix: any message containing "rejected" read as a
+    lost race, so a push a hook refuses (here GitHub's large-file check) was
+    retried as one and reported as "the branch kept moving"."""
+    publish(tmp_path, files, remote, title="first")
+    pushes = remote.parent / "pushes.log"
+    hook = remote / "hooks" / "pre-receive"
+    hook.write_text(f"#!/bin/sh\necho push >> '{pushes}'\n"
+                    "echo 'error: GH001: Large files detected.' >&2\nexit 1\n")
+    hook.chmod(0o755)
+    r, out, _ = publish(tmp_path, files, remote)
+    assert r.returncode == 1, r.stderr
+    assert out["report_publish_note"].startswith("git push failed:"), out
+    assert "GH001" in out["report_publish_note"] and "GH001" in r.stderr
+    assert len(pushes.read_text().split()) == 1, "retried a push that cannot succeed"
+
+
+def test_titles_that_slug_alike_each_keep_their_own_report(tmp_path, files, remote):
+    """Review of the race fix: two matrix titles that make the same folder
+    name overwrote each other, both jobs saying "published"."""
+    titles = ("CSAF v2.1 (prose)", "csaf v2.1 prose", "CSAF v2.1 (prose)")
+    results = [publish(tmp_path, files, remote, title=t) for t in titles]
+    assert [(r.returncode, out["report_publish_note"]) for r, out, _ in results] == \
+        [(0, "published")] * 3, [r.stderr for r, _, _ in results]
+    listing = git(remote, "ls-tree", "-r", "--name-only", "pubcheck-reports").split()
+    metas = sorted(p for p in listing if p.startswith("main/csaf-v2.1-prose") and
+                   p.endswith("/meta.json"))
+    assert len(metas) == 2 and "main/csaf-v2.1-prose/meta.json" in metas, metas
+    found = {json.loads(git(remote, "show", f"pubcheck-reports:{m}"))["title"]: m for m in metas}
+    assert set(found) == {"CSAF v2.1 (prose)", "csaf v2.1 prose"}, found
+    # Each job's links name the folder holding its own report, run after run.
+    folders = [out["report_url_folder"].rsplit("/", 1)[1] for _, out, _ in results]
+    assert folders[0] == folders[2] != folders[1], folders
+    assert found["csaf v2.1 prose"] == f"main/{folders[1]}/meta.json"
+
+
+def test_the_publish_step_cannot_fail_the_checks():
+    """publish_report.py exits 1 when a publish was tried and did not land;
+    only continue-on-error keeps that from failing the job."""
+    import yaml
+    steps = yaml.safe_load((REPO_ROOT / "action.yml").read_text())["runs"]["steps"]
+    step = next(s for s in steps if s.get("id") == "publish")
+    assert step.get("continue-on-error") is True, step
 
 
 def test_publishing_off_leaves_the_repository_alone_and_says_why(tmp_path, files, remote):
@@ -317,6 +379,30 @@ def test_pages_serving_the_branch_puts_the_rendered_html_first(tmp_path, files, 
     assert links.split("\n- ")[1].startswith(f"[HTML report (opens in browser)]({page})")
     assert f"::notice title=Validation report::HTML report (opens in browser): {page}" in r.stdout
     assert "source view" not in links
+
+
+def test_a_pages_answer_that_is_not_an_object_still_reports_the_landed_report(
+        tmp_path, files, remote):
+    """Review of the race fix: the report landed, then the Pages check met a
+    JSON list and the script crashed, exit 1 with no links."""
+    class Pages(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"[]")
+
+        def log_message(self, *a):
+            pass
+
+    srv = http.server.HTTPServer(("127.0.0.1", 0), Pages)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        r, out, _ = publish(tmp_path, files, remote, extra_env={
+            "GITHUB_API_URL": f"http://127.0.0.1:{srv.server_port}"})
+    finally:
+        srv.shutdown()
+    assert r.returncode == 0 and out["report_publish_note"] == "published", r.stderr
+    assert out["report_url_html"].endswith("/pubcheck-validation.html")
 
 
 def test_an_existing_branch_it_did_not_create_is_never_written(tmp_path, files, remote):
