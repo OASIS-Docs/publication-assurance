@@ -5,8 +5,8 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 
 # Worked examples from recent publications
 
-Each example below comes from a real OASIS work product checked between late
-September and early October 2026. Each one gives the finding as the checks
+Each example below comes from a real OASIS work product checked between
+mid-September and early October 2026. Each one gives the finding as the checks
 printed it, what it meant, and the change that cleared it. Where the fault
 was in the checks rather than the package, the example says so and names the
 release that fixed it.
@@ -22,6 +22,8 @@ has the current conditions.
 | [Dual links and angle-bracket autolinks](#dual-links-and-angle-bracket-autolinks) | CSAF v2.1, working draft for CSD04 | `md-links` | The package; the advice in the checks |
 | [Clauses reported as removed after a quote change](#clauses-reported-as-removed-after-a-quote-change) | CSAF v2.1, working draft for CSD04 | `conformance-structure` | The checks |
 | [Code fences with text after the language](#code-fences-with-text-after-the-language) | CSAF v2.1 CSD03 | `fence-collapse` | The checks |
+| [Schema directories reported missing](#schema-directories-reported-missing) | DMLex v1.0 OS | `package-refs` | The checks |
+| [PDF body text printed small](#pdf-body-text-printed-small) | DMLex v1.0 OS, Markdown edition; CSAF v2.0 | `pdf-legibility` | The rendering |
 | [A PDF compared word for word with the published standard](#a-pdf-compared-word-for-word-with-the-published-standard) | DMLex v1.0 OS, Markdown edition | `verify_pdf.py` | The conversion |
 
 ## Table captions printed as raw Markdown
@@ -192,6 +194,71 @@ still a blocker.
 If the TC moves to the OASIS pipeline's step 1, these fences need another
 form, because the default reader collapses them. The warning lists the line
 of every fence that would change.
+
+## Schema directories reported missing
+
+**Work product.** Data Model for Lexicography (DMLex) Version 1.0 OASIS
+Standard, staged with its `schemas/` tree for the Markdown edition.
+
+**What the checks reported.** Five blockers in release v1.4.0, for cited schema
+directories, in this form:
+
+```text
+[BLOCKER] package-refs  The document cites https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/schemas/JSON/
+under its own stage path, but 'schemas/JSON/' is not in the package: it will 404
+on publication.
+```
+
+**What it meant.** The cited URLs were directories, such as
+`https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/schemas/JSON/`, and each
+directory was in the package. The check tested every citation as a file, so
+a URL ending in `/` always looked missing.
+
+**The fix.** No change to the specification was needed. From release v1.4.1
+a cited directory passes when it is present in the package. A missing
+directory or file is still a blocker, because it would 404 once published.
+
+**For TC editors.** Before restructuring a package to clear a `package-refs`
+blocker, check whether the cited path is a directory that ships. If it is, and
+the blocker persists on a current release, report it as a false positive.
+
+## PDF body text printed small
+
+**Work product.** The Markdown edition of DMLex v1.0 OS, rendered through
+the pipeline's step 2 with headless Chrome; and the published CSAF v2.0 PDFs,
+printed by wkhtmltopdf.
+
+**What was found.** The first DMLex renders printed their 12 pt body text at
+about 7.5 pt. No check reported it, because no check measured printed type
+size. Release v1.5.0 added the `pdf-legibility` check, which compares the
+median word height on the PDF's portrait pages with the body size the
+package declares:
+
+```text
+[WARN   ] pdf-legibility Body text in the PDF measures a median word height of
+...pt against the ...pt body size ... declares (...%). The renderer has printed
+the text small, typically by shrinking every page to fit one element wider than
+the line (a long unbreakable code span, a wide table or figure). Find the
+overflowing element and let it wrap or scale; do not set a smaller font.
+```
+
+It warns below 85%. Pages of the DMLex render made before the fix measure
+8.9 pt against the stylesheet's 12 pt. The published CSAF v2.0 PDFs, from CSD01 to OS, measure
+7.8 pt to 8.3 pt and warn too.
+
+**What it meant.** Each page had been scaled down as a whole. In DMLex the
+cause was one long inline code path: the pipeline's PDF preprocessor set
+inline code not to wrap, so a single path made the page wider than A4, and
+Chrome shrank every page to fit it.
+
+**The fix at source.** The fix went into the pipeline, not into the
+specification's fonts. From release v1.4.2 inline code wraps when a span is
+wider than the line, and from v1.5.0 the PDF prints the OASIS print type
+scale (body 10 pt, code 9 pt, footer 8 pt) in Chrome and in wkhtmltopdf. For
+a TC that renders its own PDF, the warning's advice applies: find the element
+wider than the line, such as an unbroken code span, a wide table or a figure,
+and let it wrap or scale. Setting a smaller font hides the warning without
+fixing the page.
 
 ## A PDF compared word for word with the published standard
 

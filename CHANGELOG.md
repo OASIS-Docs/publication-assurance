@@ -29,8 +29,8 @@ Each version is anchored by a git tag on this repository.
 Documentation only: no check changed, and the counts stay at 181 conditions
 in 61 classes.
 
-- **docs/WORKED-EXAMPLES.md** (new): five findings from CSAF v2.1 and the DMLex
-  Markdown edition, each with the message, what it meant and the fix at source.
+- **docs/WORKED-EXAMPLES.md** (new): seven findings from CSAF v2.0 and v2.1 and
+  from DMLex, each with the message, what it meant and the fix at source.
 - **Corrections found by reading every guide against the code**: the
   operational count in the TC guide (83, not 73); the severity pub-check
   reports, now stated on every entry of `AUTHORITIES.md` beside the
