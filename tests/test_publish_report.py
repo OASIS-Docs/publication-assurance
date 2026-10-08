@@ -141,11 +141,120 @@ def test_concurrent_matrix_calls_all_land(tmp_path, files, remote):
                                f"--title=job-{i}", "--links-md", str(tmp_path / f"l{i}")],
                               env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
              for i in range(6)]
-    for p in procs:
-        p.wait(timeout=120)
+    results = [(p.communicate(timeout=120), p.returncode) for p in procs]
     listing = git(remote, "ls-tree", "-r", "--name-only", "pubcheck-reports").split()
     missing = [i for i in range(6) if f"main/job-{i}/meta.json" not in listing]
-    assert not missing, f"reports lost to the race: {missing}"
+    # Every job says so itself, as well as landing: a job that exits 0 with a
+    # reason in its notice dropped its report however the listing looks.
+    said = {i: (rc, err, out) for i, ((out, err), rc) in enumerate(results)
+            if rc or err or "Report not published" in out}
+    assert not missing and not said, f"reports lost to the race: {missing}; jobs: {said}"
+
+
+def competing_publisher(remote, *, every_push: bool, sha_contains: str = "") -> Path:
+    """A pre-receive hook that moves the reports branch on after the pushing
+    job read its tip and before git updates it, as another matrix job's push
+    does. git then refuses the job's push itself, as in a real collision; on
+    Linux (the CI runner) its message names both commits: `cannot lock ref
+    ...: is at <sha> but expected <sha>`. The competing commit's SHA
+    contains sha_contains. With every_push=False only the first push meets
+    a competitor. Returns the file that records each competing commit."""
+    log = remote.parent / "competitors.log"
+    hook = remote / "hooks" / "pre-receive"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "set -e\n"
+        "unset GIT_QUARANTINE_PATH GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES\n"
+        f"log='{log}'\n"
+        + ("" if every_push else '[ -s "$log" ] && exit 0\n') +
+        "tip=$(git rev-parse refs/heads/pubcheck-reports)\n"
+        "n=0\n"
+        "while :; do\n"
+        "  n=$((n + 1))\n"
+        "  new=$(git -c user.name=o -c user.email=o@o commit-tree \"$tip^{tree}\" -p \"$tip\""
+        " -m \"other job $n $$\")\n"
+        f"  case $new in *{sha_contains}*) break;; esac\n"
+        "done\n"
+        "git update-ref refs/heads/pubcheck-reports \"$new\" \"$tip\"\n"
+        'echo "$new" >> "$log"\n')
+    hook.chmod(0o755)
+    return log
+
+
+def test_a_lost_race_is_retried_whatever_the_competing_sha_spells(tmp_path, files, remote):
+    """CI run 37773095988 dropped a matrix job's report: git's lost-race
+    message names the competing commit's SHA, denied() matched a bare "403"
+    inside it, and the job reported a token without write access, exited 0
+    and never retried."""
+    publish(tmp_path, files, remote, title="first")
+    log = competing_publisher(remote, every_push=False, sha_contains="403")
+    r, out, _ = publish(tmp_path, files, remote)
+    competitor = log.read_text().split()
+    assert len(competitor) == 1 and "403" in competitor[0], competitor  # the race happened
+    assert r.returncode == 0 and not r.stderr, r.stderr
+    assert out["report_publish_note"] == "published", out
+    listing = git(remote, "ls-tree", "-r", "--name-only", "pubcheck-reports").split()
+    assert "main/csaf-v2.1-csd01/meta.json" in listing and "main/first/meta.json" in listing
+    # Re-applied on the competitor's commit, not pushed over it.
+    git(remote, "merge-base", "--is-ancestor", competitor[0], "pubcheck-reports")
+
+
+def publish_module():
+    sys.path.insert(0, str(PUBLISH.parent))
+    try:
+        import publish_report
+    finally:
+        sys.path.remove(str(PUBLISH.parent))
+    return publish_report
+
+
+# Lost races as git 2.54 on Linux reported them for concurrent pushes to one
+# bare repository; in the first, one SHA is edited to contain 403.
+LOST_RACES = [
+    "remote: error: cannot lock ref 'refs/heads/pubcheck-reports': is at "
+    "e8efc7203e6641a7c61fc342f41ab4cf98669d0b but expected 11079575301d403a53373778957e660faaba7980"
+    "        \nTo file:///tmp/s/OASIS/tc.git\n ! [remote rejected] HEAD -> pubcheck-reports "
+    "(incorrect old value provided)\nerror: failed to push some refs to 'file:///tmp/s/OASIS/tc.git'",
+    "To file:///tmp/tmpv5d9t403/server/OASIS/tc.git\n ! [rejected]        HEAD -> pubcheck-reports "
+    "(fetch first)\nerror: failed to push some refs to 'file:///tmp/tmpv5d9t403/server/OASIS/tc.git'",
+]
+
+
+@pytest.mark.parametrize("stderr", LOST_RACES, ids=["sha", "path"])
+def test_a_403_inside_a_sha_or_a_path_is_not_a_refusal(stderr):
+    """The same fault on any platform: a lost race whose message holds 403
+    in a SHA or a directory name is a race, not a token without write access.
+    GitHub's real refusal still reads as one."""
+    publish_report = publish_module()
+    assert publish_report.denied(stderr) is None
+    assert "contents: write" in publish_report.denied(
+        "remote: Write access to repository not granted.\nfatal: unable to access "
+        "'https://github.com/OASIS/tc.git/': The requested URL returned error: 403")
+    assert "contents: write" in publish_report.denied(
+        "fatal: unable to access 'https://github.com/OASIS/tc.git/': "
+        "The requested URL returned error: 403")
+
+
+def test_a_branch_that_never_stops_moving_fails_the_step_and_says_so(
+        tmp_path, files, remote, monkeypatch, capsys):
+    """A job whose every push loses must not exit 0: the action runs this
+    step with continue-on-error, so a non-zero exit marks the step without
+    failing the checks, and the note says what happened."""
+    publish(tmp_path, files, remote, title="first")
+    log = competing_publisher(remote, every_push=True)
+    publish_report = publish_module()
+    monkeypatch.setattr(publish_report.time, "sleep", lambda s: None)
+    out = tmp_path / "github-output"
+    out.write_text("")
+    for k, v in {**runner_env(remote), "GITHUB_OUTPUT": str(out)}.items():
+        monkeypatch.setenv(k, v)
+    monkeypatch.setattr(sys, "argv", [str(PUBLISH), "--files", str(files),
+                                      "--links-md", str(tmp_path / "links.md")])
+    assert publish_report.main() == 1
+    assert len(log.read_text().split()) == publish_report.ATTEMPTS
+    note = dict(line.split("=", 1) for line in out.read_text().splitlines())["report_publish_note"]
+    assert note == f"the reports branch kept moving; {publish_report.ATTEMPTS} pushes lost the race"
+    assert f"Report not published: {note}" in capsys.readouterr().err
 
 
 def test_publishing_off_leaves_the_repository_alone_and_says_why(tmp_path, files, remote):

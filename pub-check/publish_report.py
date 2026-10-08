@@ -14,7 +14,10 @@ rendered page when GitHub Pages serves the branch.
 
 Publishing never fails the gate. When it cannot happen (publishing turned
 off, a pull request from a fork, a token without contents: write) the
-reason is stated and the run page is linked instead.
+reason is stated and the run page is linked instead. When it was tried and
+did not land (the branch kept moving, git failed) the reason is stated the
+same way and the script exits 1, which marks the action's continue-on-error
+step without failing the checks.
 
 Usage (inside the action; every value arrives in the environment):
   publish_report.py --files <dir> --branch <name> --title <label>
@@ -26,7 +29,8 @@ from $PUBLISH_TOKEN and never put on a command line. Outputs go to
 $GITHUB_OUTPUT, the ::notice annotation to stdout, and the summary block to
 --links-md for the summary step to place first.
 
-Standard library only. Exit 0 whether or not anything was published.
+Standard library only. Exit 0 when the report landed or was not to be
+published for a stated reason; exit 1 when publishing was tried and failed.
 """
 from __future__ import annotations
 
@@ -66,6 +70,10 @@ RESERVED = {"index.html", MARKER, ".nojekyll"}
 
 class NotPublished(Exception):
     """A reason, in words a workflow user can act on, that nothing was pushed."""
+
+
+class PublishFailed(NotPublished):
+    """Publishing was tried and the report did not land: exit 1, never 0."""
 
 
 def slug(text: str) -> str:
@@ -121,7 +129,10 @@ class Branch:
         yet. Returns whether it existed."""
         r = self.git("ls-remote", "--heads", "origin", f"refs/heads/{self.branch}", check=False)
         if r.returncode:
-            raise NotPublished(denied(r.stderr) or "the repository could not be read")
+            reason = denied(r.stderr)
+            if reason:
+                raise NotPublished(reason)
+            raise PublishFailed(f"the repository could not be read: {r.stderr.strip()}")
         if not r.stdout.strip():
             self.git("checkout", "-q", "--orphan", self.branch)
             return False
@@ -146,11 +157,17 @@ class Branch:
         if re.search(r"non-fast-forward|fetch first|rejected|cannot lock ref", r.stderr) \
                 and not denied(r.stderr):
             return None
-        raise NotPublished(denied(r.stderr) or f"git push failed: {r.stderr.strip()}")
+        reason = denied(r.stderr)
+        if reason:
+            raise NotPublished(reason)
+        raise PublishFailed(f"git push failed: {r.stderr.strip()}")
 
 
 def denied(stderr: str) -> str | None:
-    if re.search(r"403|Permission to .* denied|write access .* not granted|"
+    # GitHub's refusal is "The requested URL returned error: 403". A bare 403
+    # also matched inside the SHAs a lost race names ("is at <sha> but
+    # expected <sha>") and inside a path, and dropped that job's report.
+    if re.search(r"error: 403\b|Permission to .* denied|write access .* not granted|"
                  r"Authentication failed|could not read Username", stderr):
         return ("the workflow token cannot write to this repository; give the job "
                 "`permissions: contents: write`")
@@ -298,6 +315,7 @@ def main() -> int:
     folder = folder_for(env, args.title, data.get("target", "package"))
     urls: dict = {}
     pages_why = ""
+    failed = False
     try:
         if not args.branch:
             raise NotPublished("publishing is off (`publish-branch` is empty)")
@@ -333,7 +351,7 @@ def main() -> int:
             # collided once does not collide again in lockstep.
             time.sleep(random.uniform(0.5, 2.0 + attempt))
         if not sha:
-            raise NotPublished(f"the reports branch kept moving; {ATTEMPTS} pushes lost the race")
+            raise PublishFailed(f"the reports branch kept moving; {ATTEMPTS} pushes lost the race")
         q = urllib.parse.quote
         base = f"{server}/{repo}/blob/{q(args.branch, safe='/')}/{folder}"
         urls = {"md": f"{base}/pubcheck-validation.md",
@@ -349,10 +367,12 @@ def main() -> int:
         note = "published"
     except NotPublished as exc:
         note = " ".join(str(exc).split())
+        failed = isinstance(exc, PublishFailed)
     except (subprocess.CalledProcessError, OSError) as exc:
         detail = getattr(exc, "stderr", "") or str(exc)
         note = f"publishing failed: {' '.join(detail.split())}"
         urls = {}
+        failed = True
 
     outputs = {"report_url_pdf": urls.get("pdf", ""), "report_url_md": urls.get("md", ""),
                "report_url_html": urls.get("html_page") or urls.get("html_blob", ""),
@@ -378,6 +398,9 @@ def main() -> int:
             f.write(block)
     else:
         print(block)
+    if failed:
+        print(f"Report not published: {note}", file=sys.stderr)
+        return 1
     return 0
 
 

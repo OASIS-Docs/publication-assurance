@@ -28,6 +28,25 @@ Each version is anchored by a git tag on this repository.
 
 PATCH: a fix inside existing checks, no new criteria.
 
+- **Publishing the report** (`pub-check/publish_report.py`): a matrix job
+  could lose its report without a word. When two jobs push to the reports
+  branch at once, git's message for the loser names both commits ("is at
+  <sha> but expected <sha>"), and the test for a token without write access
+  matched a bare `403` anywhere in that message, so a SHA or a directory
+  name containing 403 turned a lost race into "the workflow token cannot
+  write to this repository": no retry, exit 0, report never published. CI
+  run 37773095988 dropped one of six reports, most likely this way: the run
+  kept no stderr, but the whole six-job test took 2.4 seconds, too short for
+  retries to run out, and this was the only way a report was dropped in 185
+  rounds of six concurrent publishes on Linux. The test now matches
+  GitHub's own refusal (`The requested URL returned error: 403`). A
+  publish that was tried and did not land (the branch kept moving for all
+  10 attempts, or git failed) now exits 1 with the reason on stderr; the
+  action runs the step with `continue-on-error`, so the checks' result is
+  unchanged. Publishing that is off, a fork's pull request and a token
+  without write access still exit 0 with the reason stated. Pinned by
+  `tests/test_publish_report.py`.
+
 - **md-links** and **all checks that read Markdown prose** (through
   `strip_code_blocks`), a third pass on where code is, each case rendered
   with pandoc 3.8.2.1 first:
