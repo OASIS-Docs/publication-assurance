@@ -66,7 +66,7 @@ had reported that link on the TC's issue tracker during the public review.
 
 **The fix at source.** The TC traced the printed captions to its renderer:
 the version of nide it had used did not handle tables with captions and
-labels, and a later nide release did. The pandoc reader in the OASIS
+labels, and its working draft for CSD04 moved to a later release. The pandoc reader in the OASIS
 pipeline's step 1 also reads the syntax, and turns
 `Table: Remediation Combinations{#vulnerabilities-property-remediations-category-tab-1}`
 into a `<table>` with that id and a caption. So the first fix is to render
@@ -81,7 +81,10 @@ If the TLP label changes during such a conversion in a way not listed in
 [the TLP label table](#tab:tlp-labels-across-csaf-versions), ...
 ```
 
-The checks look at the HTML a reader gets, whatever produced it.
+The checks look at the HTML a reader gets, whatever produced it. On the
+working draft at commit 73614d6, two blockers were left: the cross-reference
+had its `#`, but the TLP table's caption still printed as text, so the link
+still had no anchor to land on.
 
 **Why earlier runs did not report all ten.** The `tab:` link and the printed
 captions became conditions in v1.13.0, so earlier releases did not report
