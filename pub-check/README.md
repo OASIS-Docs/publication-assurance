@@ -74,8 +74,8 @@ python3 oasis_pub_check.py <target> --emit-manifest
 
 Exit 0 means publishable (warnings allowed). Exit 1 means blockers. Exit 2
 means the tool could not run the checks: no target was given, the path is not
-a directory or a `.zip`, the `.zip` would not open, or an entry in the `.zip`
-would unpack outside its own folder.
+a directory or a `.zip`, the `.zip` would not open, an entry in the `.zip`
+would unpack outside its own folder, or an option is not recognised.
 
 ## Where the checks come from
 

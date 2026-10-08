@@ -190,5 +190,6 @@ figures: words compared, unexplained and accepted differences, and either the
 code blocks and contents entries (HTML) or the numbered contents entries and
 pages without a footer (PDF). Anyone who can open the run sees an
 annotation; reading a step's log needs a sign-in. The verdict is in the
-annotation. The tool exits `0` whenever it has printed one, and `1` with its
-usage text when its arguments are wrong.
+annotation. The tool exits `0` whenever it has printed one, `1` with its
+usage text when its arguments are wrong, and `1` when the report cannot be
+read.

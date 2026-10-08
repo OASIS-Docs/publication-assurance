@@ -191,7 +191,8 @@ own prints inside the margins instead of at its natural size.
 The injected CSS prints each code block as one block (since v1.13.0). The
 OASIS Markdown stylesheet sets `pre { display: inline }`, which printed every
 line of a code block in its own box: 447 of the 667 multi-line blocks in the
-CSAF v2.1 CSD03 PDF. The preprocessor sets `pre { display: block }` and
+pipeline's Chrome and wkhtmltopdf renders of CSAF v2.1 CSD03 (the published
+CSD03 PDF was made with Typst 0.15.0, not this pipeline). The preprocessor sets `pre { display: block }` and
 removes the frame from the `<code>` inside a `<pre>` and from pandoc's
 `div.sourceCode` wrapper. Inline `<code>` is unchanged.
 
@@ -247,7 +248,8 @@ printed unnumbered, and the `pdf-toc-pages` check says so.
 
 A note on renderers: wkhtmltopdf is what this repository's workflows run.
 publisher-toolkit can also print with headless Chrome, using CSS Paged Media:
-an injected `@page` block sets A4 and the footer, with no running header. wkhtmltopdf's limits, for anyone evaluating alternatives:
+an injected `@page` block sets A4 and the footer, with no running header.
+wkhtmltopdf's limits, for anyone evaluating alternatives:
 untagged PDF, no bookmarks/outline, no PDF/A conformance, and internal links
 that depend on the anchor fix-ups from Stage 1. A toolchain that produces a
 tagged PDF with a real outline (for example typst) improves on each of those

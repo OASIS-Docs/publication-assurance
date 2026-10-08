@@ -66,10 +66,11 @@ and a reference written `[tab](tab:tlp-labels-across-csaf-versions)`, which a
 browser reads as a URL with the scheme `tab:`. A reader of the specification
 had reported that link on the TC's issue tracker during the public review.
 
-**The fix at source.** The TC traced the printed captions to its renderer:
-the version of nide it had used did not handle tables with captions and
-labels, and its working draft for CSD04 moved to a later release. The pandoc reader in the OASIS
-pipeline's step 1 also reads the syntax, and turns
+**The fix at source.** The TC traced the printed captions to its renderer.
+In [oasis-tcs/csaf pull request 1635](https://github.com/oasis-tcs/csaf/pull/1635)
+it recorded that nide 2026.7.19 was too old to handle tables with captions
+and labels, and its working draft for CSD04 moved to nide 2026.9.27. The
+pandoc reader in the OASIS pipeline's step 1 also reads the syntax, and turns
 `Table: Remediation Combinations{#vulnerabilities-property-remediations-category-tab-1}`
 into a `<table>` with that id and a caption. So the first fix is to render
 the HTML from the published Markdown with a renderer that reads it, and to
@@ -121,8 +122,7 @@ oasis-tcs/csaf repository.
 ```
 
 This is Markdown's own autolink syntax, so it does not depend on whether a
-renderer links bare URLs, and the check accepts it. Real
-anchor text, `[the aggregator schema](https://...)`, is also accepted. From
+renderer links bare URLs, and the check accepts it. Real anchor text, `[the aggregator schema](https://...)`, is also accepted. From
 v1.13.1 the warning recommends the angle-bracket form:
 
 ```text
@@ -224,9 +224,9 @@ the blocker persists on a current release, report it as a false positive.
 
 ## PDF body text printed small
 
-**Work product.** The Markdown edition of DMLex v1.0 OS, rendered through
-the pipeline's step 2 with headless Chrome; and the published CSAF v2.0 PDFs,
-printed by wkhtmltopdf.
+**Work product.** The Markdown edition of DMLex v1.0 OS, rendered with
+`render/render.sh` (step 2's PDF preprocessor, printed by headless Chrome);
+and the published CSAF v2.0 PDFs, printed by wkhtmltopdf.
 
 **What was found.** The first DMLex renders printed their 12 pt body text at
 about 7.5 pt. No check reported it, because no check measured printed type
@@ -243,8 +243,10 @@ overflowing element and let it wrap or scale; do not set a smaller font.
 ```
 
 It warns below 85%. Pages of the DMLex render made before the fix measure
-8.9 pt against the stylesheet's 12 pt. The published CSAF v2.0 PDFs, from CSD01 to OS, measure
-7.8 pt to 8.3 pt and warn too.
+a median word height of 8.9 pt, 74% of the stylesheet's 12 pt (a word's box
+is taller than its font size, so this figure is higher than the 7.5 pt type
+size). The published CSAF v2.0 PDFs, from CSD01 to OS, measure 7.8 pt to
+8.3 pt and warn too.
 
 **What it meant.** Each page had been scaled down as a whole. In DMLex the
 cause was one long inline code path: the pipeline's PDF preprocessor set

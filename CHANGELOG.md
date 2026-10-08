@@ -26,8 +26,10 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Documentation only: no check changed, and the counts stay at 181 conditions
-in 61 classes.
+No check changed, and the counts stay at 181 conditions in 61 classes.
+`harvest.py`'s report headings were reworded, three class summaries in
+`CHECKS.md` name the v1.13 conditions, and three conformance-structure
+condition descriptions say that quotes and dashes are folded.
 
 - **docs/WORKED-EXAMPLES.md** (new): seven findings from CSAF v2.0 and v2.1 and
   from DMLex, each with the message, what it meant and the fix at source.
@@ -36,7 +38,7 @@ in 61 classes.
   reports, now stated on every entry of `AUTHORITIES.md` beside the
   criterion's; every cause of exit 2; the DMLex contents counts (171
   published entries, 133 unnumbered in the first renders); `render.sh` exit
-  codes and its four-print limit; the conversion leaving a refused `.md` on
+  codes and its four-pass limit on contents numbering; the conversion leaving a refused `.md` on
   disk; the step 2 code-block and time-limit behaviour in `TRANSFORMS.md`;
   the nine workflows; the test dependencies CI installs; flags and tools no
   README described (`annotate.py`, `--context`, `--dpi`, `--plant`,
