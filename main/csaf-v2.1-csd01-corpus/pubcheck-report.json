@@ -1975,7 +1975,7 @@
       "prong_b_unreadable_entries_skipped": "0",
       "prong_c_md_block_urls_scanned": "6",
       "prong_c_md_anchor_links_scanned": "553",
-      "prong_c_md_bare_urls_scanned": "98"
+      "prong_c_md_bare_urls_scanned": "95"
     },
     "xml-namespace": {
       "schema_files_scanned": "0",
