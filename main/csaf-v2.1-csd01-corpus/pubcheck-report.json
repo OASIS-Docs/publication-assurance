@@ -1251,7 +1251,7 @@
       "applies": "all",
       "condition": "Every (profile, clause number) pair in the previous stage is still present in this stage (append-only extension is fine; removal/renumbering, including a whole profile silently disappearing, is flagged)",
       "pulls": "the ((profile, clause number) -> content hash) map extracted from the resolvable previous-stage artifact, diffed against this stage's map",
-      "compares_to": "handbook-WPQualityRequirements.txt 'Key principles': 'Clause numbering must be unique and stable across revisions'. Guidelines-sourced (recommended, not mandatory) so WARN-tier informational, never BLOCKER, and never fired for the CS->OS transition (that gets the zero-tolerance override instead)",
+      "compares_to": "handbook-WPQualityRequirements.txt 'Key principles': 'Clause numbering must be unique and stable across revisions'. Guidelines-sourced (recommended, not mandatory) so WARN-tier informational, never BLOCKER, and never fired for the CS->OS transition (that gets the zero-tolerance override instead); profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing",
       "severity": "WARN"
     },
     {
@@ -1260,7 +1260,7 @@
       "applies": "all",
       "condition": "A (profile, clause number) pair missing from this stage does not reappear under a DIFFERENT number in the same profile with the same content (a disguised renumber-via-delete-and-re-add)",
       "pulls": "content-hash collisions between a previous-stage clause and any current-stage clause, scoped within the same profile",
-      "compares_to": "the same Guidelines stability principle as 'removed/renumbered'; WARN-tier informational",
+      "compares_to": "the same Guidelines stability principle as 'removed/renumbered'; WARN-tier informational; profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing",
       "severity": "WARN"
     },
     {
@@ -1278,7 +1278,7 @@
       "applies": "all",
       "condition": "A clause whose (profile, number) key is unchanged at CS->OS is flagged for manual confirmation when its content hash changed",
       "pulls": "content-hash comparison, per (profile, clause number) key, between the approved CS and the OS package, restricted to keys present in both sets",
-      "compares_to": "handbook-WPQualityRequirements.txt 'Allowed changes during publication': coordinated non-material changes are permitted (TC Process 2.2.4); not itself a zero-tolerance failure, so WARN/manual-review, never an automatic BLOCKER",
+      "compares_to": "handbook-WPQualityRequirements.txt 'Allowed changes during publication': coordinated non-material changes are permitted (TC Process 2.2.4); not itself a zero-tolerance failure, so WARN/manual-review, never an automatic BLOCKER; profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing",
       "severity": "WARN"
     },
     {
