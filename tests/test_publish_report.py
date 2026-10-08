@@ -262,6 +262,10 @@ def test_a_branch_that_never_stops_moving_fails_the_step_and_says_so(
     monkeypatch.setattr(publish_report, "RETRY_SECONDS", 2)
     out = tmp_path / "github-output"
     out.write_text("")
+    # In process, so the runner's own variables must go too, as runner_env()
+    # leaves them out of a subprocess: CI's pull request event read as a fork.
+    for k in ("GITHUB_HEAD_REF", "GITHUB_EVENT_PATH"):
+        monkeypatch.delenv(k, raising=False)
     for k, v in {**runner_env(remote), "GITHUB_OUTPUT": str(out)}.items():
         monkeypatch.setenv(k, v)
     monkeypatch.setattr(sys, "argv", [str(PUBLISH), "--files", str(files),
