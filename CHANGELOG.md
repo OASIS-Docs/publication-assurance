@@ -26,7 +26,55 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-PATCH: a fix inside existing checks, no new criteria.
+MINOR: six new conditions (181 to 187 across the same 61 classes), the
+NOT EVALUATED reports below; the other entries are fixes inside existing
+checks.
+
+- **NOT EVALUATED** (new, in revision-collision, public-review-metadata,
+  schema-id, xml-namespace, pdf-sync and package-refs): the checks that need
+  the cover's This-stage base URL returned without a word when there was
+  none. On SARIF v2.2 CSD01 the cover's This-stage URLs did not parse, and
+  schema-id skipped a real `$id` defect while the report looked cleaner than
+  the package was. Each of these checks that applies to the package now
+  reports `NOT EVALUATED` with the reason. The four that read only the
+  package (schema-id when it ships JSON, xml-namespace when it ships
+  XSD/WSDL/RELAX NG, pdf-sync when it ships a PDF, package-refs on the
+  Markdown track) always block: the This-stage BLOCKER that explains the gap
+  can itself be adjudicated as a tool false positive, as SARIF's was, and the
+  skipped check must not go with it. The two network checks block unless a
+  This-stage BLOCKER already stands, and are not reported under
+  `PUB_CHECK_OFFLINE`, where they never run. Found by the adversarial review
+  and fixed with it:
+  - A This-stage URL that names a real file under another stage's directory
+    (a cover copied from the previous stage) set the base to that directory,
+    so schema-id compared correct `$id`s with the wrong address and reported
+    them wrong. The Markdown cover now takes the base only from a URL under
+    the package's own `/version/stage/`, as the HTML cover already did.
+  - "not valid JSON" in schema-id runs without a base URL; only the `$id`
+    comparisons need one.
+  Over the corpus offline, no exit code changes and no stage package's
+  findings change. The four targets with no base, all already failing (the
+  CSAF v2.0 and v2.1 version roots, the CSAF v2.0 errata01 directory and
+  EoX Core v1.0 CSD01), each gain two or three NOT EVALUATED BLOCKERs.
+  Pinned by `tests/test_not_evaluated.py`.
+
+- **conformance-structure**: a wrapped list line that mentions a profile
+  was read as a profile title. The CSAF v2.1 draft wraps an item in clause
+  9.1.7 as "according to the profile specified in `$.document.category`";
+  with its inline code blanked the line looked like a title, and that
+  "profile" took clauses 9.1.7 to 9.1.9, so the diff against CSD03 reported
+  all three as "removed/renumbered" though the clause headings are unchanged.
+  A profile title now has to begin with a capital or a digit. Pinned by
+  `tests/test_conformance_profiles.py`.
+
+- **`--emit-manifest`**, `items[].role`: only `.md` files were tagged
+  `authoritative`, so a Word-authored package (KMIP Usage Guide v3.0 CND02)
+  listed its authoritative `.docx` as `other`, and every `.md` in a package
+  (a comment-resolution log, a schema README) was tagged authoritative. The
+  authoritative item is now the package's source as pub-check reads it, the
+  Markdown, else the Word file, else the ODT, preferring the one named for
+  the stage; any other `.md` is `other`. Pinned by
+  `tests/test_manifest_emitter.py`.
 
 - **Publishing the report** (`pub-check/publish_report.py`): a matrix job
   could lose its report without a word. When two jobs push to the reports

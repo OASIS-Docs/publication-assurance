@@ -159,3 +159,42 @@ def test_a_stage_whose_renders_the_repo_ignores_records_no_commit(repo, manifest
     assert any(p.suffix == ".html" for p in stage.rglob("*")), "fixture must carry an HTML render"
     assert _git(stage, "ls-files"), "fixture must track some of the stage"
     assert _commit_of(stage) == ""
+
+
+# items[].role (KMIP Usage Guide v3.0 cnd02, Oct 2026): only .md was tagged
+# authoritative, so a Word-authored package listed its authoritative .docx as
+# "other" and the manifest had to be corrected by hand.
+def _roles(stage):
+    out = emit_manifest(str(stage), stage.parent.name, stage.name)
+    return {i["path"]: i["role"] for i in json.load(open(out, encoding="utf-8"))["items"]}
+
+
+def _package(tmp_path, stem, exts):
+    stage = tmp_path / "v3.0" / "cnd02"
+    stage.mkdir(parents=True)
+    for ext in exts:
+        (stage / f"{stem}.{ext}").write_bytes(b"x")
+    return stage
+
+
+def test_a_word_authored_package_tags_the_docx_authoritative(tmp_path):
+    roles = _roles(_package(tmp_path, "kmip-ug-v3.0-cnd02", ("docx", "html", "pdf", "zip")))
+    assert roles == {"kmip-ug-v3.0-cnd02.docx": "authoritative",
+                     "kmip-ug-v3.0-cnd02.html": "delivery",
+                     "kmip-ug-v3.0-cnd02.pdf": "delivery",
+                     "kmip-ug-v3.0-cnd02.zip": "other"}
+
+
+def test_a_markdown_package_keeps_the_md_authoritative_and_a_docx_other(tmp_path):
+    roles = _roles(_package(tmp_path, "x-v3.0-cnd02", ("md", "docx", "html", "pdf")))
+    assert roles["x-v3.0-cnd02.md"] == "authoritative"
+    assert roles["x-v3.0-cnd02.docx"] == "other"
+
+
+def test_only_the_source_is_authoritative_not_every_markdown_file(tmp_path):
+    stage = _package(tmp_path, "kmip-ug-v3.0-cnd02", ("docx", "html", "pdf"))
+    (stage / "schema").mkdir()
+    (stage / "schema" / "README.md").write_bytes(b"x")
+    (stage / "kmip-ug-v3.0-cnd02-comment-resolution-log.md").write_bytes(b"x")
+    roles = _roles(stage)
+    assert [p for p, r in roles.items() if r == "authoritative"] == ["kmip-ug-v3.0-cnd02.docx"]

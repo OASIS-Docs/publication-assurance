@@ -11,7 +11,7 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 Before a TC Specification is published to `docs.oasis-open.org`, it is run
 through the publication acceptance tests (`oasis-pub-check`). This guide adds
 those tests to a TC's own GitHub repository, so every push validates the
-draft against the same 181 conditions applied at submission, and each run
+draft against the same 187 conditions applied at submission, and each run
 publishes a Validation Report you can open in a browser.
 
 | Section | Read it when |
@@ -176,7 +176,7 @@ the new commit and publishes a new report.
 ## The Validation Report
 
 It is the report OASIS staff produce at intake, from the same code. It has
-a header, a table of the 61 check classes and a table of all 181
+a header, a table of the 61 check classes and a table of all 187
 conditions. The job summary shows the same two tables, above them the
 findings list, which ends with the verdict in a second form,
 `N blocker(s), M warning(s) -> NOT PUBLISHABLE`. The header lines described
@@ -185,7 +185,7 @@ below are in the report files.
 ### Verdict
 
 The header block states the target, the date, the tool, the coverage
-(181 conditions in 61 classes, all run), the blocker count and the checks'
+(187 conditions in 61 classes, all run), the blocker count and the checks'
 exit code, then one **Result** line:
 
 - `PUBLICATION-READY: zero blockers.` with exit code `0`. Warnings may remain.
@@ -222,7 +222,7 @@ beside it that says what was found and, where the check knows, where.
 
 ### Condition table
 
-One row per condition, 181 rows. Each row gives:
+One row per condition, 187 rows. Each row gives:
 
 | Column | Content |
 |---|---|

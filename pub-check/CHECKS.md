@@ -35,7 +35,7 @@ other condition runs on every package regardless of how it was authored.
 A package that includes only its outputs still gets the full output and
 package suites.
 
-181 conditions across 61 check classes.
+187 conditions across 61 check classes.
 
 ## Legend
 
@@ -399,7 +399,8 @@ Files the document cites under its own stage path must be included in the packag
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 111 | Every file the document cites under its own stage path is included in the package | each cited URL under the this-stage base and the package file tree | the cited relative path must exist as a file in the package | BLOCKER | md | - |
+| 111 | The cited-file check is not silently skipped when the cover gives no This-stage base URL | the This-stage base URL the front-matter check derives from the cover | a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED | BLOCKER | md | - |
+| 112 | Every file the document cites under its own stage path is included in the package | each cited URL under the this-stage base and the package file tree | the cited relative path must exist as a file in the package | BLOCKER | md | - |
 
 ### pdf-cover
 
@@ -407,8 +408,8 @@ The rendered PDF cover must carry the title exactly once and no CI paths.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 112 | The document title appears exactly once on the PDF cover page | the count of title occurrences in the PDF's first page text, not counting the Citation format entry that names it (title followed by 'Edited by') | exactly 1 (more means stale title-block residue baked into the render, assertion A1) | BLOCKER | all | pdftotext |
-| 113 | No CI runner path anywhere in the PDF text | the full extracted PDF text | the /home/runner/ path must not occur (assertion A2) | BLOCKER | all | pdftotext |
+| 113 | The document title appears exactly once on the PDF cover page | the count of title occurrences in the PDF's first page text, not counting the Citation format entry that names it (title followed by 'Edited by') | exactly 1 (more means stale title-block residue baked into the render, assertion A1) | BLOCKER | all | pdftotext |
+| 114 | No CI runner path anywhere in the PDF text | the full extracted PDF text | the /home/runner/ path must not occur (assertion A2) | BLOCKER | all | pdftotext |
 
 ### pdf-fonts
 
@@ -416,8 +417,8 @@ PDF embedded fonts are compared against the package's own CSS as typography auth
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 114 | pdffonts executes against the PDF | the pdffonts process outcome | a clean execution | WARN | all | pdffonts |
-| 115 | The PDF's embedded fonts are declared by the package's own CSS | the font base names embedded in the PDF (pdffonts) | the font families declared in the package's HTML/CSS (its own typography authority) | WARN | all | pdffonts |
+| 115 | pdffonts executes against the PDF | the pdffonts process outcome | a clean execution | WARN | all | pdffonts |
+| 116 | The PDF's embedded fonts are declared by the package's own CSS | the font base names embedded in the PDF (pdffonts) | the font families declared in the package's HTML/CSS (its own typography authority) | WARN | all | pdffonts |
 
 ### pdf-legibility
 
@@ -425,8 +426,8 @@ PDF body text size is measured against the body size the package's stylesheet de
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 116 | pdftotext -bbox executes against the PDF | the pdftotext process outcome | a clean execution | WARN | all | pdftotext |
-| 117 | The PDF's body text prints at no less than 85% of the body size the package declares | the median word-box height over every page (pdftotext -bbox), and the body font-size from the package's own CSS or the OASIS stylesheet it links | 85% of the declared body size; skipped for landscape PDFs and PDFs from Word, LibreOffice, TeX, Typst, FOP or Acrobat | WARN | all | pdftotext |
+| 117 | pdftotext -bbox executes against the PDF | the pdftotext process outcome | a clean execution | WARN | all | pdftotext |
+| 118 | The PDF's body text prints at no less than 85% of the body size the package declares | the median word-box height over every page (pdftotext -bbox), and the body font-size from the package's own CSS or the OASIS stylesheet it links | 85% of the declared body size; skipped for landscape PDFs and PDFs from Word, LibreOffice, TeX, Typst, FOP or Acrobat | WARN | all | pdftotext |
 
 ### pdf-sync
 
@@ -434,11 +435,12 @@ The PDF must be readable and rendered from the same revision as the rest of the 
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 118 | The PDF cross-check toolchain is available | the PATH lookup for pdftotext (poppler) | pdftotext present; absent means the PDF front-matter cross-check is skipped here and runs at intake | WARN | all | - |
-| 119 | pdftotext executes against the PDF | the pdftotext process outcome | a clean execution | WARN | all | pdftotext |
-| 120 | The PDF is machine-readable | pdftotext's exit status on the delivery PDF | exit 0 | BLOCKER | all | pdftotext |
-| 121 | The PDF front matter carries the canonical this-stage URL | the first three pages of extracted PDF text | the this-stage base URL declared by the package front matter | BLOCKER | all | pdftotext |
-| 122 | The PDF cites no unexpected other version of this spec | every this-spec version URL in the extracted PDF text | the package's own version (previous-stage citations expected, anything else confirmed) | WARN | all | pdftotext |
+| 119 | The PDF This-stage URL cross-check is not silently skipped when the cover gives no This-stage base URL | the This-stage base URL the front-matter check derives from the cover | a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED | BLOCKER | all | pdftotext |
+| 120 | The PDF cross-check toolchain is available | the PATH lookup for pdftotext (poppler) | pdftotext present; absent means the PDF front-matter cross-check is skipped here and runs at intake | WARN | all | - |
+| 121 | pdftotext executes against the PDF | the pdftotext process outcome | a clean execution | WARN | all | pdftotext |
+| 122 | The PDF is machine-readable | pdftotext's exit status on the delivery PDF | exit 0 | BLOCKER | all | pdftotext |
+| 123 | The PDF front matter carries the canonical this-stage URL | the first three pages of extracted PDF text | the this-stage base URL declared by the package front matter | BLOCKER | all | pdftotext |
+| 124 | The PDF cites no unexpected other version of this spec | every this-spec version URL in the extracted PDF text | the package's own version (previous-stage citations expected, anything else confirmed) | WARN | all | pdftotext |
 
 ### pdf-toc-pages
 
@@ -446,8 +448,8 @@ The PDF's table of contents gives page numbers, and each number is the page its 
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 123 | The PDF's table of contents gives a page number for its entries | the contents entries on the PDF's first 25 pages (pdftotext -layout, a Word line-number column removed, wrapped entries joined) and whether each ends in a page number (solid or spaced dot leaders, or two spaces) | at least half of the entries numbered; a contents list of fewer than five entries is not graded | WARN | all | pdftotext |
-| 124 | The page a contents entry gives is the page its heading is printed on | up to 20 numbered contents entries spread across the list, and the text of the page each names | the entry's title on that page, after the constant offset most entries agree on (printed labels may differ from the PDF page index); more than 2, or a fifth of the sample, missing is reported | WARN | all | pdftotext |
+| 125 | The PDF's table of contents gives a page number for its entries | the contents entries on the PDF's first 25 pages (pdftotext -layout, a Word line-number column removed, wrapped entries joined) and whether each ends in a page number (solid or spaced dot leaders, or two spaces) | at least half of the entries numbered; a contents list of fewer than five entries is not graded | WARN | all | pdftotext |
+| 126 | The page a contents entry gives is the page its heading is printed on | up to 20 numbered contents entries spread across the list, and the text of the page each names | the entry's title on that page, after the constant offset most entries agree on (printed labels may differ from the PDF page index); more than 2, or a fifth of the sample, missing is reported | WARN | all | pdftotext |
 
 ### previous-stage
 
@@ -455,8 +457,8 @@ Second and later stages must cite the previous stage's URLs.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 125 | A stage past 01 cites its previous stage | the URLs in the markdown's Previous-stage block | at least one docs.oasis-open.org URL required when the revision number exceeds 01 | BLOCKER | md | - |
-| 126 | A stage past 01 cites its previous stage on the HTML cover | the URLs in the cover's Previous-version block | at least one docs.oasis-open.org URL required when the revision number exceeds 01 | BLOCKER | docx | - |
+| 127 | A stage past 01 cites its previous stage | the URLs in the markdown's Previous-stage block | at least one docs.oasis-open.org URL required when the revision number exceeds 01 | BLOCKER | md | - |
+| 128 | A stage past 01 cites its previous stage on the HTML cover | the URLs in the cover's Previous-version block | at least one docs.oasis-open.org URL required when the revision number exceeds 01 | BLOCKER | docx | - |
 
 ### public-review-metadata
 
@@ -464,9 +466,10 @@ Post-publication audit: a csd/cnd stage directory that underwent a TC public rev
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 127 | A live, published csd/cnd stage directory confirmed (by tiered evidence) and successfully scanned to have undergone TC public review carries the required public-review-metadata companion file | the LIVE docs.oasis-open.org stage-directory-root filename listing (fetched over the network, post-publication audit only), plus a same-revision comment-resolution-log or a downstream cs/errata stage's own Previous-stage cover URL as evidence the review occurred | the exact, case-sensitive filename [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html (naming-directives.txt 5.2; handbook-Naming.txt 'Public-review metadata filename (new in v1.7)') | BLOCKER | all | network |
-| 128 | A present public-review-metadata companion file is non-empty | the byte length of the fetched companion file | naming-directives.txt 5.2: the file 'provides a publication history of the Work Product' (content validation itself is out of scope for this check; only non-zero size is tested here) | WARN | all | network |
-| 129 | A public-review-metadata companion file listed in the live directory is actually reachable so its content can be evaluated | the HTTP status of a direct fetch of the listed companion filename | a listing entry alone is not proof of a readable file; an unreachable listed file stays an open advisory rather than a silent, unreviewed pass | WARN | all | network |
+| 129 | A live, published csd/cnd stage directory confirmed (by tiered evidence) and successfully scanned to have undergone TC public review carries the required public-review-metadata companion file | the LIVE docs.oasis-open.org stage-directory-root filename listing (fetched over the network, post-publication audit only), plus a same-revision comment-resolution-log or a downstream cs/errata stage's own Previous-stage cover URL as evidence the review occurred | the exact, case-sensitive filename [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html (naming-directives.txt 5.2; handbook-Naming.txt 'Public-review metadata filename (new in v1.7)') | BLOCKER | all | network |
+| 130 | A present public-review-metadata companion file is non-empty | the byte length of the fetched companion file | naming-directives.txt 5.2: the file 'provides a publication history of the Work Product' (content validation itself is out of scope for this check; only non-zero size is tested here) | WARN | all | network |
+| 131 | A public-review-metadata companion file listed in the live directory is actually reachable so its content can be evaluated | the HTTP status of a direct fetch of the listed companion filename | a listing entry alone is not proof of a readable file; an unreachable listed file stays an open advisory rather than a silent, unreviewed pass | WARN | all | network |
+| 132 | The public-review-metadata check on a csd/cnd is not silently skipped when the cover gives no This-stage base URL | the This-stage base URL the front-matter check derives from the cover | a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED | BLOCKER/WARN | all | - |
 
 ### ref-rfc
 
@@ -474,8 +477,8 @@ An [RFCnnnn] references entry's label, body text, and URL must cite the same RFC
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 130 | An [RFCnnnn] references entry's URL cites the same RFC number as its label | each RFC number embedded in an ietf.org / rfc-editor.org URL inside the entry window that follows an [RFCnnnn] label | the RFC number in the entry's own label; a disagreement means the label or the linked document is stale | WARN | all | - |
-| 131 | An [RFCnnnn] references entry's body text cites the same RFC number as its label and URL | each 'RFC nnnn' mention in the entry window that follows an [RFCnnnn] label, excluding mentions excused by obsoletes/supersedes/replaces/updates/see phrasing | the RFC number in the entry's label and URL (numbers drift when a reference is upgraded to a successor RFC and the prose is not) | WARN | all | - |
+| 133 | An [RFCnnnn] references entry's URL cites the same RFC number as its label | each RFC number embedded in an ietf.org / rfc-editor.org URL inside the entry window that follows an [RFCnnnn] label | the RFC number in the entry's own label; a disagreement means the label or the linked document is stale | WARN | all | - |
+| 134 | An [RFCnnnn] references entry's body text cites the same RFC number as its label and URL | each 'RFC nnnn' mention in the entry window that follows an [RFCnnnn] label, excluding mentions excused by obsoletes/supersedes/replaces/updates/see phrasing | the RFC number in the entry's label and URL (numbers drift when a reference is upgraded to a successor RFC and the prose is not) | WARN | all | - |
 
 ### references-split
 
@@ -483,8 +486,8 @@ On a Standards Track work product, Normative and Informative References should b
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 132 | A bare 'References' heading carrying 2+ direct reference entries is split into separately labeled Normative/Informative child headings (or is too small a sample, 0 or 1 entries, to judge) | H1-H3 headings normalizing to 'references' plus the distinct reference-entry IDs found directly in that heading's own span (before its first immediate-child heading) | handbook-WPQualityChecklist.txt editorial quality checklist bullet: 'normative references listed separately from informative references' (WARN: staff-maintained best-practice checklist, not a TC Process must/shall clause) | WARN | all | - |
-| 133 | No reference-entry ID appears under both a Normative References heading and an Informative References heading anywhere in the document | the set of reference-entry IDs found in the span of every 'normative references'-classified heading, and the same for every 'informative references'-classified heading | the two ID sets must not intersect; a shared ID is a labeling inconsistency or editorial duplication (handbook-WPQualityChecklist.txt same checklist bullet) | WARN | all | - |
+| 135 | A bare 'References' heading carrying 2+ direct reference entries is split into separately labeled Normative/Informative child headings (or is too small a sample, 0 or 1 entries, to judge) | H1-H3 headings normalizing to 'references' plus the distinct reference-entry IDs found directly in that heading's own span (before its first immediate-child heading) | handbook-WPQualityChecklist.txt editorial quality checklist bullet: 'normative references listed separately from informative references' (WARN: staff-maintained best-practice checklist, not a TC Process must/shall clause) | WARN | all | - |
+| 136 | No reference-entry ID appears under both a Normative References heading and an Informative References heading anywhere in the document | the set of reference-entry IDs found in the span of every 'normative references'-classified heading, and the same for every 'informative references'-classified heading | the two ID sets must not intersect; a shared ID is a labeling inconsistency or editorial duplication (handbook-WPQualityChecklist.txt same checklist bullet) | WARN | all | - |
 
 ### residue
 
@@ -492,10 +495,10 @@ Editor placeholders (TODO, tbd, 'Will be filled in') must not be present.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 134 | No editor TODO markers left in prose | prose of the markdown and HTML (code blocks stripped) | the patterns TODO(...) and TODO: must not occur | BLOCKER | all | - |
-| 135 | No bare 'tbd' placeholder sections | prose of the markdown and HTML (code blocks stripped) | no line consisting solely of 'tbd' | BLOCKER | all | - |
-| 136 | No template editor-instruction text left in the published prose | prose of the markdown and HTML (code blocks stripped) | the OASIS Board-approved work product templates, which state that 'All template instructions ... need to be deleted prior to publication'; an imperative to remove/delete something 'before publication' or 'prior to publication' surviving in the prose means an instruction block reached publication | BLOCKER | all | - |
-| 137 | No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS) | prose of the markdown and HTML (code blocks stripped) | the template placeholder 'Will be filled in' (after an opening bracket, or opening a line, list item, quote, table cell or element) must not occur; the phrase inside a sentence is prose | WARN | all | - |
+| 137 | No editor TODO markers left in prose | prose of the markdown and HTML (code blocks stripped) | the patterns TODO(...) and TODO: must not occur | BLOCKER | all | - |
+| 138 | No bare 'tbd' placeholder sections | prose of the markdown and HTML (code blocks stripped) | no line consisting solely of 'tbd' | BLOCKER | all | - |
+| 139 | No template editor-instruction text left in the published prose | prose of the markdown and HTML (code blocks stripped) | the OASIS Board-approved work product templates, which state that 'All template instructions ... need to be deleted prior to publication'; an imperative to remove/delete something 'before publication' or 'prior to publication' surviving in the prose means an instruction block reached publication | BLOCKER | all | - |
+| 140 | No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS) | prose of the markdown and HTML (code blocks stripped) | the template placeholder 'Will be filled in' (after an opening bracket, or opening a line, list item, quote, table cell or element) must not occur; the phrase inside a sentence is prose | WARN | all | - |
 
 ### revision-collision
 
@@ -503,7 +506,8 @@ A new submission must not collide with a stage already live for the version.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 138 | The submitted stage does not already exist on the live site | the HTTP status of the this-stage URL on docs.oasis-open.org | expected non-200 for a NEW submission; an existing stage means the revision must increment | WARN | all | network |
+| 141 | The submitted stage does not already exist on the live site | the HTTP status of the this-stage URL on docs.oasis-open.org | expected non-200 for a NEW submission; an existing stage means the revision must increment | WARN | all | network |
+| 142 | The live-site collision check is not silently skipped when the cover gives no This-stage base URL | the This-stage base URL the front-matter check derives from the cover | a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED | BLOCKER/WARN | all | - |
 
 ### rfc-keywords
 
@@ -511,8 +515,8 @@ Normative key words require the RFC 2119 (and 8174) citations.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 139 | Normative key words are backed by an RFC 2119 citation | normative key words (MUST, SHALL, SHOULD, MAY, ...) found in the prose | an RFC 2119 citation must be present when key words are used | BLOCKER | md | - |
-| 140 | RFC 2119 citation is paired with RFC 8174 | the RFC citations in the document | the current template cites both 2119 and 8174 (uppercase-only clarification) | WARN | md | - |
+| 143 | Normative key words are backed by an RFC 2119 citation | normative key words (MUST, SHALL, SHOULD, MAY, ...) found in the prose | an RFC 2119 citation must be present when key words are used | BLOCKER | md | - |
+| 144 | RFC 2119 citation is paired with RFC 8174 | the RFC citations in the document | the current template cites both 2119 and 8174 (uppercase-only clarification) | WARN | md | - |
 
 ### schema-id
 
@@ -520,10 +524,11 @@ Every JSON schema's $id must agree with where the file actually publishes.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 141 | Every .json file in the package parses as JSON | each .json file's content | must parse without error | BLOCKER | all | schemas |
-| 142 | A flattened $id under the version root is a conscious convention | each schema's declared $id | the file's publish path; a version-root flattened $id (CSAF v2.0 style) needs a copy at that location | WARN | all | schemas |
-| 143 | Each schema's $id agrees with where the file publishes | each schema's declared $id | the canonical latest-version URL derived from the package path | BLOCKER | all | schemas |
-| 144 | Schema-internal self-references agree with the declared $id | every docs.oasis-open.org .json URL inside each schema body | the schema's own declared $id | BLOCKER | all | schemas |
+| 145 | Every .json file in the package parses as JSON | each .json file's content | must parse without error | BLOCKER | all | schemas |
+| 146 | A flattened $id under the version root is a conscious convention | each schema's declared $id | the file's publish path; a version-root flattened $id (CSAF v2.0 style) needs a copy at that location | WARN | all | schemas |
+| 147 | Each schema's $id agrees with where the file publishes | each schema's declared $id | the canonical latest-version URL derived from the package path | BLOCKER | all | schemas |
+| 148 | Schema-internal self-references agree with the declared $id | every docs.oasis-open.org .json URL inside each schema body | the schema's own declared $id | BLOCKER | all | schemas |
+| 149 | The schema $id checks are not silently skipped when the cover gives no This-stage base URL | the This-stage base URL the front-matter check derives from the cover | a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED | BLOCKER | all | schemas |
 
 ### stage-name
 
@@ -531,10 +536,10 @@ The stage token must be a current, correctly numbered stage per the Naming Direc
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 145 | Stage directory name, and an errataNN parent directory, carry a two-digit number | the stage directory name, and the parent directory name when it is an errata directory | valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4) | BLOCKER | all | - |
-| 146 | A package staged for publication is not a Working Draft | the stage directory name's stage token | wd: Working Drafts are unpublished and may use any naming (naming-directives.txt 5.2 note); docs.oasis-open.org has no wd location (dmlex/v1.1/wd01 returns 404) | WARN | all | - |
-| 147 | Stage token is not a retired abbreviation | the alphabetic prefix of the stage directory name | retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7 | BLOCKER | all | - |
-| 148 | Stage token (and an Errata parent directory) is a recognized current stage, in lower case, and os carries no revision number | the alphabetic prefix of the stage directory name, its digits, and the Errata parent directory name | valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata; lower case, and 'The os stage abbreviation is never used with a revision number' (naming-directives.txt 5.2) | BLOCKER | all | - |
+| 150 | Stage directory name, and an errataNN parent directory, carry a two-digit number | the stage directory name, and the parent directory name when it is an errata directory | valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4) | BLOCKER | all | - |
+| 151 | A package staged for publication is not a Working Draft | the stage directory name's stage token | wd: Working Drafts are unpublished and may use any naming (naming-directives.txt 5.2 note); docs.oasis-open.org has no wd location (dmlex/v1.1/wd01 returns 404) | WARN | all | - |
+| 152 | Stage token is not a retired abbreviation | the alphabetic prefix of the stage directory name | retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7 | BLOCKER | all | - |
+| 153 | Stage token (and an Errata parent directory) is a recognized current stage, in lower case, and os carries no revision number | the alphabetic prefix of the stage directory name, its digits, and the Errata parent directory name | valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata; lower case, and 'The os stage abbreviation is never used with a revision number' (naming-directives.txt 5.2) | BLOCKER | all | - |
 
 ### stage-token
 
@@ -542,9 +547,9 @@ On a second or later stage, the Previous-stage cover URI should carry the docume
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 149 | Previous-stage URL stage token is not a retired abbreviation | the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem | retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7; WARN with a legacy-URI verification caveat since a pre-2024 Previous-stage URI may permanently retain a retired token (naming-directives.txt 6.3 Resource Permanence) | WARN | all | - |
-| 150 | Previous-stage URL stage token matches the document's own current csd/cnd stage abbreviation or the track's approved-stage counterpart | the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem | the document's own current stage token, or the track's approved-stage set (csd: cs/os/errata; cnd: cn) when the block links a previous VERSION at its own approved stage (handbook-PublicReviews.txt: the cover page URIs 'should all reflect the csd stage abbreviation') | WARN | all | - |
-| 151 | Latest-stage URL's filename embeds no stage-abbreviation/revision token at all | the filename-stem-position stage-abbreviation token (if any) extracted from the Latest-stage URL | naming-directives.txt 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', an absolute prohibition independent of whether the token matches the current stage | BLOCKER | all | - |
+| 154 | Previous-stage URL stage token is not a retired abbreviation | the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem | retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7; WARN with a legacy-URI verification caveat since a pre-2024 Previous-stage URI may permanently retain a retired token (naming-directives.txt 6.3 Resource Permanence) | WARN | all | - |
+| 155 | Previous-stage URL stage token matches the document's own current csd/cnd stage abbreviation or the track's approved-stage counterpart | the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem | the document's own current stage token, or the track's approved-stage set (csd: cs/os/errata; cnd: cn) when the block links a previous VERSION at its own approved stage (handbook-PublicReviews.txt: the cover page URIs 'should all reflect the csd stage abbreviation') | WARN | all | - |
+| 156 | Latest-stage URL's filename embeds no stage-abbreviation/revision token at all | the filename-stem-position stage-abbreviation token (if any) extracted from the Latest-stage URL | naming-directives.txt 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', an absolute prohibition independent of whether the token matches the current stage | BLOCKER | all | - |
 
 ### stage-uri-live
 
@@ -552,7 +557,7 @@ The Previous-stage and Latest-stage URIs on the cover name files that are not in
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 152 | Every Previous-stage and Latest-stage URI the cover declares actually retrieves | a live HEAD request for each docs.oasis-open.org URI in the Previous/Latest stage blocks | a definitive 404/410 from the published site (transport failures and non-404 errors stay INFO) | BLOCKER | md | network |
+| 157 | Every Previous-stage and Latest-stage URI the cover declares actually retrieves | a live HEAD request for each docs.oasis-open.org URI in the Previous/Latest stage blocks | a definitive 404/410 from the published site (transport failures and non-404 errors stay INFO) | BLOCKER | md | network |
 
 ### symlinks
 
@@ -560,7 +565,7 @@ Self-referential symlinks materialize into unbounded recursion on deploy.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 153 | No symlink points at itself or an ancestor directory | each symlink's resolved target | must not equal or contain its own directory (deploys materialize symlinks into unbounded recursion) | BLOCKER | all | - |
+| 158 | No symlink points at itself or an ancestor directory | each symlink's resolved target | must not equal or contain its own directory (deploys materialize symlinks into unbounded recursion) | BLOCKER | all | - |
 
 ### template
 
@@ -568,9 +573,9 @@ The OASIS template's required front-matter sections, in order, plus Conformance.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 154 | All required template front-matter sections are present | the markdown headings | the template's required set: This/Previous/Latest stage, Technical Committee, Chairs, Editors, Abstract | BLOCKER | md | - |
-| 155 | Front-matter sections appear in template order | the order of found front-matter sections | the canonical template ordering | WARN | md | - |
-| 156 | A Conformance section exists | the markdown headings | the TC Process requirement: every Standards Track Work Product carries conformance clauses | BLOCKER | md | - |
+| 159 | All required template front-matter sections are present | the markdown headings | the template's required set: This/Previous/Latest stage, Technical Committee, Chairs, Editors, Abstract | BLOCKER | md | - |
+| 160 | Front-matter sections appear in template order | the order of found front-matter sections | the canonical template ordering | WARN | md | - |
+| 161 | A Conformance section exists | the markdown headings | the TC Process requirement: every Standards Track Work Product carries conformance clauses | BLOCKER | md | - |
 
 ### template-css
 
@@ -578,8 +583,8 @@ The HTML must carry a stylesheet; the canonical CSS is the default expectation.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 157 | A non-canonical stylesheet keeps the template font family | the primary font-family declared by the HTML's own stylesheet | the template look: Liberation Sans / Arial / Helvetica | WARN | md | - |
-| 158 | The HTML carries a stylesheet | the HTML's &lt;link rel=stylesheet&gt; and &lt;style&gt; elements | at least one styling source must be present | BLOCKER | md | - |
+| 162 | A non-canonical stylesheet keeps the template font family | the primary font-family declared by the HTML's own stylesheet | the template look: Liberation Sans / Arial / Helvetica | WARN | md | - |
+| 163 | The HTML carries a stylesheet | the HTML's &lt;link rel=stylesheet&gt; and &lt;style&gt; elements | at least one styling source must be present | BLOCKER | md | - |
 
 ### title-oasis-prefix
 
@@ -587,7 +592,7 @@ A Work Product title should not begin with 'OASIS' unless Project Administration
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 159 | The Work Product title (the &lt;h1&gt; identified by _h1_title_match_info's 'exact' or 'singular-related-fallback' classification) does not begin with the word 'OASIS' | the &lt;h1&gt; text identified by _h1_title_match_info: either the single &lt;h1&gt; exactly matching the rendered &lt;title&gt; text (the same match check_html's own D1 lint uses for its duplicate-title finding), or, when no exact match exists, the document's sole &lt;h1&gt; when it shares a prefix relationship with &lt;title&gt; (e.g. a trailing brand suffix on &lt;title&gt; alone), flagged lower-confidence in that case | naming-directives.txt s7: 'Preferably, a title should not begin with the name "OASIS" except on the recommendation of Project Administration for special cases.' Section 7's lead sentence track-scopes this to BLOCKER (Standards Track, must-observe) / WARN (Non-Standards Track, should-follow with an additional alternate-construction escape valve). | BLOCKER/WARN | all | - |
+| 164 | The Work Product title (the &lt;h1&gt; identified by _h1_title_match_info's 'exact' or 'singular-related-fallback' classification) does not begin with the word 'OASIS' | the &lt;h1&gt; text identified by _h1_title_match_info: either the single &lt;h1&gt; exactly matching the rendered &lt;title&gt; text (the same match check_html's own D1 lint uses for its duplicate-title finding), or, when no exact match exists, the document's sole &lt;h1&gt; when it shares a prefix relationship with &lt;title&gt; (e.g. a trailing brand suffix on &lt;title&gt; alone), flagged lower-confidence in that case | naming-directives.txt s7: 'Preferably, a title should not begin with the name "OASIS" except on the recommendation of Project Administration for special cases.' Section 7's lead sentence track-scopes this to BLOCKER (Standards Track, must-observe) / WARN (Non-Standards Track, should-follow with an additional alternate-construction escape valve). | BLOCKER/WARN | all | - |
 
 ### title-version
 
@@ -595,9 +600,9 @@ The cover-page title must carry the package's own Version identifier, composed f
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 160 | The rendered cover-page title incorporates the package's own Version identifier | the resolved cover-page title text (HTML &lt;title&gt;/&lt;h1&gt; on the markdown track, the MsoTitle-styled or first non-empty non-logo cover paragraph on the DOCX-native track) | naming-directives.txt 5.1: 'A Version identifier must also be incorporated into a Work Product name/title' | BLOCKER | all | - |
-| 161 | The Version cited in the title agrees with the package's own Version identifier | the numeric run of the rightmost 'Version &lt;n&gt;' token in the resolved title | the package's own Version identifier (the version directory segment, with a leading 'v' stripped per naming-directives.txt Section 4's [version-id] grammar) | BLOCKER | all | - |
-| 162 | The title's Version token is composed as '&lt;name/identifier&gt; Version &lt;number&gt;' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: &lt;part title&gt;' suffix; on a package whose own stage directory or immediate parent is named errataNN, also an 'Errata NN' or 'Plus Errata NN' suffix whose number matches the package's own errata number, per naming-directives.txt Section 4's separate Errata construction) | the characters immediately preceding and following the rightmost 'Version &lt;n&gt;' token in the resolved title, the stage token's track classification, and the package's own Errata number derived from its stage directory layout | naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -&gt; BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -&gt; WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification) | BLOCKER/WARN | all | - |
+| 165 | The rendered cover-page title incorporates the package's own Version identifier | the resolved cover-page title text (HTML &lt;title&gt;/&lt;h1&gt; on the markdown track, the MsoTitle-styled or first non-empty non-logo cover paragraph on the DOCX-native track) | naming-directives.txt 5.1: 'A Version identifier must also be incorporated into a Work Product name/title' | BLOCKER | all | - |
+| 166 | The Version cited in the title agrees with the package's own Version identifier | the numeric run of the rightmost 'Version &lt;n&gt;' token in the resolved title | the package's own Version identifier (the version directory segment, with a leading 'v' stripped per naming-directives.txt Section 4's [version-id] grammar) | BLOCKER | all | - |
+| 167 | The title's Version token is composed as '&lt;name/identifier&gt; Version &lt;number&gt;' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: &lt;part title&gt;' suffix; on a package whose own stage directory or immediate parent is named errataNN, also an 'Errata NN' or 'Plus Errata NN' suffix whose number matches the package's own errata number, per naming-directives.txt Section 4's separate Errata construction) | the characters immediately preceding and following the rightmost 'Version &lt;n&gt;' token in the resolved title, the stage token's track classification, and the package's own Errata number derived from its stage directory layout | naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -&gt; BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -&gt; WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification) | BLOCKER/WARN | all | - |
 
 ### uri-alias
 
@@ -605,15 +610,15 @@ No unauthorized URI aliasing within a stage/revision package: META-refresh, byte
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 163 | No live META-refresh element in any delivered HTML file | every &lt;meta&gt; tag in each .html/.htm/.xhtml file, HTML-tokenized (comments/&lt;script&gt;/&lt;style&gt;/&lt;pre&gt;/&lt;code&gt;/&lt;template&gt; excluded) | Naming Directives v1.7 s6.5(a): unauthorized URI aliasing via META-refresh elements is barred | BLOCKER | all | - |
-| 164 | No stage-root delivery file or manifest-cited file (by exact package-relative path) shares byte-identical content with another package-relative path | sha256 of every regular file (symlinks resolved to their in-package target's bytes) in the stage/revision directory | Naming Directives v1.7 s6.5(b): preparing files with identical content under two different filenames within a published instance is barred | BLOCKER | all | - |
-| 165 | An ancillary (non-delivery, non-manifest-cited) duplicate is flagged for review, not treated as a s6.5(b) aliasing risk | sha256 buckets whose members are all non-citable paths (LICENSE/NOTICE/schemas/test-fixtures/asset directories/etc.) | the package's own delivery-item paths and manifest.json authoritative/delivery-role paths | WARN | all | - |
-| 166 | The markdown Previous-stage block cites no redirect/URL-shortening domain | every URL under the 'Previous Stage/Version' heading | the seed redirect-service domain list (tinyurl.com, bit.ly, goo.gl, ow.ly, t.co, is.gd, buff.ly, rebrand.ly, tiny.cc, cutt.ly, shorturl.at, rb.gy, purl.oclc.org) | BLOCKER | md | - |
-| 167 | The DOCX-native rendered cover's This/Previous/Latest-version fields cite no redirect/URL-shortening domain | every URL (visible text or href) between the This/Previous/Latest-version labels on the rendered HTML cover | the seed redirect-service domain list | BLOCKER | docx | - |
-| 168 | Plain-prose anchor text that names oasis-open.org does not link to a redirect/URL-shortening domain (markdown source) | the visible/anchor text of every `[shown](target)` (md) or `&lt;a&gt;shown&lt;/a&gt;` (html) construct whose shown text is not itself a URL (a shown-is-a-URL mismatch is the existing link-mismatch check's territory) | the seed redirect-service domain list, gated on the anchor text literally containing 'oasis-open.org' | BLOCKER | all | - |
-| 169 | Plain-prose anchor text that names oasis-open.org does not link to a redirect/URL-shortening domain (HTML render) | the visible/anchor text of every `[shown](target)` (md) or `&lt;a&gt;shown&lt;/a&gt;` (html) construct whose shown text is not itself a URL (a shown-is-a-URL mismatch is the existing link-mismatch check's territory) | the seed redirect-service domain list, gated on the anchor text literally containing 'oasis-open.org' | BLOCKER | all | - |
-| 170 | A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain (markdown source) | the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct | the seed redirect-service domain list, gated on the sentence window literally containing 'oasis-open.org' | BLOCKER | all | - |
-| 171 | A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain (HTML render) | the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct | the seed redirect-service domain list, gated on the sentence window literally containing 'oasis-open.org' | BLOCKER | all | - |
+| 168 | No live META-refresh element in any delivered HTML file | every &lt;meta&gt; tag in each .html/.htm/.xhtml file, HTML-tokenized (comments/&lt;script&gt;/&lt;style&gt;/&lt;pre&gt;/&lt;code&gt;/&lt;template&gt; excluded) | Naming Directives v1.7 s6.5(a): unauthorized URI aliasing via META-refresh elements is barred | BLOCKER | all | - |
+| 169 | No stage-root delivery file or manifest-cited file (by exact package-relative path) shares byte-identical content with another package-relative path | sha256 of every regular file (symlinks resolved to their in-package target's bytes) in the stage/revision directory | Naming Directives v1.7 s6.5(b): preparing files with identical content under two different filenames within a published instance is barred | BLOCKER | all | - |
+| 170 | An ancillary (non-delivery, non-manifest-cited) duplicate is flagged for review, not treated as a s6.5(b) aliasing risk | sha256 buckets whose members are all non-citable paths (LICENSE/NOTICE/schemas/test-fixtures/asset directories/etc.) | the package's own delivery-item paths and manifest.json authoritative/delivery-role paths | WARN | all | - |
+| 171 | The markdown Previous-stage block cites no redirect/URL-shortening domain | every URL under the 'Previous Stage/Version' heading | the seed redirect-service domain list (tinyurl.com, bit.ly, goo.gl, ow.ly, t.co, is.gd, buff.ly, rebrand.ly, tiny.cc, cutt.ly, shorturl.at, rb.gy, purl.oclc.org) | BLOCKER | md | - |
+| 172 | The DOCX-native rendered cover's This/Previous/Latest-version fields cite no redirect/URL-shortening domain | every URL (visible text or href) between the This/Previous/Latest-version labels on the rendered HTML cover | the seed redirect-service domain list | BLOCKER | docx | - |
+| 173 | Plain-prose anchor text that names oasis-open.org does not link to a redirect/URL-shortening domain (markdown source) | the visible/anchor text of every `[shown](target)` (md) or `&lt;a&gt;shown&lt;/a&gt;` (html) construct whose shown text is not itself a URL (a shown-is-a-URL mismatch is the existing link-mismatch check's territory) | the seed redirect-service domain list, gated on the anchor text literally containing 'oasis-open.org' | BLOCKER | all | - |
+| 174 | Plain-prose anchor text that names oasis-open.org does not link to a redirect/URL-shortening domain (HTML render) | the visible/anchor text of every `[shown](target)` (md) or `&lt;a&gt;shown&lt;/a&gt;` (html) construct whose shown text is not itself a URL (a shown-is-a-URL mismatch is the existing link-mismatch check's territory) | the seed redirect-service domain list, gated on the anchor text literally containing 'oasis-open.org' | BLOCKER | all | - |
+| 175 | A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain (markdown source) | the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct | the seed redirect-service domain list, gated on the sentence window literally containing 'oasis-open.org' | BLOCKER | all | - |
+| 176 | A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain (HTML render) | the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct | the seed redirect-service domain list, gated on the sentence window literally containing 'oasis-open.org' | BLOCKER | all | - |
 
 ### uri-chars
 
@@ -621,7 +626,7 @@ No underscore may appear in a document (cover-page) URI (Naming Directives v1.7 
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 172 | No underscore appears in a This/Latest-stage document URI | the percent-decoded path of each This-stage and Latest-stage cover URI | Naming Directives v1.7 s3: '_' is barred from any filename or directory name used in a document URI | BLOCKER | md | - |
+| 177 | No underscore appears in a This/Latest-stage document URI | the percent-decoded path of each This-stage and Latest-stage cover URI | Naming Directives v1.7 s3: '_' is barred from any filename or directory name used in a document URI | BLOCKER | md | - |
 
 ### version-naming
 
@@ -629,9 +634,9 @@ The version directory and delivery filenames must agree on one vN.N(.N) version.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 173 | Version directory matches the vN.N(.N) convention | the version directory name from the package path | the Naming Directives version-segment pattern vN.N(.N), e.g. v1.0, v2.0.1 | BLOCKER | all | - |
-| 174 | Version embedded in the delivery filename agrees with the version directory | the version segment embedded in the delivery filename stem | the version directory the package publishes under | BLOCKER | all | - |
-| 175 | Delivery filename embeds the version segment | the delivery filename stem | the Naming Directives filename shape &lt;base&gt;-&lt;version&gt;-&lt;stage&gt; | WARN | all | - |
+| 178 | Version directory matches the vN.N(.N) convention | the version directory name from the package path | the Naming Directives version-segment pattern vN.N(.N), e.g. v1.0, v2.0.1 | BLOCKER | all | - |
+| 179 | Version embedded in the delivery filename agrees with the version directory | the version segment embedded in the delivery filename stem | the version directory the package publishes under | BLOCKER | all | - |
+| 180 | Delivery filename embeds the version segment | the delivery filename stem | the Naming Directives filename shape &lt;base&gt;-&lt;version&gt;-&lt;stage&gt; | WARN | all | - |
 
 ### vml-fallback
 
@@ -639,7 +644,7 @@ VML-only images in Word HTML renders are invisible in every modern browser.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 176 | Every VML image has an &lt;![if !vml]&gt; img fallback | the counts of v:imagedata elements and vml-fallback img tags | fallback count must cover VML count (the invisible-cover-logo class) | BLOCKER | all | - |
+| 181 | Every VML image has an &lt;![if !vml]&gt; img fallback | the counts of v:imagedata elements and vml-fallback img tags | fallback count must cover VML count (the invisible-cover-logo class) | BLOCKER | all | - |
 
 ### xml-namespace
 
@@ -647,11 +652,12 @@ Every namespace a packaged .xsd/.wsdl/.rng declares as its own must be a docs.oa
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 177 | An http(s) namespace's tail matches the docs.oasis-open.org/[tc-shortname]/ns/xxxx pattern | targetNamespace on the root of each packaged .xsd/.wsdl (incl. wsdl:types-embedded schemas), and the ns attribute on the root grammar/element of each .rng | Naming Directives s8 pattern http(s)://docs.oasis-open.org/[tc-shortname]/ns/xxxx, xxxx restricted to the s3 sixty-four-character set plus internal '/', terminating in '/', '#', or alphanumeric; BLOCKER when the tc-shortname has no pattern-grandfather allowlist entry | BLOCKER | all | - |
-| 178 | A pattern-mismatched namespace's tc-shortname is a confirmed-approved pre-2012 pattern grandfather | the same pattern-mismatched namespace URI, matched against the pattern-grandfather allowlist | Naming Directives v1.2 s9: pre-2012 practice 'may be grandfathered, if approved by Project Administration': WARN when listed but approval is not machine-confirmable at check time | WARN | all | - |
-| 179 | The same namespace tail is declared under one scheme only, package-wide | every http(s) namespace URI declared by any packaged .xsd/.wsdl(+embedded)/.rng in the package, grouped by scheme-stripped tail | Naming Directives s8: 'While either "http" or "https" may be used ... they are not interchangeable. One or the other must be used consistently.' | BLOCKER | all | - |
-| 180 | A urn:-scheme declared namespace's TC is on the URN-grandfather allowlist | the urn:-scheme namespace URI and its owning tc-shortname | Naming Directives s8: URN-based namespaces 'must not be declared otherwise', permitted only for TCs that already used the feature (or Maintenance Activity TCs), approved by Project Administration | BLOCKER | all | - |
-| 181 | A RELAX NG grammar declares only one namespace, on its root grammar/element node | every ns attribute on non-root nodes of a .rng file, compared to the root node's ns | this check only validates the root-level self-declared namespace; a differing non-root ns is flagged for manual review rather than silently dropped | WARN | all | - |
+| 182 | The XML namespace checks are not silently skipped when the cover gives no This-stage base URL | the This-stage base URL the front-matter check derives from the cover | a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED | BLOCKER | all | - |
+| 183 | An http(s) namespace's tail matches the docs.oasis-open.org/[tc-shortname]/ns/xxxx pattern | targetNamespace on the root of each packaged .xsd/.wsdl (incl. wsdl:types-embedded schemas), and the ns attribute on the root grammar/element of each .rng | Naming Directives s8 pattern http(s)://docs.oasis-open.org/[tc-shortname]/ns/xxxx, xxxx restricted to the s3 sixty-four-character set plus internal '/', terminating in '/', '#', or alphanumeric; BLOCKER when the tc-shortname has no pattern-grandfather allowlist entry | BLOCKER | all | - |
+| 184 | A pattern-mismatched namespace's tc-shortname is a confirmed-approved pre-2012 pattern grandfather | the same pattern-mismatched namespace URI, matched against the pattern-grandfather allowlist | Naming Directives v1.2 s9: pre-2012 practice 'may be grandfathered, if approved by Project Administration': WARN when listed but approval is not machine-confirmable at check time | WARN | all | - |
+| 185 | The same namespace tail is declared under one scheme only, package-wide | every http(s) namespace URI declared by any packaged .xsd/.wsdl(+embedded)/.rng in the package, grouped by scheme-stripped tail | Naming Directives s8: 'While either "http" or "https" may be used ... they are not interchangeable. One or the other must be used consistently.' | BLOCKER | all | - |
+| 186 | A urn:-scheme declared namespace's TC is on the URN-grandfather allowlist | the urn:-scheme namespace URI and its owning tc-shortname | Naming Directives s8: URN-based namespaces 'must not be declared otherwise', permitted only for TCs that already used the feature (or Maintenance Activity TCs), approved by Project Administration | BLOCKER | all | - |
+| 187 | A RELAX NG grammar declares only one namespace, on its root grammar/element node | every ns attribute on non-root nodes of a .rng file, compared to the root node's ns | this check only validates the root-level self-declared namespace; a differing non-root ns is flagged for manual review rather than silently dropped | WARN | all | - |
 
 ---
 

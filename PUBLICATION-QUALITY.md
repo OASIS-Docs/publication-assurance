@@ -63,7 +63,7 @@ must pass before the audit closes.
 
 **The dovetail.** Step 4b of the intake checklist is: re-run oasis-pub-check, on
 our side, with the identical code, and triage every finding. Your entire
-181-check validation layer plugs into the audit as one step. Both sides run
+187-check validation layer plugs into the audit as one step. Both sides run
 the same code, so acceptance is mechanical on both ends. Your green run
 predicts our green run; TC Administration still runs its own.
 
@@ -91,14 +91,14 @@ The checks group into six areas:
 
 | Area | Checks | What it protects |
 |---|---|---|
-| Naming and stages | 40 | stage tokens per the current [Naming Directives](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html), version directories, delivery filenames, multi-part numbering, permitted characters, the Version identifier in the title, live revision collisions |
-| Front matter and links | 45 | This/Previous/Latest stage URL blocks, whether the cited previous-stage document actually retrieves, internal anchors, cited-but-missing files, dead mail addresses, link-target mismatches, URI aliasing |
+| Naming and stages | 41 | stage tokens per the current [Naming Directives](https://docs.oasis-open.org/specGuidelines/ndr/namingDirectives.html), version directories, delivery filenames, multi-part numbering, permitted characters, the Version identifier in the title, live revision collisions |
+| Front matter and links | 46 | This/Previous/Latest stage URL blocks, whether the cited previous-stage document actually retrieves, internal anchors, cited-but-missing files, dead mail addresses, link-target mismatches, URI aliasing |
 | Content residue | 19 | editor TODOs, placeholder sections, unresolved Authors, stale pandoc headers, pandoc caption syntax printed as text, working titles |
-| Rendering and sync | 33 | PDF built from the same revision as the HTML, embedded fonts vs the package's own CSS, printed body text size vs the declared size, image policy and figure width, page numbers in the PDF's contents, code blocks published unchanged from the Markdown, Word render fidelity |
-| Template and policy | 23 | required front-matter sections, the [TC Process](https://www.oasis-open.org/policies-guidelines/tc-process/) Conformance requirement and clause stability, RFC 2119/8174 citation, the public-review companion files |
-| Package hygiene | 21 | junk files, recursive symlinks, schema `$id` vs publish path, manifest sha256, XML namespace form, ODT container integrity |
+| Rendering and sync | 34 | PDF built from the same revision as the HTML, embedded fonts vs the package's own CSS, printed body text size vs the declared size, image policy and figure width, page numbers in the PDF's contents, code blocks published unchanged from the Markdown, Word render fidelity |
+| Template and policy | 24 | required front-matter sections, the [TC Process](https://www.oasis-open.org/policies-guidelines/tc-process/) Conformance requirement and clause stability, RFC 2119/8174 citation, the public-review companion files |
+| Package hygiene | 23 | junk files, recursive symlinks, schema `$id` vs publish path, manifest sha256, XML namespace form, ODT container integrity |
 
-The six areas partition all 181 conditions: `pub-check/render_checks_md.py`
+The six areas partition all 187 conditions: `pub-check/render_checks_md.py`
 asserts that every check class sits in exactly one area and that the areas sum
 to the registry total, and `tests/test_advertised_counts.py` pins the six
 figures above against the registry.
@@ -114,11 +114,11 @@ and what it compares that value against, is
 tool's own condition registry, and `--list-checks` reports the counts from
 the code.
 
-98 of the 181 conditions trace to a verbatim clause of written OASIS policy.
+98 of the 187 conditions trace to a verbatim clause of written OASIS policy.
 [`pub-check/AUTHORITIES.md`](pub-check/AUTHORITIES.md) gives the clause for
 each, and the corpus those clauses were quoted from ships beside it in
 [`pub-check/corpus/`](pub-check/corpus/), hashed, so your TC can check any of
-them. The other 83 are operational rules from correction rounds, with no
+them. The other 89 are operational rules from correction rounds, with no
 single written clause behind them; `pub-check/crosswalk.json` says which are
 which.
 
