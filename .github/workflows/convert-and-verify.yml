@@ -68,7 +68,7 @@ on:
         description: The publication-assurance release whose tools run; leave as is
         required: false
         type: string
-        default: v1.15.0
+        default: v1.15.1
 
 permissions:
   contents: read

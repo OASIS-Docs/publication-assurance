@@ -26,6 +26,10 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.15.1 - 2026-10-14
+
 PATCH: a fix inside existing checks, no new criteria.
 
 - **Which file is the package's source**: a Word package whose stage root
