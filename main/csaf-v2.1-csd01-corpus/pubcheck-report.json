@@ -440,7 +440,7 @@
       "applies": "all",
       "condition": "No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS)",
       "pulls": "prose of the markdown and HTML (code blocks stripped)",
-      "compares_to": "the phrase 'Will be filled in' must not occur",
+      "compares_to": "the template placeholder 'Will be filled in' (after an opening bracket, or opening a line, list item, quote, table cell or element) must not occur; the phrase inside a sentence is prose",
       "severity": "WARN"
     },
     {

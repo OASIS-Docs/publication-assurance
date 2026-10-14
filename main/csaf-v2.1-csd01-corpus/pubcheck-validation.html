@@ -52,7 +52,7 @@ code{font-size:7.5pt}
 </style></head><body><main>
 <h1>Publication Validation Report (pub-check): CSAF v2.1 CSD01 (corpus)</h1><dl>
 <dt>Target</dt><dd><code>examples/csaf/v2.1/csd01</code></dd>
-<dt>Validation date</dt><dd>2026-10-08</dd>
+<dt>Validation date</dt><dd>2026-10-14</dd>
 <dt>Tool</dt><dd>oasis_pub_check.py (OASIS-Docs/publication-assurance)</dd>
 <dt>Coverage</dt><dd>181 individual checks across 61 check classes, all run</dd>
 <dt>Blockers</dt><dd>1</dd>
@@ -159,7 +159,7 @@ code{font-size:7.5pt}
 <tr><td class="n">30</td><td class="r PASS">PASS</td><td><code>residue</code></td><td class="t">No editor TODO markers left in prose</td><td class="t f">scanned: html, markdown</td><td class="t">the patterns TODO(...) and TODO: must not occur</td></tr>
 <tr><td class="n">31</td><td class="r PASS">PASS</td><td><code>residue</code></td><td class="t">No bare &#x27;tbd&#x27; placeholder sections</td><td class="t f">scanned: html, markdown</td><td class="t">no line consisting solely of &#x27;tbd&#x27;</td></tr>
 <tr><td class="n">32</td><td class="r PASS">PASS</td><td><code>residue</code></td><td class="t">No template editor-instruction text left in the published prose</td><td class="t f">scanned: html, markdown</td><td class="t">the OASIS Board-approved work product templates, which state that &#x27;All template instructions ... need to be deleted prior to publication&#x27;; an imperative to remove/delete something &#x27;before publication&#x27; or &#x27;prior to publication&#x27; surviving in the prose means an instruction block reached publication</td></tr>
-<tr><td class="n">33</td><td class="r PASS">PASS</td><td><code>residue</code></td><td class="t">No &#x27;Will be filled in&#x27; placeholders (early-stage tolerated, must resolve before CS)</td><td class="t f">scanned: html, markdown</td><td class="t">the phrase &#x27;Will be filled in&#x27; must not occur</td></tr>
+<tr><td class="n">33</td><td class="r PASS">PASS</td><td><code>residue</code></td><td class="t">No &#x27;Will be filled in&#x27; placeholders (early-stage tolerated, must resolve before CS)</td><td class="t f">scanned: html, markdown</td><td class="t">the template placeholder &#x27;Will be filled in&#x27; (after an opening bracket, or opening a line, list item, quote, table cell or element) must not occur; the phrase inside a sentence is prose</td></tr>
 <tr><td class="n">34</td><td class="r PASS">PASS</td><td><code>html-title</code></td><td class="t">HTML title carries no working residue</td><td class="t f">title: Common Security Advisory Framework Version 2.1</td><td class="t">must not end in tmp, draft, or wip</td></tr>
 <tr><td class="n">35</td><td class="r PASS">PASS</td><td><code>html-title</code></td><td class="t">HTML title is a plausible document title</td><td class="t f">title: Common Security Advisory Framework Version 2.1</td><td class="t">a full spec title (at least 8 characters)</td></tr>
 <tr><td class="n">36</td><td class="r PASS">PASS</td><td><code>html-residue</code></td><td class="t">No stale pandoc title-block header in the HTML</td><td class="t f">title_block_headers: 0; runner_paths: 0; markdown_caption_or_attribute_text: 0</td><td class="t">the &lt;header id=&quot;title-block-header&quot;&gt; element must be absent (lint D2)</td></tr>

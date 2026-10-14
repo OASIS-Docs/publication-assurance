@@ -1,7 +1,7 @@
 # Publication Validation Report (pub-check): CSAF v2.1 CSD01 (corpus)
 
 **Target:** ` examples/csaf/v2.1/csd01 `  
-**Validation date:** 2026-10-08  
+**Validation date:** 2026-10-14  
 **Tool:** oasis_pub_check.py (OASIS-Docs/publication-assurance)  
 **Coverage:** 181 individual checks across 61 check classes, all run  
 **Blockers:** 1  
@@ -115,7 +115,7 @@ Every one of the 181 individual conditions, with the value the check pulled from
 | 30 | PASS | residue | No editor TODO markers left in prose | scanned: html, markdown | the patterns TODO(...) and TODO: must not occur |
 | 31 | PASS | residue | No bare 'tbd' placeholder sections | scanned: html, markdown | no line consisting solely of 'tbd' |
 | 32 | PASS | residue | No template editor-instruction text left in the published prose | scanned: html, markdown | the OASIS Board-approved work product templates, which state that 'All template instructions ... need to be deleted prior to publication'; an imperative to remove/delete something 'before publication' or 'prior to publication' surviving in the prose means an instruction block reached publication |
-| 33 | PASS | residue | No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS) | scanned: html, markdown | the phrase 'Will be filled in' must not occur |
+| 33 | PASS | residue | No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS) | scanned: html, markdown | the template placeholder 'Will be filled in' (after an opening bracket, or opening a line, list item, quote, table cell or element) must not occur; the phrase inside a sentence is prose |
 | 34 | PASS | html-title | HTML title carries no working residue | title: Common Security Advisory Framework Version 2.1 | must not end in tmp, draft, or wip |
 | 35 | PASS | html-title | HTML title is a plausible document title | title: Common Security Advisory Framework Version 2.1 | a full spec title (at least 8 characters) |
 | 36 | PASS | html-residue | No stale pandoc title-block header in the HTML | title\_block\_headers: 0; runner\_paths: 0; markdown\_caption\_or\_attribute\_text: 0 | the &lt;header id="title-block-header"&gt; element must be absent (lint D2) |
