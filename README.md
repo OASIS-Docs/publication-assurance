@@ -67,6 +67,15 @@ input and output, Markdown rendering before the checks, report-only runs,
 several documents in one repository, fork pull requests, pinning and
 upgrades, and troubleshooting.
 
+### Reading the result
+
+The job summary opens with the outcome in one line, "Publishable" or "Not
+publishable: N blockers, M warnings", then a table of the blockers: where each
+one is (file and line), what is wrong in plain English, and how to fix it. On
+a pull request the same findings are marked on the changed lines, and one
+comment, updated on every run, carries the table and what was fixed since the
+last run: [docs/ADOPTING.md](docs/ADOPTING.md#what-a-committee-sees).
+
 ### Finding the report
 
 Each run commits its report files to the `pubcheck-reports` branch and
@@ -200,6 +209,8 @@ publication-assurance/
 │   ├── criteria.yaml                #   the acceptance criteria themselves, with their quotes
 │   ├── corpus/                      #   the 25 snapshotted policy pages + MANIFEST.json (sha256)
 │   ├── render_summary.py            #   the Step Summary renderer the Action calls
+│   ├── tc_view.py                   #   outcome line, what-to-fix tables, annotations, PR comment
+│   ├── plain_language.py            #   plain-English text for every check class
 │   ├── validation_report.py         #   the full Validation Report from one --json run
 │   ├── publish_report.py            #   commits a run's reports to the pubcheck-reports branch
 │   ├── advance_stage.py             #   cuts the next stage of a Markdown spec (dry run by default)
