@@ -36,6 +36,10 @@ permissions:
   # and link it; with read the checks run the same and the summary says why
   # nothing was published.
   contents: write
+  # write lets the action post the result as one pull request comment and
+  # update it on every run; without it the run logs a warning and nothing
+  # else changes.
+  pull-requests: write
 
 jobs:
   pub-check:

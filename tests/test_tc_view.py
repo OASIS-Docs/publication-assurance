@@ -392,3 +392,11 @@ def test_every_condition_override_names_a_registered_condition():
 def tc_view_conditions() -> set[tuple[str, str, str]]:
     import oasis_pub_check
     return {(c["check"], c["sig"], c["severity"]) for c in oasis_pub_check.conditions_inventory()}
+
+
+def test_a_finding_that_names_its_file_is_placed_at_the_value_it_quotes(tmp_path):
+    stage = package(tmp_path)
+    (stage / "schema" / "a.json").write_text('{\n  "title": "a",\n  "$id": "https://x.example/v9/a.json"\n}\n')
+    pkg = tc_view.Package(str(stage))
+    msg = "schema/a.json: $id is 'https://x.example/v9/a.json' but the file publishes under 'https://y/'."
+    assert pkg.locate(f("BLOCKER", "schema-id", msg)) == ("schema/a.json", 3)

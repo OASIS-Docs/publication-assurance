@@ -282,6 +282,16 @@ CONDITIONS: dict[tuple[str, str, str], tuple[str, str]] = {
     ("pdf-legibility", "pdftotext -bbox failed", "WARN"): (
         "The size of the text in the PDF could not be measured.",
         "Rebuild the PDF, and check it opens and that its text can be selected and copied."),
+    ("schema-id", "not valid JSON (", "BLOCKER"): (
+        "A JSON file in the package is not valid JSON.",
+        "Correct the JSON syntax at the place the detail names."),
+    ("schema-id", "An implementer following the $id", "BLOCKER"): (
+        "A schema's $id is not the address the file will be published at.",
+        "Set the schema's $id to the file's address on docs.oasis-open.org (the detail gives "
+        "the folder it publishes under), or move the file so it publishes at its $id."),
+    ("schema-id", "disagrees with $id", "BLOCKER"): (
+        "A reference inside a schema does not match the schema's own $id.",
+        "Make the schema's references to itself use the same address as its $id."),
     ("conformance-structure", "Stability not verified - previous stage unavailable", "WARN"): (
         "The previous draft could not be fetched, so its Conformance clauses were not compared "
         "with this one.",

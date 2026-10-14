@@ -272,7 +272,7 @@ def test_a_summary_title_starting_with_a_dash_still_renders(tmp_path):
     result = subprocess.run(["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", summary],
                             cwd=work, env=env, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
-    assert "### Validation report: --csd01" in step_summary.read_text()
+    assert "### Every check in detail: --csd01" in step_summary.read_text()
 
 
 def test_a_live_check_that_reached_the_site_is_not_marked_offline(tmp_path):

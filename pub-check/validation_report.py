@@ -463,11 +463,13 @@ def render_html(rec: dict) -> str:
 
 
 def render_summary(rec: dict, report_files: str | None) -> str:
-    """The step-summary section: verdict, class table, and the condition
-    table collapsed. The condition table is left out, with a pointer to the
+    """The step-summary section: coverage, the class table and the condition
+    table, both collapsed. The condition table is left out, with a pointer to the
     report file, when it would push the summary past GitHub's size limit."""
-    lines = [f"### Validation report: {md_text(rec['title'])}", "",
-             f"**{verdict(rec)}** {result_line(rec)} "
+    # The outcome already opens the summary (render_summary.py); this section
+    # is the detail under it, so it repeats no verdict.
+    lines = [f"### Every check in detail: {md_text(rec['title'])}", "",
+             f"{result_line(rec)} "
              f"{rec['total_checks']} individual checks across {rec['total_classes']} "
              "check classes, all run.", ""]
     if report_files:

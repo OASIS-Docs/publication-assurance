@@ -15,7 +15,8 @@ Where a finding is: the checker's messages do not carry a location field, so
 it is read from the message, deterministically, in this order:
   1. "markdown line N" / "HTML line N" in the message: that line of the
      package's main Markdown or HTML file.
-  2. A message that opens with a package file's path and a colon: that file.
+  2. A message that opens with a package file's path and a colon: that file,
+     at the first line holding a phrase or address the message quotes.
   3. A quoted phrase (8 characters or more) or a web address in the message
      that occurs verbatim in the package's Markdown, then HTML: its first line.
   4. A check about the PDF: the package's PDF, with no line.
@@ -142,11 +143,16 @@ class Package:
             n = int(m.group(2))
             if rel and 0 < n <= len(self.lines(rel)):
                 return rel, n
-        head = msg.split(": ", 1)[0]
-        if head in self.files:
-            return head, None
         snippets = sorted(set(QUOTED.findall(msg)) | {u.rstrip(".,;:") for u in URL.findall(msg)},
                           key=len, reverse=True)
+        head = msg.split(": ", 1)[0]
+        if head in self.files:
+            # The message names the file; a quoted value from it gives the line.
+            for s in snippets:
+                n = self.find(s, head)
+                if n:
+                    return head, n
+            return head, None
         for rel in (md, page):
             if not rel:
                 continue
