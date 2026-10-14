@@ -270,6 +270,11 @@ CONDITIONS: dict[tuple[str, str, str], tuple[str, str]] = {
         "A 'Will be filled in' placeholder is still in the document.",
         "This is fine for an early draft. Replace it with the final text before the document "
         "becomes a Committee Specification."),
+    ("pdf-sync", "expected only as a previous-stage reference", "WARN"): (
+        "The PDF cites another version of this specification, where only the previous "
+        "version is expected.",
+        "Check each such link is meant to point at that other version; if not, change it to "
+        "this version's address and rebuild the PDF."),
     ("pdf-sync", "pdftotext not on PATH", "WARN"): (
         "The PDF could not be compared with the HTML on this machine.",
         "Nothing to change in the document. Compare the PDF's cover page with the HTML by eye."),

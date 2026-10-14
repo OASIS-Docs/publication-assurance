@@ -13,8 +13,9 @@ finding, a count or an exit code.
 
 Where a finding is: the checker's messages do not carry a location field, so
 it is read from the message, deterministically, in this order:
-  1. "markdown line N" / "HTML line N" in the message: that line of the
-     package's main Markdown or HTML file.
+  1. "markdown line N" / "HTML line N" (or "Line N:" opening the message, or
+     "Markdown lines N, M, ..." where the first is used) in the message: that
+     line of the package's Markdown or HTML delivery file.
   2. A message that opens with a package file's path and a colon: that file,
      at the first line holding a phrase or address the message quotes.
   3. A quoted phrase (8 characters or more) or a web address in the message
@@ -64,7 +65,7 @@ COMMENT_LIMIT = 60_000    # GitHub refuses a comment body over 65,536 characters
 MARKER = "<!-- oasis-publication-checks: {slot} -->"
 STATE = re.compile(r"<!-- oasis-publication-checks-state: ([A-Za-z0-9+/=]*) -->")
 PDF_CLASSES = {"pdf-cover", "pdf-fonts", "pdf-legibility", "pdf-sync", "pdf-toc-pages", "generator"}
-LINE_IN_MESSAGE = re.compile(r"\b(markdown|html)\s+line\s+(\d+)", re.I)
+LINE_IN_MESSAGE = re.compile(r"\b(markdown|html)\s+lines?\s+\(?(\d+)", re.I)   # a list: its first line
 JSON_POSITION = re.compile(r"\bline (\d+) column \d+")
 LINE_AT_START = re.compile(r"^Line (\d+): ")   # the Markdown checks' own form (md-links, fence-collapse)
 DIGITS = re.compile(r"\d+")

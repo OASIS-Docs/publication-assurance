@@ -586,3 +586,9 @@ def test_invalid_json_is_placed_where_the_parser_stopped(tmp_path):
     except ValueError as exc:
         msg = f"schema/a.json: not valid JSON ({exc})"
     assert tc_view.Package(str(stage)).locate(f("BLOCKER", "schema-id", msg)) == ("schema/a.json", 3)
+
+
+def test_a_list_of_markdown_lines_is_placed_at_the_first(tmp_path):
+    pkg = tc_view.Package(str(package(tmp_path)))
+    msg = "3 code fence(s) carry trailing text in the info string (Markdown lines 4, 6, 8)."
+    assert pkg.locate(f("WARN", "fence-collapse", msg)) == ("x-v1.0-csd01.md", 4)
