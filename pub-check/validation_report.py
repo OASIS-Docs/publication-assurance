@@ -472,8 +472,9 @@ def render_summary(rec: dict, report_files: str | None) -> str:
              f"{result_line(rec)} "
              f"{rec['total_checks']} individual checks across {rec['total_classes']} "
              "check classes, all run.", ""]
-    if report_files:
-        lines += [f"**Full report files:** {md_text(report_files)}", ""]
+    # Where the report files are is said once, above, in the committee's
+    # terms (render_summary.py); report_files names them only when the
+    # condition table has to be left out.
     lines += ["<details>", f"<summary>Every check class ({rec['total_classes']}) and its "
               "result</summary>", ""] + md_class_table(rec) + ["", "</details>"]
     detail = ["", "<details>",

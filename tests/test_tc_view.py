@@ -601,3 +601,39 @@ def test_what_was_resolved_comes_straight_after_the_outcome():
     body = tc_view.comment_body(b, tc_view.rows(b, None, env={}), "t", previous)
     assert body.index("**Publishable (1 warning to review)**") < body.index("Resolved since the last run (1)") \
         < body.index("<details>"), body
+
+
+def test_with_publishing_off_the_summary_never_mentions_the_setting(tmp_path):
+    """Lead review of v1.15.0: "Report not published: publishing is off
+    (`publish-branch` is empty)" is workflow plumbing a committee does not
+    need. Runs the action's checks, publish and summary steps as the runner
+    does, with publish-branch empty."""
+    steps = action_steps()
+    gate = next(s["run"] for s in steps if s.get("id") == "pubcheck")
+    publish = next(s["run"] for s in steps if s.get("id") == "publish")
+    summary = next(s["run"] for s in steps if s.get("name") == "Write step summary")
+    work, temp = tmp_path / "work", tmp_path / "rt"
+    temp.mkdir()
+    stage = stage_from_corpus(work / "d", CSAF_CSD01)
+    out, step_summary = tmp_path / "out", tmp_path / "summary.md"
+    env = {"PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin", "ACTION_PATH": str(REPO_ROOT),
+           "TARGET": str(stage.relative_to(work)), "EXTRA_ARGS": "", "REPORT_DIR": "pubcheck-report",
+           "SUMMARY_TITLE": "", "RUNNER_TEMP": str(temp), "GITHUB_OUTPUT": str(out),
+           "GITHUB_WORKSPACE": str(work), "GITHUB_STEP_SUMMARY": str(step_summary),
+           "PUB_CHECK_OFFLINE": "1", "PUBLISH_BRANCH": "", "PUBLISH_TOKEN": "",
+           "GITHUB_REPOSITORY": "o/r", "GITHUB_RUN_ID": "7", "GITHUB_SERVER_URL": "https://github.com"}
+    subprocess.run(["bash", "-c", gate], cwd=work, env=env, capture_output=True, text=True)
+    outputs = dict(line.split("=", 1) for line in out.read_text().splitlines())
+    pub = subprocess.run(["bash", "-c", publish], cwd=work, env=env, capture_output=True, text=True)
+    assert pub.returncode == 0, pub.stderr
+    assert "publish-branch" not in pub.stdout and "Artifacts on this run's page" in pub.stdout
+    env["EXIT_CODE"] = outputs["exit_code"]
+    result = subprocess.run(["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", summary],
+                            cwd=work, env=env, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    text = step_summary.read_text()
+    assert "## OASIS publication checks: " in text and "Every check in detail" in text
+    assert "publish-branch" not in text and "Report not published" not in text, text[:3000]
+    assert "written on the runner" not in text and "follow-up step" not in text
+    assert "listed under **Artifacts** at the bottom of this run's page" in text
+    assert text.count("Full report files") == 1, "said once, not again with runner paths"

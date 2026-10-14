@@ -291,8 +291,13 @@ def pages_site(api: str, repo: str, token: str, branch: str) -> tuple[str | None
 
 def links_block(title: str, verdict: str, urls: dict, note: str, pages_why: str,
                 branch: str, run_url: str) -> str:
-    """The summary block: labelled links first, the verdict under them."""
+    """The summary block: labelled links first, the verdict under them.
+    With publishing off there is nothing to link, and the setting is the
+    workflow's business, not the committee's: no block at all (the summary
+    above it already says where the report files are)."""
     md = validation_report.md_text
+    if not urls and not branch:
+        return ""
     lines = [f"### Validation report: {md(title)}", "", f"**{verdict}**", ""]
     if not urls:
         return "\n".join(lines + [f"Report not published: {md(note)}. The report files for this "
@@ -422,11 +427,15 @@ def main() -> int:
         notice = f"PDF (opens in GitHub): {urls['pdf']}"
     elif urls:
         notice = f"Markdown report: {urls['md']}"
+    elif not args.branch:
+        notice = f"The full report files are under Artifacts on this run's page: {run_url}"
     else:
         notice = f"Report not published: {note}. Files for this run: {run_url}"
     print(f"::notice title=Validation report::{command_data(notice)}")
     block = links_block(title, verdict, urls, note, pages_why, args.branch, run_url)
-    if args.links_md:
+    if args.links_md and not block:
+        open(args.links_md, "w").close()
+    elif args.links_md:
         with open(args.links_md, "w") as f:
             f.write(block)
     else:
