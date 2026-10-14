@@ -76,8 +76,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # lets the action publish the report to the pubcheck-reports branch
-  # pages: read    # uncomment in a private repository that uses Step 2
+  contents: write        # lets the action publish the report to the pubcheck-reports branch
+  pull-requests: write   # lets the action post the result as a comment on a pull request
+  # pages: read          # uncomment in a private repository that uses Step 2
 
 jobs:
   pub-check:
@@ -85,7 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: OASIS-Docs/publication-assurance@v1.14.0
+      - uses: OASIS-Docs/publication-assurance@v1.15.0
         with:
           target: work/v1.0/csd01   # EDIT: your stage directory or package .zip
 
@@ -144,6 +145,13 @@ address; without it the HTML link opens the source view.
 1. Push any commit, or open **Actions > pub-check > Run workflow** and
    select **Run workflow**.
 2. In the **Actions** tab, select the run. Its **Summary** page opens.
+   The first thing on it is the outcome, in one line: **Publishable**, or
+   **Not publishable: N blockers, M warnings**. Under it is a table of the
+   blockers, one row each, giving where the problem is (the file and line,
+   linked to that line at the commit when the file is in the repository),
+   what is wrong in plain English, and how to fix it, with the checks' own
+   wording in small type as the detail. The warnings are in a second table,
+   folded away under the first. See [What a committee sees](#what-a-committee-sees).
 3. Scroll to the block headed **Validation report:** followed by your
    document's title. Under the verdict are the report links:
    **HTML report (opens in browser)** once Step 2 is done, or
@@ -172,6 +180,26 @@ blocker only staff can clear; see [Local runs](#local-runs).)
 
 To fix a blocker, edit the source, commit, and push. The next run checks
 the new commit and publishes a new report.
+
+### What a committee sees
+
+Every run states its result in the same words in four places, so an editor
+can follow the issues from whichever one they use:
+
+| Where | What it shows |
+|---|---|
+| The run's **Summary** page | The outcome line; the blockers table (where, what is wrong, how to fix it); the warnings table, folded; then the full findings list and the per-check tables, folded |
+| The changed files | On a pull request's **Files changed** tab, each blocker is marked as an error and each warning as a warning on the line it concerns, when the checks can tell the line. GitHub shows at most 10 of each per run; one notice counts the rest, which are all in the summary |
+| A pull request comment | On a pull request, one comment from the workflow carries the outcome and the same tables, and a list of what was fixed since the previous run. Each run updates that comment rather than adding a new one. It needs `pull-requests: write` (the Quick start workflow has it); without it the run logs a warning and nothing else changes. A pull request from a fork never gets that permission |
+| The report files | The Markdown, HTML and PDF reports open with the same outcome and tables, with no row limit, for anyone reading the report outside GitHub |
+
+The plain-English text comes from a fixed table with one entry for every
+check class (`pub-check/plain_language.py`); the checks' own message for each
+finding is shown beside it, so nothing is hidden. Where a finding is on a
+particular line is read from that message: a line number it gives, or the
+first line of the document that holds the text or web address it quotes. A
+finding the checks cannot tie to a line is shown as "Whole document", or
+against the file it names. A `.zip` target gets no file locations.
 
 ## The Validation Report
 
@@ -291,10 +319,13 @@ All inputs except `target` are optional.
 | `python-version` | `3.x` | Python version the checks run on |
 | `install-poppler` | `true` | Installs `pdftotext` and `pdffonts` on Linux runners for the PDF cross-checks. Without them those conditions report NA |
 | `report-dir` | `pubcheck-report` | Where the report files are written in the job's working directory. `''` writes none |
-| `write-summary` | `true` | Writes the verdict, the findings and the report tables to the job summary |
+| `write-summary` | `true` | Writes the outcome, the tables of what to fix, the findings and the report tables to the job summary |
 | `publish-branch` | `pubcheck-reports` | The branch the reports are committed to. `''` turns publishing off |
 | `publish-token` | `${{ github.token }}` | The token that pushes the report branch and reads the Pages settings |
 | `fail-on-blockers` | `true` | Whether a blocker fails the step. `false` runs report-only: the report is written and published as usual, a warning names the blocker count, and the step passes. A target the checks cannot read still fails. See [Enforcing and report-only runs](#enforcing-and-report-only-runs) |
+| `annotations` | `true` | Marks each located blocker and warning on its file and line (GitHub annotations). `false` skips them |
+| `pr-comment` | `auto` | On a pull request, posts the outcome and the tables as one comment and updates it on every run. `auto` and `true` comment on `pull_request` and `pull_request_target` runs; `false` never comments. Needs `pull-requests: write` |
+| `pr-comment-token` | `${{ github.token }}` | The token that creates and updates the pull request comment |
 | `summary-title` | `''` (the target path is used) | Heading for this call's summary section, and the name of its folder on the report branch; set it when the action runs more than once in a job or matrix |
 
 ### Environment variables
@@ -307,7 +338,7 @@ Set these with `env:` on the checks step.
 | `PUBCHECK_CHROME` | Path of the browser that prints the PDF report. Unset, the action finds Chrome or Chromium itself, as on `ubuntu-latest`; with none, no PDF is written |
 
 ```yaml
-      - uses: OASIS-Docs/publication-assurance@v1.14.0
+      - uses: OASIS-Docs/publication-assurance@v1.15.0
         env:
           PUB_CHECK_OFFLINE: '1'   # only while docs.oasis-open.org is unreachable
         with:
@@ -374,7 +405,7 @@ An example that posts the blocker count as a notice:
 
 ```yaml
       - id: checks
-        uses: OASIS-Docs/publication-assurance@v1.14.0
+        uses: OASIS-Docs/publication-assurance@v1.15.0
         with:
           target: work/v1.0/csd01
 
@@ -430,7 +461,7 @@ permissions:
 
 env:
   PANDOC_VERSION: 3.8.2.1
-  PA_REF: v1.14.0          # the release whose render/render.sh renders
+  PA_REF: v1.15.0          # the release whose render/render.sh renders
 
 jobs:
   render-and-check:
@@ -460,7 +491,7 @@ jobs:
         run: _pa/render/render.sh dmlex-v1.1 dmlex-v1.1/schemas _publication
 
       - name: OASIS publication checks
-        uses: OASIS-Docs/publication-assurance@v1.14.0
+        uses: OASIS-Docs/publication-assurance@v1.15.0
         with:
           target: _publication/lexidma/dmlex/v1.1/wd01
 ```
@@ -482,7 +513,7 @@ through findings it inherited and has not yet decided. A target the checks
 cannot read (a wrong `target:` path) fails the step in either mode.
 
 ```yaml
-      - uses: OASIS-Docs/publication-assurance@v1.14.0
+      - uses: OASIS-Docs/publication-assurance@v1.15.0
         with:
           target: published/v1.0/os
           fail-on-blockers: false    # report only: blockers never fail the run
@@ -495,7 +526,7 @@ each entry can carry its own setting. Give each entry an `enforce` value,
 standard, and pass it to the action:
 
 ```yaml
-      - uses: OASIS-Docs/publication-assurance@v1.14.0
+      - uses: OASIS-Docs/publication-assurance@v1.15.0
         with:
           target: ${{ matrix.package.target }}
           fail-on-blockers: ${{ matrix.package.enforce }}
@@ -545,7 +576,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: OASIS-Docs/publication-assurance@v1.14.0
+      - uses: OASIS-Docs/publication-assurance@v1.15.0
         with:
           target: ${{ matrix.package.target }}
           summary-title: ${{ matrix.package.name }}
@@ -573,8 +604,9 @@ the workflow's `permissions:` block says. GitHub does this so that code
 from outside the repository cannot write to it. The checks themselves need no
 write access and run normally: the verdict, the red or green status, the
 job summary and the report files on the runner are all produced. Only
-publishing to the `pubcheck-reports` branch needs write access, so on a
-fork pull request nothing is pushed and the checks' result is unaffected. The
+publishing to the `pubcheck-reports` branch and the pull request comment
+need write access, so on a fork pull request nothing is pushed or posted,
+and the checks' result is unaffected (the comment step logs a warning). The
 job summary says why the report was not published, and the
 **Validation report** notice reads
 `Report not published: <reason>. Files for this run: <run address>`.
@@ -593,14 +625,14 @@ the report is not published and the rest of the run is unchanged. Setting
 
 ### Version pinning and upgrades
 
-Pin the action to a full release tag, such as `@v1.14.0`. The releases,
+Pin the action to a full release tag, such as `@v1.15.0`. The releases,
 with what each changed, are on the
 [releases page](https://github.com/OASIS-Docs/publication-assurance/releases)
 and in [CHANGELOG.md](../CHANGELOG.md).
 
 | Reference | Behaviour |
 |---|---|
-| `@v1.14.0` | A fixed release. Recommended |
+| `@v1.15.0` | A fixed release. Recommended |
 | `@<40-character commit SHA>` | Fixed and immune to a tag being moved. Use it where your organisation requires SHA pinning |
 | `@v1` | Moves to each new v1 release when it is published. Convenient, but a MINOR release can add a finding without any change on your side |
 | `@main` | Unreleased code. Never for a TC workflow |
@@ -608,7 +640,7 @@ and in [CHANGELOG.md](../CHANGELOG.md).
 To find the SHA of a release:
 
 ```bash
-git ls-remote https://github.com/OASIS-Docs/publication-assurance 'refs/tags/v1.14.0^{}'
+git ls-remote https://github.com/OASIS-Docs/publication-assurance 'refs/tags/v1.15.0^{}'
 ```
 
 To upgrade:
@@ -640,7 +672,7 @@ library, so it runs anywhere Python 3.10 or later does. The same code runs
 in the action.
 
 ```bash
-git clone --depth 1 --branch v1.14.0 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.15.0 https://github.com/OASIS-Docs/publication-assurance
 python3 publication-assurance/pub-check/oasis_pub_check.py path/to/your/stage-dir
 ```
 

@@ -26,12 +26,23 @@
 #         contents: read
 #       steps:
 #         - uses: actions/checkout@v5
-#         - uses: OASIS-Docs/publication-assurance@v1.14.0
+#         - uses: OASIS-Docs/publication-assurance@v1.15.0
 #           with:
 #             target: ${{ inputs.target }}
 #
 # The step fails (red CI) when the checks report one or more blockers; warnings
 # do not fail the build (the checks exit 0 on "publishable").
+#
+# What a committee member sees: the Step Summary opens with one line,
+# "Publishable" or "Not publishable: N blockers, M warnings", then a table of
+# the blockers (warnings collapsed under it), each row giving the file and line
+# (linked to the file at the commit), what is wrong in plain English and how to
+# fix it. Each located finding is also marked on the file (a GitHub annotation,
+# shown on a pull request's "Files changed" view), and on a pull request one
+# comment carries the same table and what was fixed since the last run; it is
+# updated in place on every run. The comment needs `pull-requests: write` in
+# the job's permissions; without it the run logs a warning and nothing else
+# changes. The downloadable reports open with the same outcome and table.
 #
 # By default the run page is now self-contained: a GitHub Step Summary shows
 # the verdict and full findings list (no need to open raw logs), and
@@ -93,6 +104,18 @@ inputs:
     description: "Whether a blocker fails the step. 'true' (default) is right for a working draft. 'false' runs report-only: blockers are reported, written and published exactly as before and raised as a ::warning annotation, and the step passes. Use it for a document that cannot change, such as a published OASIS Standard, or while a TC works through inherited findings. A target the checks cannot read (exit code 2) fails the step either way. The exit-code, blockers and warnings outputs are unchanged."
     required: false
     default: "true"
+  annotations:
+    description: "Mark each blocker and warning that has a location on its file and line (GitHub annotations, shown on a pull request's Files changed view). GitHub shows at most 10 errors and 10 warnings per step; the rest are counted in one notice and are all in the summary. Set to 'false' to skip."
+    required: false
+    default: "true"
+  pr-comment:
+    description: "Post the outcome and the table of findings as one pull request comment, updated in place on every run, with a list of what was fixed since the previous run. 'auto' (default) comments on pull_request and pull_request_target runs only; 'true' is the same; 'false' never comments. Needs `permissions: pull-requests: write`; without it the run logs a warning and the checks are unaffected."
+    required: false
+    default: "auto"
+  pr-comment-token:
+    description: "Token used to create and update the pull request comment."
+    required: false
+    default: ${{ github.token }}
   summary-title:
     description: "Label for the Step Summary heading. Defaults to the target path -- set this when calling the action more than once (e.g. in a matrix) so each section is distinguishable."
     required: false
@@ -231,12 +254,18 @@ runs:
         rm -f "$RUNNER_TEMP/pubcheck-validation.md" "$RUNNER_TEMP/pubcheck-validation.html" \
           "$RUNNER_TEMP/pubcheck-validation.pdf"
         validation_ok=0
+        # A stage directory lets each finding name its file and line; a zip's
+        # files are not in the repository, so it gets no locations.
+        PKG_ARGS=()
+        if [ -d "$TARGET" ]; then
+          PKG_ARGS=(--package-dir "$TARGET")
+        fi
         if python3 "$ACTION_PATH/pub-check/validation_report.py" \
             "$RUNNER_TEMP/oasis-pub-check.json" \
             --md "$RUNNER_TEMP/pubcheck-validation.md" \
             --html "$RUNNER_TEMP/pubcheck-validation.html" \
             --pdf "$RUNNER_TEMP/pubcheck-validation.pdf" \
-            --title="$SUMMARY_TITLE" --exit-code "$exit_code"; then
+            --title="$SUMMARY_TITLE" --exit-code "$exit_code" "${PKG_ARGS[@]}"; then
           validation_ok=1
           # The PDF needs headless Chrome (google-chrome on GitHub's Ubuntu
           # runners). Without one the renderer skips it and says why above.
@@ -283,6 +312,24 @@ runs:
 
         echo "oasis-pub-check exit code: ${exit_code}"
 
+    # Mark each located finding on its file and line. GitHub shows these on a
+    # pull request's "Files changed" view and on the run page. Never fails
+    # the checks.
+    - name: Mark the findings on the files
+      if: always() && steps.pubcheck.outputs.exit_code != '2' && inputs.annotations == 'true'
+      continue-on-error: true
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        TARGET: ${{ inputs.target }}
+      run: |
+        PKG_ARGS=()
+        if [ -d "$TARGET" ]; then
+          PKG_ARGS=(--package-dir "$TARGET")
+        fi
+        python3 "$ACTION_PATH/pub-check/tc_view.py" annotate \
+          "$RUNNER_TEMP/oasis-pub-check.json" "${PKG_ARGS[@]}"
+
     # Commit this run's report files to publish-branch and state their full
     # URLs. Never fails the checks: a reason is recorded instead, and a
     # publish that was tried and did not land exits 1, which marks only this
@@ -324,27 +371,36 @@ runs:
         TARGET: ${{ inputs.target }}
       run: |
         if [ "$EXIT_CODE" = 2 ]; then
-          {
-            echo "## pub-check: ${SUMMARY_TITLE:-$TARGET}"
-            echo ""
-            echo "**The target could not be read (exit code 2).** No report was produced. Check that \`$TARGET\` exists in the checked-out repository; the path is relative to the repository root and case-sensitive."
-            echo ""
-          } >> "$GITHUB_STEP_SUMMARY"
+          # The title and target come from the caller (a pull request can set
+          # them): escaped as plain text, never rendered as Markdown or HTML.
+          python3 - "$ACTION_PATH/pub-check" "${SUMMARY_TITLE:-$TARGET}" "$TARGET" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+        import sys
+        sys.path.insert(0, sys.argv[1])
+        from validation_report import md_code, md_text
+        print(f"## OASIS publication checks: {md_text(sys.argv[2])}\n")
+        print("**The target could not be read (exit code 2).** No report was "
+              f"produced. Check that {md_code(sys.argv[3])} exists in the checked-out repository; "
+              "the path is relative to the repository root and case-sensitive.\n")
+        PY
           exit 0
         fi
-        # The labelled report links first, so nobody has to scroll for them.
-        if [ -s "$RUNNER_TEMP/pubcheck-links.md" ]; then
-          cat "$RUNNER_TEMP/pubcheck-links.md" >> "$GITHUB_STEP_SUMMARY"
-        fi
+        # The outcome and what to fix first, then the report links, then the
+        # per-check tables, collapsed.
         REPORT_DIR_ARGS=()
         if [ -n "$REPORT_DIR" ]; then
           REPORT_DIR_ARGS=(--report-dir "$REPORT_DIR")
+        fi
+        if [ -d "$TARGET" ]; then
+          REPORT_DIR_ARGS+=(--package-dir "$TARGET")
         fi
         python3 "$ACTION_PATH/pub-check/render_summary.py" \
           "$RUNNER_TEMP/oasis-pub-check.json" \
           --txt "$RUNNER_TEMP/oasis-pub-check.txt" \
           --title="$SUMMARY_TITLE" \
           "${REPORT_DIR_ARGS[@]}"
+        if [ -s "$RUNNER_TEMP/pubcheck-links.md" ]; then
+          cat "$RUNNER_TEMP/pubcheck-links.md" >> "$GITHUB_STEP_SUMMARY"
+        fi
         # The readable per-check tables, when the report rendered.
         if [ -f "$RUNNER_TEMP/pubcheck-validation.md" ]; then
           FILES_ARGS=()
@@ -362,6 +418,29 @@ runs:
             "${FILES_ARGS[@]}" \
             || echo "::warning::validation tables could not be added to the step summary"
         fi
+
+    # One pull request comment per summary title, created once and updated
+    # on every run. A token without pull-requests: write (or a fork's pull
+    # request) gets a warning; the checks are unaffected either way.
+    - name: Comment on the pull request
+      if: >-
+        always() && steps.pubcheck.outputs.exit_code != '2' &&
+        (inputs.pr-comment == 'true' || inputs.pr-comment == 'auto') &&
+        (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
+      continue-on-error: true
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        TARGET: ${{ inputs.target }}
+        SUMMARY_TITLE: ${{ inputs.summary-title }}
+        PR_COMMENT_TOKEN: ${{ inputs.pr-comment-token }}
+      run: |
+        PKG_ARGS=()
+        if [ -d "$TARGET" ]; then
+          PKG_ARGS=(--package-dir "$TARGET")
+        fi
+        python3 "$ACTION_PATH/pub-check/tc_view.py" comment \
+          "$RUNNER_TEMP/oasis-pub-check.json" --title="${SUMMARY_TITLE:-$TARGET}" "${PKG_ARGS[@]}"
 
     - name: Enforce the check result
       if: always()

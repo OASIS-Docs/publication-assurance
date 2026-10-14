@@ -10,6 +10,11 @@ with its result (PASS, WARN, BLOCKER or NA), the value the check pulled from
 the package, and what that value was compared against. It is the same report
 OASIS staff produce at intake, so a TC's CI and the staff record read alike.
 
+The report opens with the outcome as a committee member reads it: one line
+("Publishable" or "Not publishable: N blockers, M warnings"), then each
+blocker and warning with where it is, what is wrong in plain English and how
+to fix it (tc_view.py). The per-check tables follow.
+
 Nothing is truncated in the condition table: the observed value is the
 evidence the table exists to show. The class table caps each class at five
 findings and points at the JSON record for the rest.
@@ -17,6 +22,7 @@ findings and points at the JSON record for the rest.
 Usage:
   validation_report.py <report.json> --md <out.md> [--html <out.html>] [--pdf <out.pdf>]
                        [--title <label>] [--exit-code N] [--date YYYY-MM-DD]
+                       [--package-dir <stage dir>]
                        [--step-summary [--report-files <text>]]
 
 <report.json> is the output of `oasis_pub_check.py --json <target>`.
@@ -179,7 +185,8 @@ def condition_rows(data: dict) -> list[dict]:
     return rows
 
 
-def build_record(data: dict, title: str, exit_code: int | None, date: str) -> dict:
+def build_record(data: dict, title: str, exit_code: int | None, date: str,
+                 package_dir: str | None = None) -> dict:
     by_class: dict[str, list[dict]] = {}
     for f in data["findings"]:
         by_class.setdefault(f["check"], []).append(f)
@@ -230,7 +237,16 @@ def build_record(data: dict, title: str, exit_code: int | None, date: str) -> di
         "blockers": sev["BLOCKER"], "severity_counts": sev,
         "publication_ready": sev["BLOCKER"] == 0,
         "classes": classes, "condition_detail": detail,
+        "findings": data["findings"], "package_dir": package_dir,
     }
+
+
+def outcome_rows(rec: dict) -> list[dict]:
+    """Each finding as tc_view.py words it, located in the package when the
+    package directory is known. Imported here, not at the top: tc_view
+    imports this module's Markdown helpers."""
+    from tc_view import rows
+    return rows(rec.get("findings", []), rec.get("package_dir"))
 
 
 def capped(findings: list[dict]) -> list[str]:
@@ -316,7 +332,10 @@ def md_condition_table(rec: dict) -> list[str]:
 
 
 def render_md(rec: dict) -> str:
-    lines = [f"# Publication Validation Report (pub-check): {md_text(rec['title'])}", ""]
+    from tc_view import outcome_md
+    lines = [f"# Publication Validation Report (pub-check): {md_text(rec['title'])}", "",
+             outcome_md(rec.get("findings", []), outcome_rows(rec), limit=None, level="##"),
+             "## Report details", ""]
     fields = [("Target", md_code(rec["target"])), ("Validation date", rec["date"]),
               ("Tool", rec["tool"]),
               ("Coverage", f"{rec['total_checks']} individual checks across "
@@ -367,6 +386,8 @@ td.PASS{color:var(--good);background:var(--goodbg)}td.BLOCKER{color:var(--bad);b
 td.WARN{color:var(--warn);background:var(--warnbg)}td.NA,td.INFO{color:var(--na);background:var(--nabg)}
 code{font-family:"JetBrains Mono",Menlo,monospace;font-size:12px}
 p.note{color:var(--muted)}
+.outcome .verdict{font-size:17px}
+.outcome small{color:var(--muted)}
 a{color:var(--accent)}
 @page{size:A4 landscape;margin:1.27cm}
 @media print{
@@ -399,7 +420,10 @@ def render_html(rec: dict) -> str:
     out = ["<!DOCTYPE html>", '<html lang="en"><head><meta charset="utf-8">',
            '<meta name="viewport" content="width=device-width, initial-scale=1">',
            f"<title>pub-check Validation Report</title><style>{CSS}</style></head><body><main>",
-           f"<h1>Publication Validation Report (pub-check): {e(rec['title'])}</h1><dl>"]
+           f"<h1>Publication Validation Report (pub-check): {e(rec['title'])}</h1>"]
+    from tc_view import outcome_html
+    out += [outcome_html(rec.get("findings", []), outcome_rows(rec)),
+            "<h2>Report details</h2><dl>"]
     fields = [("Target", f"<code>{e(rec['target'])}</code>"), ("Validation date", e(rec["date"])),
               ("Tool", e(rec["tool"])),
               ("Coverage", f"{rec['total_checks']} individual checks across "
@@ -439,16 +463,19 @@ def render_html(rec: dict) -> str:
 
 
 def render_summary(rec: dict, report_files: str | None) -> str:
-    """The step-summary section: verdict, class table, and the condition
-    table collapsed. The condition table is left out, with a pointer to the
+    """The step-summary section: coverage, the class table and the condition
+    table, both collapsed. The condition table is left out, with a pointer to the
     report file, when it would push the summary past GitHub's size limit."""
-    lines = [f"### Validation report: {md_text(rec['title'])}", "",
-             f"**{verdict(rec)}** {result_line(rec)} "
+    # The outcome already opens the summary (render_summary.py); this section
+    # is the detail under it, so it repeats no verdict.
+    lines = [f"### Every check in detail: {md_text(rec['title'])}", "",
+             f"{result_line(rec)} "
              f"{rec['total_checks']} individual checks across {rec['total_classes']} "
              "check classes, all run.", ""]
     if report_files:
         lines += [f"**Full report files:** {md_text(report_files)}", ""]
-    lines += md_class_table(rec)
+    lines += ["<details>", f"<summary>Every check class ({rec['total_classes']}) and its "
+              "result</summary>", ""] + md_class_table(rec) + ["", "</details>"]
     detail = ["", "<details>",
               f"<summary>All {rec['total_checks']} individual conditions: observed vs "
               "expected</summary>", ""] + md_condition_table(rec) + ["", "</details>"]
@@ -634,6 +661,9 @@ def main() -> int:
     ap.add_argument("--exit-code", type=int, default=None,
                     help="the gate's own exit code, recorded in the report")
     ap.add_argument("--date", default=datetime.datetime.now(datetime.timezone.utc).date().isoformat())
+    ap.add_argument("--package-dir", default=None,
+                    help="the checked stage directory, so each finding in the opening "
+                         "summary names its file and line; omit it for a zip target")
     ap.add_argument("--step-summary", action="store_true",
                     help="append the report tables to $GITHUB_STEP_SUMMARY")
     ap.add_argument("--report-files", default=None,
@@ -653,7 +683,7 @@ def main() -> int:
               file=sys.stderr)
         return 2
 
-    rec = build_record(data, args.title, args.exit_code, args.date)
+    rec = build_record(data, args.title, args.exit_code, args.date, args.package_dir)
     with open(args.md, "w") as f:
         f.write(render_md(rec))
     if args.html:

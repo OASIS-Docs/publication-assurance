@@ -499,7 +499,7 @@ def test_a_hostile_title_reaches_every_step_summary_block_as_plain_text(files, t
     assert result.returncode == 0, result.stderr
     section = summary.read_text()
     heading = section.split("\n", 1)[0]
-    assert heading.startswith("## pub-check: "), heading
+    assert heading.startswith("## OASIS publication checks: "), heading
     assert_inert(heading)
     assert f"`` {PAYLOAD} `x` ``" in section, section
     fence = section.split("<summary>Full findings list (ordered)</summary>\n\n", 1)[1].split("\n")[0]

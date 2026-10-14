@@ -28,6 +28,73 @@ Each version is anchored by a git tag on this repository.
 
 Nothing yet.
 
+## v1.15.0 - 2026-10-14
+
+MINOR: the result as a committee reads it. The checks themselves are
+unchanged (187 conditions across 61 classes) except that the residue check
+now names the line of each editor note, below. Exit codes, the
+`fail-on-blockers` behaviour and every output keep their meaning.
+
+A committee asked to see the outcome easily and to follow what the issues
+are. Every run now says the same thing in four places:
+
+- **The job summary** opens with one line, `Publishable` or
+  `Not publishable: N blockers, M warnings`, then a table of the blockers:
+  where each one is (the file and line, linked to that line at the commit
+  when the file is in the repository), what is wrong in plain English, and
+  how to fix it, with the checks' own message beside it as the detail. The
+  warnings follow in a second table, folded. The full findings list and the
+  per-check tables stay below, folded; the per-check section is now headed
+  `Every check in detail` and no longer repeats the verdict.
+- **Annotations**: each blocker and warning the checks can tie to a line is
+  marked on that file and line (`::error` / `::warning`), so a pull
+  request's Files changed tab shows it in place. GitHub shows 10 of each per
+  step; one notice counts the rest. New input `annotations` (default
+  `true`).
+- **A pull request comment**: on `pull_request` and `pull_request_target`
+  runs, one comment per summary title carries the outcome and the tables,
+  and lists what was fixed since the previous run. Each run updates it in
+  place; a comment someone else wrote is never edited. New inputs
+  `pr-comment` (`auto`, the default, comments on pull requests only;
+  `false` never) and `pr-comment-token` (default `github.token`). It needs
+  `permissions: pull-requests: write`; without it, or on a fork's pull
+  request, the step logs a warning and nothing else changes. The Quick
+  start workflow and `examples/consumer-workflow.yml` now grant it.
+- **The report files**: the Markdown, HTML and PDF Validation Reports open
+  with the same outcome and tables, with no row limit, for editors who do
+  not use GitHub.
+
+The plain English comes from `pub-check/plain_language.py`: one entry for
+every check class, plus condition-level wording where a class's text would
+misdescribe a condition (a check that could not run, a placeholder that is
+fine in an early draft, a schema `$id`, and others). A test fails if a check
+class has no entry or an entry names a condition the checker does not
+register. Where a finding is comes from its own message, deterministically
+(`pub-check/tc_view.py`): a line number it gives, a JSON parser's position,
+or the first line of the delivery file that holds the address or text it
+quotes, preferring a link target over the same address as cover text. The
+files are the checker's own delivery items, never a `-DIFF` PDF or a comment
+resolution log. A `.zip` target is not located.
+
+- **residue**: `Editor TODO left in markdown line N: 'TODO:'` and
+  `'tbd' placeholder section left in markdown line N.` now name the line
+  (the code-block blanking keeps line numbers). Before, every TODO in a file
+  produced the same message, which the checker merges, so a document with
+  three TODOs reported one blocker; it now reports three, one per line to
+  fix. This is the only change to a count.
+- The unreadable-target summary (exit code 2) now escapes the summary title
+  and the target as plain text, as every other summary block already did.
+
+An independent adversarial review built counterexamples against the first
+draft; each is pinned by a test in `tests/test_tc_view.py`: dual-link
+warnings placed on the cover line instead of the link (52 of 64 in the
+corpus), findings placed on a `-DIFF` PDF or a larger comment log, a moved
+TODO listed as resolved while still present, a dangling symlink in the stage
+failing the summary step, a pasted marker making the action edit someone
+else's comment, an edited state block breaking every later update, a comment
+over GitHub's size limit, `NOT EVALUATED` findings described as defects,
+"Same as above" across two different conditions, and line drift on U+2028.
+
 ## v1.14.0 - 2026-10-14
 
 MINOR: six new conditions (181 to 187 across the same 61 classes), the

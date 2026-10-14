@@ -875,10 +875,15 @@ def check_residue(md_text: str, html_text: str, f: Findings) -> None:
     f.observe("residue", scanned=[k for k, t in (("markdown", md_text), ("html", html_text)) if t])
     for label, text in (("markdown", strip_code_blocks(md_text, "md")),
                         ("html", strip_code_blocks(html_text, "html"))):
+        # Each marker names its line (code blanking keeps line numbers), so an
+        # editor can go to it, and two markers are two findings, not one.
         for m in re.finditer(r"TODO\([^)]*\)|TODO:", text):
-            f.add(BLOCKER, "residue", f"Editor TODO left in {label}: '{m.group(0)}'")
+            line = text.count("\n", 0, m.start()) + 1
+            f.add(BLOCKER, "residue", f"Editor TODO left in {label} line {line}: '{m.group(0)}'")
         for m in re.finditer(r"(?i)^\s*tbd\.?\s*$", text, re.M):
-            f.add(BLOCKER, "residue", f"'tbd' placeholder section left in {label}.")
+            # \s* can open on the blank lines above: count to the word itself.
+            line = text.count("\n", 0, m.start() + m.group(0).lower().index("tbd")) + 1
+            f.add(BLOCKER, "residue", f"'tbd' placeholder section left in {label} line {line}.")
         if FILL_IN_PLACEHOLDER_RE.search(text):
             f.add(WARN, "residue",
                   f"'Will be filled in …' placeholder present in {label} (acceptable for an "
