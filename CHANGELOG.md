@@ -26,6 +26,10 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.14.0 - 2026-10-14
+
 MINOR: six new conditions (181 to 187 across the same 61 classes), the
 NOT EVALUATED reports below; the other entries are fixes inside existing
 checks.
