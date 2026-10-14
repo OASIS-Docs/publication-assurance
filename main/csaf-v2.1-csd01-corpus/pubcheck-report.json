@@ -218,6 +218,15 @@
       "severity": "WARN"
     },
     {
+      "check": "revision-collision",
+      "sig": "NOT EVALUATED: whether this stage is already published",
+      "applies": "all",
+      "severity": "BLOCKER/WARN",
+      "condition": "The live-site collision check is not silently skipped when the cover gives no This-stage base URL",
+      "pulls": "the This-stage base URL the front-matter check derives from the cover",
+      "compares_to": "a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED"
+    },
+    {
       "check": "filenames",
       "sig": "No delivery items found",
       "applies": "all",
@@ -720,6 +729,26 @@
       "severity": "BLOCKER"
     },
     {
+      "check": "schema-id",
+      "sig": "NOT EVALUATED: the schemas' $id values",
+      "applies": "all",
+      "requires": "schemas",
+      "condition": "The schema $id checks are not silently skipped when the cover gives no This-stage base URL",
+      "pulls": "the This-stage base URL the front-matter check derives from the cover",
+      "compares_to": "a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED",
+      "severity": "BLOCKER"
+    },
+    {
+      "check": "pdf-sync",
+      "sig": "NOT EVALUATED: the PDF front matter",
+      "applies": "all",
+      "requires": "pdftotext",
+      "condition": "The PDF This-stage URL cross-check is not silently skipped when the cover gives no This-stage base URL",
+      "pulls": "the This-stage base URL the front-matter check derives from the cover",
+      "compares_to": "a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED",
+      "severity": "BLOCKER"
+    },
+    {
       "check": "pdf-sync",
       "sig": "pdftotext not on PATH",
       "applies": "all",
@@ -811,6 +840,15 @@
       "condition": "The HTML carries a stylesheet",
       "pulls": "the HTML's <link rel=stylesheet> and <style> elements",
       "compares_to": "at least one styling source must be present",
+      "severity": "BLOCKER"
+    },
+    {
+      "check": "package-refs",
+      "sig": "NOT EVALUATED: the files the spec cites",
+      "applies": "md",
+      "condition": "The cited-file check is not silently skipped when the cover gives no This-stage base URL",
+      "pulls": "the This-stage base URL the front-matter check derives from the cover",
+      "compares_to": "a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED",
       "severity": "BLOCKER"
     },
     {
@@ -1618,6 +1656,15 @@
       "severity": "WARN"
     },
     {
+      "check": "public-review-metadata",
+      "sig": "NOT EVALUATED: the public review metadata file",
+      "applies": "all",
+      "severity": "BLOCKER/WARN",
+      "condition": "The public-review-metadata check on a csd/cnd is not silently skipped when the cover gives no This-stage base URL",
+      "pulls": "the This-stage base URL the front-matter check derives from the cover",
+      "compares_to": "a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED"
+    },
+    {
       "check": "comment-resolution-log",
       "sig": "resembling the required comment-resolution-log is present but misnamed",
       "applies": "all",
@@ -1732,6 +1779,15 @@
       "condition": "A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain (HTML render)",
       "pulls": "the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct",
       "compares_to": "the seed redirect-service domain list, gated on the sentence window literally containing 'oasis-open.org'",
+      "severity": "BLOCKER"
+    },
+    {
+      "check": "xml-namespace",
+      "sig": "NOT EVALUATED: the XML namespaces",
+      "applies": "all",
+      "condition": "The XML namespace checks are not silently skipped when the cover gives no This-stage base URL",
+      "pulls": "the This-stage base URL the front-matter check derives from the cover",
+      "compares_to": "a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED",
       "severity": "BLOCKER"
     },
     {
