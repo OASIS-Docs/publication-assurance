@@ -55,4 +55,4 @@ def test_a_missing_target_says_so_once_without_a_traceback(tmp_path):
     assert "Traceback" not in result.stderr
     text = step_summary.read_text()
     assert "The target could not be read (exit code 2)" in text
-    assert "`work/v2.1/CSD01`" in text
+    assert "` work/v2.1/CSD01 `" in text   # a code span, escaped as every summary block is

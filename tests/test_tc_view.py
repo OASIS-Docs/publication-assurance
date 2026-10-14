@@ -592,3 +592,12 @@ def test_a_list_of_markdown_lines_is_placed_at_the_first(tmp_path):
     pkg = tc_view.Package(str(package(tmp_path)))
     msg = "3 code fence(s) carry trailing text in the info string (Markdown lines 4, 6, 8)."
     assert pkg.locate(f("WARN", "fence-collapse", msg)) == ("x-v1.0-csd01.md", 4)
+
+
+def test_what_was_resolved_comes_straight_after_the_outcome():
+    a = [f("BLOCKER", "residue", "Editor TODO left in markdown line 8: 'TODO:'"), f("WARN", "md-links", "w")]
+    b = [f("WARN", "md-links", "w")]
+    previous = tc_view.decode_state(tc_view.comment_body(a, tc_view.rows(a, None, env={}), "t", None))
+    body = tc_view.comment_body(b, tc_view.rows(b, None, env={}), "t", previous)
+    assert body.index("**Publishable (1 warning to review)**") < body.index("Resolved since the last run (1)") \
+        < body.index("<details>"), body

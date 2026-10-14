@@ -449,31 +449,36 @@ def resolved(previous: list[dict], rs: list[dict]) -> list[dict]:
 
 def comment_body(findings: list[dict], rs: list[dict], title: str, previous: list[dict] | None,
                  run_url: str = "", sha: str = "") -> str:
+    """The comment: the outcome line, then what was fixed since the last run
+    (the news, so above the tables), then the tables, the footer and the state."""
     slot = slot_for(title)
-    lines = [MARKER.format(slot=slot), f"### OASIS publication checks: {md_text(title)}", "",
-             outcome_md(findings, rs, level="####")]
     gone = resolved(previous or [], rs)
+    news = []
     if gone:
-        lines += [f"#### Resolved since the last run ({len(gone)})", ""]
+        news += [f"#### Resolved since the last run ({len(gone)})", ""]
         for p in gone[:TABLE_LIMIT]:
             what = explain(p.get("c", ""), p.get("d", ""), p.get("s", ""))[0]
-            detail = f" Found was: {md_cell(p['d'])}" if p.get("d") else ""
-            lines.append(f"- {md_cell(what)}{detail}")
+            detail = f" Last found: {md_cell(p['d'])}" if p.get("d") else ""
+            news.append(f"- {md_cell(what)}{detail}")
         if len(gone) > TABLE_LIMIT:
-            lines.append(f"- ...and {len(gone) - TABLE_LIMIT} more.")
-        lines.append("")
+            news.append(f"- ...and {len(gone) - TABLE_LIMIT} more.")
+        news.append("")
     foot = "This comment is updated on every run."
     if sha:
         foot = f"Checked commit {sha[:7]}. " + foot
     if run_url:
         foot += f" [Full report and run details]({run_url})."
-    lines += [f"<sub>{foot}</sub>", "", f"<!-- oasis-publication-checks-state: {encode_state(rs)} -->"]
-    body = "\n".join(lines)
-    for limit in (5, 0):
+    tail = [f"<sub>{foot}</sub>", "", f"<!-- oasis-publication-checks-state: {encode_state(rs)} -->"]
+
+    def build(limit: int) -> str:
+        head, rest = outcome_md(findings, rs, limit=limit, level="####").split("\n\n", 1)
+        return "\n".join([MARKER.format(slot=slot), f"### OASIS publication checks: {md_text(title)}",
+                          "", head, ""] + news + [rest] + tail)
+
+    for limit in (TABLE_LIMIT, 5, 0):
+        body = build(limit)
         if len(body) <= COMMENT_LIMIT:
             break
-        lines[3] = outcome_md(findings, rs, limit=limit, level="####")
-        body = "\n".join(lines)
     return body
 
 
