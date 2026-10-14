@@ -431,6 +431,27 @@ def find_delivery_items(stage_dir: str,
     return out
 
 
+def authoritative_source(items: dict[str, str], stage_dir: str) -> str:
+    """The format of the package's authoritative source: the Markdown, else the
+    Word file, else the ODT, but a source named for the stage wins over one
+    that is not. find_delivery_items falls back to the shortest stem per
+    format, so a Word package whose stage root also holds a README.md or a
+    comment-resolution-log.md was read as a Markdown package, with that file
+    as its source. '' when the package has no source format at all."""
+    sources = [k for k in ("md", "docx", "odt") if k in items]
+    named = [k for k in sources if named_for_stage(items[k], stage_dir)]
+    return (named or sources or [""])[0]
+
+
+def named_for_stage(path: str, stage_dir: str) -> bool:
+    """True when the file's stem ends in -<stage>, the delivery-item naming, or
+    in -<stage>-partN-name, the multi-part form the filenames check accepts."""
+    stage = os.path.basename(os.path.normpath(stage_dir))
+    stem = os.path.splitext(os.path.basename(path))[0]
+    return stem.endswith(f"-{stage}") or bool(
+        re.search(rf"-{re.escape(stage)}-part\d+-[a-z0-9-]+$", stem))
+
+
 def auxiliary_files(stage_dir: str, items: dict[str, str]) -> list[str]:
     delivery = {os.path.basename(p) for p in items.values()}
     out = []
@@ -2715,13 +2736,11 @@ def emit_manifest(stage_dir: str, version: str, stage: str) -> str:
     # else the Word file, else the ODT. Tagging only .md as authoritative
     # listed the authoritative .docx of a Word-authored package as "other"
     # (KMIP Usage Guide v3.0 cnd02, Oct 2026).
-    # A source named for the stage wins over the shortest-stem fallback, so a
-    # Word package's comment-resolution-log.md is not taken for its source.
+    # The same source run() checks as authoritative (authoritative_source), so
+    # a Word package's comment-resolution-log.md is not taken for its source.
     delivery = find_delivery_items(stage_dir, ("md", "docx", "odt", "html", "pdf"))
-    sources = [delivery[k] for k in ("md", "docx", "odt") if k in delivery]
-    named = [q for q in sources
-             if os.path.splitext(os.path.basename(q))[0].endswith(f"-{stage}")]
-    source = (named or sources or [""])[0]
+    source_ext = authoritative_source(delivery, stage_dir)
+    source = delivery[source_ext] if source_ext else ""
     items = []
     for root, _dirs, files in os.walk(stage_dir):
         for name in sorted(files):
@@ -7621,6 +7640,17 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
         f.add(BLOCKER, "filenames", f"No delivery items found in {stage_dir}")
         return
 
+    # A source file not named for the stage is not the package's source when
+    # one that is named for it sits beside it (a Word package with a stray
+    # README.md); it is left to the checks that report auxiliary files.
+    # Only when the source itself is named for the stage: with nothing named
+    # for it (a pre-rename working package) every file stays checked, so the
+    # filenames check still reports each one.
+    source = authoritative_source(items, stage_dir)
+    if source and named_for_stage(items[source], stage_dir):
+        for k in ("md", "docx", "odt"):
+            if k in items and k != source and not named_for_stage(items[k], stage_dir):
+                del items[k]
     md_text = read_text(items["md"]) if "md" in items else ""
     html_text = read_text(items["html"]) if "html" in items else ""
     is_word = "docx" in items and "md" not in items

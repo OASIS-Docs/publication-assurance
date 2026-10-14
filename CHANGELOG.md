@@ -26,7 +26,20 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+PATCH: a fix inside existing checks, no new criteria.
+
+- **Which file is the package's source**: a Word package whose stage root
+  also held a `README.md` or a `-comment-resolution-log.md` was read as a
+  Markdown package with that file as its source, because the delivery-item
+  lookup falls back to the shortest stem per format. Every front-matter check
+  then ran on the README and blocked. A source named for the stage (including
+  the `-<stage>-partN-name` multi-part form) now wins over one that is not; a
+  stage-named `.md` still makes the package a Markdown package, and with
+  nothing named for the stage every file stays checked, so the filenames
+  check still reports each one. `run()` and `--emit-manifest` use the same
+  rule. The adversarial review found the two last cases and they are pinned.
+  No corpus package's findings change. Pinned by
+  `tests/test_word_package_stray_md.py`.
 
 ## v1.15.0 - 2026-10-14
 
