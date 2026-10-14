@@ -28,6 +28,22 @@ Each version is anchored by a git tag on this repository.
 
 Nothing yet.
 
+## v1.15.2 - 2026-10-14
+
+PATCH: plainer job summary wording, no change to any check.
+
+- **Job summary wording** (`pub-check/publish_report.py`, `pub-check/render_summary.py`,
+  `pub-check/validation_report.py`): with `publish-branch: ''` the summary no longer
+  shows "Report not published: publishing is off (`publish-branch` is empty)" with a
+  second copy of the verdict. That is a choice in the workflow, not something a
+  committee acts on, so there is no report-links block at all, and the notice says the
+  full report files are under Artifacts on the run page. The `report-publish-note`
+  output is unchanged. The report-files sentence no longer speaks of files "written on
+  the runner" and a "follow-up step": it names the folder and says it is listed under
+  Artifacts at the bottom of the run page when the workflow uploads it, and the
+  per-check section no longer repeats it as a list of file paths. Pinned by
+  `tests/test_tc_view.py::test_with_publishing_off_the_summary_never_mentions_the_setting`.
+
 ## v1.15.1 - 2026-10-14
 
 PATCH: a fix inside existing checks, no new criteria.

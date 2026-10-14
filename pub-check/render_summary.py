@@ -10,10 +10,9 @@ outcome ("Publishable" or "Not publishable: N blockers, M warnings"), a table
 of the blockers and a collapsed table of the warnings, each row giving where
 the problem is, what is wrong in plain English and how to fix it (tc_view.py),
 then the full ordered findings list in a collapsible fenced block, and -- when --report-dir
-is given -- the exact report file paths written on the runner, so a caller
-who forgets to add an upload-artifact step is still told where the files
-are, and a caller who does upload them still gets a starting point before
-its own follow-up step (if any) appends the precise artifact-url.
+is given -- one plain sentence saying where the full report files are: the
+folder the workflow writes, listed under Artifacts on the run page when the
+workflow uploads it.
 
 Usage:
   render_summary.py <report.json> [--txt <report.txt>] [--title <label>]
@@ -67,13 +66,10 @@ def build_section(report: dict, title: str, txt_body: str | None,
             "",
         ]
     if report_dir:
-        txt_path = f"{report_dir}/pubcheck-report.txt"
-        json_path = f"{report_dir}/pubcheck-report.json"
         lines += [
-            f"**Report files:** {md_code(txt_path)}, {md_code(json_path)} (written on the "
-            "runner). If this workflow uploads them as a build artifact, a "
-            "follow-up step below states the download link directly; "
-            "otherwise check this run's Artifacts section.",
+            f"**Full report files:** the workflow writes them to the {md_code(report_dir)} "
+            "folder. When it uploads that folder, it is listed under **Artifacts** at the "
+            "bottom of this run's page, ready to download.",
             "",
         ]
     lines.append("---")

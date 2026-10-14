@@ -327,8 +327,9 @@ def test_publishing_off_leaves_the_repository_alone_and_says_why(tmp_path, files
     assert r.returncode == 0
     assert out["report_publish_note"] == "publishing is off (`publish-branch` is empty)"
     assert out["report_url_pdf"] == "" and out["report_url_folder"] == ""
-    assert "Report not published: publishing is off" in links
-    assert "actions/runs/42" in links
+    assert links == "", "publishing off is the workflow's choice: no block in the summary"
+    assert "The full report files are under Artifacts on this run's page" in r.stdout
+    assert "actions/runs/42" in r.stdout and "publish-branch" not in r.stdout
     assert git(remote, "branch", "--list").split() == ["main"]
 
 
@@ -473,7 +474,13 @@ def test_a_hostile_title_reaches_every_step_summary_block_as_plain_text(files, t
                              f"--title={PAYLOAD}", "--links-md", str(links)],
                             capture_output=True, text=True, env=env)
     assert result.returncode == 0, result.stderr
-    assert "Report not published: publishing is off" in links.read_text()
+    assert links.read_text() == ""   # publishing off: no block to escape
+    # Publishing on but impossible here (no repository in the environment):
+    # the block is written, with the hostile title, and must stay inert.
+    result = subprocess.run([sys.executable, str(PUBLISH), "--files", str(files), "--branch",
+                             "pubcheck-reports", f"--title={PAYLOAD}", "--links-md", str(links)],
+                            capture_output=True, text=True, env=env)
+    assert "Report not published" in links.read_text(), (result.stdout, result.stderr)
     assert_inert(links.read_text())
 
     summary = tmp_path / "summary.md"
