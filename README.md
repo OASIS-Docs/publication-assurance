@@ -11,7 +11,7 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
   <a href="NOTICE"><img alt="Criteria prose: OASIS verbatim-only" src="https://img.shields.io/badge/criteria_prose-OASIS_verbatim--only-446CAA"></a>
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776ab">
   <img alt="Dependencies: stdlib only" src="https://img.shields.io/badge/dependencies-stdlib_only-2f9e44">
-  <img alt="Checks: 181 individual, 61 classes" src="https://img.shields.io/badge/checks-181_individual_%C2%B7_61_classes-f08c00">
+  <img alt="Checks: 187 individual, 61 classes" src="https://img.shields.io/badge/checks-187_individual_%C2%B7_61_classes-f08c00">
   <img alt="Regression corpus: 12 packages" src="https://img.shields.io/badge/regression_corpus-12_packages-6741d9">
 </p>
 
@@ -99,7 +99,7 @@ URL shapes and what happens when nothing is published:
 
 ## Publication acceptance test cases: an overview
 
-The 181 individual checks (61 check classes; `--list-checks` asserts the
+The 187 individual checks (61 check classes; `--list-checks` asserts the
 inventory from the code) cover six areas:
 
 - **Naming and stages**: stage tokens, version directories, filename
@@ -132,7 +132,7 @@ candidate whose blocker set TC Administration had already established by hand.
 
 ![How a criterion is sourced from policy](assets/authority.png?v=181)
 
-Every acceptance criterion cites the rule it enforces. 98 of the 181 checks
+Every acceptance criterion cites the rule it enforces. 98 of the 187 checks
 trace to a verbatim clause in the governing corpus; the rest are operational
 rules from correction rounds. The full criterion-to-clause map, with the exact
 quoted text and its source, is [`AUTHORITIES.md`](pub-check/AUTHORITIES.md).
@@ -150,7 +150,7 @@ tool's own registry, on every run.
 
 ![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=181)
 
-Your TC runs oasis-pub-check in its own CI to check all 181 conditions, each reported as the value the tool pulled from the
+Your TC runs oasis-pub-check in its own CI to check all 187 conditions, each reported as the value the tool pulled from the
 package set against the value it was compared to, in full. TC Administration
 re-runs the identical code at intake (checklist step 4b) and wraps it with the
 15 mandatory audit checks only a human or a live check can do: byte identity
@@ -190,7 +190,7 @@ publication-assurance/
 ├── CHANGELOG.md                     # Versioned audit trail: which issue drove which criteria
 ├── action.yml                       # The drop-in GitHub Action a TC calls in one step
 ├── pub-check/                       # The acceptance criteria
-│   ├── oasis_pub_check.py           #   181 individual checks in 61 classes, stdlib only
+│   ├── oasis_pub_check.py           #   187 individual checks in 61 classes, stdlib only
 │   ├── CHECKS.md                    #   the acceptance criteria catalog, generated from the code
 │   ├── AUTHORITIES.md               #   the criterion-to-clause map (verbatim OASIS policy)
 │   ├── render_checks_md.py          #   the generator (keeps CHECKS.md in sync)

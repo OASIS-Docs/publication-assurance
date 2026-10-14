@@ -86,3 +86,21 @@ def test_a_remark_under_a_numbered_heading_keeps_its_old_scope():
     remark = "An implementation conformant to this Profile MAY vary the"
     assert scopes[remark].startswith(remark) and "4.7.1" in scopes["Core Profile"]
 
+
+
+def test_a_wrapped_list_line_mentioning_a_profile_does_not_begin_one(tmp_path):
+    """The CSAF v2.1 draft (Oct 2026) wraps a list item inside clause 9.1.7 as
+    '    according to the profile specified in `$.document.category`'; with its
+    inline code blanked the line read as a profile title, and that 'profile'
+    took clauses 9.1.7 to 9.1.9 from the one they belong to."""
+    clauses = (
+        '### 3.1.1 Conformance Clause 1: Widget\n\n'
+        'A file satisfies the "Widget" conformance profile if it:\n\n* is a widget.\n\n'
+        '### 3.1.2 Conformance Clause 2: Widget Editor\n\n'
+        '* before saving:\n  - checks the required fields\n'
+        '    according to the profile specified in `$.document.category`\n'
+        '  - checks the rest\n\n'
+        '### 3.1.3 Conformance Clause 3: Widget Viewer\n\n* shows widgets.\n\n')
+    f = findings(HEAD + clauses + TAIL, tmp_path)
+    assert f.observed["conformance-structure"]["profiles_found"] == "1"
+    assert f.observed["conformance-structure"]["clauses_extracted"] == "3"

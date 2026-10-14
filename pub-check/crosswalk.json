@@ -11,9 +11,9 @@
   "missing": 30,
   "conditions_total": 96,
   "policy_grounded": 95,
-  "operational_extra": 82,
-  "total_conditions": 181,
-  "total_signatures": 177,
+  "operational_extra": 88,
+  "total_conditions": 187,
+  "total_signatures": 183,
   "policy_grounded_conditions": 98
  },
  "criteria": [
@@ -1335,6 +1335,11 @@
   },
   {
    "check": "package-refs",
+   "sig": "NOT EVALUATED: the files the spec cites",
+   "status": "operational-extra"
+  },
+  {
+   "check": "package-refs",
    "sig": "is not in the package: it will 404",
    "status": "operational-extra"
   },
@@ -1366,6 +1371,11 @@
   {
    "check": "pdf-legibility",
    "sig": "pdftotext -bbox failed",
+   "status": "operational-extra"
+  },
+  {
+   "check": "pdf-sync",
+   "sig": "NOT EVALUATED: the PDF front matter",
    "status": "operational-extra"
   },
   {
@@ -1421,6 +1431,11 @@
    "criteria": [
     "AC-FRONTMATTER-03"
    ]
+  },
+  {
+   "check": "public-review-metadata",
+   "sig": "NOT EVALUATED: the public review metadata file",
+   "status": "operational-extra"
   },
   {
    "check": "public-review-metadata",
@@ -1491,6 +1506,11 @@
   },
   {
    "check": "revision-collision",
+   "sig": "NOT EVALUATED: whether this stage is already published",
+   "status": "operational-extra"
+  },
+  {
+   "check": "revision-collision",
    "sig": "is already published at",
    "status": "policy-grounded",
    "criteria": [
@@ -1518,6 +1538,11 @@
   {
    "check": "schema-id",
    "sig": "An implementer following the $id",
+   "status": "operational-extra"
+  },
+  {
+   "check": "schema-id",
+   "sig": "NOT EVALUATED: the schemas' $id values",
    "status": "operational-extra"
   },
   {
@@ -1766,6 +1791,11 @@
   {
    "check": "vml-fallback",
    "sig": "browsers that ignore VML show nothing",
+   "status": "operational-extra"
+  },
+  {
+   "check": "xml-namespace",
+   "sig": "NOT EVALUATED: the XML namespaces",
    "status": "operational-extra"
   },
   {

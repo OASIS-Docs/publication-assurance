@@ -542,6 +542,53 @@ def check_version_naming(version: str, stem: str, f: Findings) -> None:
                   f"'-{version}-' (Naming Directives shape: <base>-{version}-<stage>).")
 
 
+def check_not_evaluated(base: str, stage_dir: str, version: str, stage: str,
+                        items: dict[str, str], f: Findings) -> None:
+    """The checks that need the This-stage base URL must not pass by silence
+    when the cover gives none. SARIF v2.2 csd01 (Oct 2026): an autolinked
+    cover URL failed to parse, base was empty, and schema-id returned early,
+    hiding a real $id BLOCKER behind a clean report. Each dependent check
+    that applies to this package now reports NOT EVALUATED with the reason.
+    The checks that read only the package always block: the This-stage
+    BLOCKER that explains the gap may itself be adjudicated as a tool false
+    positive (it was, on SARIF), and the skipped check must not go with it.
+    The two network checks block unless that BLOCKER already stands, and are
+    not reported offline (PUB_CHECK_OFFLINE), where they never run."""
+    if base:
+        return
+    blocked = any(x["severity"] == BLOCKER and x["check"] == "front-matter"
+                  and re.search(r"\bThis[- ](stage|version)\b", x["message"], re.I)
+                  for x in f.items)
+    net_sev = WARN if blocked else BLOCKER
+    why = (f"the cover's This-stage block gave no base URL for this package's "
+           f"/{version}/{stage}/ directory")
+    files = [n.lower() for _r, _d, fs in os.walk(stage_dir) for n in fs]
+    if os.getenv("PUB_CHECK_OFFLINE", "").lower() not in {"1", "true", "yes"}:
+        f.add(net_sev, "revision-collision",
+              f"NOT EVALUATED: whether this stage is already published could not be "
+              f"checked: {why}.")
+        if re.fullmatch(r"(csd|cnd)\d\d", stage or ""):
+            f.add(net_sev, "public-review-metadata",
+                  f"NOT EVALUATED: the public review metadata file could not be looked "
+                  f"for in the live stage directory: {why}.")
+    if any(n.endswith(".json") and n != "manifest.json" for n in files):
+        f.add(BLOCKER, "schema-id",
+              f"NOT EVALUATED: the schemas' $id values could not be compared with "
+              f"where they publish: {why}.")
+    if any(n.endswith((".xsd", ".wsdl", ".rng")) for n in files):
+        f.add(BLOCKER, "xml-namespace",
+              f"NOT EVALUATED: the XML namespaces could not be compared with the "
+              f"TC's namespace path: {why}.")
+    if "pdf" in items:
+        f.add(BLOCKER, "pdf-sync",
+              f"NOT EVALUATED: the PDF front matter could not be checked for the "
+              f"canonical This-stage URL: {why}.")
+    if "md" in items:
+        f.add(BLOCKER, "package-refs",
+              f"NOT EVALUATED: the files the spec cites under its own stage path "
+              f"could not be checked against the package: {why}.")
+
+
 def check_revision_collision(base: str, version: str, stage: str,
                              f: Findings) -> None:
     """A new submission's stage must not already exist on the live site: the
@@ -750,7 +797,12 @@ def check_front_matter(md_text: str, items: dict[str, str], version: str, stage:
                   f"This-stage URL points at '{name}' which is not a file in the package: {u}")
         else:
             seen_ext.add(os.path.splitext(name)[1].lstrip("."))
-            base = u.rsplit("/", 1)[0] + "/"
+            # Only a URL under this package's own /version/stage/ gives the
+            # base, as on the HTML cover: a cover copied from an earlier stage
+            # names real files under the wrong directory, and every check that
+            # reads base then compared the package with the wrong address.
+            if f"/{version}/" in u and f"/{stage}/" in u:
+                base = u.rsplit("/", 1)[0] + "/"
     for ext in ("md", "html", "pdf"):
         if this_urls and ext not in seen_ext:
             f.add(WARN, "front-matter", f"This-stage block does not list the .{ext} artifact.")
@@ -1917,8 +1969,6 @@ def check_pdf_cover(pdf_path: str, title: str, f: Findings) -> None:
 
 def check_schemas(stage_dir: str, base_this_stage: str, version: str, stage: str,
                   f: Findings) -> None:
-    if not base_this_stage:
-        return
     # $id convention: schemas identify at the version root (latest), not the stage path
     latest_root = base_this_stage.replace(f"/{stage}/", "/")
     _json_files = [n for r, _d, fs in os.walk(stage_dir) for n in fs if n.endswith(".json")]
@@ -1933,7 +1983,9 @@ def check_schemas(stage_dir: str, base_this_stage: str, version: str, stage: str
             except json.JSONDecodeError as e:
                 f.add(BLOCKER, "schema-id", f"{name}: not valid JSON ({e})")
                 continue
-            if not isinstance(doc, dict) or "$id" not in doc:
+            # Without a base URL only the parse above can run; the $id
+            # comparisons below are reported NOT EVALUATED by check_not_evaluated.
+            if not base_this_stage or not isinstance(doc, dict) or "$id" not in doc:
                 continue
             rel = os.path.relpath(path, stage_dir)
             expected = latest_root + rel.replace(os.sep, "/")
@@ -2654,6 +2706,17 @@ def check_manifest(stage_dir: str, f: Findings) -> None:
 
 
 def emit_manifest(stage_dir: str, version: str, stage: str) -> str:
+    # The authoritative source is the one run() checks as such: the Markdown,
+    # else the Word file, else the ODT. Tagging only .md as authoritative
+    # listed the authoritative .docx of a Word-authored package as "other"
+    # (KMIP Usage Guide v3.0 cnd02, Oct 2026).
+    # A source named for the stage wins over the shortest-stem fallback, so a
+    # Word package's comment-resolution-log.md is not taken for its source.
+    delivery = find_delivery_items(stage_dir, ("md", "docx", "odt", "html", "pdf"))
+    sources = [delivery[k] for k in ("md", "docx", "odt") if k in delivery]
+    named = [q for q in sources
+             if os.path.splitext(os.path.basename(q))[0].endswith(f"-{stage}")]
+    source = (named or sources or [""])[0]
     items = []
     for root, _dirs, files in os.walk(stage_dir):
         for name in sorted(files):
@@ -2662,8 +2725,10 @@ def emit_manifest(stage_dir: str, version: str, stage: str) -> str:
             p = os.path.join(root, name)
             rel = os.path.relpath(p, stage_dir).replace(os.sep, "/")
             ext = os.path.splitext(name)[1].lstrip(".").lower()
-            role = {"md": "authoritative", "html": "delivery", "pdf": "delivery",
+            role = {"html": "delivery", "pdf": "delivery",
                     "json": "schema"}.get(ext, "other")
+            if source and os.path.samefile(p, source):
+                role = "authoritative"
             items.append({"path": rel, "role": role, "sha256": sha256_file(p),
                           "bytes": os.path.getsize(p)})
     commit = os.environ.get("GITHUB_SHA", "")
@@ -3254,8 +3319,15 @@ def _split_profiles(span: str) -> dict[str, str]:
     unpunctuated titles."""
     # 'A Library does not satisfy the "X" conformance profile if ...' states
     # when a profile fails; it never begins one (OpenEoX eox-core csd01).
+    # A profile title begins with a capital or a digit. A wrapped list line
+    # that happens to mention a profile ('    according to the profile
+    # specified in `$.document.category`', its inline code blanked) begins
+    # lower case, and was taken for a new profile that swallowed the clauses
+    # after it (CSAF v2.1 draft, Oct 2026: three false "Clause number
+    # removed/renumbered" warnings for clauses 9.1.7 to 9.1.9).
     marks = [(m.start(), m.group(1).strip()) for m in PROFILE_HEADING_LINE.finditer(span)
-             if not PROFILE_NEGATION.search(m.group(0))]
+             if not PROFILE_NEGATION.search(m.group(0))
+             and not m.group(1).strip()[:1].islower()]
     if not marks:
         return {"(default)": span}
     # A profile named in a sentence directly under its clause heading
@@ -7626,6 +7698,7 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
     # single defects as doubles: residue ran twice, image-policy twelve
     # times. Findings.add now also suppresses identical repeats as a
     # backstop, but the call list itself stays deduplicated.)
+    check_not_evaluated(base, stage_dir, version, stage, items, f)
     check_revision_collision(base, version, stage, f)
     check_residue(md_text, html_text, f)
     check_member_uri(md_text, html_text, f)
@@ -7837,6 +7910,11 @@ CONDITION_DOCS: list[dict] = [
          condition="The submitted stage does not already exist on the live site",
          pulls="the HTTP status of the this-stage URL on docs.oasis-open.org",
          compares_to="expected non-200 for a NEW submission; an existing stage means the revision must increment"),
+    dict(check="revision-collision", sig="NOT EVALUATED: whether this stage is already published",
+         applies="all", severity="BLOCKER/WARN",  # dynamic: WARN when a This-stage BLOCKER already stands
+         condition="The live-site collision check is not silently skipped when the cover gives no This-stage base URL",
+         pulls="the This-stage base URL the front-matter check derives from the cover",
+         compares_to="a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED"),
     # filenames
     dict(check="filenames", sig="No delivery items found", applies="all",
          condition="The stage directory contains delivery items at all",
@@ -8080,7 +8158,16 @@ CONDITION_DOCS: list[dict] = [
          condition="Schema-internal self-references agree with the declared $id",
          pulls="every docs.oasis-open.org .json URL inside each schema body",
          compares_to="the schema's own declared $id"),
+    dict(check="schema-id", sig="NOT EVALUATED: the schemas' $id values", applies="all",
+         requires="schemas",
+         condition="The schema $id checks are not silently skipped when the cover gives no This-stage base URL",
+         pulls="the This-stage base URL the front-matter check derives from the cover",
+         compares_to="a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED"),
     # pdf-sync
+    dict(check="pdf-sync", sig="NOT EVALUATED: the PDF front matter", applies="all", requires="pdftotext",
+         condition="The PDF This-stage URL cross-check is not silently skipped when the cover gives no This-stage base URL",
+         pulls="the This-stage base URL the front-matter check derives from the cover",
+         compares_to="a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED"),
     dict(check="pdf-sync", sig="pdftotext not on PATH", applies="all",
          condition="The PDF cross-check toolchain is available",
          pulls="the PATH lookup for pdftotext (poppler)",
@@ -8124,6 +8211,10 @@ CONDITION_DOCS: list[dict] = [
          pulls="the HTML's <link rel=stylesheet> and <style> elements",
          compares_to="at least one styling source must be present"),
     # package-refs
+    dict(check="package-refs", sig="NOT EVALUATED: the files the spec cites", applies="md",
+         condition="The cited-file check is not silently skipped when the cover gives no This-stage base URL",
+         pulls="the This-stage base URL the front-matter check derives from the cover",
+         compares_to="a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED"),
     dict(check="package-refs", sig="is not in the package: it will 404", applies="md",
          condition="Every file the document cites under its own stage path is included in the package",
          pulls="each cited URL under the this-stage base and the package file tree",
@@ -8359,6 +8450,11 @@ CONDITION_DOCS: list[dict] = [
     dict(check='public-review-metadata', sig='does not carry the required companion file', applies='all', requires='network', condition='A live, published csd/cnd stage directory confirmed (by tiered evidence) and successfully scanned to have undergone TC public review carries the required public-review-metadata companion file', pulls="the LIVE docs.oasis-open.org stage-directory-root filename listing (fetched over the network, post-publication audit only), plus a same-revision comment-resolution-log or a downstream cs/errata stage's own Previous-stage cover URL as evidence the review occurred", compares_to="the exact, case-sensitive filename [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html (naming-directives.txt 5.2; handbook-Naming.txt 'Public-review metadata filename (new in v1.7)')"),
     dict(check='public-review-metadata', sig='but is empty (0 bytes)', applies='all', requires='network', condition='A present public-review-metadata companion file is non-empty', pulls='the byte length of the fetched companion file', compares_to="naming-directives.txt 5.2: the file 'provides a publication history of the Work Product' (content validation itself is out of scope for this check; only non-zero size is tested here)"),
     dict(check='public-review-metadata', sig='could not be fetched to confirm its content', applies='all', requires='network', condition='A public-review-metadata companion file listed in the live directory is actually reachable so its content can be evaluated', pulls='the HTTP status of a direct fetch of the listed companion filename', compares_to='a listing entry alone is not proof of a readable file; an unreachable listed file stays an open advisory rather than a silent, unreviewed pass'),
+    dict(check="public-review-metadata", sig="NOT EVALUATED: the public review metadata file", applies="all",
+         severity="BLOCKER/WARN",  # dynamic: WARN when a This-stage BLOCKER already stands
+         condition="The public-review-metadata check on a csd/cnd is not silently skipped when the cover gives no This-stage base URL",
+         pulls="the This-stage base URL the front-matter check derives from the cover",
+         compares_to="a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED"),
     dict(check='comment-resolution-log', sig='resembling the required comment-resolution-log is present but misnamed', applies='all', condition='A file resembling a comment-resolution-log, if present in a CSD/CND stage directory that itself carries a public-review-metadata file, carries the exact basename Naming Directives prescribes', pulls="the sibling file listing of the stage directory root (immediate siblings of the document-identifier files only, per naming-directives.txt's 'directory with the CSD or CND' scoping); whether any sibling basename (extension stripped, hyphen/underscore-normalized) contains 'commentresolutionlog' without exactly matching the expected basename under a plausible-format extension", compares_to="the expected basename [stem]-comment-resolution-log against naming-directives.txt s5.2's filename pattern for a produced comment resolution log"),
     dict(check='comment-resolution-log', sig='appears to have concluded', applies='all', condition='Where in-package evidence (a later-stage sibling directory) shows a CSD/CND public review has demonstrably concluded, a comment-resolution-log basename match was sought and not found', pulls='the sibling file listing of the stage directory root; the presence of a later-stage sibling directory (cs/os/errata for a csd gate, cn for a cnd gate) alongside this stage directory, as the review-concluded closure signal', compares_to="tc-process.txt s2.6/s2.7 (comment disposition is required to be posted to the TC's e-mail lists; the downstream approval ballot may only commence once every comment is resolved) against handbook-PublicReviews.txt's 'best practice, not a normative filing mandate' framing for HOW that record is kept"),
     dict(check='normdef-refs', sig='normative-definition file is never referenced from the Work Product', applies='all', condition='Every candidate normative-definition file (schema/grammar/code plain-text file, excluding example/sample/test-case/non-normative and pipeline/asset directories) is referenced from the Work Product', pulls="each candidate file's package-relative path and basename, tested via structured link/href/src/schemaLocation/$ref target extraction (path-level, then basename-level) against the spec's own text (or rendered HTML on the DOCX track), every OTHER candidate file's own content and extracted targets, and manifest.json (package root only)/top-level README-or-index text, all normalized (URL-decode, Unicode NFC)", compares_to="TC Process 2.2.5: 'Each text file must be referenced from the Work Product; and'. Standards Track (csd, cs, os, errata) only"),
@@ -8370,6 +8466,10 @@ CONDITION_DOCS: list[dict] = [
     dict(check='uri-alias', sig='DOCX-native cover field cites a redirect', applies='docx', condition="The DOCX-native rendered cover's This/Previous/Latest-version fields cite no redirect/URL-shortening domain", pulls='every URL (visible text or href) between the This/Previous/Latest-version labels on the rendered HTML cover', compares_to='the seed redirect-service domain list'),
     dict(check='uri-alias', sig='names oasis-open.org but links to a redirect', applies='all', condition='Plain-prose anchor text that names oasis-open.org does not link to a redirect/URL-shortening domain', pulls="the visible/anchor text of every `[shown](target)` (md) or `<a>shown</a>` (html) construct whose shown text is not itself a URL (a shown-is-a-URL mismatch is the existing link-mismatch check's territory)", compares_to="the seed redirect-service domain list, gated on the anchor text literally containing 'oasis-open.org'", sites=2),
     dict(check='uri-alias', sig='cites oasis-open.org while linking a redirect', applies='all', condition="A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain", pulls='the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct', compares_to="the seed redirect-service domain list, gated on the sentence window literally containing 'oasis-open.org'", sites=2),
+    dict(check="xml-namespace", sig="NOT EVALUATED: the XML namespaces", applies="all",
+         condition="The XML namespace checks are not silently skipped when the cover gives no This-stage base URL",
+         pulls="the This-stage base URL the front-matter check derives from the cover",
+         compares_to="a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED"),
     dict(check='xml-namespace', sig='does not match the required', applies='all', condition="An http(s) namespace's tail matches the docs.oasis-open.org/[tc-shortname]/ns/xxxx pattern", pulls='targetNamespace on the root of each packaged .xsd/.wsdl (incl. wsdl:types-embedded schemas), and the ns attribute on the root grammar/element of each .rng', compares_to="Naming Directives s8 pattern http(s)://docs.oasis-open.org/[tc-shortname]/ns/xxxx, xxxx restricted to the s3 sixty-four-character set plus internal '/', terminating in '/', '#', or alphanumeric; BLOCKER when the tc-shortname has no pattern-grandfather allowlist entry"),
     dict(check='xml-namespace', sig='approval cannot be machine-confirmed', applies='all', condition="A pattern-mismatched namespace's tc-shortname is a confirmed-approved pre-2012 pattern grandfather", pulls='the same pattern-mismatched namespace URI, matched against the pattern-grandfather allowlist', compares_to="Naming Directives v1.2 s9: pre-2012 practice 'may be grandfathered, if approved by Project Administration': WARN when listed but approval is not machine-confirmable at check time"),
     dict(check='xml-namespace', sig='declared under both http and https scheme', applies='all', condition='The same namespace tail is declared under one scheme only, package-wide', pulls='every http(s) namespace URI declared by any packaged .xsd/.wsdl(+embedded)/.rng in the package, grouped by scheme-stripped tail', compares_to='Naming Directives s8: \'While either "http" or "https" may be used ... they are not interchangeable. One or the other must be used consistently.\''),

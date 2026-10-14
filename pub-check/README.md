@@ -33,7 +33,7 @@ Characteristics:
 - No configuration. Every expectation is derived from the package itself:
   its own front matter, its own CSS, its own schema `$id`s, its own publish
   path.
-- 181 individual checks across 61 check classes. `--list-checks` asserts
+- 187 individual checks across 61 check classes. `--list-checks` asserts
   that inventory against the code, and every count advertised anywhere in
   this repository comes from it.
 - It combines the intake acceptance criteria with the publication
@@ -156,20 +156,20 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | normdef-refs | 2 | BLOCKER/WARN | Every packaged normative schema/grammar/code file (Standards Track) must be referenced from the Work Product (TC Process 2.2.5). |
 | ns-segment | 2 | BLOCKER/WARN | This/Latest-stage cover URIs must not reuse the reserved /ns/ path segment (namespace identifiers only); Previous-stage hits are WARN (inherited, immutable citation). |
 | odt-integrity | 6 | BLOCKER | The ODT source must be a valid, macro-free OpenDocument container. |
-| package-refs | 1 | BLOCKER | Files the document cites under its own stage path must be included in the package. |
+| package-refs | 2 | BLOCKER | Files the document cites under its own stage path must be included in the package. |
 | pdf-cover | 2 | BLOCKER | The rendered PDF cover must carry the title exactly once and no CI paths. |
 | pdf-fonts | 2 | WARN | PDF embedded fonts are compared against the package's own CSS as typography authority. |
 | pdf-legibility | 2 | WARN | PDF body text size is measured against the body size the package's stylesheet declares. |
-| pdf-sync | 5 | BLOCKER/WARN | The PDF must be readable and rendered from the same revision as the rest of the package. |
+| pdf-sync | 6 | BLOCKER/WARN | The PDF must be readable and rendered from the same revision as the rest of the package. |
 | pdf-toc-pages | 2 | WARN | The PDF's table of contents gives page numbers, and each number is the page its heading is printed on. |
 | previous-stage | 2 | BLOCKER | Second and later stages must cite the previous stage's URLs. |
-| public-review-metadata | 3 | BLOCKER/WARN | Post-publication audit: a csd/cnd stage directory that underwent a TC public review must carry the [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html companion file Project Administration is obligated to publish alongside it (Naming Directives v1.7 s5.2 / TC Handbook Naming). |
+| public-review-metadata | 4 | BLOCKER/WARN | Post-publication audit: a csd/cnd stage directory that underwent a TC public review must carry the [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html companion file Project Administration is obligated to publish alongside it (Naming Directives v1.7 s5.2 / TC Handbook Naming). |
 | ref-rfc | 2 | WARN | An [RFCnnnn] references entry's label, body text, and URL must cite the same RFC number. |
 | references-split | 2 | WARN | On a Standards Track work product, Normative and Informative References should be separately labeled, with no reference ID listed under both (handbook-WPQualityChecklist.txt, WARN). |
 | residue | 4 | BLOCKER/WARN | Editor placeholders (TODO, tbd, 'Will be filled in') must not be present. |
-| revision-collision | 1 | WARN | A new submission must not collide with a stage already live for the version. |
+| revision-collision | 2 | BLOCKER/WARN | A new submission must not collide with a stage already live for the version. |
 | rfc-keywords | 2 | BLOCKER/WARN | Normative key words require the RFC 2119 (and 8174) citations. |
-| schema-id | 4 | BLOCKER/WARN | Every JSON schema's $id must agree with where the file actually publishes. |
+| schema-id | 5 | BLOCKER/WARN | Every JSON schema's $id must agree with where the file actually publishes. |
 | stage-name | 4 | BLOCKER/WARN | The stage token must be a current, correctly numbered stage per the Naming Directives. |
 | stage-token | 3 | BLOCKER/WARN | On a second or later stage, the Previous-stage cover URI should carry the document's own csd or cnd stage token; a retired or mismatched token is a WARN, with a caveat for pre-v1.7 legacy paths. A Latest-stage cover URI filename must carry no stage-abbreviation or revision token (BLOCKER). |
 | stage-uri-live | 1 | BLOCKER | The Previous-stage and Latest-stage URIs on the cover name files that are not in the package, so every other check can see only their shape. This class fetches them. A 404 or 410 is a BLOCKER: the cover cites a document that was never published at that address, usually because the template hardcodes the extension while templating the stage name, so a stage that went markdown-native is still cited as `.docx`. Transport failures, 5xx responses and bot challenges are recorded as INFO. `PUB_CHECK_OFFLINE` turns the class off. |
@@ -182,7 +182,7 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | uri-chars | 1 | BLOCKER | No underscore may appear in a document (cover-page) URI (Naming Directives v1.7 s3). |
 | version-naming | 3 | BLOCKER/WARN | The version directory and delivery filenames must agree on one vN.N(.N) version. |
 | vml-fallback | 1 | BLOCKER | VML-only images in Word HTML renders are invisible in every modern browser. |
-| xml-namespace | 5 | BLOCKER/WARN | Every namespace a packaged .xsd/.wsdl/.rng declares as its own must be a docs.oasis-open.org/[tc-shortname]/ns/xxxx URI (consistent scheme) or an allowlisted urn:. |
+| xml-namespace | 6 | BLOCKER/WARN | Every namespace a packaged .xsd/.wsdl/.rng declares as its own must be a docs.oasis-open.org/[tc-shortname]/ns/xxxx URI (consistent scheme) or an allowlisted urn:. |
 
 <!-- END generated class table -->
 
