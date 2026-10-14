@@ -407,7 +407,7 @@ The rendered PDF cover must carry the title exactly once and no CI paths.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 112 | The document title appears exactly once on the PDF cover page | the count of title occurrences in the PDF's first page text | exactly 1 (more means stale title-block residue baked into the render, assertion A1) | BLOCKER | all | pdftotext |
+| 112 | The document title appears exactly once on the PDF cover page | the count of title occurrences in the PDF's first page text, not counting the Citation format entry that names it (title followed by 'Edited by') | exactly 1 (more means stale title-block residue baked into the render, assertion A1) | BLOCKER | all | pdftotext |
 | 113 | No CI runner path anywhere in the PDF text | the full extracted PDF text | the /home/runner/ path must not occur (assertion A2) | BLOCKER | all | pdftotext |
 
 ### pdf-fonts

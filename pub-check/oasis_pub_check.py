@@ -471,7 +471,11 @@ def stage_urls_from_md(md_text: str, heading: str) -> list[str]:
     # TC's own preprocessor). Without '<' in the terminator set the closing tag
     # is absorbed into the URL and every This/Latest-stage URL reports a false
     # 'points at link>' 404. A URL never legitimately continues through '<'.
-    return re.findall(r"https?://\S+?(?=[)\s\\<]|$)", m.group(1))
+    # '>' terminates it too: a Markdown autolink <https://...>, the form the
+    # md-links warning itself recommends, otherwise keeps its closing '>'
+    # (SARIF v2.2 csd01 and the CSAF v2.1 draft, Oct 2026: false "not a file
+    # in the package" and "returns HTTP 404" BLOCKERs on '...md>').
+    return re.findall(r"https?://\S+?(?=[)\s\\<>]|$)", m.group(1))
 
 
 # ---------------------------------------------------------------- checks
@@ -1894,7 +1898,12 @@ def check_pdf_cover(pdf_path: str, title: str, f: Findings) -> None:
     except Exception:  # noqa: BLE001 - pdf-sync already reports readability
         return
     norm = re.sub(r"\s+", " ", title.lower())
-    count = re.sub(r"\s+", " ", page1.lower()).count(norm)
+    cover = re.sub(r"\s+", " ", page1.lower())
+    # The template's Citation format block names the title too ("<title>.
+    # Edited by ..."), and a layout that fits the citation on page 1 (SARIF
+    # v2.2 csd01, Typst) put it there: that occurrence is not residue.
+    count = sum(1 for m in re.finditer(re.escape(norm), cover)
+                if not re.match(r"[\s._*\"'\u201d\u2019]*edited by\b", cover[m.end():]))
     f.observe("pdf-cover", title=title, cover_page_occurrences=count,
               runner_path_in_pdf="/home/runner/" in full)
     if count > 1:
@@ -2659,11 +2668,27 @@ def emit_manifest(stage_dir: str, version: str, stage: str) -> str:
                           "bytes": os.path.getsize(p)})
     commit = os.environ.get("GITHUB_SHA", "")
     if not commit:
+        # HEAD is the source commit only when that repository holds these
+        # exact files: every item tracked (a gitignored render is not in the
+        # commit) and none changed. A stage assembled inside another checkout
+        # (the ops workspace, SARIF v2.2 csd01, Oct 2026) recorded that
+        # checkout's unrelated HEAD; an empty commit is honest, GITHUB_SHA
+        # supplies the real one.
+        def git(*args: str) -> str:
+            return subprocess.run(["git", *args], capture_output=True, text=True,
+                                  cwd=stage_dir, timeout=10).stdout.strip()
         try:
-            commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
-                                    text=True, cwd=stage_dir, timeout=10).stdout.strip()
+            tracked = set(filter(None, git("ls-files", "-z", "--", ".").split("\0")))
+            if (items and {i["path"] for i in items} <= tracked
+                    and not git("status", "--porcelain", "--untracked-files=all", "--",
+                                *(i["path"] for i in items))):
+                commit = git("rev-parse", "HEAD")
         except Exception:  # noqa: BLE001
             commit = ""
+        if not commit:
+            print("manifest.json: source.commit left empty: the stage directory is not "
+                  "committed as-is in a git repository; set GITHUB_SHA to the release "
+                  "commit to record it.", file=sys.stderr)
     tools = {}
     for tool in ("pandoc", "typst", "tidy"):
         exe = shutil.which(tool)
@@ -6632,7 +6657,7 @@ URI_ALIAS_REDIRECT_DOMAINS = {
 # strings the spec names for the scope-gate(ii) anchor-text/sentence test.
 URI_ALIAS_CANONICAL_SUBSTR_RE = re.compile(r"oasis-open\.org", re.IGNORECASE)
 
-URI_ALIAS_BARE_URL_RE = re.compile(r"https?://\S+?(?=[)\s\\]|$)")
+URI_ALIAS_BARE_URL_RE = re.compile(r"https?://\S+?(?=[)\s\\<>]|$)")
 # Widened at FIXER pass: optional angle-bracket destination and an optional
 # "title"/'title' after the URL (both valid CommonMark inline-link forms);
 # reference-style [text][ref] links are still out of scope, matching every
@@ -8031,7 +8056,8 @@ CONDITION_DOCS: list[dict] = [
     # pdf-cover
     dict(check="pdf-cover", sig="times on the PDF cover page", applies="all", requires="pdftotext",
          condition="The document title appears exactly once on the PDF cover page",
-         pulls="the count of title occurrences in the PDF's first page text",
+         pulls="the count of title occurrences in the PDF's first page text, not counting the "
+               "Citation format entry that names it (title followed by 'Edited by')",
          compares_to="exactly 1 (more means stale title-block residue baked into the render, assertion A1)"),
     dict(check="pdf-cover", sig="leaked into the rendered PDF text", applies="all", requires="pdftotext",
          condition="No CI runner path anywhere in the PDF text",
