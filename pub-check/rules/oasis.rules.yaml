@@ -142,11 +142,15 @@ rules:
     description: >-
       No 'Will be filled in' placeholders may remain (tolerated early-stage,
       must resolve before Committee Specification)
+    # The template's form is "\< Will be filled in at CS01 \>". The phrase
+    # inside a sentence is prose ("these dynamic values will be filled in with
+    # valid values", KMIP Test Cases v3.0), so it counts only after an opening
+    # bracket or opening a line, list item, quote or table cell. Same
+    # expression as FILL_IN_PLACEHOLDER_RE in oasis_pub_check.py.
     check:
       type: all-match
       target: prose
-      pattern: 'Will be filled in'
-      flags: IGNORECASE
+      pattern: '(?m)(?:\\?<|&lt;|&#0*60;|&#[xX]0*3[cC];|\[)(?:\s|&nbsp;)*[Ww]ill\s+be\s+filled\s+in\b|(?:^|>|\||\()(?:[ \t\xa0]|&nbsp;)*(?:(?:[-*+]|\d+[.)])[ \t]+)?[*_]{0,2}Will\s+be\s+filled\s+in\b'
       invert: true
 
   # The OASIS Board-approved work product templates carry editor guidance and
