@@ -665,7 +665,7 @@
       "applies": "all",
       "requires": "pdftotext",
       "condition": "The document title appears exactly once on the PDF cover page",
-      "pulls": "the count of title occurrences in the PDF's first page text",
+      "pulls": "the count of title occurrences in the PDF's first page text, not counting the Citation format entry that names it (title followed by 'Edited by')",
       "compares_to": "exactly 1 (more means stale title-block residue baked into the render, assertion A1)",
       "severity": "BLOCKER"
     },
