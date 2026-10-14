@@ -86,6 +86,38 @@ PATCH: a fix inside existing checks, no new criteria.
   OData v4.02 Part 1, OData Vocabularies v4.0 and CSAF v2.1 CSD03 packages
   they are unchanged too (54, 32 and 38).
 
+- **residue**, the 'Will be filled in' placeholder: the check matched the
+  phrase anywhere, so specification prose drew the placeholder WARN. KMIP
+  Test Cases v3.0 WD01 s2 says "in actual request and response messages
+  these dynamic values will be filled in with valid values" and was told it
+  carried a placeholder (14 Oct 2026). The same sentence drew it on KMIP
+  Profiles v3.0 and PKCS#11 Profiles v3.1 and v3.2, and ODF v1.4 Part 3's
+  "will be filled independently" drew it too. The phrase now counts only
+  where the template's placeholder stands: after an opening bracket (`<`,
+  `\<`, `&lt;`, `&#60;`, `&#x3C;`, `[`, with spaces or `&nbsp;`), or opening
+  a line, list item, quote, table cell, parenthesis or HTML element with a
+  capital W, and only as the whole word "in". The template's form as OpenEoX
+  EoX Core v1.0 CSD01 published it, `- \< Will be filled in at CS01 \>` in
+  the Markdown and `<li>&lt; Will be filled in at CS01 &gt;` in the HTML,
+  still warns on the live files. An adversarial review ran the change over
+  the 61 spec copies on disk that contain the phrase: only the OpenEoX
+  placeholders are reported. Its counterexamples (Word HTML entities and
+  `&nbsp;`, a parenthesised, numbered or emphasised placeholder, "filled
+  independently") are each pinned by a test. On the staged KMIP Test Cases
+  v3.0 CND01 tree the residue WARN is gone and no other finding changed (149
+  warnings to 148). No corpus package contains the phrase, so the corpus
+  findings are unchanged. Pinned by `tests/test_residue_fill_in.py`.
+
+`oasis.rules.yaml`, kept in lockstep (nide):
+
+- `OASIS-RESID-FILL-IN` takes the same expression, without `IGNORECASE`
+  (the capital W at the start of a line is what separates the placeholder
+  from a sentence) and with `(?m)` inline, so `^` means a line start whether
+  the engine matches a block or a whole document. Everything it matches, the
+  old rule matched, except a placeholder whose words are wrapped across lines
+  or separated by more than one space, which the old rule missed. The test
+  asserts the two expressions are identical.
+
 ## v1.13.2 - 2026-10-08
 
 PATCH: a fix inside an existing check, no new criteria.

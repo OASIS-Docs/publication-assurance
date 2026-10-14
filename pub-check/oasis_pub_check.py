@@ -800,6 +800,21 @@ def check_member_uri(md_text: str, html_text: str, f: Findings) -> None:
               f"any TC document that is or may become public.")
 
 
+# The templates' placeholder for content the TC Admin supplies later, as it
+# ships: "- \< Will be filled in at CS01 \>" in the Markdown, "<li>&lt; Will be
+# filled in at CS01 &gt;" in the HTML (OpenEoX EoX Core v1.0 csd01). It is
+# matched only where a placeholder stands: after an opening bracket (also as
+# Word writes one, &#60; or with &nbsp;), or opening a line, list item, quote,
+# table cell, parenthesis or element. The bare phrase is
+# ordinary English, and matching it anywhere warned on KMIP Test Cases v3.0
+# WD01 s2, "in actual request and response messages these dynamic values will
+# be filled in with valid values" (14 Oct 2026).
+FILL_IN_PLACEHOLDER_RE = re.compile(
+    r"(?m)(?:\\?<|&lt;|&#0*60;|&#[xX]0*3[cC];|\[)(?:\s|&nbsp;)*[Ww]ill\s+be\s+filled\s+in\b"
+    r"|(?:^|>|\||\()(?:[ \t\xa0]|&nbsp;)*(?:(?:[-*+]|\d+[.)])[ \t]+)?[*_]{0,2}"
+    r"Will\s+be\s+filled\s+in\b")
+
+
 def check_residue(md_text: str, html_text: str, f: Findings) -> None:
     f.observe("residue", scanned=[k for k, t in (("markdown", md_text), ("html", html_text)) if t])
     for label, text in (("markdown", strip_code_blocks(md_text, "md")),
@@ -808,7 +823,7 @@ def check_residue(md_text: str, html_text: str, f: Findings) -> None:
             f.add(BLOCKER, "residue", f"Editor TODO left in {label}: '{m.group(0)}'")
         for m in re.finditer(r"(?i)^\s*tbd\.?\s*$", text, re.M):
             f.add(BLOCKER, "residue", f"'tbd' placeholder section left in {label}.")
-        if re.search(r"[Ww]ill be filled in", text):
+        if FILL_IN_PLACEHOLDER_RE.search(text):
             f.add(WARN, "residue",
                   f"'Will be filled in …' placeholder present in {label} (acceptable for an "
                   f"early stage; must be resolved before CS).")
@@ -7906,7 +7921,9 @@ CONDITION_DOCS: list[dict] = [
     dict(check="residue", sig="'Will be filled in", applies="all",
          condition="No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS)",
          pulls="prose of the markdown and HTML (code blocks stripped)",
-         compares_to="the phrase 'Will be filled in' must not occur"),
+         compares_to="the template placeholder 'Will be filled in' (after an opening bracket, or "
+                     "opening a line, list item, quote, table cell or element) must not occur; "
+                     "the phrase inside a sentence is prose"),
     # html-title
     dict(check="html-title", sig="carries working residue", applies="all",
          condition="HTML title carries no working residue",

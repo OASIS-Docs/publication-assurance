@@ -495,7 +495,7 @@ Editor placeholders (TODO, tbd, 'Will be filled in') must not be present.
 | 134 | No editor TODO markers left in prose | prose of the markdown and HTML (code blocks stripped) | the patterns TODO(...) and TODO: must not occur | BLOCKER | all | - |
 | 135 | No bare 'tbd' placeholder sections | prose of the markdown and HTML (code blocks stripped) | no line consisting solely of 'tbd' | BLOCKER | all | - |
 | 136 | No template editor-instruction text left in the published prose | prose of the markdown and HTML (code blocks stripped) | the OASIS Board-approved work product templates, which state that 'All template instructions ... need to be deleted prior to publication'; an imperative to remove/delete something 'before publication' or 'prior to publication' surviving in the prose means an instruction block reached publication | BLOCKER | all | - |
-| 137 | No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS) | prose of the markdown and HTML (code blocks stripped) | the phrase 'Will be filled in' must not occur | WARN | all | - |
+| 137 | No 'Will be filled in' placeholders (early-stage tolerated, must resolve before CS) | prose of the markdown and HTML (code blocks stripped) | the template placeholder 'Will be filled in' (after an opening bracket, or opening a line, list item, quote, table cell or element) must not occur; the phrase inside a sentence is prose | WARN | all | - |
 
 ### revision-collision
 
