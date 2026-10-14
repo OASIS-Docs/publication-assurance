@@ -210,10 +210,11 @@ def test_a_publishable_package_says_so_and_has_no_blocker_table():
 class FakeApi:
     """GitHub's issue-comment endpoints, in memory."""
 
-    def __init__(self, comments=None, refuse=None):
+    def __init__(self, comments=None, refuse=None, me=None):
         self.repo, self.token = "o/r", "t"
         self.comments = comments or []
         self.refuse = refuse or set()
+        self.me = me
         self.calls = []
 
     def call(self, method, path, body=None):
@@ -221,11 +222,17 @@ class FakeApi:
         if method in self.refuse:
             raise urllib.error.HTTPError(path, 403, "Resource not accessible by integration",
                                          {}, io.BytesIO(b""))
+        if method == "GET" and path == "/user":
+            if self.me:
+                return {"login": self.me}
+            raise urllib.error.HTTPError(path, 403, "workflow token", {}, io.BytesIO(b""))
         if method == "GET":
+            assert path.startswith("/repos/o/r/issues/3/comments?"), path
             page = int(re.search(r"[?&]page=(\d+)", path).group(1))
             return self.comments[(page - 1) * 100: page * 100]
         if method == "POST":
-            c = {"id": len(self.comments) + 1, "body": body["body"]}
+            c = {"id": len(self.comments) + 1, "body": body["body"],
+                 "user": {"login": self.me or tc_view.BOT}}
             self.comments.append(c)
             return c
         cid = int(path.rsplit("/", 1)[1])
@@ -247,7 +254,7 @@ def test_the_comment_is_created_once_then_updated_with_what_was_resolved(tmp_pat
     assert tc_view.post_comment(first, tc_view.rows(first, None), "csd01", env, api).startswith("created")
     assert len(api.comments) == 121
     body = api.comments[-1]["body"]
-    assert body.startswith("<!-- oasis-publication-checks: csd01 -->")
+    assert body.startswith(f"<!-- oasis-publication-checks: {tc_view.slot_for('csd01')} -->")
     assert "**Not publishable: 1 blocker, 1 warning**" in body and "Resolved" not in body
     assert "Checked commit feedfac" in body
 
@@ -400,3 +407,182 @@ def test_a_finding_that_names_its_file_is_placed_at_the_value_it_quotes(tmp_path
     pkg = tc_view.Package(str(stage))
     msg = "schema/a.json: $id is 'https://x.example/v9/a.json' but the file publishes under 'https://y/'."
     assert pkg.locate(f("BLOCKER", "schema-id", msg)) == ("schema/a.json", 3)
+
+
+# ---------------------------------------------------------------- review counterexamples
+
+def corpus_findings(stage: Path) -> list[dict]:
+    env = dict(os.environ, PUB_CHECK_OFFLINE="1")
+    out = subprocess.run([sys.executable, str(PUB / "oasis_pub_check.py"), str(stage), "--json"],
+                         capture_output=True, text=True, env=env)
+    return json.loads(out.stdout)["findings"]
+
+
+def test_a_dual_link_is_placed_on_the_line_that_holds_the_link():
+    """Review: the same address first appears as cover text ("Latest stage:
+    https://.../aggregator.json"), and 52 of 64 dual-link rows landed there."""
+    pkg = tc_view.Package(str(CSAF_CSD01))
+    dual = [x for x in corpus_findings(CSAF_CSD01) if x["message"].startswith("Dual link")]
+    assert len(dual) >= 5, dual
+    for x in dual:
+        rel, n = pkg.locate(x)
+        url = x["message"].rsplit(": ", 1)[1]
+        line = (CSAF_CSD01 / rel).read_text().split("\n")[n - 1]
+        assert f"]({url})" in line, (n, url, line)
+
+
+def test_the_located_file_is_the_one_the_checker_read():
+    """Review: the largest PDF was a -DIFF PDF, and a larger comment
+    resolution log took a TODO that was in the specification."""
+    import oasis_pub_check
+    stages = [p.parent for p in CORPUS.rglob("*.md") if p.parent.name[:2] in ("cs", "os", "cn")]
+    assert len(stages) >= 5, stages
+    for stage in set(stages):
+        expected = {k: os.path.basename(v) for k, v in oasis_pub_check.find_delivery_items(str(stage)).items()}
+        pkg = tc_view.Package(str(stage))
+        for ext in ("md", "html", "pdf"):
+            assert pkg.main(ext) == expected.get(ext), (stage, ext)
+
+
+def test_a_todo_beside_a_larger_comment_log_is_placed_in_the_specification(tmp_path):
+    stage = package(tmp_path)
+    (stage / "x-v1.0-csd01-comment-resolution-log.md").write_text("big\n" * 5000)
+    pkg = tc_view.Package(str(stage))
+    assert pkg.locate(f("BLOCKER", message="Editor TODO left in markdown line 6: 'TODO:'")) == \
+        ("x-v1.0-csd01.md", 6)
+
+
+def test_a_finding_that_only_moved_is_not_resolved():
+    a = [f("BLOCKER", "residue", "Editor TODO left in markdown line 8: 'TODO:'")]
+    b = [f("BLOCKER", "residue", "Editor TODO left in markdown line 9: 'TODO:'")]
+    previous = tc_view.decode_state(tc_view.comment_body(a, tc_view.rows(a, None, env={}), "t", None))
+    body = tc_view.comment_body(b, tc_view.rows(b, None, env={}), "t", previous)
+    assert "Resolved since" not in body
+
+
+def test_a_dangling_link_in_the_stage_does_not_break_the_summary(tmp_path):
+    """Review: os.path.getsize on a dangling symlink raised, and the summary
+    step (which has no continue-on-error) failed a publishable run."""
+    steps = action_steps()
+    gate = next(s["run"] for s in steps if s.get("id") == "pubcheck")
+    summary = next(s["run"] for s in steps if s.get("name") == "Write step summary")
+    work, temp = tmp_path / "work", tmp_path / "rt"
+    temp.mkdir()
+    stage = stage_from_corpus(work / "d", CSAF_CSD01)
+    os.symlink("missing.md", stage / "notes.md")
+    out, step_summary = tmp_path / "out", tmp_path / "summary.md"
+    env = {"PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin", "ACTION_PATH": str(REPO_ROOT),
+           "TARGET": str(stage.relative_to(work)), "EXTRA_ARGS": "", "REPORT_DIR": "r",
+           "SUMMARY_TITLE": "", "RUNNER_TEMP": str(temp), "GITHUB_OUTPUT": str(out),
+           "GITHUB_WORKSPACE": str(work), "GITHUB_STEP_SUMMARY": str(step_summary),
+           "PUB_CHECK_OFFLINE": "1"}
+    subprocess.run(["bash", "-c", gate], cwd=work, env=env, capture_output=True, text=True)
+    outputs = dict(line.split("=", 1) for line in out.read_text().splitlines())
+    assert outputs["report_validation_md"], "the report must still render"
+    env["EXIT_CODE"] = outputs["exit_code"]
+    result = subprocess.run(["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", summary],
+                            cwd=work, env=env, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "## OASIS publication checks: " in step_summary.read_text()
+
+
+def test_each_todo_is_its_own_finding_on_its_own_line():
+    """The residue check now names each marker's line, so two markers are two
+    blockers (they were merged into one identical message before v1.15.0)."""
+    import oasis_pub_check
+    found = oasis_pub_check.Findings()
+    md = "# T\n\n```\nTODO: in code, ignored\n```\n\nTODO: one\n\nText `TODO:` inline.\nTODO: two\n"
+    oasis_pub_check.check_residue(md, "", found)
+    todo = [x["message"] for x in found.items if "TODO" in x["message"]]
+    assert todo == ["Editor TODO left in markdown line 7: 'TODO:'",
+                    "Editor TODO left in markdown line 10: 'TODO:'"], todo
+
+
+def test_a_finding_that_opens_with_its_line_is_placed_there(tmp_path):
+    pkg = tc_view.Package(str(package(tmp_path)))
+    assert pkg.locate(f("BLOCKER", "fence-collapse", "Line 6: opening fence info string carries trailing "
+                        "text ('json title=...')")) == ("x-v1.0-csd01.md", 6)
+
+
+def test_same_as_above_only_when_the_wording_is_the_same():
+    fs = [f("BLOCKER", "schema-id", "a.json is not valid JSON (line 1)"),
+          f("BLOCKER", "schema-id", "b.json: $ref 'x' disagrees with $id 'y'")]
+    text = tc_view.outcome_md(fs, tc_view.rows(fs, None, env={}))
+    assert "Same as above" not in text and "not valid JSON." in text and "own <span>$</span>id" in text
+
+
+def test_a_comment_someone_else_wrote_with_the_marker_is_left_alone(tmp_path):
+    env = pr_env(tmp_path)
+    marker = tc_view.MARKER.format(slot=tc_view.slot_for("t"))
+    api = FakeApi(comments=[{"id": 5, "body": marker + " pasted by a reviewer",
+                             "user": {"login": "someone"}}])
+    assert tc_view.post_comment([], [], "t", env, api).startswith("created")
+    assert api.comments[0]["body"].endswith("pasted by a reviewer")
+    assert ("PATCH", "/repos/o/r/issues/comments/5") not in api.calls
+
+
+def test_a_personal_token_finds_the_comment_it_wrote(tmp_path):
+    env = pr_env(tmp_path)
+    api = FakeApi(me="editor")
+    tc_view.post_comment([], [], "t", env, api)
+    assert tc_view.post_comment([], [], "t", env, api).startswith("updated")
+
+
+def test_malformed_state_in_an_edited_comment_is_dropped():
+    for items in ([{"k": "a", "s": "BLOCKER", "c": ["x"], "d": ""}], {"k": "a"}, "x", [1, None]):
+        blob = base64.b64encode(json.dumps(items).encode()).decode()
+        assert tc_view.decode_state(f"<!-- oasis-publication-checks-state: {blob} -->") == []
+
+
+def test_a_check_that_did_not_run_is_not_described_as_a_defect():
+    msg = ("NOT EVALUATED: the files the spec cites under its own stage path could not be checked "
+           "against the package: the cover's This-stage block gave no base URL for this package's "
+           "/v1.0/csd01/ directory.")
+    what, fix = plain_language.explain("package-refs", msg, "BLOCKER")
+    assert what.startswith("This check could not run") and "This version" in fix
+    assert plain_language.explain("x", "NOT EVALUATED: something else", "WARN")[0].startswith(
+        "This check could not run")
+
+
+def test_the_comment_fits_githubs_limit_whatever_the_number_of_findings():
+    fs = [f("BLOCKER" if i % 2 else "WARN", "residue", f"finding {i} " + "x" * 200) for i in range(3000)]
+    body = tc_view.comment_body(fs, tc_view.rows(fs, None, env={}), "t", None)
+    assert len(body) <= 65_536, len(body)
+    assert tc_view.decode_state(body), "some state is still carried"
+
+
+def test_line_numbers_count_lf_only(tmp_path):
+    stage = package(tmp_path)
+    md = stage / "x-v1.0-csd01.md"
+    md.write_text("a\u2028b\fc\nsee [https://e.org/q](https://e.org/q)\n")
+    pkg = tc_view.Package(str(stage))
+    assert pkg.locate(f("WARN", "md-links", "Dual link: https://e.org/q")) == ("x-v1.0-csd01.md", 2)
+
+
+def test_titles_that_read_alike_get_separate_comments():
+    assert tc_view.slot_for("csaf v2.1") != tc_view.slot_for("csaf-v2.1")
+    assert tc_view.slot_for("a" * 200 + "1") != tc_view.slot_for("a" * 200 + "2")
+
+
+def test_the_unreadable_target_summary_escapes_the_title(tmp_path):
+    summary = next(s["run"] for s in action_steps() if s.get("name") == "Write step summary")
+    step_summary = tmp_path / "summary.md"
+    env = {"PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin", "ACTION_PATH": str(REPO_ROOT),
+           "EXIT_CODE": "2", "TARGET": "x`y", "SUMMARY_TITLE": "**pwned** <img src=x onerror=1>",
+           "GITHUB_STEP_SUMMARY": str(step_summary), "REPORT_DIR": "", "RUNNER_TEMP": str(tmp_path)}
+    result = subprocess.run(["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", summary],
+                            cwd=tmp_path, env=env, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    text = step_summary.read_text()
+    assert text.startswith("## OASIS publication checks: \\*\\*pwned\\*\\* &lt;img"), text
+    assert "The target could not be read (exit code 2)" in text and "`` x`y ``" in text
+
+
+def test_invalid_json_is_placed_where_the_parser_stopped(tmp_path):
+    stage = package(tmp_path)
+    (stage / "schema" / "a.json").write_text('{\n  "a": 1\n  "b": 2\n}\n')
+    try:
+        json.loads((stage / "schema" / "a.json").read_text())
+    except ValueError as exc:
+        msg = f"schema/a.json: not valid JSON ({exc})"
+    assert tc_view.Package(str(stage)).locate(f("BLOCKER", "schema-id", msg)) == ("schema/a.json", 3)

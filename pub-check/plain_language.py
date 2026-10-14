@@ -305,9 +305,23 @@ FALLBACK = ("The checks found a problem with the document.",
             "Read the detail and correct the document as it describes.")
 
 
+# A check that could not run says so ("NOT EVALUATED: ..."), whatever its
+# class: the class text would describe a defect nobody has found.
+NOT_EVALUATED = (
+    "This check could not run, because the cover page does not give this draft's own "
+    "'This version' address.",
+    "Add the 'This version' links (the .md, .html and .pdf at their docs.oasis-open.org "
+    "addresses) to the cover page, then run the checks again so this one can run.")
+NOT_EVALUATED_OTHER = (
+    "This check could not run, so the document has not been checked for it yet.",
+    "The detail says what the check needed. Once that is in place, run the checks again.")
+
+
 def explain(check: str, message: str = "", severity: str = "") -> tuple[str, str]:
     """(what is wrong, how to fix it) for one finding: its condition's own
     text where it has one, else its check class's."""
+    if message.startswith("NOT EVALUATED"):
+        return NOT_EVALUATED if "gave no base URL" in message else NOT_EVALUATED_OTHER
     for (c, sig, sev), text in CONDITIONS.items():
         if c == check and sev == severity and sig in message:
             return text

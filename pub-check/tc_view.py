@@ -65,6 +65,10 @@ MARKER = "<!-- oasis-publication-checks: {slot} -->"
 STATE = re.compile(r"<!-- oasis-publication-checks-state: ([A-Za-z0-9+/=]*) -->")
 PDF_CLASSES = {"pdf-cover", "pdf-fonts", "pdf-legibility", "pdf-sync", "pdf-toc-pages", "generator"}
 LINE_IN_MESSAGE = re.compile(r"\b(markdown|html)\s+line\s+(\d+)", re.I)
+JSON_POSITION = re.compile(r"\bline (\d+) column \d+")
+LINE_AT_START = re.compile(r"^Line (\d+): ")   # the Markdown checks' own form (md-links, fence-collapse)
+DIGITS = re.compile(r"\d+")
+STATE_LIMIT = 20_000      # characters of encoded state carried in the comment
 QUOTED = re.compile(r"'([^'\n]{8,})'")
 URL = re.compile(r"https?://[^\s'\"<>()\[\]]+")
 
@@ -87,8 +91,13 @@ def headline(findings: list[dict]) -> str:
 
 
 def finding_key(f: dict) -> str:
-    """A stable identity for one finding across runs: its class and exact message."""
-    raw = f"{f.get('check', '')}\0{f.get('message', '')}".encode("utf-8")
+    """A stable identity for one finding across runs: its class and message
+    with every number blanked. A line number or a count moves when unrelated
+    text is edited, and a finding that only moved is not resolved. Two
+    findings that differ only in a number share a key, so one fixed while the
+    other stays is not listed as resolved: the list errs towards silence."""
+    msg = DIGITS.sub("#", f.get("message", ""))
+    raw = f"{f.get('check', '')}\0{msg}".encode("utf-8")
     return hashlib.sha256(raw).hexdigest()[:16]
 
 
@@ -101,6 +110,7 @@ class Package:
         self.dir = pkg_dir if pkg_dir and os.path.isdir(pkg_dir) else None
         self.files: list[str] = []
         self._text: dict[str, list[str]] = {}
+        self._main: dict[str, str] | None = None
         if not self.dir:
             return
         for root, dirs, names in os.walk(self.dir):
@@ -108,19 +118,27 @@ class Package:
             for n in sorted(names):
                 self.files.append(os.path.relpath(os.path.join(root, n), self.dir).replace(os.sep, "/"))
 
-    def main(self, ext: tuple[str, ...]) -> str | None:
-        """The package's main document in one format: the largest top-level
-        file with that extension (manifests and metadata files are small)."""
-        top = [f for f in self.files if "/" not in f and f.lower().endswith(ext)]
-        if not top:
-            return None
-        return max(top, key=lambda f: (os.path.getsize(os.path.join(self.dir, f)), f))
+    def main(self, ext: str) -> str | None:
+        """The package's delivery item in one format (md, html, pdf), chosen
+        by the checker's own rule, so a finding lands on the file that was
+        checked and never on a -DIFF PDF or a comment resolution log."""
+        if self._main is None:
+            from oasis_pub_check import find_delivery_items
+            try:
+                found = find_delivery_items(self.dir)
+            except OSError:
+                found = {}
+            self._main = {k: os.path.basename(v) for k, v in found.items()}
+        return self._main.get(ext)
 
     def lines(self, rel: str) -> list[str]:
+        """The file's lines as git and GitHub count them: split at LF only, so
+        a form feed or U+2028 in the text does not shift the numbering."""
         if rel not in self._text:
             try:
-                with open(os.path.join(self.dir, rel), encoding="utf-8", errors="replace") as fh:
-                    self._text[rel] = fh.read().splitlines()
+                with open(os.path.join(self.dir, rel), encoding="utf-8", errors="replace",
+                          newline="") as fh:
+                    self._text[rel] = fh.read().split("\n")
             except OSError:
                 self._text[rel] = []
         return self._text[rel]
@@ -135,19 +153,24 @@ class Package:
         if not self.dir:
             return None
         msg = f.get("message", "")
-        md = self.main((".md",))
-        page = self.main((".html", ".htm"))
+        md = self.main("md")
+        page = self.main("html")
         m = LINE_IN_MESSAGE.search(msg)
-        if m:
-            rel = md if m.group(1).lower() == "markdown" else page
-            n = int(m.group(2))
+        start = LINE_AT_START.match(msg)
+        if m or start:
+            rel = page if m and m.group(1).lower() == "html" else md
+            n = int(m.group(2) if m else start.group(1))
             if rel and 0 < n <= len(self.lines(rel)):
                 return rel, n
         snippets = sorted(set(QUOTED.findall(msg)) | {u.rstrip(".,;:") for u in URL.findall(msg)},
                           key=len, reverse=True)
         head = msg.split(": ", 1)[0]
         if head in self.files:
-            # The message names the file; a quoted value from it gives the line.
+            # The message names the file; a JSON parser's "line N column M",
+            # or a quoted value from the file, gives the line.
+            j = JSON_POSITION.search(msg)
+            if j and 0 < int(j.group(1)) <= len(self.lines(head)):
+                return head, int(j.group(1))
             for s in snippets:
                 n = self.find(s, head)
                 if n:
@@ -157,11 +180,14 @@ class Package:
             if not rel:
                 continue
             for s in snippets:
-                n = self.find(s, rel)
+                # A web address is placed where it is a link target first: the
+                # same address usually also appears, earlier, as cover text.
+                n = (self.find(f"]({s})", rel) or self.find(f'href="{s}"', rel)
+                     if URL.fullmatch(s) else None) or self.find(s, rel)
                 if n:
                     return rel, n
         if f.get("check") in PDF_CLASSES:
-            pdf = self.main((".pdf",))
+            pdf = self.main("pdf")
             if pdf:
                 return pdf, None
         return None
@@ -243,9 +269,12 @@ def rows(findings: list[dict], pkg_dir: str | None, env: dict | None = None) -> 
 
 # ---------------------------------------------------------------- Markdown
 
+NO_PLACE = "Not tied to one line"
+
+
 def where_md(r: dict) -> str:
     if not r["file"]:
-        return "Whole document"
+        return NO_PLACE
     label = md_cell(r["file"] + (f" line {r['line']}" if r["line"] else ""))
     return f"[{label}]({r['url']})" if r["url"] else label
 
@@ -256,11 +285,11 @@ def table_md(rs: list[dict], limit: int | None) -> list[str]:
     prev = None
     for r in shown:
         found = f"<br><sub>Found: {md_cell(r['detail'])}</sub>"
-        if r["check"] == prev:
+        if (r["what"], r["fix"]) == prev:
             lines.append(f"| {where_md(r)} | Same as above.{found} | As above. |")
         else:
             lines.append(f"| {where_md(r)} | {md_cell(r['what'])}{found} | {md_cell(r['fix'])} |")
-        prev = r["check"]
+        prev = (r["what"], r["fix"])
     if limit is not None and len(rs) > limit:
         lines += ["", f"...and {len(rs) - limit} more, listed in the full report."]
     return lines
@@ -307,16 +336,16 @@ def outcome_html(findings: list[dict], rs: list[dict]) -> str:
                    "<th>How to fix it</th></tr></thead><tbody>")
         prev = None
         for r in sel:
-            where = "Whole document"
+            where = NO_PLACE
             if r["file"]:
                 label = e(r["file"] + (f" line {r['line']}" if r["line"] else ""))
                 where = f'<a href="{e(r["url"])}">{label}</a>' if r["url"] else f"<code>{label}</code>"
-            same = r["check"] == prev
+            same = (r["what"], r["fix"]) == prev
             what = "Same as above." if same else e(r["what"])
             fix = "As above." if same else e(r["fix"])
             out.append(f'<tr><td class="t">{where}</td><td class="t f">{what}<br><small>Found: '
                        f'{e(r["detail"])}</small></td><td class="t">{fix}</td></tr>')
-            prev = r["check"]
+            prev = (r["what"], r["fix"])
         out.append("</tbody></table></div>")
 
     blockers = [r for r in rs if r["severity"] == "BLOCKER"]
@@ -370,29 +399,46 @@ def annotations(rs: list[dict], limit: int = ANNOTATION_LIMIT) -> list[str]:
 # ---------------------------------------------------------------- pull request comment
 
 def slot_for(title: str) -> str:
-    return re.sub(r"[^A-Za-z0-9._/-]+", "-", title).strip("-")[:120] or "package"
+    """The comment's marker for one title: readable, and unique to the exact
+    title (two titles that read alike, or share a long prefix, get two comments)."""
+    readable = re.sub(r"[^A-Za-z0-9._/-]+", "-", title).strip("-")[:80] or "package"
+    return f"{readable}-{hashlib.sha256(title.encode('utf-8')).hexdigest()[:8]}"
 
 
 def encode_state(rs: list[dict]) -> str:
+    """This run's blockers and warnings, for the next run's 'resolved' list,
+    within STATE_LIMIT: with their text when it fits, else identities only,
+    else as many identities as fit (the list then errs towards silence)."""
     items = [{"k": r["key"], "s": r["severity"], "c": r["check"], "d": r["detail"]}
              for r in rs if r["severity"] in ("BLOCKER", "WARN")]
-    raw = json.dumps(items, separators=(",", ":"))
-    if len(raw) > COMMENT_LIMIT // 3:
-        # Too many to carry their text: carry identities only.
-        raw = json.dumps([{"k": x["k"], "s": x["s"], "c": x["c"], "d": ""} for x in items],
-                         separators=(",", ":"))
-    return base64.b64encode(raw.encode("utf-8")).decode("ascii")
+
+    def enc(xs: list[dict]) -> str:
+        return base64.b64encode(json.dumps(xs, separators=(",", ":")).encode("utf-8")).decode("ascii")
+
+    out = enc(items)
+    if len(out) > STATE_LIMIT:
+        items = [dict(x, d="") for x in items]
+        out = enc(items)
+    while len(out) > STATE_LIMIT and items:
+        items = items[: len(items) * 3 // 4]
+        out = enc(items)
+    return out
 
 
 def decode_state(body: str) -> list[dict]:
+    """The previous run's state. The comment can be edited by anyone who can
+    edit it, so every field is checked and anything malformed is dropped."""
     m = STATE.search(body or "")
     if not m:
         return []
     try:
-        items = json.loads(base64.b64decode(m.group(1)).decode("utf-8"))
-        return [x for x in items if isinstance(x, dict) and isinstance(x.get("k"), str)]
+        items = json.loads(base64.b64decode(m.group(1), validate=True).decode("utf-8"))
     except (ValueError, UnicodeDecodeError):
         return []
+    if not isinstance(items, list):
+        return []
+    return [x for x in items[:2000] if isinstance(x, dict)
+            and all(isinstance(x.get(k), str) for k in ("k", "s", "c", "d"))]
 
 
 def resolved(previous: list[dict], rs: list[dict]) -> list[dict]:
@@ -422,8 +468,10 @@ def comment_body(findings: list[dict], rs: list[dict], title: str, previous: lis
         foot += f" [Full report and run details]({run_url})."
     lines += [f"<sub>{foot}</sub>", "", f"<!-- oasis-publication-checks-state: {encode_state(rs)} -->"]
     body = "\n".join(lines)
-    if len(body) > COMMENT_LIMIT:
-        lines[3] = outcome_md(findings, rs, limit=5, level="####")
+    for limit in (5, 0):
+        if len(body) <= COMMENT_LIMIT:
+            break
+        lines[3] = outcome_md(findings, rs, limit=limit, level="####")
         body = "\n".join(lines)
     return body
 
@@ -447,7 +495,7 @@ class Api:
 
     def call(self, method: str, path: str, body: dict | None = None):
         req = urllib.request.Request(
-            f"{self.base}/repos/{self.repo}{path}", method=method,
+            f"{self.base}{path}", method=method,
             data=json.dumps(body).encode("utf-8") if body is not None else None,
             headers={"Authorization": f"Bearer {self.token}",
                      "Accept": "application/vnd.github+json",
@@ -457,13 +505,33 @@ class Api:
             return json.loads(resp.read().decode("utf-8") or "null")
 
 
+BOT = "github-actions[bot]"   # the author of every comment the default workflow token writes
+
+
+def own_logins(api: Api) -> set[str]:
+    """Who this token writes as: the Actions bot, and for a personal token
+    its user (GET /user refuses the workflow token, which is fine)."""
+    logins = {BOT}
+    try:
+        me = api.call("GET", "/user")
+        if isinstance(me, dict) and isinstance(me.get("login"), str):
+            logins.add(me["login"])
+    except (urllib.error.URLError, OSError, ValueError):
+        pass
+    return logins
+
+
 def find_comment(api: Api, number: int, marker: str) -> dict | None:
+    """Our comment for this marker: written by this token's identity, never
+    a comment someone else wrote with the marker pasted in."""
+    mine = own_logins(api)
     for page in range(1, 31):
-        batch = api.call("GET", f"/issues/{number}/comments?per_page=100&page={page}")
+        batch = api.call("GET", f"/repos/{api.repo}/issues/{number}/comments?per_page=100&page={page}")
         if not batch:
             return None
         for c in batch:
-            if (c.get("body") or "").startswith(marker):
+            if (c.get("body") or "").startswith(marker) and \
+                    ((c.get("user") or {}).get("login") in mine):
                 return c
         if len(batch) < 100:
             return None
@@ -494,13 +562,13 @@ def post_comment(findings: list[dict], rs: list[dict], title: str, env=None,
                             run_url, head_sha(env))
         if existing:
             try:
-                api.call("PATCH", f"/issues/comments/{existing['id']}", {"body": body})
+                api.call("PATCH", f"/repos/{api.repo}/issues/comments/{existing['id']}", {"body": body})
                 return f"updated comment {existing['id']}"
             except urllib.error.HTTPError as exc:
                 if exc.code not in (403, 404):
                     raise
                 # Someone else's comment carrying our marker: post our own.
-        made = api.call("POST", f"/issues/{number}/comments", {"body": body})
+        made = api.call("POST", f"/repos/{api.repo}/issues/{number}/comments", {"body": body})
         return f"created comment {(made or {}).get('id')}"
     except urllib.error.HTTPError as exc:
         if exc.code in (401, 403, 404):

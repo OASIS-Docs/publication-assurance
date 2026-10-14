@@ -371,12 +371,17 @@ runs:
         TARGET: ${{ inputs.target }}
       run: |
         if [ "$EXIT_CODE" = 2 ]; then
-          {
-            echo "## pub-check: ${SUMMARY_TITLE:-$TARGET}"
-            echo ""
-            echo "**The target could not be read (exit code 2).** No report was produced. Check that \`$TARGET\` exists in the checked-out repository; the path is relative to the repository root and case-sensitive."
-            echo ""
-          } >> "$GITHUB_STEP_SUMMARY"
+          # The title and target come from the caller (a pull request can set
+          # them): escaped as plain text, never rendered as Markdown or HTML.
+          python3 - "$ACTION_PATH/pub-check" "${SUMMARY_TITLE:-$TARGET}" "$TARGET" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+        import sys
+        sys.path.insert(0, sys.argv[1])
+        from validation_report import md_code, md_text
+        print(f"## OASIS publication checks: {md_text(sys.argv[2])}\n")
+        print("**The target could not be read (exit code 2).** No report was "
+              f"produced. Check that {md_code(sys.argv[3])} exists in the checked-out repository; "
+              "the path is relative to the repository root and case-sensitive.\n")
+        PY
           exit 0
         fi
         # The outcome and what to fix first, then the report links, then the
