@@ -14,7 +14,9 @@ Two defects, both found staging UBL v2.5 as an OASIS Standard:
 
 from __future__ import annotations
 
+import json
 import shutil
+import subprocess
 
 import pytest
 
@@ -84,3 +86,76 @@ def test_manifest_records_the_stage_and_version_it_was_given(manifest_stage):
 
     assert "Version:        v2.5" in text, f"version not recorded:\n{text}"
     assert "Approval stage: os" in text, f"approval stage not recorded:\n{text}"
+
+
+# source.commit (SARIF v2.2 csd01, Oct 2026): the stage was assembled inside
+# the ops workspace, a different git repository, and manifest.json recorded
+# that repository's HEAD as the package's source commit.
+emit_manifest = oasis_pub_check.emit_manifest
+
+
+def _git(cwd, *args):
+    return subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.org",
+                           *args], cwd=cwd, capture_output=True, text=True,
+                          check=True).stdout.strip()
+
+
+def _commit_of(stage):
+    out = emit_manifest(str(stage), "v2.5", "os")
+    return json.load(open(out, encoding="utf-8"))["source"]["commit"]
+
+
+@pytest.fixture()
+def repo(tmp_path, monkeypatch):
+    monkeypatch.delenv("GITHUB_SHA", raising=False)
+    _git(tmp_path, "init", "-q")
+    (tmp_path / "README.md").write_text("ops workspace\n", encoding="utf-8")
+    _git(tmp_path, "add", "README.md")
+    _git(tmp_path, "commit", "-q", "-m", "unrelated")
+    return tmp_path
+
+
+def test_a_stage_the_enclosing_repo_does_not_hold_records_no_commit(repo, manifest_stage):
+    stage = repo / "work" / "v2.5" / "os"
+    shutil.copytree(manifest_stage, stage)
+    assert _commit_of(stage) == ""
+
+
+def test_a_stage_committed_as_is_records_head(repo, manifest_stage):
+    stage = repo / "tc" / "v2.5" / "os"
+    shutil.copytree(manifest_stage, stage)
+    _git(repo, "add", "tc")
+    _git(repo, "commit", "-q", "-m", "stage")
+    assert _commit_of(stage) == _git(repo, "rev-parse", "HEAD")
+    # Emitting again must not count its own manifest.json as a local change.
+    _git(repo, "add", "tc")
+    _git(repo, "commit", "-q", "-m", "manifest")
+    assert _commit_of(stage) == _git(repo, "rev-parse", "HEAD")
+
+
+def test_a_stage_with_uncommitted_changes_records_no_commit(repo, manifest_stage):
+    stage = repo / "tc" / "v2.5" / "os"
+    shutil.copytree(manifest_stage, stage)
+    _git(repo, "add", "tc")
+    _git(repo, "commit", "-q", "-m", "stage")
+    (stage / "extra.html").write_text("<p>not committed</p>\n", encoding="utf-8")
+    assert _commit_of(stage) == ""
+
+
+def test_github_sha_still_wins(repo, manifest_stage, monkeypatch):
+    monkeypatch.setenv("GITHUB_SHA", "0123456789abcdef0123456789abcdef01234567")
+    assert _commit_of(manifest_stage) == "0123456789abcdef0123456789abcdef01234567"
+
+
+def test_a_stage_whose_renders_the_repo_ignores_records_no_commit(repo, manifest_stage):
+    """The ops workspace tracks a batch's text files and ignores its renders:
+    the stage looked committed and clean, but HEAD does not hold the HTML."""
+    (repo / ".gitignore").write_text("*.html\n", encoding="utf-8")
+    stage = repo / "tc" / "v2.5" / "os"
+    shutil.copytree(manifest_stage, stage)
+    (stage / "UBL-2.5-os.md").write_text("# Universal Business Language\n", encoding="utf-8")
+    _git(repo, "add", ".gitignore", "tc")
+    _git(repo, "commit", "-q", "-m", "text files only")
+    assert any(p.suffix == ".html" for p in stage.rglob("*")), "fixture must carry an HTML render"
+    assert _git(stage, "ls-files"), "fixture must track some of the stage"
+    assert _commit_of(stage) == ""

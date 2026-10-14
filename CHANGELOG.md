@@ -108,6 +108,44 @@ PATCH: a fix inside existing checks, no new criteria.
   warnings to 148). No corpus package contains the phrase, so the corpus
   findings are unchanged. Pinned by `tests/test_residue_fill_in.py`.
 
+- **front-matter**, **stage-uri-live** and every check that reads the cover's
+  This, Previous and Latest stage URLs: a URL written as a Markdown autolink,
+  `<https://...>`, kept its closing `>`. That is the form the md-links
+  warning recommends, and SARIF v2.2 CSD01 and the CSAF v2.1 draft use it.
+  SARIF got three false "This-stage URL points at 'sarif-v2.2-csd01.md>'
+  which is not a file in the package" BLOCKERs; the CSAF draft got six false
+  "Previous/Latest stage URI returns HTTP 404" BLOCKERs on `...md>` while the
+  same URLs without `>` return 200. `>` now ends a URL, as `<` already did.
+  Because the This-stage URL failed to parse, SARIF's stage base URL was
+  empty and schema-id, revision-collision and public-review-metadata
+  silently did not run; they now run, and schema-id reports SARIF's real
+  `$id` defect. On the CSAF draft the blockers go from 21 to 15 (the six
+  404s), and conformance-structure, now able to fetch CSD03, reports three
+  renumbered clauses instead of "previous stage unavailable". The bare-URL
+  scan in uri-alias stops at `<` and `>` the same way. Pinned by
+  `tests/test_cover_autolink_urls.py`.
+
+- **pdf-cover**, the title-count assertion (A1): the template's Citation
+  format block names the title (`Title. Edited by ...`), and when a layout
+  fits the citation on page 1 (SARIF v2.2 CSD01, rendered with Typst) a
+  correct cover reported "Document title appears 2 times". The count now
+  skips an occurrence followed by "Edited by"; a duplicated title block still
+  blocks. Pinned by `tests/test_pdf_cover_citation.py`. SARIF goes from 4
+  blockers to 1, the real schema-id defect.
+
+- **`--emit-manifest`**, `source.commit`: without `GITHUB_SHA` the emitter
+  recorded `git rev-parse HEAD` from the stage directory, so a stage
+  assembled inside another checkout (SARIF v2.2 CSD01, staged in the OASIS
+  ops workspace) recorded that checkout's unrelated commit as the package's
+  source. HEAD is now recorded only when that repository tracks every file
+  the manifest lists and none of them differ from it; otherwise
+  `source.commit` is empty. Tracking only some of them is not enough: the ops
+  workspace commits a batch's text files and ignores its HTML, PDF and zip,
+  so the stage looks committed and clean while HEAD does not hold the renders
+  (found by the adversarial review). An empty commit is allowed by the
+  schema, and the emitter says so on stderr. `GITHUB_SHA` still wins. Pinned
+  by `tests/test_manifest_emitter.py`.
+
 `oasis.rules.yaml`, kept in lockstep (nide):
 
 - `OASIS-RESID-FILL-IN` takes the same expression, without `IGNORECASE`
