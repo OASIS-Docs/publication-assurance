@@ -125,11 +125,12 @@ def test_a_row_taller_than_a_page_loses_no_line(tmp_path):
     assert result.returncode == 0 and pdf.exists(), result.stderr
     text = pdf_text(pdf)
     # A line wrapped across a page break has the footer between its halves,
-    # so count the "line N of" heads: once in the class table, once below.
+    # so count the "line N of" heads: once in the opening table of what to
+    # fix, once in the class table, once below.
     heads = re.findall(r"line\s+(\d+)\s+of", text)
-    short = [n for n in range(200) if heads.count(str(n)) < 2]
+    short = [n for n in range(200) if heads.count(str(n)) < 3]
     assert not short, f"lines missing from the PDF: {short}"
-    assert text.count("X") == 2 * len(token)
+    assert text.count("X") == 3 * len(token)
 
 
 def test_a_hung_browser_times_out_and_leaves_no_process_behind(tmp_path):
