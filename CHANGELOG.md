@@ -26,7 +26,15 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+- Changed: check messages say 'checked against' instead of 'gated on'. The
+  redirect-service check (uri-alias) described its comparison as "gated on the
+  anchor text" and "gated on the sentence window"; the comment-resolution-log
+  description said "csd gate" and "cnd gate"; the asset-refs note said "you are
+  gating a live-edge capture"; and the comment-resolution-log not-applicable
+  observation was labelled "gate". None of these words is meant for a report
+  reader, so they now read "checked against", "csd package", "cnd package",
+  "checking" and "applicability". No check id, class, count or severity changed.
+  Pinned by `tests/test_no_gate_wording.py`.
 
 ## v1.15.2 - 2026-10-14
 

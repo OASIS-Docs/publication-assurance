@@ -3087,7 +3087,7 @@ def check_asset_refs(stage_dir: str, html_path: str, html_text: str,
         # the origin artifact (gate the zip). Stays a blocker either way;
         # the note tells the operator which mistake to go fix.
         note = (" This ref is Cloudflare serve-time injection: either the "
-                "package contains browser-saved HTML, or you are gating a "
+                "package contains browser-saved HTML, or you are checking a "
                 "live-edge capture instead of the origin artifact."
                 if r.startswith("/cdn-cgi/") else "")
         f.add(BLOCKER, "asset-refs",
@@ -6320,27 +6320,27 @@ def check_comment_resolution_log(stage_dir: str, stage: str, stem: str,
     take down the whole gate on a caller bug."""
     if not isinstance(stage_dir, str) or not isinstance(stage, str):
         f.observe("comment-resolution-log",
-                  gate="not applicable: malformed stage_dir/stage input")
+                  applicability="not applicable: malformed stage_dir/stage input")
         return
     m = re.fullmatch(r"([a-z]+)(\d\d)?", stage or "")
     prefix = m.group(1) if m else (stage or "")
     if prefix not in {"csd", "cnd"}:
         f.observe("comment-resolution-log",
-                  gate=f"not applicable: stage '{stage}' is not csd/cnd")
+                  applicability=f"not applicable: stage '{stage}' is not csd/cnd")
         return
     if not stem:
         f.observe("comment-resolution-log",
-                  gate="not applicable: no established delivery stem")
+                  applicability="not applicable: no established delivery stem")
         return
     if _comment_log_is_multipart(stage_dir):
         f.observe("comment-resolution-log",
-                  gate="not applicable: Multi-Part Work Product (scope open_question)")
+                  applicability="not applicable: Multi-Part Work Product (scope open_question)")
         return
     try:
         names = os.listdir(stage_dir)
     except (OSError, TypeError):
         f.observe("comment-resolution-log",
-                  gate="not applicable: stage directory unreadable")
+                  applicability="not applicable: stage directory unreadable")
         return
     siblings = [n for n in names if os.path.isfile(os.path.join(stage_dir, n))]
 
@@ -8491,7 +8491,7 @@ CONDITION_DOCS: list[dict] = [
          pulls="the This-stage base URL the front-matter check derives from the cover",
          compares_to="a base URL under this package's own /version/stage/ directory; without one the check reports NOT EVALUATED"),
     dict(check='comment-resolution-log', sig='resembling the required comment-resolution-log is present but misnamed', applies='all', condition='A file resembling a comment-resolution-log, if present in a CSD/CND stage directory that itself carries a public-review-metadata file, carries the exact basename Naming Directives prescribes', pulls="the sibling file listing of the stage directory root (immediate siblings of the document-identifier files only, per naming-directives.txt's 'directory with the CSD or CND' scoping); whether any sibling basename (extension stripped, hyphen/underscore-normalized) contains 'commentresolutionlog' without exactly matching the expected basename under a plausible-format extension", compares_to="the expected basename [stem]-comment-resolution-log against naming-directives.txt s5.2's filename pattern for a produced comment resolution log"),
-    dict(check='comment-resolution-log', sig='appears to have concluded', applies='all', condition='Where in-package evidence (a later-stage sibling directory) shows a CSD/CND public review has demonstrably concluded, a comment-resolution-log basename match was sought and not found', pulls='the sibling file listing of the stage directory root; the presence of a later-stage sibling directory (cs/os/errata for a csd gate, cn for a cnd gate) alongside this stage directory, as the review-concluded closure signal', compares_to="tc-process.txt s2.6/s2.7 (comment disposition is required to be posted to the TC's e-mail lists; the downstream approval ballot may only commence once every comment is resolved) against handbook-PublicReviews.txt's 'best practice, not a normative filing mandate' framing for HOW that record is kept"),
+    dict(check='comment-resolution-log', sig='appears to have concluded', applies='all', condition='Where in-package evidence (a later-stage sibling directory) shows a CSD/CND public review has demonstrably concluded, a comment-resolution-log basename match was sought and not found', pulls='the sibling file listing of the stage directory root; the presence of a later-stage sibling directory (cs/os/errata for a csd package, cn for a cnd package) alongside this stage directory, as the review-concluded closure signal', compares_to="tc-process.txt s2.6/s2.7 (comment disposition is required to be posted to the TC's e-mail lists; the downstream approval ballot may only commence once every comment is resolved) against handbook-PublicReviews.txt's 'best practice, not a normative filing mandate' framing for HOW that record is kept"),
     dict(check='normdef-refs', sig='normative-definition file is never referenced from the Work Product', applies='all', condition='Every candidate normative-definition file (schema/grammar/code plain-text file, excluding example/sample/test-case/non-normative and pipeline/asset directories) is referenced from the Work Product', pulls="each candidate file's package-relative path and basename, tested via structured link/href/src/schemaLocation/$ref target extraction (path-level, then basename-level) against the spec's own text (or rendered HTML on the DOCX track), every OTHER candidate file's own content and extracted targets, and manifest.json (package root only)/top-level README-or-index text, all normalized (URL-decode, Unicode NFC)", compares_to="TC Process 2.2.5: 'Each text file must be referenced from the Work Product; and'. Standards Track (csd, cs, os, errata) only"),
     dict(check='normdef-refs', sig='basename-only reference cannot be unambiguously resolved', applies='all', condition='A basename-only match among candidate files sharing that basename in different directories is flagged for confirmation rather than silently satisfying the requirement for every tied file', pulls='candidate files sharing an identical basename in different package directories, and whether any reference to that basename in the corpus is path-qualified', compares_to="TC Process 2.2.5's reference requirement; an ambiguous basename-only match does not unambiguously resolve which file was referenced"),
     dict(check='uri-alias', sig='live <meta http-equiv="refresh">', applies='all', condition='No live META-refresh element in any delivered HTML file', pulls='every <meta> tag in each .html/.htm/.xhtml file, HTML-tokenized (comments/<script>/<style>/<pre>/<code>/<template> excluded)', compares_to='Naming Directives v1.7 s6.5(a): unauthorized URI aliasing via META-refresh elements is barred'),
@@ -8499,8 +8499,8 @@ CONDITION_DOCS: list[dict] = [
     dict(check='uri-alias', sig='none of which is a delivery/manifest-cited file', applies='all', condition='An ancillary (non-delivery, non-manifest-cited) duplicate is flagged for review, not treated as a s6.5(b) aliasing risk', pulls='sha256 buckets whose members are all non-citable paths (LICENSE/NOTICE/schemas/test-fixtures/asset directories/etc.)', compares_to="the package's own delivery-item paths and manifest.json authoritative/delivery-role paths"),
     dict(check='uri-alias', sig='Previous-stage front-matter cites a redirect', applies='md', condition='The markdown Previous-stage block cites no redirect/URL-shortening domain', pulls="every URL under the 'Previous Stage/Version' heading", compares_to='the seed redirect-service domain list (tinyurl.com, bit.ly, goo.gl, ow.ly, t.co, is.gd, buff.ly, rebrand.ly, tiny.cc, cutt.ly, shorturl.at, rb.gy, purl.oclc.org)'),
     dict(check='uri-alias', sig='DOCX-native cover field cites a redirect', applies='docx', condition="The DOCX-native rendered cover's This/Previous/Latest-version fields cite no redirect/URL-shortening domain", pulls='every URL (visible text or href) between the This/Previous/Latest-version labels on the rendered HTML cover', compares_to='the seed redirect-service domain list'),
-    dict(check='uri-alias', sig='names oasis-open.org but links to a redirect', applies='all', condition='Plain-prose anchor text that names oasis-open.org does not link to a redirect/URL-shortening domain', pulls="the visible/anchor text of every `[shown](target)` (md) or `<a>shown</a>` (html) construct whose shown text is not itself a URL (a shown-is-a-URL mismatch is the existing link-mismatch check's territory)", compares_to="the seed redirect-service domain list, gated on the anchor text literally containing 'oasis-open.org'", sites=2),
-    dict(check='uri-alias', sig='cites oasis-open.org while linking a redirect', applies='all', condition="A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain", pulls='the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct', compares_to="the seed redirect-service domain list, gated on the sentence window literally containing 'oasis-open.org'", sites=2),
+    dict(check='uri-alias', sig='names oasis-open.org but links to a redirect', applies='all', condition='Plain-prose anchor text that names oasis-open.org does not link to a redirect/URL-shortening domain', pulls="the visible/anchor text of every `[shown](target)` (md) or `<a>shown</a>` (html) construct whose shown text is not itself a URL (a shown-is-a-URL mismatch is the existing link-mismatch check's territory)", compares_to="the seed redirect-service domain list, checked against the anchor text literally containing 'oasis-open.org'", sites=2),
+    dict(check='uri-alias', sig='cites oasis-open.org while linking a redirect', applies='all', condition="A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain", pulls='the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct', compares_to="the seed redirect-service domain list, checked against the sentence window literally containing 'oasis-open.org'", sites=2),
     dict(check="xml-namespace", sig="NOT EVALUATED: the XML namespaces", applies="all",
          condition="The XML namespace checks are not silently skipped when the cover gives no This-stage base URL",
          pulls="the This-stage base URL the front-matter check derives from the cover",
