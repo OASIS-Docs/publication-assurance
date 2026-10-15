@@ -63,6 +63,10 @@ SEV_ORDER = {"BLOCKER": 0, "WARN": 1, "INFO": 2}
 RENDER_CAP = 5          # findings shown per class in the class table
 SUMMARY_LIMIT = 900_000  # GitHub refuses a step summary over 1 MiB
 TOOL = "oasis_pub_check.py (OASIS-Docs/publication-assurance)"
+# Observed keys that a report prints under a different label. The comment-resolution-log
+# key stays `gate` in the --json output (its shape is unchanged since v1.15.2), and the
+# report reads "applicability" there.
+OBSERVED_LABELS = {"gate": "applicability"}
 
 
 def class_inventory(conditions: list[dict]) -> list[dict]:
@@ -178,7 +182,7 @@ def condition_rows(data: dict) -> list[dict]:
         else:
             result = "PASS"
             obs = observed.get(c["check"], {})
-            pulled = ("; ".join(f"{k}: {v}" for k, v in obs.items())
+            pulled = ("; ".join(f"{OBSERVED_LABELS.get(k, k)}: {v}" for k, v in obs.items())
                       or f"pulled: {c['pulls']}; no violating instance found")
         rows.append({"check": c["check"], "condition": c["condition"], "result": result,
                      "observed": pulled, "compares_to": c["compares_to"]})
@@ -342,7 +346,7 @@ def render_md(rec: dict) -> str:
                            f"{rec['total_classes']} check classes, all run"),
               ("Blockers", str(rec["blockers"]))]
     if rec["exit_code"] is not None:
-        fields.append(("Gate exit code", str(rec["exit_code"])))
+        fields.append(("Checker exit code", str(rec["exit_code"])))
     lines += [f"**{k}:** {v}  " for k, v in fields]
     lines += ["", f"**Result: {verdict(rec)}** {result_line(rec)}", "",
               "## Check-by-Check Results", "",
@@ -430,7 +434,7 @@ def render_html(rec: dict) -> str:
                            f"{rec['total_classes']} check classes, all run"),
               ("Blockers", str(rec["blockers"]))]
     if rec["exit_code"] is not None:
-        fields.append(("Gate exit code", str(rec["exit_code"])))
+        fields.append(("Checker exit code", str(rec["exit_code"])))
     out += [f"<dt>{k}</dt><dd>{v}</dd>" for k, v in fields]
     out += ["</dl>",
             f'<p class="verdict {"ok" if rec["publication_ready"] else "no"}">'
@@ -660,7 +664,7 @@ def main() -> int:
                          "browser is available")
     ap.add_argument("--title", default="", help="report heading; defaults to the target")
     ap.add_argument("--exit-code", type=int, default=None,
-                    help="the gate's own exit code, recorded in the report")
+                    help="the checker's own exit code, recorded in the report")
     ap.add_argument("--date", default=datetime.datetime.now(datetime.timezone.utc).date().isoformat())
     ap.add_argument("--package-dir", default=None,
                     help="the checked stage directory, so each finding in the opening "

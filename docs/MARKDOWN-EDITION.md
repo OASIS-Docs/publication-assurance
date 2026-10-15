@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: OASIS-Docs/publication-assurance/docbook-markdown@v1.15.2
+      - uses: OASIS-Docs/publication-assurance/docbook-markdown@v1.15.3
         with:
           source: dmlex-v1.0/specification       # 1
           profile: dmlex                         # 2
