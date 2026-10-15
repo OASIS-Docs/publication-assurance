@@ -1678,7 +1678,7 @@
       "sig": "appears to have concluded",
       "applies": "all",
       "condition": "Where in-package evidence (a later-stage sibling directory) shows a CSD/CND public review has demonstrably concluded, a comment-resolution-log basename match was sought and not found",
-      "pulls": "the sibling file listing of the stage directory root; the presence of a later-stage sibling directory (cs/os/errata for a csd gate, cn for a cnd gate) alongside this stage directory, as the review-concluded closure signal",
+      "pulls": "the sibling file listing of the stage directory root; the presence of a later-stage sibling directory (cs/os/errata for a csd package, cn for a cnd package) alongside this stage directory, as the review-concluded closure signal",
       "compares_to": "tc-process.txt s2.6/s2.7 (comment disposition is required to be posted to the TC's e-mail lists; the downstream approval ballot may only commence once every comment is resolved) against handbook-PublicReviews.txt's 'best practice, not a normative filing mandate' framing for HOW that record is kept",
       "severity": "WARN"
     },
@@ -1751,7 +1751,7 @@
       "applies": "all",
       "condition": "Plain-prose anchor text that names oasis-open.org does not link to a redirect/URL-shortening domain (markdown source)",
       "pulls": "the visible/anchor text of every `[shown](target)` (md) or `<a>shown</a>` (html) construct whose shown text is not itself a URL (a shown-is-a-URL mismatch is the existing link-mismatch check's territory)",
-      "compares_to": "the seed redirect-service domain list, gated on the anchor text literally containing 'oasis-open.org'",
+      "compares_to": "the seed redirect-service domain list, checked against the anchor text literally containing 'oasis-open.org'",
       "severity": "BLOCKER"
     },
     {
@@ -1760,7 +1760,7 @@
       "applies": "all",
       "condition": "Plain-prose anchor text that names oasis-open.org does not link to a redirect/URL-shortening domain (HTML render)",
       "pulls": "the visible/anchor text of every `[shown](target)` (md) or `<a>shown</a>` (html) construct whose shown text is not itself a URL (a shown-is-a-URL mismatch is the existing link-mismatch check's territory)",
-      "compares_to": "the seed redirect-service domain list, gated on the anchor text literally containing 'oasis-open.org'",
+      "compares_to": "the seed redirect-service domain list, checked against the anchor text literally containing 'oasis-open.org'",
       "severity": "BLOCKER"
     },
     {
@@ -1769,7 +1769,7 @@
       "applies": "all",
       "condition": "A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain (markdown source)",
       "pulls": "the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct",
-      "compares_to": "the seed redirect-service domain list, gated on the sentence window literally containing 'oasis-open.org'",
+      "compares_to": "the seed redirect-service domain list, checked against the sentence window literally containing 'oasis-open.org'",
       "severity": "BLOCKER"
     },
     {
@@ -1778,7 +1778,7 @@
       "applies": "all",
       "condition": "A bare URL's enclosing sentence that names oasis-open.org does not point at a redirect/URL-shortening domain (HTML render)",
       "pulls": "the sentence-bounded prose window (nearest sentence terminator or paragraph break either side) around every bare URL not part of a link construct",
-      "compares_to": "the seed redirect-service domain list, gated on the sentence window literally containing 'oasis-open.org'",
+      "compares_to": "the seed redirect-service domain list, checked against the sentence window literally containing 'oasis-open.org'",
       "severity": "BLOCKER"
     },
     {
