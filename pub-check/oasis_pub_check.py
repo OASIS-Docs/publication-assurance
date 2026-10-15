@@ -6320,27 +6320,27 @@ def check_comment_resolution_log(stage_dir: str, stage: str, stem: str,
     take down the whole gate on a caller bug."""
     if not isinstance(stage_dir, str) or not isinstance(stage, str):
         f.observe("comment-resolution-log",
-                  applicability="not applicable: malformed stage_dir/stage input")
+                  gate="not applicable: malformed stage_dir/stage input")
         return
     m = re.fullmatch(r"([a-z]+)(\d\d)?", stage or "")
     prefix = m.group(1) if m else (stage or "")
     if prefix not in {"csd", "cnd"}:
         f.observe("comment-resolution-log",
-                  applicability=f"not applicable: stage '{stage}' is not csd/cnd")
+                  gate=f"not applicable: stage '{stage}' is not csd/cnd")
         return
     if not stem:
         f.observe("comment-resolution-log",
-                  applicability="not applicable: no established delivery stem")
+                  gate="not applicable: no established delivery stem")
         return
     if _comment_log_is_multipart(stage_dir):
         f.observe("comment-resolution-log",
-                  applicability="not applicable: Multi-Part Work Product (scope open_question)")
+                  gate="not applicable: Multi-Part Work Product (scope open_question)")
         return
     try:
         names = os.listdir(stage_dir)
     except (OSError, TypeError):
         f.observe("comment-resolution-log",
-                  applicability="not applicable: stage directory unreadable")
+                  gate="not applicable: stage directory unreadable")
         return
     siblings = [n for n in names if os.path.isfile(os.path.join(stage_dir, n))]
 

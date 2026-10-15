@@ -25,6 +25,9 @@ What this scans, and why it is wide:
 - the registry is also scanned through `conditions_inventory()`, the exact
   structure `--list-checks`, CHECKS.md and the validation report read.
 
+One narrow exemption exists (see `_exempt_nodes`): the comment-resolution-log
+observe() key `gate`, kept so the --json shape is unchanged, never printed as a label.
+
 What it deliberately does not scan: comments, docstrings beyond that first
 line, and identifiers.
 Those never reach a report. Code may say "gate" internally.
@@ -33,11 +36,14 @@ Those never reach a report. Code may say "gate" internally.
 from __future__ import annotations
 
 import ast
+import json
 import re
+import subprocess
+import sys
 
 import pytest
 
-from conftest import PUB_CHECK, oasis_pub_check
+from conftest import CORPUS, PUB_CHECK, oasis_pub_check, run_cli, stage_from_corpus
 
 # Not preceded or followed by a letter, so snake_case ("gate_exit_code") is caught
 # while "navigate", "aggregate" and "gateway" are not.
@@ -60,9 +66,40 @@ PRINTING_FILES = [PUB_CHECK] + [PUB_CHECK.parent / n for n in (
     "tc_view.py", "render_summary.py", "advance_stage.py")]
 
 
+def _exempt_nodes(tree: ast.AST) -> list[ast.AST]:
+    """The ONLY two places allowed to spell `gate`, and why.
+
+    The comment-resolution-log check records its "not applicable" reason under the
+    observe() keyword `gate`. That key is part of the --json output, which is
+    unchanged since v1.15.2, so it stays `gate` for compatibility with anything that
+    reads the JSON. It is never printed as a label: validation_report.py maps it to
+    "applicability" (OBSERVED_LABELS) wherever observed keys are rendered, and
+    test_json_key_kept_and_reports_say_applicability proves both halves.
+
+    The exemption is exactly that keyword in exactly those observe() calls, and the
+    one dict key that does the mapping. Any other `gate` still fails the scan, and
+    test_exemption_is_exactly_these_sites pins the count.
+    """
+    nodes = []
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "observe" and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and node.args[0].value == "comment-resolution-log"):
+            nodes += [k for k in node.keywords if k.arg == "gate"]
+        elif (isinstance(node, ast.Assign) and len(node.targets) == 1
+                and isinstance(node.targets[0], ast.Name)
+                and node.targets[0].id == "OBSERVED_LABELS"
+                and isinstance(node.value, ast.Dict)):
+            nodes += [k for k in node.value.keys
+                      if isinstance(k, ast.Constant) and k.value == "gate"]
+    return nodes
+
+
 def _printable_strings(path=PUB_CHECK) -> list[tuple[int, str]]:
     tree = ast.parse(path.read_text(encoding="utf-8"))
     docstrings = _docstring_node_ids(tree)
+    exempt = {id(n) for n in _exempt_nodes(tree)}
     found = []
     # Five modules pass the first docstring line to argparse as the --help
     # description (`__doc__.splitlines()[0]`), so that line is printed.
@@ -70,6 +107,8 @@ def _printable_strings(path=PUB_CHECK) -> list[tuple[int, str]]:
     if doc:
         found.append((1, doc.splitlines()[0]))
     for node in ast.walk(tree):
+        if id(node) in exempt:
+            continue
         if (isinstance(node, ast.Constant) and isinstance(node.value, str)
                 and id(node) not in docstrings):
             found.append((node.lineno, node.value))
@@ -140,3 +179,38 @@ def test_no_registry_entry_uses_gate_wording():
         "the condition registry (--list-checks, CHECKS.md, validation report) "
         "uses gate wording:\n" + "\n".join(f"  {c} [{k}]: {v}" for c, k, v in bad)
     )
+
+
+def test_exemption_is_exactly_these_sites():
+    """5 observe(gate=...) calls in the checker and 1 label-map key in the report
+    writer, and nothing else; a sixth site, or a stray `gate` elsewhere, fails."""
+    sites = {p.name: len(_exempt_nodes(ast.parse(p.read_text(encoding="utf-8"))))
+             for p in PRINTING_FILES}
+    assert sites == {"oasis_pub_check.py": 5, "validation_report.py": 1, "publish_report.py": 0,
+                     "plain_language.py": 0, "tc_view.py": 0, "render_summary.py": 0,
+                     "advance_stage.py": 0}, sites
+
+
+def test_json_key_kept_and_reports_say_applicability(tmp_path):
+    """Both halves, on a real "not applicable" run: a csd package renamed cs01, so
+    comment-resolution-log records why it does not apply."""
+    stage = stage_from_corpus(tmp_path / "pkg", CORPUS / "csaf" / "v2.1" / "csd01")
+    stage = stage.rename(stage.with_name("cs01"))
+    run = run_cli("--json", str(stage))
+    assert run.returncode in (0, 1), run.stderr
+    (tmp_path / "r.json").write_text(run.stdout)
+    observed = json.loads(run.stdout)["observed"]["comment-resolution-log"]
+    # Precondition: this really is the not-applicable path, or the rest proves nothing.
+    assert observed.get("gate") == "not applicable: stage 'cs01' is not csd/cnd", observed
+    # Half 1: the --json shape is unchanged.
+    assert "applicability" not in observed, observed
+    # Half 2: the rendered reports label it "applicability" and never print "gate".
+    md, html = tmp_path / "v.md", tmp_path / "v.html"
+    report = subprocess.run(
+        [sys.executable, str(PUB_CHECK.parent / "validation_report.py"), str(tmp_path / "r.json"),
+         "--md", str(md), "--html", str(html), "--exit-code", str(run.returncode)],
+        capture_output=True, text=True)
+    assert report.returncode == 0, report.stderr
+    for name, text in (("md", md.read_text()), ("html", html.read_text())):
+        assert "applicability: not applicable: stage 'cs01' is not csd/cnd" in text.replace("&#x27;", "'").replace("&#39;", "'"), name
+        assert not GATE_WORD.search(text), (name, GATE_WORD.search(text).group(0))

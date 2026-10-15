@@ -26,6 +26,12 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.15.3 - 2026-10-15
+
+PATCH: plainer wording in report text, no change to any check and no change to the `--json` output.
+
 - Changed: check messages say 'checked against' instead of 'gated on'. The
   redirect-service check (uri-alias) described its comparison as "gated on the
   anchor text" and "gated on the sentence window"; the comment-resolution-log
@@ -36,9 +42,10 @@ Each version is anchored by a git tag on this repository.
   publish_report.py ("The gate produced no readable --json report"), used the
   word too. None of these words is meant for a report reader, so they now read
   "checked against", "csd package", "cnd package", "checking", "applicability",
-  "Checker exit code" and "The checker ...". The comment-resolution-log
-  `observed` key `gate` is now `applicability`; anything reading that key from
-  the `--json` report must read `applicability`. No check id, class, count or severity changed.
+  "Checker exit code" and "The checker ...". The `--json` output is unchanged: the
+  comment-resolution-log `observed` key stays `gate`, and reports label it
+  "applicability" (`OBSERVED_LABELS` in `validation_report.py`). No check id,
+  class, count or severity changed.
   Pinned by `tests/test_no_gate_wording.py`, which scans every printing module
   (including snake_case such as `gate_exit_code` and the first docstring line
   that `--help` prints).
