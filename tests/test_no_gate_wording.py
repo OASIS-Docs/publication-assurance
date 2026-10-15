@@ -19,10 +19,14 @@ What this scans, and why it is wide:
 - the same scan runs over validation_report.py (the report's field labels, such
   as "Checker exit code", and its --help text) and publish_report.py (the job
   summary text);
+- the scan covers pub-check's other printing modules (plain_language.py,
+  tc_view.py, render_summary.py, advance_stage.py) and the first line of each
+  module docstring, which five modules print as their --help description;
 - the registry is also scanned through `conditions_inventory()`, the exact
   structure `--list-checks`, CHECKS.md and the validation report read.
 
-What it deliberately does not scan: comments, docstrings and identifiers.
+What it deliberately does not scan: comments, docstrings beyond that first
+line, and identifiers.
 Those never reach a report. Code may say "gate" internally.
 """
 
@@ -35,7 +39,9 @@ import pytest
 
 from conftest import PUB_CHECK, oasis_pub_check
 
-GATE_WORD = re.compile(r"\bgat(?:e|es|ed|ing)\b", re.IGNORECASE)
+# Not preceded or followed by a letter, so snake_case ("gate_exit_code") is caught
+# while "navigate", "aggregate" and "gateway" are not.
+GATE_WORD = re.compile(r"(?<![A-Za-z])gat(?:e|es|ed|ing)(?![A-Za-z])", re.IGNORECASE)
 
 
 def _docstring_node_ids(tree: ast.AST) -> set[int]:
@@ -49,15 +55,20 @@ def _docstring_node_ids(tree: ast.AST) -> set[int]:
     return ids
 
 
-PRINTING_FILES = [PUB_CHECK,
-                  PUB_CHECK.parent / "validation_report.py",
-                  PUB_CHECK.parent / "publish_report.py"]
+PRINTING_FILES = [PUB_CHECK] + [PUB_CHECK.parent / n for n in (
+    "validation_report.py", "publish_report.py", "plain_language.py",
+    "tc_view.py", "render_summary.py", "advance_stage.py")]
 
 
 def _printable_strings(path=PUB_CHECK) -> list[tuple[int, str]]:
     tree = ast.parse(path.read_text(encoding="utf-8"))
     docstrings = _docstring_node_ids(tree)
     found = []
+    # Five modules pass the first docstring line to argparse as the --help
+    # description (`__doc__.splitlines()[0]`), so that line is printed.
+    doc = ast.get_docstring(tree)
+    if doc:
+        found.append((1, doc.splitlines()[0]))
     for node in ast.walk(tree):
         if (isinstance(node, ast.Constant) and isinstance(node.value, str)
                 and id(node) not in docstrings):
@@ -86,6 +97,28 @@ def test_report_files_scan_sees_their_labels():
     assert "Validation date" in seen
     summary = [s for _, s in _printable_strings(PUB_CHECK.parent / "publish_report.py")]
     assert any("produced no readable --json report" in s for s in summary)
+
+
+# Minimum string counts per module: a precondition so an emptied or mis-parsed
+# scan cannot pass. Measured 15 Oct 2026; set well below the measured counts.
+MIN_STRINGS = {"oasis_pub_check.py": 4000, "validation_report.py": 150,
+               "publish_report.py": 100, "plain_language.py": 100,
+               "tc_view.py": 100, "render_summary.py": 30, "advance_stage.py": 60}
+
+
+@pytest.mark.parametrize("path", PRINTING_FILES, ids=lambda p: p.name)
+def test_every_scanned_module_yields_strings(path):
+    strings = _printable_strings(path)
+    assert len(strings) > MIN_STRINGS[path.name], f"{path.name}: scan saw only {len(strings)} strings"
+
+
+@pytest.mark.parametrize("name", ["advance_stage.py", "oasis_pub_check.py", "publish_report.py",
+                                  "tc_view.py", "validation_report.py"])
+def test_help_description_line_is_scanned(name):
+    """These modules print the first docstring line as their --help description."""
+    path = PUB_CHECK.parent / name
+    first = ast.get_docstring(ast.parse(path.read_text(encoding="utf-8"))).splitlines()[0]
+    assert first in [s for _, s in _printable_strings(path)]
 
 
 @pytest.mark.parametrize("path", PRINTING_FILES, ids=lambda p: p.name)

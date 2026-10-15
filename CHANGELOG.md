@@ -36,8 +36,12 @@ Each version is anchored by a git tag on this repository.
   publish_report.py ("The gate produced no readable --json report"), used the
   word too. None of these words is meant for a report reader, so they now read
   "checked against", "csd package", "cnd package", "checking", "applicability",
-  "Checker exit code" and "The checker ...". No check id, class, count or severity changed.
-  Pinned by `tests/test_no_gate_wording.py`.
+  "Checker exit code" and "The checker ...". The comment-resolution-log
+  `observed` key `gate` is now `applicability`; anything reading that key from
+  the `--json` report must read `applicability`. No check id, class, count or severity changed.
+  Pinned by `tests/test_no_gate_wording.py`, which scans every printing module
+  (including snake_case such as `gate_exit_code` and the first docstring line
+  that `--help` prints).
 
 ## v1.15.2 - 2026-10-14
 
