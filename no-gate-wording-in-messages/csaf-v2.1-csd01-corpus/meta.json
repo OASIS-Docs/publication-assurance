@@ -1,0 +1,13 @@
+{
+  "folder": "no-gate-wording-in-messages/csaf-v2.1-csd01-corpus",
+  "pdf": true,
+  "publication_ready": false,
+  "published": "2026-10-15 19:40:05",
+  "published_at": "2026-10-15T19:40:05.831749+00:00",
+  "ref": "no-gate-wording-in-messages",
+  "run_url": "https://github.com/OASIS-Docs/publication-assurance/actions/runs/38795614589",
+  "source_sha": "e08927965ffd051aa0d00ae82d4cbca9c619f808",
+  "target": "examples/csaf/v2.1/csd01",
+  "title": "CSAF v2.1 CSD01 (corpus)",
+  "verdict": "NOT publication-ready: 1 blocker(s). 48 of 59 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 17 warning, 10 informational."
+}
