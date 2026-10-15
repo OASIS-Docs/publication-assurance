@@ -16,6 +16,9 @@ What this scans, and why it is wide:
   string literal and every keyword name in the module therefore covers all of
   them, including text built in a variable and passed to `f.add` later, which
   a scan limited to the arguments of the `f.add(...)` call would miss;
+- the same scan runs over validation_report.py (the report's field labels, such
+  as "Checker exit code", and its --help text) and publish_report.py (the job
+  summary text);
 - the registry is also scanned through `conditions_inventory()`, the exact
   structure `--list-checks`, CHECKS.md and the validation report read.
 
@@ -27,6 +30,8 @@ from __future__ import annotations
 
 import ast
 import re
+
+import pytest
 
 from conftest import PUB_CHECK, oasis_pub_check
 
@@ -44,8 +49,13 @@ def _docstring_node_ids(tree: ast.AST) -> set[int]:
     return ids
 
 
-def _printable_strings() -> list[tuple[int, str]]:
-    tree = ast.parse(PUB_CHECK.read_text(encoding="utf-8"))
+PRINTING_FILES = [PUB_CHECK,
+                  PUB_CHECK.parent / "validation_report.py",
+                  PUB_CHECK.parent / "publish_report.py"]
+
+
+def _printable_strings(path=PUB_CHECK) -> list[tuple[int, str]]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
     docstrings = _docstring_node_ids(tree)
     found = []
     for node in ast.walk(tree):
@@ -69,10 +79,20 @@ def test_scan_actually_sees_the_messages():
     assert any("compares_to" == s for s in strings)
 
 
-def test_no_printable_string_uses_gate_wording():
-    bad = [(line, s) for line, s in _printable_strings() if GATE_WORD.search(s)]
+def test_report_files_scan_sees_their_labels():
+    """Precondition for the report-file scan: it must see the real labels."""
+    seen = [s for _, s in _printable_strings(PUB_CHECK.parent / "validation_report.py")]
+    assert "Checker exit code" in seen, "validation_report.py scan missed its exit-code label"
+    assert "Validation date" in seen
+    summary = [s for _, s in _printable_strings(PUB_CHECK.parent / "publish_report.py")]
+    assert any("produced no readable --json report" in s for s in summary)
+
+
+@pytest.mark.parametrize("path", PRINTING_FILES, ids=lambda p: p.name)
+def test_no_printable_string_uses_gate_wording(path):
+    bad = [(line, s) for line, s in _printable_strings(path) if GATE_WORD.search(s)]
     assert not bad, (
-        "pub-check prints text that uses 'gate', 'gated' or 'gating'; say "
+        f"{path.name} prints text that uses 'gate', 'gated' or 'gating'; say "
         "'checked against' or 'check' instead:\n"
         + "\n".join(f"  line {line}: {s}" for line, s in bad)
     )

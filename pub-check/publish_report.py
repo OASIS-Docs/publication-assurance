@@ -343,7 +343,7 @@ def main() -> int:
         rec = validation_report.build_record(data, args.title, None, "")
         verdict = f"{validation_report.verdict(rec)} {validation_report.result_line(rec)}"
     except (OSError, ValueError, KeyError, TypeError):
-        data, rec, verdict = {}, None, "The gate produced no readable --json report."
+        data, rec, verdict = {}, None, "The checker produced no readable --json report."
     title = " ".join((args.title or data.get("target", "package")).split())
     folder = base_folder = folder_for(env, args.title, data.get("target", "package"))
     urls: dict = {}
@@ -353,7 +353,7 @@ def main() -> int:
         if not args.branch:
             raise NotPublished("publishing is off (`publish-branch` is empty)")
         if rec is None:
-            raise NotPublished("the gate did not produce a report to publish")
+            raise NotPublished("the checker did not produce a report to publish")
         if not repo:
             raise NotPublished("not running in GitHub Actions (no GITHUB_REPOSITORY)")
         if fork_pull_request(env):

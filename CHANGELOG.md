@@ -31,9 +31,12 @@ Each version is anchored by a git tag on this repository.
   anchor text" and "gated on the sentence window"; the comment-resolution-log
   description said "csd gate" and "cnd gate"; the asset-refs note said "you are
   gating a live-edge capture"; and the comment-resolution-log not-applicable
-  observation was labelled "gate". None of these words is meant for a report
-  reader, so they now read "checked against", "csd package", "cnd package",
-  "checking" and "applicability". No check id, class, count or severity changed.
+  observation was labelled "gate". The validation report's "Gate exit code" field
+  and the `--exit-code` help text, and two job-summary messages in
+  publish_report.py ("The gate produced no readable --json report"), used the
+  word too. None of these words is meant for a report reader, so they now read
+  "checked against", "csd package", "cnd package", "checking", "applicability",
+  "Checker exit code" and "The checker ...". No check id, class, count or severity changed.
   Pinned by `tests/test_no_gate_wording.py`.
 
 ## v1.15.2 - 2026-10-14

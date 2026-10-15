@@ -342,7 +342,7 @@ def render_md(rec: dict) -> str:
                            f"{rec['total_classes']} check classes, all run"),
               ("Blockers", str(rec["blockers"]))]
     if rec["exit_code"] is not None:
-        fields.append(("Gate exit code", str(rec["exit_code"])))
+        fields.append(("Checker exit code", str(rec["exit_code"])))
     lines += [f"**{k}:** {v}  " for k, v in fields]
     lines += ["", f"**Result: {verdict(rec)}** {result_line(rec)}", "",
               "## Check-by-Check Results", "",
@@ -430,7 +430,7 @@ def render_html(rec: dict) -> str:
                            f"{rec['total_classes']} check classes, all run"),
               ("Blockers", str(rec["blockers"]))]
     if rec["exit_code"] is not None:
-        fields.append(("Gate exit code", str(rec["exit_code"])))
+        fields.append(("Checker exit code", str(rec["exit_code"])))
     out += [f"<dt>{k}</dt><dd>{v}</dd>" for k, v in fields]
     out += ["</dl>",
             f'<p class="verdict {"ok" if rec["publication_ready"] else "no"}">'
@@ -660,7 +660,7 @@ def main() -> int:
                          "browser is available")
     ap.add_argument("--title", default="", help="report heading; defaults to the target")
     ap.add_argument("--exit-code", type=int, default=None,
-                    help="the gate's own exit code, recorded in the report")
+                    help="the checker's own exit code, recorded in the report")
     ap.add_argument("--date", default=datetime.datetime.now(datetime.timezone.utc).date().isoformat())
     ap.add_argument("--package-dir", default=None,
                     help="the checked stage directory, so each finding in the opening "
