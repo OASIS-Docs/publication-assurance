@@ -3,53 +3,23 @@
   "findings": [
     {
       "severity": "WARN",
-      "check": "front-matter",
-      "message": "URL declares version v1.2 (package is v2.1): https://docs.oasis-open.org/csaf/csaf-cvrf/v1.2/cs01/csaf-cvrf-v1.2-cs01.html -- confirm this is an intentional external reference."
-    },
-    {
-      "severity": "WARN",
-      "check": "front-matter",
-      "message": "URL declares version v1.2 (package is v2.1): https://docs.oasis-open.org/csaf/csaf-cvrf/v1.2/csaf-cvrf-v1.2.html -- confirm this is an intentional external reference."
-    },
-    {
-      "severity": "WARN",
       "check": "revision-collision",
       "message": "Stage /csd01/ is already published at https://docs.oasis-open.org/csaf/csaf/v2.1/csd01/: a NEW submission for v2.1 must use the next revision number instead. Ignore this warning if you are re-checking the published package itself."
     },
     {
       "severity": "INFO",
       "check": "revision-collision",
-      "message": "Published stages already live under https://docs.oasis-open.org/csaf/csaf/v2.1/: csd01, csd02, csd03."
+      "message": "Published stages already live under https://docs.oasis-open.org/csaf/csaf/v2.1/: csd01, csd02, csd03, csd04."
     },
     {
       "severity": "INFO",
       "check": "content-labels",
-      "message": "Appendix/Annex heading 'Appendix A. Acknowledgments <a id='acknowledgments'></a>' (markdown line 11935) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt."
+      "message": "Appendix/Annex heading 'Appendix A. Acknowledgments <a id='acknowledgments'></a>' (markdown line 11935) carries no content-type statement. Advisory only: say under its title whether it is part of the conformance requirements, for example with the OASIS template's '(This appendix does not form an integral part of this Specification and is informational.)'; Conformance Requirements for Specifications v1.0, 7.3: 'normative and informative sections SHALL be evident and, if necessary, labeled accordingly'."
     },
     {
       "severity": "INFO",
       "check": "content-labels",
-      "message": "Appendix/Annex heading 'Appendix B. Revision History <a id='revision-history'></a>' (markdown line 12061) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt."
-    },
-    {
-      "severity": "INFO",
-      "check": "content-labels",
-      "message": "Appendix/Annex heading 'Appendix C. Guidance on the Size of CSAF Documents <a id='guidance-on-the-size-of-csaf-documents'></a>' (markdown line 12083) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt."
-    },
-    {
-      "severity": "INFO",
-      "check": "content-labels",
-      "message": "Appendix/Annex heading 'Appendix C. File Size <a id='file-size'></a>' (markdown line 12097) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt."
-    },
-    {
-      "severity": "INFO",
-      "check": "content-labels",
-      "message": "Appendix/Annex heading 'Appendix C. Array Length <a id='array-length'></a>' (markdown line 12110) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt."
-    },
-    {
-      "severity": "INFO",
-      "check": "content-labels",
-      "message": "Appendix/Annex heading 'Appendix C. String Length <a id='string-length'></a>' (markdown line 12210) carries no content-type label. Advisory only: confirm whether this appendix/annex is part of the conformance requirements, and if not, label it 'Non-normative' per handbook-Conformance.txt."
+      "message": "Appendix/Annex heading 'Appendix B. Revision History <a id='revision-history'></a>' (markdown line 12061) carries no content-type statement. Advisory only: say under its title whether it is part of the conformance requirements, for example with the OASIS template's '(This appendix does not form an integral part of this Specification and is informational.)'; Conformance Requirements for Specifications v1.0, 7.3: 'normative and informative sections SHALL be evident and, if necessary, labeled accordingly'."
     },
     {
       "severity": "INFO",
@@ -60,11 +30,6 @@
       "severity": "BLOCKER",
       "check": "public-review-metadata",
       "message": "csd01 underwent a TC public review (Tier 1 (a comment-resolution-log for this revision is already live)) but the live stage directory https://docs.oasis-open.org/csaf/csaf/v2.1/csd01/ does not carry the required companion file csaf-v2.1-csd01-public-review-metadata.html. Naming Directives v1.7 s5.2: 'Project Administration will publish an additional \"public review metadata\" file in the directory with the CSD or CND'; TC Handbook Naming: 'Work products undergoing public review must include a companion metadata file.'"
-    },
-    {
-      "severity": "WARN",
-      "check": "pdf-sync",
-      "message": "PDF cites https://docs.oasis-open.org/csaf/csaf/v2.0/ (package is v2.1); expected only as a previous-stage reference -- confirm."
     },
     {
       "severity": "INFO",
@@ -150,7 +115,7 @@
       "applies": "all",
       "condition": "Stage directory name, and an errataNN parent directory, carry a two-digit number",
       "pulls": "the stage directory name, and the parent directory name when it is an errata directory",
-      "compares_to": "valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (naming-directives.txt Section 4)",
+      "compares_to": "valid stage prefixes must carry exactly two digits (csd01, never bare csd or csd1); an Errata directory is /errata01/ (the OASIS Naming Directives v1.7 Section 4)",
       "severity": "BLOCKER"
     },
     {
@@ -159,7 +124,7 @@
       "applies": "all",
       "condition": "A package staged for publication is not a Working Draft",
       "pulls": "the stage directory name's stage token",
-      "compares_to": "wd: Working Drafts are unpublished and may use any naming (naming-directives.txt 5.2 note); docs.oasis-open.org has no wd location (dmlex/v1.1/wd01 returns 404)",
+      "compares_to": "wd: Working Drafts are unpublished and may use any naming (the OASIS Naming Directives v1.7 5.2 note); docs.oasis-open.org has no wd location (dmlex/v1.1/wd01 returns 404)",
       "severity": "WARN"
     },
     {
@@ -177,7 +142,7 @@
       "applies": "all",
       "condition": "Stage token (and an Errata parent directory) is a recognized current stage, in lower case, and os carries no revision number",
       "pulls": "the alphabetic prefix of the stage directory name, its digits, and the Errata parent directory name",
-      "compares_to": "valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata; lower case, and 'The os stage abbreviation is never used with a revision number' (naming-directives.txt 5.2)",
+      "compares_to": "valid stage set: wd, csd, cs, cnd, cn, os, ps, psd, pn, pnd, errata; lower case, and 'The os stage abbreviation is never used with a revision number' (the OASIS Naming Directives v1.7 5.2)",
       "severity": "BLOCKER"
     },
     {
@@ -354,12 +319,12 @@
       "severity": "BLOCKER"
     },
     {
-      "check": "front-matter",
-      "sig": "confirm this is an intentional external reference",
+      "check": "version-refs",
+      "sig": "of this work product (package is",
       "applies": "md",
-      "condition": "Any docs.oasis-open.org URL declaring a different version is intentional",
-      "pulls": "every docs.oasis-open.org URL in the markdown outside Previous/Related-work blocks",
-      "compares_to": "the package's own version; a different version is a stale-draft tell unless external",
+      "condition": "A docs.oasis-open.org link to another version of this work product is intended",
+      "pulls": "every docs.oasis-open.org URL in the markdown under this work product's own /<tc-shortname>/<WP-abbrev>/ path, outside the cover's Previous stage and Related work blocks and outside References sections",
+      "compares_to": "the package's own version; another version of this work product cited elsewhere is a stale-draft tell",
       "severity": "WARN"
     },
     {
@@ -557,17 +522,8 @@
       "applies": "md",
       "condition": "No opening code fence carries trailing text in its info string",
       "pulls": "each opening fence line's info string",
-      "compares_to": "a bare language token or curly-attribute form; trailing text collapses the block (lint D6). BLOCKER when the package has no HTML, or the HTML does not carry the block as a <pre> block",
+      "compares_to": "a bare language token or curly-attribute form; trailing text collapses the block under pandoc's markdown reader (lint D6). BLOCKER when the package has no HTML, or the HTML does not carry the block as a <pre> block; a block the HTML does carry is noted once as INFO, with no action needed. The remedy offered is the note as an HTML comment on its own line above the fence, which pandoc, gfm and commonmark all render",
       "severity": "BLOCKER"
-    },
-    {
-      "check": "fence-collapse",
-      "sig": "renders only with a gfm/commonmark reader",
-      "applies": "md",
-      "condition": "A fence with trailing text in its info string, which the published HTML nonetheless shows as a code block, is reported once as a portability warning",
-      "pulls": "the opening line of each fence with trailing info-string text, and the HTML's <pre> blocks (the same comparison html-code-sync makes)",
-      "compares_to": "pandoc's gfm and commonmark readers render such a fence as code; its default markdown reader (the OASIS pipeline's step 1) collapses it, so the Markdown renders only with a gfm/commonmark reader or a preprocessor",
-      "severity": "WARN"
     },
     {
       "check": "image-policy",
@@ -793,8 +749,8 @@
       "applies": "all",
       "requires": "pdftotext",
       "condition": "The PDF cites no unexpected other version of this spec",
-      "pulls": "every this-spec version URL in the extracted PDF text",
-      "compares_to": "the package's own version (previous-stage citations expected, anything else confirmed)",
+      "pulls": "every this-spec version URL in the first three pages of extracted PDF text, wrapped URLs rejoined",
+      "compares_to": "the package's own version (other versions excused inside the Previous stage and Related work blocks, anything else confirmed)",
       "severity": "WARN"
     },
     {
@@ -1262,7 +1218,7 @@
       "applies": "all",
       "condition": "At least one Conformance heading is a genuine top-level numbered section (not nested deeper than the document's modal top-level depth, and not under an Annex/Appendix ancestor)",
       "pulls": "every heading's nesting level, leading number prefix, and Annex/Appendix ancestor chain (markdown ATX headings, or rendered HTML h1-h6 on the DOCX-native track), with code-block content stripped first",
-      "compares_to": "handbook-Conformance.txt: 'a separate, top-level numbered section of the work product (not a subsection buried elsewhere)'; BLOCKER at cs/os (WARN at wd/csd, or when the modal-depth signal itself is low-confidence)",
+      "compares_to": "The TC Handbook page 'Conformance Clauses': 'a separate, top-level numbered section of the work product (not a subsection buried elsewhere)'; BLOCKER at cs/os (WARN at wd/csd, or when the modal-depth signal itself is low-confidence)",
       "severity": "BLOCKER/WARN"
     },
     {
@@ -1271,7 +1227,7 @@
       "applies": "all",
       "condition": "Each conformance profile scope yields at least one extracted clause identifier",
       "pulls": "numbered sub-headings and paragraph-leading 'Clause N'/bracketed target-id labels within the Conformance section span, scoped per named profile",
-      "compares_to": "handbook-WPQualityRequirements.txt: 'a set of numbered conformance clauses to which any implementation must adhere'; BLOCKER at cs/os, WARN at wd/csd; an empty Conformance section is reported at either tier",
+      "compares_to": "The TC Handbook page 'Work Product Requirements': 'a set of numbered conformance clauses to which any implementation must adhere'; BLOCKER at cs/os, WARN at wd/csd; an empty Conformance section is reported at either tier",
       "severity": "WARN"
     },
     {
@@ -1280,7 +1236,7 @@
       "applies": "all",
       "condition": "No clause identifier repeats within the same profile scope",
       "pulls": "the extracted clause-identifier set, scoped per named conformance profile (Core/Extended-style sub-headings matching 'Profile'/'Level')",
-      "compares_to": "handbook-Conformance.txt: 'individually numbered conformance clauses ... so that implementers and Statements of Use can cite specific clauses by number'; BLOCKER at cs/os, WARN at wd/csd",
+      "compares_to": "The TC Handbook page 'Conformance Clauses': 'individually numbered conformance clauses ... so that implementers and Statements of Use can cite specific clauses by number'; BLOCKER at cs/os, WARN at wd/csd",
       "severity": "BLOCKER/WARN"
     },
     {
@@ -1289,7 +1245,7 @@
       "applies": "all",
       "condition": "Every (profile, clause number) pair in the previous stage is still present in this stage (append-only extension is fine; removal/renumbering, including a whole profile silently disappearing, is flagged)",
       "pulls": "the ((profile, clause number) -> content hash) map extracted from the resolvable previous-stage artifact, diffed against this stage's map",
-      "compares_to": "handbook-WPQualityRequirements.txt 'Key principles': 'Clause numbering must be unique and stable across revisions'. Guidelines-sourced (recommended, not mandatory) so WARN-tier informational, never BLOCKER, and never fired for the CS->OS transition (that gets the zero-tolerance override instead); profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing",
+      "compares_to": "The TC Handbook page 'Work Product Requirements' 'Key principles': 'Clause numbering must be unique and stable across revisions'. Guidelines-sourced (recommended, not mandatory) so WARN-tier informational, never BLOCKER, and never fired for the CS->OS transition (that gets the zero-tolerance override instead); profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing",
       "severity": "WARN"
     },
     {
@@ -1307,7 +1263,7 @@
       "applies": "all",
       "condition": "At the CS->OS transition, the current (profile, clause id) key set is a byte-for-byte match to the approved-CS key set, scoped per profile, so a whole profile silently dropped while a surviving profile happens to reuse its bare clause numbers is still caught",
       "pulls": "the (profile, clause-identifier) sets extracted from the OS package and from the artifact named by its Previous-stage URI (verified to be the approved CS by stage token), each parsed with the extractor matching that artifact's own format (markdown or rendered HTML)",
-      "compares_to": "handbook-Conformance.txt 'OASIS Standard os': 'Conformance clauses are preserved unchanged from the approved Committee Specification' (TC Process 2.9): zero tolerance, always BLOCKER",
+      "compares_to": "The TC Handbook page 'Conformance Clauses' 'OASIS Standard os': 'Conformance clauses are preserved unchanged from the approved Committee Specification' (TC Process 2.9): zero tolerance, always BLOCKER",
       "severity": "BLOCKER"
     },
     {
@@ -1316,7 +1272,7 @@
       "applies": "all",
       "condition": "A clause whose (profile, number) key is unchanged at CS->OS is flagged for manual confirmation when its content hash changed",
       "pulls": "content-hash comparison, per (profile, clause number) key, between the approved CS and the OS package, restricted to keys present in both sets",
-      "compares_to": "handbook-WPQualityRequirements.txt 'Allowed changes during publication': coordinated non-material changes are permitted (TC Process 2.2.4); not itself a zero-tolerance failure, so WARN/manual-review, never an automatic BLOCKER; profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing",
+      "compares_to": "The TC Handbook page 'Work Product Requirements' 'Allowed changes during publication': coordinated non-material changes are permitted (TC Process 2.2.4); not itself a zero-tolerance failure, so WARN/manual-review, never an automatic BLOCKER; profile names and clause text are compared with curly quotes, apostrophes and Unicode dashes folded to ASCII, so straightening a quote changes nothing",
       "severity": "WARN"
     },
     {
@@ -1343,7 +1299,7 @@
       "applies": "all",
       "condition": "A bare 'References' heading carrying 2+ direct reference entries is split into separately labeled Normative/Informative child headings (or is too small a sample, 0 or 1 entries, to judge)",
       "pulls": "H1-H3 headings normalizing to 'references' plus the distinct reference-entry IDs found directly in that heading's own span (before its first immediate-child heading)",
-      "compares_to": "handbook-WPQualityChecklist.txt editorial quality checklist bullet: 'normative references listed separately from informative references' (WARN: staff-maintained best-practice checklist, not a TC Process must/shall clause)",
+      "compares_to": "The TC Handbook page 'Work Product Quality Checklist' editorial quality checklist bullet: 'normative references listed separately from informative references' (WARN: staff-maintained best-practice checklist, not a TC Process must/shall clause)",
       "severity": "WARN"
     },
     {
@@ -1352,7 +1308,7 @@
       "applies": "all",
       "condition": "No reference-entry ID appears under both a Normative References heading and an Informative References heading anywhere in the document",
       "pulls": "the set of reference-entry IDs found in the span of every 'normative references'-classified heading, and the same for every 'informative references'-classified heading",
-      "compares_to": "the two ID sets must not intersect; a shared ID is a labeling inconsistency or editorial duplication (handbook-WPQualityChecklist.txt same checklist bullet)",
+      "compares_to": "the two ID sets must not intersect; a shared ID is a labeling inconsistency or editorial duplication (the TC Handbook page 'Work Product Quality Checklist' same checklist bullet)",
       "severity": "WARN"
     },
     {
@@ -1361,7 +1317,7 @@
       "applies": "all",
       "condition": "Every Examples/Illustrative-Examples/Sample-<noun> heading carries a structural content-type label (heading suffix, first-sentence lead/predicate, labeled ancestor heading, or document-wide blanket statement)",
       "pulls": "markdown ATX/setext headings (or, DOCX-native track, rendered HTML h1-h6 elements via an HTMLParser walk, entities decoded), in document order, each with its heading text, nesting level, and the first sentence of the body block immediately following it",
-      "compares_to": "handbook-Conformance.txt 'Normative versus non-normative content': Examples content is classified non-normative and 'should be clearly labelled'",
+      "compares_to": "The TC Handbook page 'Conformance Clauses' 'Normative versus non-normative content': Examples content is classified non-normative and 'should be clearly labelled'",
       "severity": "WARN"
     },
     {
@@ -1370,7 +1326,7 @@
       "applies": "all",
       "condition": "Previous-stage URL stage token is not a retired abbreviation",
       "pulls": "the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem",
-      "compares_to": "retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7; WARN with a legacy-URI verification caveat since a pre-2024 Previous-stage URI may permanently retain a retired token (naming-directives.txt 6.3 Resource Permanence)",
+      "compares_to": "retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7; WARN with a legacy-URI verification caveat since a pre-2024 Previous-stage URI may permanently retain a retired token (the OASIS Naming Directives v1.7 6.3 Resource Permanence)",
       "severity": "WARN"
     },
     {
@@ -1379,7 +1335,7 @@
       "applies": "all",
       "condition": "Previous-stage URL stage token matches the document's own current csd/cnd stage abbreviation or the track's approved-stage counterpart",
       "pulls": "the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem",
-      "compares_to": "the document's own current stage token, or the track's approved-stage set (csd: cs/os/errata; cnd: cn) when the block links a previous VERSION at its own approved stage (handbook-PublicReviews.txt: the cover page URIs 'should all reflect the csd stage abbreviation')",
+      "compares_to": "the document's own current stage token, or the track's approved-stage set (csd: cs/os/errata; cnd: cn) when the block links a previous VERSION at its own approved stage (the TC Handbook page 'Public Review': the cover page URIs 'should all reflect the csd stage abbreviation')",
       "severity": "WARN"
     },
     {
@@ -1388,7 +1344,7 @@
       "applies": "all",
       "condition": "Latest-stage URL's filename embeds no stage-abbreviation/revision token at all",
       "pulls": "the filename-stem-position stage-abbreviation token (if any) extracted from the Latest-stage URL",
-      "compares_to": "naming-directives.txt 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', an absolute prohibition independent of whether the token matches the current stage",
+      "compares_to": "The OASIS Naming Directives v1.7 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', an absolute prohibition independent of whether the token matches the current stage",
       "severity": "BLOCKER"
     },
     {
@@ -1397,7 +1353,7 @@
       "applies": "all",
       "condition": "The rendered cover-page title incorporates the package's own Version identifier",
       "pulls": "the resolved cover-page title text (HTML <title>/<h1> on the markdown track, the MsoTitle-styled or first non-empty non-logo cover paragraph on the DOCX-native track)",
-      "compares_to": "naming-directives.txt 5.1: 'A Version identifier must also be incorporated into a Work Product name/title'",
+      "compares_to": "The OASIS Naming Directives v1.7 5.1: 'A Version identifier must also be incorporated into a Work Product name/title'",
       "severity": "BLOCKER"
     },
     {
@@ -1406,16 +1362,16 @@
       "applies": "all",
       "condition": "The Version cited in the title agrees with the package's own Version identifier",
       "pulls": "the numeric run of the rightmost 'Version <n>' token in the resolved title",
-      "compares_to": "the package's own Version identifier (the version directory segment, with a leading 'v' stripped per naming-directives.txt Section 4's [version-id] grammar)",
+      "compares_to": "the package's own Version identifier (the version directory segment, with a leading 'v' stripped per the OASIS Naming Directives v1.7 Section 4's [version-id] grammar)",
       "severity": "BLOCKER"
     },
     {
       "check": "title-version",
       "sig": "Version composition does not follow the required",
       "applies": "all",
-      "condition": "The title's Version token is composed as '<name/identifier> Version <number>' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: <part title>' suffix; on a package whose own stage directory or immediate parent is named errataNN, also an 'Errata NN' or 'Plus Errata NN' suffix whose number matches the package's own errata number, per naming-directives.txt Section 4's separate Errata construction)",
+      "condition": "The title's Version token is composed as '<name/identifier> Version <number>' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: <part title>' suffix; on a package whose own stage directory or immediate parent is named errataNN, also an 'Errata NN' or 'Plus Errata NN' suffix whose number matches the package's own errata number, per the OASIS Naming Directives v1.7 Section 4's separate Errata construction)",
       "pulls": "the characters immediately preceding and following the rightmost 'Version <n>' token in the resolved title, the stage token's track classification, and the package's own Errata number derived from its stage directory layout",
-      "compares_to": "naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -> BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -> WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification)",
+      "compares_to": "The OASIS Naming Directives v1.7 Section 7: MUST for Standards Track (csd/cs/os/errata) -> BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -> WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification)",
       "severity": "BLOCKER/WARN"
     },
     {
@@ -1424,7 +1380,7 @@
       "applies": "all",
       "condition": "The Work Product title (the <h1> identified by _h1_title_match_info's 'exact' or 'singular-related-fallback' classification) does not begin with the word 'OASIS'",
       "pulls": "the <h1> text identified by _h1_title_match_info: either the single <h1> exactly matching the rendered <title> text (the same match check_html's own D1 lint uses for its duplicate-title finding), or, when no exact match exists, the document's sole <h1> when it shares a prefix relationship with <title> (e.g. a trailing brand suffix on <title> alone), flagged lower-confidence in that case",
-      "compares_to": "naming-directives.txt s7: 'Preferably, a title should not begin with the name \"OASIS\" except on the recommendation of Project Administration for special cases.' Section 7's lead sentence track-scopes this to BLOCKER (Standards Track, must-observe) / WARN (Non-Standards Track, should-follow with an additional alternate-construction escape valve).",
+      "compares_to": "The OASIS Naming Directives v1.7 s7: 'Preferably, a title should not begin with the name \"OASIS\" except on the recommendation of Project Administration for special cases.' Section 7's lead sentence track-scopes this to BLOCKER (Standards Track, must-observe) / WARN (Non-Standards Track, should-follow with an additional alternate-construction escape valve).",
       "severity": "BLOCKER/WARN"
     },
     {
@@ -1577,7 +1533,7 @@
       "applies": "all",
       "condition": "No bare CORE.ext delivery filename coexists with genuine part files",
       "pulls": "delivery-item stems sharing one <wp>-<version>-<stage> core, and their tails",
-      "compares_to": "naming-directives.txt s4: the single-part bare-CORE filename rule does not apply once the package is multi-part",
+      "compares_to": "The OASIS Naming Directives v1.7 s4: the single-part bare-CORE filename rule does not apply once the package is multi-part",
       "severity": "BLOCKER"
     },
     {
@@ -1595,7 +1551,7 @@
       "applies": "all",
       "condition": "A part file discovered inside an Option-1 URI part-subdirectory agrees with that subdirectory's own [partNumber]-[partName] segment",
       "pulls": "the part number/name parsed from the filename tail and from its containing part-subdirectory name",
-      "compares_to": "naming-directives.txt s6.1 (Option 1): the subdirectory segment and the filename's part identifier must name the same part",
+      "compares_to": "The OASIS Naming Directives v1.7 s6.1 (Option 1): the subdirectory segment and the filename's part identifier must name the same part",
       "severity": "BLOCKER"
     },
     {
@@ -1613,7 +1569,7 @@
       "applies": "all",
       "condition": "Part numbering for a multi-part package begins at 1",
       "pulls": "the sorted set of unique part numbers found across the package's in-scope delivery filenames",
-      "compares_to": "naming-directives.txt s4: partNumber begins with the number '1' (for Part 1)",
+      "compares_to": "The OASIS Naming Directives v1.7 s4: partNumber begins with the number '1' (for Part 1)",
       "severity": "BLOCKER"
     },
     {
@@ -1622,7 +1578,7 @@
       "applies": "all",
       "condition": "Part numbering for a multi-part package is contiguous with no gaps",
       "pulls": "the sorted set of unique part numbers found across the package's in-scope delivery filenames",
-      "compares_to": "naming-directives.txt s4: partNumber increases monotonically (2, 3, 4, ...) for other parts, i.e. the exact sequence [1, 2, ..., N]",
+      "compares_to": "The OASIS Naming Directives v1.7 s4: partNumber increases monotonically (2, 3, 4, ...) for other parts, i.e. the exact sequence [1, 2, ..., N]",
       "severity": "BLOCKER"
     },
     {
@@ -1632,7 +1588,7 @@
       "requires": "network",
       "condition": "A live, published csd/cnd stage directory confirmed (by tiered evidence) and successfully scanned to have undergone TC public review carries the required public-review-metadata companion file",
       "pulls": "the LIVE docs.oasis-open.org stage-directory-root filename listing (fetched over the network, post-publication audit only), plus a same-revision comment-resolution-log or a downstream cs/errata stage's own Previous-stage cover URL as evidence the review occurred",
-      "compares_to": "the exact, case-sensitive filename [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html (naming-directives.txt 5.2; handbook-Naming.txt 'Public-review metadata filename (new in v1.7)')",
+      "compares_to": "the exact, case-sensitive filename [WP-abbrev]-[version-id]-[stage-abbrev][revisionNumber]-public-review-metadata.html (the OASIS Naming Directives v1.7 5.2; the TC Handbook page 'Naming & URIs' 'Public-review metadata filename (new in v1.7)')",
       "severity": "BLOCKER"
     },
     {
@@ -1642,7 +1598,7 @@
       "requires": "network",
       "condition": "A present public-review-metadata companion file is non-empty",
       "pulls": "the byte length of the fetched companion file",
-      "compares_to": "naming-directives.txt 5.2: the file 'provides a publication history of the Work Product' (content validation itself is out of scope for this check; only non-zero size is tested here)",
+      "compares_to": "The OASIS Naming Directives v1.7 5.2: the file 'provides a publication history of the Work Product' (content validation itself is out of scope for this check; only non-zero size is tested here)",
       "severity": "WARN"
     },
     {
@@ -1669,8 +1625,8 @@
       "sig": "resembling the required comment-resolution-log is present but misnamed",
       "applies": "all",
       "condition": "A file resembling a comment-resolution-log, if present in a CSD/CND stage directory that itself carries a public-review-metadata file, carries the exact basename Naming Directives prescribes",
-      "pulls": "the sibling file listing of the stage directory root (immediate siblings of the document-identifier files only, per naming-directives.txt's 'directory with the CSD or CND' scoping); whether any sibling basename (extension stripped, hyphen/underscore-normalized) contains 'commentresolutionlog' without exactly matching the expected basename under a plausible-format extension",
-      "compares_to": "the expected basename [stem]-comment-resolution-log against naming-directives.txt s5.2's filename pattern for a produced comment resolution log",
+      "pulls": "the sibling file listing of the stage directory root (immediate siblings of the document-identifier files only, per the OASIS Naming Directives v1.7's 'directory with the CSD or CND' scoping); whether any sibling basename (extension stripped, hyphen/underscore-normalized) contains 'commentresolutionlog' without exactly matching the expected basename under a plausible-format extension",
+      "compares_to": "the expected basename [stem]-comment-resolution-log against the OASIS Naming Directives v1.7 s5.2's filename pattern for a produced comment resolution log",
       "severity": "BLOCKER"
     },
     {
@@ -1679,7 +1635,7 @@
       "applies": "all",
       "condition": "Where in-package evidence (a later-stage sibling directory) shows a CSD/CND public review has demonstrably concluded, a comment-resolution-log basename match was sought and not found",
       "pulls": "the sibling file listing of the stage directory root; the presence of a later-stage sibling directory (cs/os/errata for a csd package, cn for a cnd package) alongside this stage directory, as the review-concluded closure signal",
-      "compares_to": "tc-process.txt s2.6/s2.7 (comment disposition is required to be posted to the TC's e-mail lists; the downstream approval ballot may only commence once every comment is resolved) against handbook-PublicReviews.txt's 'best practice, not a normative filing mandate' framing for HOW that record is kept",
+      "compares_to": "The OASIS Technical Committee (TC) Process s2.6/s2.7 (comment disposition is required to be posted to the TC's e-mail lists; the downstream approval ballot may only commence once every comment is resolved) against the TC Handbook page 'Public Review''s 'best practice, not a normative filing mandate' framing for HOW that record is kept",
       "severity": "WARN"
     },
     {
@@ -1841,7 +1797,7 @@
       "applies": "all",
       "condition": "This-stage and Latest-stage cover URIs do not reuse the reserved /ns/ path segment",
       "pulls": "the This-stage and Latest-stage URL(s) from the markdown front matter (md track) or the rendered HTML cover (docx-native track, via the shared html_cover_urls() helper)",
-      "compares_to": "handbook-Naming.txt: '/ns/ ... is for namespace identifiers, not for retrievable documents. Do not use /ns/ in the URI of a document you intend to publish as a retrievable resource'",
+      "compares_to": "The TC Handbook page 'Naming & URIs': '/ns/ ... is for namespace identifiers, not for retrievable documents. Do not use /ns/ in the URI of a document you intend to publish as a retrievable resource'",
       "severity": "BLOCKER"
     },
     {
@@ -1850,7 +1806,7 @@
       "applies": "all",
       "condition": "Previous-stage cover URI does not reuse the reserved /ns/ path segment (non-blocking, manual-review if it does: an immutable inherited citation)",
       "pulls": "the Previous-stage URL from the markdown front matter (md track) or the rendered HTML cover (docx-native track, via the shared html_cover_urls() helper)",
-      "compares_to": "handbook-Naming.txt's /ns/ reservation rule, applied to an already-published prior-stage citation the current package cannot alter",
+      "compares_to": "The TC Handbook page 'Naming & URIs''s /ns/ reservation rule, applied to an already-published prior-stage citation the current package cannot alter",
       "severity": "WARN"
     }
   ],
@@ -1874,6 +1830,10 @@
     },
     "uri-chars": {
       "cover_uris_scanned": "6"
+    },
+    "version-refs": {
+      "own_work_product_urls_compared": "22",
+      "other_versions_cited_in_references": "(none)"
     },
     "stage-uri-live": {
       "previous_stage_urls": "(none)",
@@ -1950,7 +1910,7 @@
       "example_candidates": "0",
       "example_unlabeled": "0",
       "appendix_candidates": "6",
-      "appendix_unlabeled": "6",
+      "appendix_unlabeled": "2",
       "blanket_statement_classes": "example"
     },
     "stage-token": {
@@ -2046,7 +2006,8 @@
     },
     "pdf-sync": {
       "pdftotext": "present",
-      "this_stage_base_in_pdf": "True"
+      "this_stage_base_in_pdf": "True",
+      "other_versions_excused": "v2.0"
     },
     "pdf-cover": {
       "title": "Common Security Advisory Framework Version 2.1",
