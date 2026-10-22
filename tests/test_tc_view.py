@@ -390,8 +390,8 @@ def test_every_condition_override_names_a_registered_condition():
     inventory = tc_view_conditions()
     for key in plain_language.CONDITIONS:
         assert key in inventory, f"no registered condition {key}"
-    what, _ = plain_language.explain("front-matter", "x -- confirm this is an intentional external reference.", "WARN")
-    assert what.startswith("The document links to a different version")
+    what, _ = plain_language.explain("pdf-sync", "x expected only as a previous-stage reference -- confirm.", "WARN")
+    assert what.startswith("The PDF cites another version")
     assert plain_language.explain("front-matter", "This-stage URL points at", "BLOCKER") == \
         plain_language.PLAIN["front-matter"]
 

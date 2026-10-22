@@ -92,6 +92,16 @@ output. The scratch file is removed afterwards. If a `styles/styles.css` sits
 beside the output, `-c` points at that file and not at the published
 stylesheet. prettier and pandoc each have a time limit of 1800 seconds.
 
+Before pandoc runs, an opening code fence whose info string is a language name
+followed by more text (```` ```yaml <!--json-path($.a)--> ````) is cut to the
+language name (`.github/src/pipeline/fence_info.py`). GitHub and pandoc's gfm
+and commonmark readers read such a fence that way; pandoc's markdown reader
+does not recognise it as a fence and collapses the block to inline code.
+publisher-toolkit's step 1 has made the same rewrite since v0.2.0. pandoc then
+reads a temporary copy (`.fence_info_*.md`) in the Markdown's own directory,
+removed afterwards; a document with no such fence is read as it is.
+`verify/verify_md.py` reads the Markdown the same way.
+
 `--preserve-tabs` keeps a tab in a code block a tab: without it pandoc expands
 tabs to spaces, and 9 of the 316 code blocks in DMLex no longer matched the
 published standard.
