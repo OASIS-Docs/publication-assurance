@@ -108,7 +108,8 @@ def test_a_url_cited_only_in_a_references_section_is_recorded_not_warned_on():
     section, the URL in an autolink, the next numbered subsection after it."""
     md = MD.split("# 1 Introduction")[0] + (
         "# 1 Introduction\n\nText.\n\n## 1.3 Normative References\n\nText.\n\n"
-        f"## 1.4 Informative References\n\n**[WID-v0.9]** _Widget 0.9_. <{OTHER}>.\n\n"
+        f"## 1.4 Informative References<a id='informative-references'></a>\n\n"
+        f"**[WID-v0.9]** _Widget 0.9_. <{OTHER}>.\n\n"
         "## 1.5 Typographical Conventions\n\nText.\n")
     f = oasis_pub_check.Findings()
     oasis_pub_check.check_version_refs(md, "v2.0", f)
@@ -122,6 +123,28 @@ def test_the_same_url_after_the_references_section_ends_still_warns():
         f"## 1.5 Typographical Conventions\n\nSee <{OTHER}>.\n")
     got = warnings(md)
     assert len(got) == 1 and "(section '1.5 Typographical Conventions')" in got[0], got
+
+
+def test_a_body_section_that_only_mentions_references_is_not_exempt():
+    """CSAF v2.1 csd04 has five body sections titled '... - References'
+    (3.2.4.13 Document Property - References among them). Only a References
+    section itself is a list of deliberate citations."""
+    md = MD.split("# 1 Introduction")[0] + (
+        "# 3 Schema\n\n### 3.2.4.13 Document Property - References<a id='x'></a>\n\n"
+        f"See <{OTHER}>.\n")
+    got = warnings(md)
+    assert len(got) == 1 and "Document Property - References" in got[0], got
+
+
+def test_a_bibliography_is_a_references_section():
+    md = MD.split("# 1 Introduction")[0] + f"# Annex C Bibliography\n\n- <{OTHER}>\n"
+    assert warnings(md) == []
+
+
+def test_emphasis_around_a_url_is_not_part_of_it():
+    md = MD.split("# 1 Introduction")[0] + f"# 1 Introduction\n\nSee *{OTHER}*.\n"
+    (msg,) = warnings(md)
+    assert f": {OTHER}. Confirm" in msg, msg
 
 
 def test_front_matter_no_longer_reports_another_version():

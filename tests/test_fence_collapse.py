@@ -147,5 +147,10 @@ def test_the_messages_survive_a_markdown_table_cell():
         assert "<!--" not in own and own.count("```") <= 1
 
 
+def test_a_language_with_pandoc_attributes_is_not_flagged():
+    """```yaml {.numberLines} is a fence under pandoc's markdown reader."""
+    assert findings('Intro.\n\n```yaml {.numberLines startFrom="5"}\na: 1\n```\n') == []
+
+
 def check_clean(md):
     return findings(md) == []

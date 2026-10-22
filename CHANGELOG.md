@@ -48,12 +48,16 @@ reported 6 warnings and 9 notes (content-labels notes: 1, was 5).
     `/[tc-shortname]/[WP-abbrev]/[version-id]/`), so `csaf/csaf-cvrf/v1.2/`
     is not compared with `csaf/csaf/v2.1/`; the scheme is ignored, so a stale
     `http://` link to this work product still warns;
-  - treats a URL that appears only inside a References section (Normative,
-    Informative, or an annex titled References, with its subsections) as a
+  - treats a URL that appears only inside a References section as a
     deliberate citation: it is recorded as the observation
-    `other_versions_cited_in_references`, not warned on;
+    `other_versions_cited_in_references`, not warned on. A References section
+    is a heading whose whole title, after its number or annex letter, is
+    "References", "Normative References", "Informative References" or
+    "Bibliography", with its subsections; a body section that only mentions
+    references ("Document Property - References", five in CSAF v2.1) is not;
   - names the Markdown line and section of the first other-version link it
-    reports, and no longer calls the link "external".
+    reports, and no longer calls the link "external";
+  - no longer reads a closing `*` or `]` as part of a URL.
   The Previous stage and Related work exemption is unchanged (a URL listed
   there is excused wherever else it appears in the Markdown). Plain-language
   text, the crosswalk and CHECKS.md follow. Tests:
@@ -67,7 +71,9 @@ reported 6 warnings and 9 notes (content-labels notes: 1, was 5).
   INFO, says no action is needed, says the text after the language name is
   valid CommonMark and GitHub Markdown, and says the OASIS pipeline's step 1
   rewrites the fences before pandoc reads them. A fence the HTML does not show
-  as code, or a package with no HTML, is still a BLOCKER.
+  as code, or a package with no HTML, is still a BLOCKER. A language name
+  followed only by pandoc attributes (`` ```yaml {.numberLines} ``), which
+  pandoc's markdown reader reads as a fence, is no longer flagged at all.
 - **fence-collapse: a remedy every reader renders.** Both messages
   recommended the curly-attribute fence `` ```{.lang title="..."} ``, which
   suits pandoc only: gfm and commonmark read `{.lang` as the language name, and
@@ -84,7 +90,9 @@ reported 6 warnings and 9 notes (content-labels notes: 1, was 5).
   appendix provides informative guidance", so four labelled CSAF appendices
   were each reported unlabelled. The advisory no longer advises the word
   "Non-normative", which no OASIS rule requires; it names the template
-  sentence and quotes Conformance Requirements for Specifications v1.0, 7.3.
+  sentence that fits the heading (the annex sentence under an Annex, the
+  appendix sentence under an Appendix) and quotes Conformance Requirements
+  for Specifications v1.0, 7.3.
   Tests: `tests/test_content_labels_template_sentence.py`.
 - **pdf-sync: another version cited in Related work or Previous stage is
   expected.** The PDF check warned on every other version of the
@@ -114,7 +122,8 @@ reported 6 warnings and 9 notes (content-labels notes: 1, was 5).
   before it, so a fence opened as `` ```yaml <!--json-path(...)--> ``
   collapsed to inline code there. The new `pipeline/fence_info.py` cuts such
   an info string to its language name before pandoc, as publisher-toolkit's
-  step 1 does. On CSAF v2.1 csd04 verify_md now reads 726 code blocks, as
+  step 1 does; a language name followed only by pandoc attributes is left
+  alone, because pandoc reads it as a fence and applies the attributes. On CSAF v2.1 csd04 verify_md now reads 726 code blocks, as
   published, where it read 630. Documents with no such fence convert byte for
   byte as before. Tests: `tests/test_fence_info.py`.
 

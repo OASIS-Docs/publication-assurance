@@ -54,6 +54,12 @@ _FENCE = re.compile(r"^(?P<indent> {0,3})(?P<delim>`{3,}|~{3,})(?P<info>.*)$")
 _LANG_AND_MORE = re.compile(r"^\s*(?P<lang>[A-Za-z][A-Za-z0-9_+.#-]*)\s+\S")
 
 
+# A language name followed only by pandoc attributes (```yaml {.numberLines}):
+# pandoc's markdown reader reads this as a fence and applies the attributes,
+# so it is left alone.
+_LANG_AND_ATTRS = re.compile(r"^\s*[A-Za-z][A-Za-z0-9_+.#-]*\s*\{[^}]*\}\s*$")
+
+
 def bare_fence_info(md: str) -> tuple[str, list[int]]:
     """Return ``md`` with each opening fence's info string cut to its
     language name where more text follows it, and the 1-based line numbers
@@ -79,7 +85,7 @@ def bare_fence_info(md: str) -> tuple[str, list[int]]:
             continue
         open_delim = delim
         lm = _LANG_AND_MORE.match(info)
-        if lm and not info.lstrip().startswith("{"):
+        if lm and not info.lstrip().startswith("{") and not _LANG_AND_ATTRS.match(info):
             out.append(f"{m.group('indent')}{delim}{lm.group('lang')}{ending}")
             changed.append(n)
         else:

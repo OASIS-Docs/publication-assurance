@@ -71,6 +71,13 @@ def test_an_unlabelled_appendix_is_still_reported(first_para):
     assert len(msgs) == 1 and "Appendix C Guidance" in msgs[0]
 
 
+def test_the_advisory_under_an_annex_names_the_annex_sentence():
+    msgs = findings(doc("Annex C Guidance", "Some guidance."))
+    assert len(msgs) == 1
+    assert "(This annex forms an integral part of this Specification.)" in msgs[0]
+    assert "does not form an integral part" not in msgs[0]
+
+
 def test_the_advisory_names_the_template_sentence_and_does_not_demand_one_word():
     msgs = findings(doc("Appendix C Guidance", "Some guidance."))
     assert len(msgs) == 1

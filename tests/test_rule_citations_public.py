@@ -62,6 +62,25 @@ def json_run(tmp_path_factory):
     return json.loads(result.stdout)
 
 
+def test_version_refs_runs_in_a_real_check(json_run):
+    """The class is called from run(), not only from its unit tests."""
+    assert "version-refs" in json_run["observed"]
+
+
+def test_a_finding_that_cites_a_corpus_file_is_rewritten_in_both_outputs(monkeypatch, capsys, tmp_path):
+    """csd01 raises no finding that cites a corpus file, so the findings half of
+    the rewrite needs its own input: a stub run() that raises one."""
+    def stub_run(target, f, package_zip=""):
+        f.add(oasis_pub_check.WARN, "content-labels", "label it per handbook-Conformance.txt.")
+    monkeypatch.setattr(oasis_pub_check, "run", stub_run)
+    for extra in (["--json"], []):
+        monkeypatch.setattr(oasis_pub_check.sys, "argv", ["oasis_pub_check.py", *extra, str(tmp_path)])
+        oasis_pub_check.main()
+        out = capsys.readouterr().out
+        assert "handbook-Conformance.txt" not in out, extra
+        assert "the TC Handbook page 'Conformance Clauses'" in out, extra
+
+
 def test_the_registry_itself_still_cites_corpus_files():
     """Precondition: without it the next test could pass on a registry that
     simply stopped citing anything."""

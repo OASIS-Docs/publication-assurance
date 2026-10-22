@@ -42,6 +42,14 @@ def _load(name, path):
     return module
 
 
+def test_a_language_with_pandoc_attributes_is_left_alone():
+    """pandoc's markdown reader reads ```yaml {.numberLines} as a fence and
+    applies the attributes; cutting them would lose the line numbers."""
+    fi = _load("fence_info_attrs", FENCE_INFO)
+    md = '```yaml {.numberLines startFrom="5"}\na: 1\n```\n'
+    assert fi.bare_fence_info(md) == (md, [])
+
+
 def test_the_language_name_is_kept_and_the_trailing_text_dropped():
     fi = _load("fence_info", FENCE_INFO)
     md = "a\n\n```yaml <!--json-path($.a)-->\nx: 1\n```\n"

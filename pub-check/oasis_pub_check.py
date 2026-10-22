@@ -902,7 +902,7 @@ def check_front_matter(md_text: str, items: dict[str, str], version: str, stage:
 def related_work_urls(md_text: str) -> set[str]:
     """URLs in the cover's Previous-stage block and in its Related work block
     (where a specification says what it "replaces or supersedes")."""
-    url_end = lambda u: u.rstrip(".,);:")
+    url_end = lambda u: u.rstrip(".,);:*]")
     urls = {url_end(u) for u in stage_urls_from_md(md_text, "Previous")}
     rw = re.search(r"^#+ Related [Ww]ork.*?$(.*?)^#+ ", md_text, re.M | re.S)
     if rw:
@@ -910,17 +910,29 @@ def related_work_urls(md_text: str) -> set[str]:
     return urls
 
 
+# A heading whose whole title, after its number or Annex/Appendix letter, is a
+# References or Bibliography section: "1.4 Informative References", "Annex B
+# References", "B.1 Normative References", "Bibliography". A body section that
+# merely mentions references ("3.2.4.13 Document Property - References", five
+# of them in CSAF v2.1 csd04) is not one.
+REFERENCES_HEADING_RE = re.compile(
+    r"(?i)^(?:(?:annex|appendix)\s+[A-Z0-9]+[.:]?\s+|[A-Z]?\.?[\d.]*\d\.?\s+|[A-Z]\.?\s+)?"
+    r"(?:(?:normative|informative|non-normative|other)\s+)?(?:references|bibliography)\s*$")
+
+
 def references_section_lines(md_text: str) -> set[int]:
-    """Line numbers (1-based) under any heading naming References (Normative
+    """Line numbers (1-based) under a References section heading (Normative
     References, Informative References, a template's 'Annex B References'
-    and its subsections), up to the next heading of the same or a higher
-    level that is not itself a References heading. Code blocks are ignored."""
+    and its subsections, Bibliography), up to the next heading of the same
+    or a higher level that is not itself a References heading. Code blocks
+    are ignored."""
     lines: set[int] = set()
     level = 0
     for i, line in enumerate(strip_code_blocks(md_text, "md").splitlines(), 1):
         h = re.match(r"^ {0,3}(#{1,6})\s+(.*)$", line)
         if h:
-            lvl, is_ref = len(h.group(1)), bool(re.search(r"(?i)\breferences\b", h.group(2)))
+            title = re.sub(r"<[^>]+>", "", h.group(2)).strip().strip("#").strip()
+            lvl, is_ref = len(h.group(1)), bool(REFERENCES_HEADING_RE.match(title))
             if is_ref and (not level or lvl <= level):
                 level = lvl
             elif level and lvl <= level:
@@ -967,7 +979,7 @@ def check_version_refs(md_text: str, version: str, f: Findings) -> None:
     rather than part of front-matter (CSAF v2.1 csd04, Oct 2026: CSAF CVRF
     v1.2, cited only in Informative References, drew two front-matter
     warnings)."""
-    url_end = lambda u: u.rstrip(".,);:")
+    url_end = lambda u: u.rstrip(".,);:*]")
     legit = related_work_urls(md_text)
     this_urls = stage_urls_from_md(md_text, "This")
     bare = lambda u: re.sub(r"^https?://", "", u)
@@ -1512,7 +1524,10 @@ def check_md_fences(md_text: str, f: Findings, html_text: str = "") -> None:
             continue
         in_fence = True
         delim = marker[0]
-        if info and not info.startswith("{") and re.match(r"^[\w+-]+\s+\S", info):
+        # A language name followed by pandoc attributes (```yaml {.numberLines})
+        # is a fence pandoc's markdown reader reads as one, so it is not flagged.
+        if (info and not info.startswith("{") and re.match(r"^[\w+-]+\s+\S", info)
+                and not re.match(r"^[\w+-]+\s*\{[^}]*\}\s*$", info)):
             flagged.append((i, info))
     rendered = _fences_rendered_in_html(md_text, html_text, {i for i, _ in flagged}) if html_text else set()
     for i, info in flagged:
@@ -4482,11 +4497,14 @@ def check_content_labels(md_text: str, html_text: str, stage: str, f: Findings) 
                 appendix_unlabeled += 1
                 f.add(INFO, "content-labels",
                       f"Appendix/Annex heading '{raw_title_orig}' ({source} {pos}) carries no "
-                      f"content-type statement. Advisory only: if this appendix/annex is not "
-                      f"part of the conformance requirements, say so under its title, for "
-                      f"example with the OASIS template's '(This appendix does not form an "
-                      f"integral part of this Specification and is informational.)'; "
-                      f"Conformance Requirements for "
+                      f"content-type statement. Advisory only: say under its title whether it "
+                      f"is part of the conformance requirements, for example with the OASIS "
+                      f"template's "
+                      + ("'(This annex forms an integral part of this Specification.)'"
+                         if re.match(r"(?i)\s*annex\b", raw_title_orig) else
+                         "'(This appendix does not form an integral part of this "
+                         "Specification and is informational.)'")
+                      + f"; Conformance Requirements for "
                       f"Specifications v1.0, 7.3: 'normative and informative sections SHALL be "
                       f"evident and, if necessary, labeled accordingly'.")
             elif blanket_hit and not direct_labeled and not ancestor_labeled:
