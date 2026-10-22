@@ -70,6 +70,21 @@ import urllib.request
 READER = 'markdown+autolink_bare_uris-implicit_figures'
 
 
+def _load_fence_info():
+    """Step 1's fence rewrite (pipeline/fence_info.py), loaded by path so the
+    pipeline package's third-party imports are not needed here."""
+    import importlib.util
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir,
+                        '.github', 'src', 'pipeline', 'fence_info.py')
+    spec = importlib.util.spec_from_file_location('fence_info', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+FENCE_INFO = _load_fence_info()
+
+
 def cf_decode(hexstr):
     """Decode a Cloudflare email-obfuscation payload (first byte is the XOR key)."""
     b = bytes.fromhex(hexstr)
@@ -202,8 +217,9 @@ def external_links(h, base=None):
 
 def md_to_html(md_path):
     try:
-        r = subprocess.run(['pandoc', '--preserve-tabs', '-f', READER, '-t', 'html', md_path],
-                           capture_output=True, text=True)
+        with FENCE_INFO.pandoc_input(md_path) as (md_in, _):
+            r = subprocess.run(['pandoc', '--preserve-tabs', '-f', READER, '-t', 'html', md_in],
+                               capture_output=True, text=True)
     except FileNotFoundError:
         fail('pandoc is not installed; pandoc 3.x is required')
     if r.returncode != 0:

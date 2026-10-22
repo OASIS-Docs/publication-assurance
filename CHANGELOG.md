@@ -28,6 +28,105 @@ Each version is anchored by a git tag on this repository.
 
 Nothing yet.
 
+## v1.16.0 - 2026-10-22
+
+MINOR: a new check class (version-refs), one condition fewer (fence-collapse's
+portability note is now INFO), and fixes inside content-labels, pdf-sync and
+the rule citations. 186 conditions across 62 classes (was 187 across 61).
+Prompted by CSAF TC editor feedback on the CSAF v2.1 csd04 validation report,
+22 Oct 2026. No check in this release asks a TC to change anything in csd04;
+on the csd04 package the checker now reports 2 warnings and 6 notes where it
+reported 6 warnings and 9 notes (content-labels notes: 1, was 5).
+
+- **New class `version-refs`; front-matter no longer scans the whole
+  document.** The front-matter check compared the version in every
+  docs.oasis-open.org URL anywhere in the Markdown with the package's version,
+  so a citation of another specification in Informative References (CSAF CVRF
+  v1.2 in CSAF v2.1) was reported as a stale link under the front-matter
+  heading. That scan is now its own class, `version-refs`, and:
+  - compares only this work product's own URLs (Naming Directives v1.7 6.1:
+    `/[tc-shortname]/[WP-abbrev]/[version-id]/`), so `csaf/csaf-cvrf/v1.2/`
+    is not compared with `csaf/csaf/v2.1/`; the scheme is ignored, so a stale
+    `http://` link to this work product still warns;
+  - treats a URL that appears only inside a References section as a
+    deliberate citation: it is recorded as the observation
+    `other_versions_cited_in_references`, not warned on. A References section
+    is a heading whose whole title, after its number or annex letter, is
+    "References", "Normative References", "Informative References" or
+    "Bibliography", with its subsections; a body section that only mentions
+    references ("Document Property - References", five in CSAF v2.1) is not;
+  - names the Markdown line and section of the first other-version link it
+    reports, and no longer calls the link "external";
+  - no longer reads a closing `*` or `]` as part of a URL.
+  The Previous stage and Related work exemption is unchanged (a URL listed
+  there is excused wherever else it appears in the Markdown). Plain-language
+  text, the crosswalk and CHECKS.md follow. Tests:
+  `tests/test_front_matter_urls.py`.
+- **fence-collapse: the portability note is INFO, and says what the OASIS
+  pipeline does.** When the published HTML shows every flagged fence as code,
+  the finding was a WARN saying pandoc's default reader, "the OASIS pipeline's
+  step 1", collapses those fences. Step 1 rewrites these fences before pandoc
+  reads them (publisher-toolkit `lib/preprocess_md.py`, since v0.2.0): on CSAF
+  v2.1 csd04 it renders 726 code blocks and collapses none. The note is now
+  INFO, says no action is needed, says the text after the language name is
+  valid CommonMark and GitHub Markdown, and says the OASIS pipeline's step 1
+  rewrites the fences before pandoc reads them. A fence the HTML does not show
+  as code, or a package with no HTML, is still a BLOCKER. A language name
+  followed only by pandoc attributes (`` ```yaml {.numberLines} ``), which
+  pandoc's markdown reader reads as a fence, is no longer flagged at all.
+- **fence-collapse: a remedy every reader renders.** Both messages
+  recommended the curly-attribute fence `` ```{.lang title="..."} ``, which
+  suits pandoc only: gfm and commonmark read `{.lang` as the language name, and
+  GitHub highlights it as the wrong language. The remedy is now the note as an
+  HTML comment on its own line above a plain `` ```lang `` fence, which
+  pandoc's markdown, gfm and commonmark readers and GitHub all render as code.
+  Tests: `tests/test_fence_collapse.py`.
+- **content-labels: the OASIS template's appendix sentence is a label.** The
+  template (master 1.05) requires "(This appendix does not form an integral
+  part of this Specification and is informational.)" under each appendix, and
+  "(This annex forms an integral part of this Specification.)" marks an annex.
+  The check did not read either (the parentheses, the word "informational",
+  and an annex sentence with no marker word), nor an opening such as "This
+  appendix provides informative guidance", so four labelled CSAF appendices
+  were each reported unlabelled. The advisory no longer advises the word
+  "Non-normative", which no OASIS rule requires; it names the template
+  sentence that fits the heading (the annex sentence under an Annex, the
+  appendix sentence under an Appendix) and quotes Conformance Requirements
+  for Specifications v1.0, 7.3.
+  Tests: `tests/test_content_labels_template_sentence.py`.
+- **pdf-sync: another version cited in Related work or Previous stage is
+  expected.** The PDF check warned on every other version of the
+  specification on pages 1 to 3, including the one the cover lists under
+  "This specification replaces or supersedes:". It now excuses the lines of
+  the Previous stage and Related work blocks, found by the Related work
+  heading or by the template's first sentence in any of its wordings ("This
+  document ...", "This specification ...", "supercedes"). A block with no
+  closing front-matter label within 40 lines excuses nothing, and the same
+  URL printed elsewhere on those pages still warns; a PDF rendered from an
+  older draft is still caught by the separate this-stage URL BLOCKER. A URL
+  that pdftotext wraps after "https://" is now rejoined before the scan.
+  Tests: `tests/test_pdf_sync_related_work.py`.
+- **Rule citations name the published document.** Check messages and the
+  condition registry cited snapshot files under `pub-check/corpus/` ("per
+  handbook-Conformance.txt", "naming-directives.txt Section 4"), which a
+  reader of a validation report cannot look up. The CLI output (text and
+  `--json`, findings and the `conditions` inventory) now names each document
+  as published ("the TC Handbook page 'Conformance Clauses'", "the OASIS
+  Naming Directives v1.7"), derived from each snapshot's own title via
+  `corpus/MANIFEST.json`. Before, 29 registry rows and four classes' messages
+  printed corpus file names; now none do. Test:
+  `tests/test_rule_citations_public.py`.
+- **Step 1 and verify_md read a fence's info string as GitHub does.** This
+  repository's own step 1 (`.github/src/pipeline/html_converter.py`) and
+  `verify/verify_md.py` read Markdown with pandoc's markdown reader and nothing
+  before it, so a fence opened as `` ```yaml <!--json-path(...)--> ``
+  collapsed to inline code there. The new `pipeline/fence_info.py` cuts such
+  an info string to its language name before pandoc, as publisher-toolkit's
+  step 1 does; a language name followed only by pandoc attributes is left
+  alone, because pandoc reads it as a fence and applies the attributes. On CSAF v2.1 csd04 verify_md now reads 726 code blocks, as
+  published, where it read 630. Documents with no such fence convert byte for
+  byte as before. Tests: `tests/test_fence_info.py`.
+
 ## v1.15.3 - 2026-10-15
 
 PATCH: plainer wording in report text, no change to any check and no change to the `--json` output.

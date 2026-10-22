@@ -11,9 +11,9 @@
   "missing": 30,
   "conditions_total": 96,
   "policy_grounded": 95,
-  "operational_extra": 88,
-  "total_conditions": 187,
-  "total_signatures": 183,
+  "operational_extra": 87,
+  "total_conditions": 186,
+  "total_signatures": 182,
   "policy_grounded_conditions": 98
  },
  "criteria": [
@@ -848,11 +848,6 @@
    "status": "operational-extra"
   },
   {
-   "check": "fence-collapse",
-   "sig": "renders only with a gfm/commonmark reader",
-   "status": "operational-extra"
-  },
-  {
    "check": "filenames",
    "sig": "Missing delivery format(s)",
    "status": "policy-grounded",
@@ -985,8 +980,8 @@
    ]
   },
   {
-   "check": "front-matter",
-   "sig": "confirm this is an intentional external reference",
+   "check": "version-refs",
+   "sig": "of this work product (package is",
    "status": "operational-extra"
   },
   {

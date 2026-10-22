@@ -38,6 +38,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 from .base import PipelineStep
+from .fence_info import pandoc_input
 from .html_transforms import (
     DropLogoFigures,
     DropNavBlocks,
@@ -225,23 +226,31 @@ class HtmlConverter(PipelineStep):
         hand-authored Table of Contents in the source at the template's
         position (after the Notices block). The DropLogoFigures and
         DropNavBlocks transforms remain as defensive strips.
+
+        Like publisher-toolkit's step 1, pandoc reads a copy in which a
+        fence opened as ```yaml <!--note--> keeps only its language name
+        (:mod:`pipeline.fence_info`), so the block is code, as on GitHub,
+        instead of collapsing to inline code.
         """
         logger.info("Step %s: Running pandoc.", step)
-        cmd = [
-            "pandoc",
-            self.md_file,
-            "-f", "markdown+autolink_bare_uris-implicit_figures",
-            # Tabs in a code block are the specification's bytes; without
-            # this pandoc expands them to spaces (DMLex: 9 of 316 blocks).
-            "--preserve-tabs",
-            "--no-highlight",
-            "-c", self.css_ref_for_pandoc,
-            "-s",
-            "-o", self._temp_output,
-            "--metadata", f"title={self.html_title}",
-        ]
-        logger.debug("Pandoc command: %s", " ".join(cmd))
-        self._run_subprocess(cmd)
+        with pandoc_input(self.md_file) as (md_in, rewritten):
+            for line in rewritten:
+                logger.info("Step %s: line %s: fence info string cut to its language name.", step, line)
+            cmd = [
+                "pandoc",
+                md_in,
+                "-f", "markdown+autolink_bare_uris-implicit_figures",
+                # Tabs in a code block are the specification's bytes; without
+                # this pandoc expands them to spaces (DMLex: 9 of 316 blocks).
+                "--preserve-tabs",
+                "--no-highlight",
+                "-c", self.css_ref_for_pandoc,
+                "-s",
+                "-o", self._temp_output,
+                "--metadata", f"title={self.html_title}",
+            ]
+            logger.debug("Pandoc command: %s", " ".join(cmd))
+            self._run_subprocess(cmd)
         logger.info("Step %s: pandoc OK.", step)
 
     def _post_process_html(self, html: str, step: int) -> str:

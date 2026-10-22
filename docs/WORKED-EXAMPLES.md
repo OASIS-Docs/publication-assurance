@@ -174,26 +174,29 @@ the checks the run used before changing the text.
 blockers. From v1.13.0, one warning that lists all 96 lines:
 
 ```text
-[WARN   ] fence-collapse 96 code fence(s) carry trailing text in the info string
+[INFO   ] fence-collapse 96 code fence(s) carry trailing text in the info string
 (Markdown lines 1368, 1481, 1509, ...). The published HTML shows each as a code
 block, ...
 ```
 
 **What it meant.** The CSAF source opens many code blocks with a fence such as
 ```` ```yaml <!--json-path($.properties)--> ````: a language followed by a comment.
-Pandoc's GitHub-flavoured reader prints that as a code block. Its default
-Markdown reader, which the OASIS pipeline's step 1 runs, collapses the block
-to inline code. The checks used to assume the default reader and blocked
-every such fence. CSAF does not render its HTML with step 1, and the
-published HTML shows all 96 as code blocks, so the blockers were wrong. From
-v1.13.0 the checks look at the HTML's `<pre>` blocks. A fence the HTML shows as code is
-listed in one portability warning. A fence the HTML does not show as code is
-still a blocker.
+This is valid CommonMark and GitHub Markdown, and pandoc's GitHub-flavoured
+reader prints it as a code block. Pandoc's default Markdown reader, run on its
+own, collapses the block to inline code. The OASIS pipeline's step 1 does not:
+it rewrites these fences before pandoc reads them (publisher-toolkit
+`lib/preprocess_md.py`), so they render there too. The checks used to assume
+the default reader and blocked every such fence. The published HTML shows all
+96 as code blocks, so the blockers were wrong. From v1.13.0 the checks look at
+the HTML's `<pre>` blocks. From v1.16.0 a fence the HTML shows as code is
+listed in one INFO note, not a warning, because nothing in the package is
+wrong. A fence the HTML does not show as code is still a blocker.
 
-**The fix at source.** None is required while the TC renders its own HTML.
-If the TC moves to the OASIS pipeline's step 1, these fences need another
-form, because the default reader collapses them. The warning lists the line
-of every fence that would change.
+**The fix at source.** None is required: the TC's own HTML and the OASIS
+pipeline's step 1 both render these fences. A TC that wants its Markdown to
+suit every reader, including pandoc's default one, can put the note on its own
+line above the fence as an HTML comment and leave the language name alone on
+the fence line.
 
 ## Schema directories reported missing
 

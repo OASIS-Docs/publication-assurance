@@ -70,15 +70,23 @@ PLAIN: dict[str, tuple[str, str]] = {
         "A file name has no extension, or more than one, where exactly one is expected.",
         "Rename the file so it ends with a single extension such as .html or .pdf."),
     "fence-collapse": (
-        "A code block's opening line has extra text after the language name, so the block may "
-        "appear as one line of inline code.",
-        "Put only the language name after the opening ``` (for example ```json), and move any "
-        "title into the text above the block."),
+        "A code block's opening line has extra text after the language name. Some Markdown "
+        "readers then show the block as one line of inline code; the note says whether the "
+        "published HTML does.",
+        "If the published HTML shows the block as code, nothing is needed. Otherwise put only the "
+        "language name after the opening ``` (for example ```json), and move any note onto its "
+        "own line above the block."),
     "filenames": (
         "The document's files are missing, not all named alike, or named with a working label "
         "instead of the draft label.",
         "Give every format of the document the same name ending in the draft label (for example "
         "name-v1.0-csd01.md, .html and .pdf), and include the Markdown, HTML and PDF."),
+    "version-refs": (
+        "The document links to a different version of this specification on docs.oasis-open.org, "
+        "outside its cover-page Previous version and Related work entries and its References "
+        "sections.",
+        "Check that the link is meant to point at that other version; if not, change it to this "
+        "version's address."),
     "front-matter": (
         "The 'This version' or 'Latest version' links on the cover page are missing, point at the "
         "wrong place, or name a file that is not in the package.",
@@ -252,10 +260,6 @@ PLAIN: dict[str, tuple[str, str]] = {
 # its message contains the signature. The test pins every key to a condition
 # the checker registers, so a reworded message cannot leave a stale entry.
 CONDITIONS: dict[tuple[str, str, str], tuple[str, str]] = {
-    ("front-matter", "confirm this is an intentional external reference", "WARN"): (
-        "The document links to a different version of this specification on docs.oasis-open.org.",
-        "Check that the link is meant to point at that other version (for example a reference to "
-        "an earlier version); if not, change it to this version's address."),
     ("dead-lists", "archives", "WARN"): (
         "The document links into the old mailing list archive on lists.oasis-open.org.",
         "Open each archive link and check it still works; replace any that do not, or remove them."),
@@ -271,8 +275,8 @@ CONDITIONS: dict[tuple[str, str, str], tuple[str, str]] = {
         "This is fine for an early draft. Replace it with the final text before the document "
         "becomes a Committee Specification."),
     ("pdf-sync", "expected only as a previous-stage reference", "WARN"): (
-        "The PDF cites another version of this specification, where only the previous "
-        "version is expected.",
+        "The PDF cites another version of this specification outside its Previous stage "
+        "and Related work blocks, where only this version is expected.",
         "Check each such link is meant to point at that other version; if not, change it to "
         "this version's address and rebuild the PDF."),
     ("pdf-sync", "pdftotext not on PATH", "WARN"): (

@@ -11,7 +11,7 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 Before a TC Specification is published to `docs.oasis-open.org`, it is run
 through the publication acceptance tests (`oasis-pub-check`). This guide adds
 those tests to a TC's own GitHub repository, so every push validates the
-draft against the same 187 conditions applied at submission, and each run
+draft against the same 186 conditions applied at submission, and each run
 publishes a Validation Report you can open in a browser.
 
 | Section | Read it when |
@@ -86,7 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: OASIS-Docs/publication-assurance@v1.15.3
+      - uses: OASIS-Docs/publication-assurance@v1.16.0
         with:
           target: work/v1.0/csd01   # EDIT: your stage directory or package .zip
 
@@ -204,7 +204,7 @@ against the file it names. A `.zip` target gets no file locations.
 ## The Validation Report
 
 It is the report OASIS staff produce at intake, from the same code. It has
-a header, a table of the 61 check classes and a table of all 187
+a header, a table of the 62 check classes and a table of all 186
 conditions. The job summary shows the same two tables, above them the
 findings list, which ends with the verdict in a second form,
 `N blocker(s), M warning(s) -> NOT PUBLISHABLE`. The header lines described
@@ -213,7 +213,7 @@ below are in the report files.
 ### Verdict
 
 The header block states the target, the date, the tool, the coverage
-(187 conditions in 61 classes, all run), the blocker count and the checks'
+(186 conditions in 62 classes, all run), the blocker count and the checks'
 exit code, then one **Result** line:
 
 - `PUBLICATION-READY: zero blockers.` with exit code `0`. Warnings may remain.
@@ -250,7 +250,7 @@ beside it that says what was found and, where the check knows, where.
 
 ### Condition table
 
-One row per condition, 187 rows. Each row gives:
+One row per condition, 186 rows. Each row gives:
 
 | Column | Content |
 |---|---|
@@ -338,7 +338,7 @@ Set these with `env:` on the checks step.
 | `PUBCHECK_CHROME` | Path of the browser that prints the PDF report. Unset, the action finds Chrome or Chromium itself, as on `ubuntu-latest`; with none, no PDF is written |
 
 ```yaml
-      - uses: OASIS-Docs/publication-assurance@v1.15.3
+      - uses: OASIS-Docs/publication-assurance@v1.16.0
         env:
           PUB_CHECK_OFFLINE: '1'   # only while docs.oasis-open.org is unreachable
         with:
@@ -405,7 +405,7 @@ An example that posts the blocker count as a notice:
 
 ```yaml
       - id: checks
-        uses: OASIS-Docs/publication-assurance@v1.15.3
+        uses: OASIS-Docs/publication-assurance@v1.16.0
         with:
           target: work/v1.0/csd01
 
@@ -461,7 +461,7 @@ permissions:
 
 env:
   PANDOC_VERSION: 3.8.2.1
-  PA_REF: v1.15.3          # the release whose render/render.sh renders
+  PA_REF: v1.16.0          # the release whose render/render.sh renders
 
 jobs:
   render-and-check:
@@ -491,7 +491,7 @@ jobs:
         run: _pa/render/render.sh dmlex-v1.1 dmlex-v1.1/schemas _publication
 
       - name: OASIS publication checks
-        uses: OASIS-Docs/publication-assurance@v1.15.3
+        uses: OASIS-Docs/publication-assurance@v1.16.0
         with:
           target: _publication/lexidma/dmlex/v1.1/wd01
 ```
@@ -513,7 +513,7 @@ through findings it inherited and has not yet decided. A target the checks
 cannot read (a wrong `target:` path) fails the step in either mode.
 
 ```yaml
-      - uses: OASIS-Docs/publication-assurance@v1.15.3
+      - uses: OASIS-Docs/publication-assurance@v1.16.0
         with:
           target: published/v1.0/os
           fail-on-blockers: false    # report only: blockers never fail the run
@@ -526,7 +526,7 @@ each entry can carry its own setting. Give each entry an `enforce` value,
 standard, and pass it to the action:
 
 ```yaml
-      - uses: OASIS-Docs/publication-assurance@v1.15.3
+      - uses: OASIS-Docs/publication-assurance@v1.16.0
         with:
           target: ${{ matrix.package.target }}
           fail-on-blockers: ${{ matrix.package.enforce }}
@@ -576,7 +576,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: OASIS-Docs/publication-assurance@v1.15.3
+      - uses: OASIS-Docs/publication-assurance@v1.16.0
         with:
           target: ${{ matrix.package.target }}
           summary-title: ${{ matrix.package.name }}
@@ -627,14 +627,14 @@ report-links block at all, only the sentence pointing to the run's
 
 ### Version pinning and upgrades
 
-Pin the action to a full release tag, such as `@v1.15.3`. The releases,
+Pin the action to a full release tag, such as `@v1.16.0`. The releases,
 with what each changed, are on the
 [releases page](https://github.com/OASIS-Docs/publication-assurance/releases)
 and in [CHANGELOG.md](../CHANGELOG.md).
 
 | Reference | Behaviour |
 |---|---|
-| `@v1.15.3` | A fixed release. Recommended |
+| `@v1.16.0` | A fixed release. Recommended |
 | `@<40-character commit SHA>` | Fixed and immune to a tag being moved. Use it where your organisation requires SHA pinning |
 | `@v1` | Moves to each new v1 release when it is published. Convenient, but a MINOR release can add a finding without any change on your side |
 | `@main` | Unreleased code. Never for a TC workflow |
@@ -642,7 +642,7 @@ and in [CHANGELOG.md](../CHANGELOG.md).
 To find the SHA of a release:
 
 ```bash
-git ls-remote https://github.com/OASIS-Docs/publication-assurance 'refs/tags/v1.15.3^{}'
+git ls-remote https://github.com/OASIS-Docs/publication-assurance 'refs/tags/v1.16.0^{}'
 ```
 
 To upgrade:
@@ -674,7 +674,7 @@ library, so it runs anywhere Python 3.10 or later does. The same code runs
 in the action.
 
 ```bash
-git clone --depth 1 --branch v1.15.3 https://github.com/OASIS-Docs/publication-assurance
+git clone --depth 1 --branch v1.16.0 https://github.com/OASIS-Docs/publication-assurance
 python3 publication-assurance/pub-check/oasis_pub_check.py path/to/your/stage-dir
 ```
 

@@ -137,6 +137,69 @@ class Findings:
         return sum(1 for f in self.items if f["severity"] == BLOCKER)
 
 
+# Rule citations a reader can look up. Messages and the condition registry name
+# the snapshot files in corpus/ ("per handbook-Conformance.txt"), which exist
+# only in this repository; a chair reading a validation report needs the
+# published document ("the TC Handbook page 'Conformance Clauses'"). The name
+# is derived from each snapshot's own <title>, listed in corpus/MANIFEST.json,
+# so a document added to the corpus is named without a hand-kept table. The
+# rewrite is applied to OUTPUT only: the check code and the condition
+# signatures keep the corpus names, and nothing that matches on them moves.
+_CORPUS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corpus")
+_PUBLIC_RULE_NAMES: dict[str, str] | None = None
+
+
+def public_rule_names() -> dict[str, str]:
+    """{corpus text file: the published document's name, as a reader cites it}."""
+    global _PUBLIC_RULE_NAMES
+    if _PUBLIC_RULE_NAMES is not None:
+        return _PUBLIC_RULE_NAMES
+    names: dict[str, str] = {}
+    try:
+        with open(os.path.join(_CORPUS_DIR, "MANIFEST.json"), encoding="utf-8") as fh:
+            docs = json.load(fh)["documents"]
+    except (OSError, ValueError, KeyError):
+        docs = {}
+    for html_file, doc in docs.items():
+        try:
+            with open(os.path.join(_CORPUS_DIR, html_file), encoding="utf-8") as fh:
+                m = re.search(r"<title>(.*?)</title>", fh.read(), re.S | re.I)
+        except OSError:
+            m = None
+        title = html_lib.unescape(m.group(1)).strip() if m else ""
+        nd = re.fullmatch(r"namingDirectives-v(\d+(?:\.\d+)*)", title)
+        if nd:
+            name = f"the OASIS Naming Directives v{nd.group(1)}"
+        elif title.endswith("| OASIS TC Handbook"):
+            name = f"the TC Handbook page '{title.rsplit('|', 1)[0].strip()}'"
+        elif title:
+            title = re.sub(r"\s+-\s+OASIS Open$", "", title)
+            name = "the " + (title if title.startswith("OASIS ") else f"OASIS {title}")
+        else:
+            continue
+        names[doc["text_file"]] = name
+    _PUBLIC_RULE_NAMES = names
+    return names
+
+
+def cite_publicly(text: str) -> str:
+    """`text` with every corpus file name replaced by its published document's
+    name ('The' at the start of a sentence)."""
+    names = public_rule_names()
+    if not names or not isinstance(text, str):
+        return text
+    pat = re.compile(r"(?<![\w-])(" + "|".join(map(re.escape, sorted(names, key=len, reverse=True)))
+                     + r")\b")
+
+    def sub(m: re.Match) -> str:
+        name = names[m.group(1)]
+        before = text[:m.start()].rstrip(" ")
+        if not before or before.endswith((".", "!", "?")):
+            name = name[0].upper() + name[1:]
+        return name
+    return pat.sub(sub, text)
+
+
 class _AnchorParser(HTMLParser):
     """Collect element ids, <a name=...>, internal hrefs, and the <title>."""
 
@@ -833,25 +896,121 @@ def check_front_matter(md_text: str, items: dict[str, str], version: str, stage:
                   f"Latest-stage URL must point at the version root (no /{stage}/): {u}")
         if f"/{version}/" not in u:
             f.add(BLOCKER, "front-matter", f"Latest-stage URL not under /{version}/: {u}")
-    # any other docs URL declaring a different version is a stale-draft tell,
-    # except legitimate citations in the Previous-Stage / Related-Work blocks
-    # A URL ends at whitespace or at the '<'/'>' of a Markdown autolink
-    # (<https://...>), and trailing sentence punctuation is not part of it.
-    # Reading through the '>' printed a stray '>' after every URL in these
-    # messages, and a URL cited as <url> in References did not match the
-    # same URL cited bare in Related work (CSAF v2.1 csd03, Sep 2026).
-    url_end = lambda u: u.rstrip(".,);:")
-    legit = {url_end(u) for u in stage_urls_from_md(md_text, "Previous")}
+    return base
+
+
+def related_work_urls(md_text: str) -> set[str]:
+    """URLs in the cover's Previous-stage block and in its Related work block
+    (where a specification says what it "replaces or supersedes")."""
+    url_end = lambda u: u.rstrip(".,);:*]")
+    urls = {url_end(u) for u in stage_urls_from_md(md_text, "Previous")}
     rw = re.search(r"^#+ Related [Ww]ork.*?$(.*?)^#+ ", md_text, re.M | re.S)
     if rw:
-        legit |= {url_end(u) for u in re.findall(r"https?://[^\s<>]+?(?=[)\s\\<>]|$)", rw.group(1))}
-    for u in sorted({url_end(u) for u in re.findall(r"https?://docs\.oasis-open\.org/[^\s<>]+", md_text)} - legit):
+        urls |= {url_end(u) for u in re.findall(r"https?://[^\s<>]+?(?=[)\s\\<>]|$)", rw.group(1))}
+    return urls
+
+
+# A heading whose whole title, after its number or Annex/Appendix letter, is a
+# References or Bibliography section: "1.4 Informative References", "Annex B
+# References", "B.1 Normative References", "Bibliography". A body section that
+# merely mentions references ("3.2.4.13 Document Property - References", five
+# of them in CSAF v2.1 csd04) is not one.
+REFERENCES_HEADING_RE = re.compile(
+    r"(?i)^(?:(?:annex|appendix)\s+[A-Z0-9]+[.:]?\s+|[A-Z]?\.?[\d.]*\d\.?\s+|[A-Z]\.?\s+)?"
+    r"(?:(?:normative|informative|non-normative|other)\s+)?(?:references|bibliography)\s*$")
+
+
+def references_section_lines(md_text: str) -> set[int]:
+    """Line numbers (1-based) under a References section heading (Normative
+    References, Informative References, a template's 'Annex B References'
+    and its subsections, Bibliography), up to the next heading of the same
+    or a higher level that is not itself a References heading. Code blocks
+    are ignored."""
+    lines: set[int] = set()
+    level = 0
+    for i, line in enumerate(strip_code_blocks(md_text, "md").splitlines(), 1):
+        h = re.match(r"^ {0,3}(#{1,6})\s+(.*)$", line)
+        if h:
+            title = re.sub(r"<[^>]+>", "", h.group(2)).strip().strip("#").strip()
+            lvl, is_ref = len(h.group(1)), bool(REFERENCES_HEADING_RE.match(title))
+            if is_ref and (not level or lvl <= level):
+                level = lvl
+            elif level and lvl <= level:
+                level = 0
+            continue
+        if level:
+            lines.add(i)
+    return lines
+
+
+def _md_section_at(md_text: str, line_no: int) -> str:
+    """The title of the last Markdown heading at or before line_no, without
+    inline HTML (an <a id> anchor), or '' before the first heading."""
+    title = ""
+    for i, line in enumerate(strip_code_blocks(md_text, "md").splitlines(), 1):
+        if i > line_no:
+            break
+        h = re.match(r"^ {0,3}#{1,6}\s+(.*?)\s*#*\s*$", line)
+        if h:
+            title = re.sub(r"<[^>]+>", "", h.group(1)).strip()
+    return title
+
+
+def check_version_refs(md_text: str, version: str, f: Findings) -> None:
+    """A docs.oasis-open.org link to another version of THIS work product is
+    a stale-draft tell, unless the document cites that version on purpose.
+
+    Cited on purpose: a URL listed in the cover's Previous stage or Related
+    work block (excused wherever else the same URL appears in the Markdown),
+    and a URL that appears only inside a References section, which names the
+    version it cites deliberately. A References hit is recorded as an
+    observation, not warned on.
+
+    Only this work product's own URLs are compared. Naming Directives v1.7
+    s6.1 lays a Document URI out as /[tc-shortname]/[WP-abbrev]/[version-id]/,
+    so a URL under another WP-abbrev is another specification, and its
+    version says nothing about a stale draft of this one. The prefix keeps
+    its trailing '/', or csaf/csaf would match csaf/csaf-cvrf. With no
+    This-stage URL there is no prefix (front-matter has already raised a
+    blocker), and every URL is compared. The scheme is dropped from both
+    sides: a stale http:// link to this work product is still this one.
+
+    This scan reads the whole Markdown, not the cover, so it is its own class
+    rather than part of front-matter (CSAF v2.1 csd04, Oct 2026: CSAF CVRF
+    v1.2, cited only in Informative References, drew two front-matter
+    warnings)."""
+    url_end = lambda u: u.rstrip(".,);:*]")
+    legit = related_work_urls(md_text)
+    this_urls = stage_urls_from_md(md_text, "This")
+    bare = lambda u: re.sub(r"^https?://", "", u)
+    own = {bare(u).split(f"/{version}/", 1)[0] + "/" for u in this_urls if f"/{version}/" in u}
+    ref_lines = references_section_lines(md_text)
+    where: dict[str, list[int]] = {}
+    for i, line in enumerate(md_text.splitlines(), 1):
+        for u in re.findall(r"https?://docs\.oasis-open\.org/[^\s<>]+", line):
+            where.setdefault(url_end(u), []).append(i)
+    cited: list[str] = []
+    compared = 0
+    for u in sorted(set(where) - legit):
+        if own and not any(bare(u).startswith(pre) for pre in own):
+            continue
+        compared += 1
         m = re.search(r"/v(\d+\.\d+)/", u)
-        if m and f"v{m.group(1)}" != version and "/templates/" not in u:
-            f.add(WARN, "front-matter",
-                  f"URL declares version v{m.group(1)} (package is {version}): {u}"
-                  " -- confirm this is an intentional external reference.")
-    return base
+        if not m or f"v{m.group(1)}" == version or "/templates/" in u:
+            continue
+        outside = [n for n in where[u] if n not in ref_lines]
+        if not outside:
+            cited.append(u)
+            continue
+        n = outside[0]
+        section = _md_section_at(md_text, n)
+        place = f"Line {n}" + (f" (section '{section}')" if section else "")
+        f.add(WARN, "version-refs",
+              f"{place}: links to version v{m.group(1)} of this work product (package is "
+              f"{version}): {u}. Confirm the link is meant to point at that other version; "
+              f"if not, change it to this version's address.")
+    f.observe("version-refs", own_work_product_urls_compared=compared,
+              other_versions_cited_in_references=cited or "(none)")
 
 
 # OASIS member-only (Kavi) tool URIs: password-protected, must never be cited
@@ -1332,12 +1491,24 @@ def check_md_fences(md_text: str, f: Findings, html_text: str = "") -> None:
 
     Whether it collapses depends on the reader: pandoc's gfm and commonmark
     readers render such a fence as a code block, its default markdown reader
-    (the one the OASIS pipeline's step 1 runs) does not. So the published
+    run on its own does not. So the published
     HTML decides. A flagged block the HTML publishes as a <pre> block rendered
     (CSAF v2.1 csd03, Sep 2026: 96 such fences, every one a <pre> in the
-    HTML); the finding is then one WARN about the Markdown's portability, not
-    a BLOCKER per fence. A flagged block the HTML does not carry as a <pre>
-    block, or a package with no HTML to show it, stays a BLOCKER."""
+    HTML); the finding is then one INFO about the Markdown's portability, not
+    a BLOCKER per fence. It is INFO, not WARN, because nothing in the package
+    is wrong: the HTML renders every block, and so does the OASIS pipeline
+    (CSAF csd04 review, 22 Oct 2026). A flagged block the HTML does not carry as a <pre>
+    block, or a package with no HTML to show it, stays a BLOCKER.
+
+    The OASIS pipeline itself does not collapse these fences: publisher-
+    toolkit's step 1 rewrites them before pandoc (lib/preprocess_md.py,
+    v0.2.0, 13 May 2026) and drops the trailing text. On CSAF v2.1 csd04 that
+    gives 726 <pre> blocks and no collapse, against 630 and 96 collapsed for
+    pandoc's markdown reader run alone. The remedy the messages give is the
+    one every reader renders: the note on its own line above the fence, as an
+    HTML comment. The curly-attribute form suits pandoc only; gfm and
+    commonmark read '{.yaml' as the language name, and GitHub highlights it
+    as MiniYAML (CSAF csd04 review, 22 Oct 2026)."""
     in_fence = False
     delim = ""
     f.observe("fence-collapse", fences_scanned=len(re.findall(r"^\s{0,3}(?:`{3,}|~{3,})", md_text, re.M)))
@@ -1353,7 +1524,10 @@ def check_md_fences(md_text: str, f: Findings, html_text: str = "") -> None:
             continue
         in_fence = True
         delim = marker[0]
-        if info and not info.startswith("{") and re.match(r"^[\w+-]+\s+\S", info):
+        # A language name followed by pandoc attributes (```yaml {.numberLines})
+        # is a fence pandoc's markdown reader reads as one, so it is not flagged.
+        if (info and not info.startswith("{") and re.match(r"^[\w+-]+\s+\S", info)
+                and not re.match(r"^[\w+-]+\s*\{[^}]*\}\s*$", info)):
             flagged.append((i, info))
     rendered = _fences_rendered_in_html(md_text, html_text, {i for i, _ in flagged}) if html_text else set()
     for i, info in flagged:
@@ -1362,19 +1536,27 @@ def check_md_fences(md_text: str, f: Findings, html_text: str = "") -> None:
         shown = " and the published HTML does not carry it as a code block" if html_text else ""
         f.add(BLOCKER, "fence-collapse",
               f"Line {i}: opening fence info string carries trailing text "
-              f"('{info[:40]}...'): pandoc does not recognize it as a fence and "
-              f"the block collapses to inline code{shown}. Use ```{{.lang title=\"...\"}} "
-              f"or drop the trailing text.")
+              f"('{info[:40]}...'): pandoc's markdown reader does not recognize it as a fence and "
+              f"the block collapses to inline code{shown}. Put the trailing text on its own "
+              f"line above the fence as an HTML comment, which every reader renders, or drop "
+              f"it; the curly-attribute form ({{.lang title=\"...\"}}) works too, but for "
+              f"pandoc only.")
     ok = sorted(rendered)
     f.observe("fence-collapse", trailing_text_fences=len(flagged), rendered_as_code_in_html=len(ok))
     if ok:
-        f.add(WARN, "fence-collapse",
+        f.add(INFO, "fence-collapse",
               f"{len(ok)} code fence(s) carry trailing text in the info string (Markdown lines "
               f"{', '.join(map(str, ok))}). The published HTML shows each as a code block, so "
-              f"they render with a gfm or commonmark reader, but pandoc's default markdown "
-              f"reader (the OASIS pipeline's step 1) collapses them to inline code: the "
-              f"Markdown source renders only with a gfm/commonmark reader or a preprocessor. "
-              f"Use ```{{.lang title=\"...\"}} or drop the trailing text.")
+              f"no action is needed for this package. The text after the language name is "
+              f"valid CommonMark and GitHub Markdown, and a gfm or commonmark reader renders "
+              f"such a fence as code. The OASIS pipeline renders it too: its step 1 rewrites "
+              f"these fences before pandoc reads them, dropping the trailing text (so a note "
+              f"such as a json-path comment does not reach that HTML). Only pandoc's own "
+              f"markdown reader, run without that step, collapses them to inline code. To "
+              f"keep the note and suit every reader, it can go on its own line above the "
+              f"fence as an HTML comment, with the language name alone on the fence line. "
+              f"The curly-attribute form ({{.lang title=\"...\"}}) suits pandoc only: gfm "
+              f"and commonmark read '{{.lang' as the language name.")
 
 
 def _fences_rendered_in_html(md_text: str, html_text: str, lines: set[int]) -> set[int]:
@@ -2063,17 +2245,68 @@ def check_pdf(pdf_path: str, this_urls_base: str, version: str, f: Findings) -> 
         f.add(BLOCKER, "pdf-sync",
               f"PDF front matter does not contain the canonical this-stage base URL "
               f"({this_urls_base}); the PDF was likely rendered from an older draft.")
-    # a different version of THIS spec in the PDF is suspicious (previous-stage
-    # citations are expected, so this stays a warning)
+    # A different version of THIS spec in the PDF is a stale-draft tell, except
+    # inside the Previous stage and Related work blocks, where citing another
+    # version is the point (CSAF v2.1 csd04 cites CSAF v2.0 under "This
+    # specification replaces or supersedes:"). The two sides excuse different
+    # things: the Markdown check (version-refs) excuses a URL listed in those
+    # blocks wherever else it appears in the file, while this check excuses
+    # only the lines inside the blocks, so the same URL printed elsewhere on
+    # pages 1 to 3 still warns.
     spec_base = ""
     if this_urls_base:
         spec_base = this_urls_base.split(f"/{version}/", 1)[0]
     if spec_base:
-        for m in sorted(set(re.findall(re.escape(spec_base) + r"/v(\d+\.\d+)/", txt))):
-            if f"v{m}" != version:
-                f.add(WARN, "pdf-sync",
-                      f"PDF cites {spec_base}/v{m}/ (package is {version}); expected only "
-                      f"as a previous-stage reference -- confirm.")
+        lines = txt.splitlines()
+        excused_lines: set[int] = set()
+        for start_re in (PDF_PREVIOUS_STAGE_START, PDF_RELATED_WORK_START):
+            excused_lines |= _pdf_front_block(lines, start_re)
+        kept = "".join(l for i, l in enumerate(lines) if i not in excused_lines)
+        cut = "".join(l for i, l in enumerate(lines) if i in excused_lines)
+        # Lines are joined with no separator: pdftotext wraps a long URL after
+        # "https://", and the wrapped half used to escape the scan entirely.
+        pat = re.escape(spec_base) + r"/v(\d+\.\d+)/"
+        others = lambda t: sorted({m for m in re.findall(pat, t) if f"v{m}" != version})
+        f.observe("pdf-sync", other_versions_excused=[f"v{m}" for m in others(cut)])
+        for m in others(kept):
+            f.add(WARN, "pdf-sync",
+                  f"PDF cites {spec_base}/v{m}/ (package is {version}) outside the "
+                  f"Previous stage and Related work blocks; another version is expected "
+                  f"only as a previous-stage reference or related work -- confirm.")
+
+
+# pdf-sync's excused blocks in the PDF's front matter. Related work is found by
+# its heading, which every OASIS template shares, or failing that by its first
+# sentence, which they word differently: "This document replaces or supersedes:"
+# (CS 1.05 and CN 1.01 markdown templates), "This specification replaces or
+# supercedes:" (V4.1 HTML template, sic), "This specification replaces or
+# supersedes:" (CSAF, NIEM). A block runs to the next front-matter label; with
+# no label within PDF_FRONT_BLOCK_MAX_LINES it excuses nothing, so a parse that
+# goes wrong reports the citation rather than hiding it.
+PDF_PREVIOUS_STAGE_START = re.compile(r"^\s*Previous (?:Stage|Version)\s*:?\s*$", re.I)
+PDF_RELATED_WORK_START = re.compile(
+    r"^\s*(?:Related [Ww]ork\s*:?\s*$"
+    r"|This (?:specification|document|standard|work product) replaces or super[sc]edes\b)",
+    re.I)
+PDF_FRONT_LABEL = re.compile(
+    r"^\s*(?:(?:This|Latest) (?:Stage|Version)|Technical Committee|Open Project|"
+    r"(?:Project |TC )?Chairs?|Editors?|Additional artifacts|Abstract|Status|"
+    r"Citation format|Key ?words|Notices|Table of Contents|"
+    r"License, Document Status, and Notices|Declared\b.*\bnamespaces?)\s*:?\s*$",
+    re.I)
+PDF_FRONT_BLOCK_MAX_LINES = 40
+
+
+def _pdf_front_block(lines: list[str], start_re: re.Pattern) -> set[int]:
+    """Line indexes of the first block that opens on start_re and closes at the
+    next front-matter label, or nothing when no label closes it in reach."""
+    for i, line in enumerate(lines):
+        if start_re.match(line):
+            for j in range(i + 1, min(len(lines), i + 1 + PDF_FRONT_BLOCK_MAX_LINES)):
+                if PDF_FRONT_LABEL.match(lines[j]):
+                    return set(range(i, j))
+            return set()
+    return set()
 
 
 # The cover heading naming the governing body, and therefore the boundary that closes
@@ -3996,7 +4229,12 @@ def _normalize_dashes(text: str) -> str:
     return text.translate(_DASH_TRANSLATE)
 
 
-_MARKER = r"(?:non[-\s]?normative|(?<![\w-])informative|(?<![\w-])normative)"
+_MARKER = (r"(?:non[-\s]?normative|(?<![\w-])informative|(?<![\w-])informational|"
+           r"(?<![\w-])normative)")
+# 'informational' is the word the OASIS starter template (v1.05) uses in its
+# appendix status sentence, and Conformance Requirements for Specifications
+# v1.0 defines INFORMATIVE (NON-NORMATIVE) as 'statements provided for
+# informational purposes'.
 # The bare 'informative'/'normative' alternatives require the character
 # immediately before the match NOT be a word char or hyphen, so a compound
 # like 'anti-normative' or 'quasi-normative' cannot satisfy the label test
@@ -4007,7 +4245,18 @@ HEADING_SUFFIX_LABEL_RE = re.compile(
     r"(?i)(?:\(\s*" + _MARKER + r"\s*\)|[-–—:]\s*" + _MARKER + r"\s*)$")
 
 SENTENCE_LEAD_PREFIX_RE = re.compile(
-    r"(?i)^(?:this\s+(?:appendix|annex|section|example)\s+is|it\s+is)\s+")
+    r"(?i)^(?:this\s+(?:appendix|annex|section|example)\s+(?:is|provides|contains|gives)"
+    r"(?:\s+an?)?|it\s+is)\s+")
+
+# The status sentence the OASIS starter template (v1.05) puts under each
+# annex/appendix title, after the ITU-T Author's guide (06/2023) 8.7-8.8:
+# '(This annex forms an integral part of this Specification.)' states the
+# annex normative, '(This appendix does not form an integral part of this
+# Specification ...)' states it informative. Either is a content-type label;
+# the annex form carries no marker word, so it needs its own pattern.
+INTEGRAL_PART_LABEL_RE = re.compile(
+    r"(?i)^this\s+(?:appendix|annex|clause|section)\s+(?:does\s+not\s+form|forms)\s+"
+    r"an?\s+integral\s+part\s+of\s+this\b")
 
 SENTENCE_MARKER_START_RE = re.compile(r"(?i)^" + _MARKER + r"\b")
 
@@ -4144,9 +4393,13 @@ def _first_sentence(body: str) -> str:
 
 
 def _sentence_labels(sentence: str) -> bool:
-    s = sentence.strip()
+    # A status sentence set in parentheses, as the OASIS template sets it,
+    # is read without them.
+    s = sentence.strip().lstrip("(").rstrip(")").strip()
     if not s:
         return False
+    if INTEGRAL_PART_LABEL_RE.match(s):
+        return True
     core = SENTENCE_LEAD_PREFIX_RE.sub("", s, count=1)
     if SENTENCE_MARKER_START_RE.match(core):
         return True
@@ -4244,9 +4497,16 @@ def check_content_labels(md_text: str, html_text: str, stage: str, f: Findings) 
                 appendix_unlabeled += 1
                 f.add(INFO, "content-labels",
                       f"Appendix/Annex heading '{raw_title_orig}' ({source} {pos}) carries no "
-                      f"content-type label. Advisory only: confirm whether this appendix/annex "
-                      f"is part of the conformance requirements, and if not, label it "
-                      f"'Non-normative' per handbook-Conformance.txt.")
+                      f"content-type statement. Advisory only: say under its title whether it "
+                      f"is part of the conformance requirements, for example with the OASIS "
+                      f"template's "
+                      + ("'(This annex forms an integral part of this Specification.)'"
+                         if re.match(r"(?i)\s*annex\b", raw_title_orig) else
+                         "'(This appendix does not form an integral part of this "
+                         "Specification and is informational.)'")
+                      + f"; Conformance Requirements for "
+                      f"Specifications v1.0, 7.3: 'normative and informative sections SHALL be "
+                      f"evident and, if necessary, labeled accordingly'.")
             elif blanket_hit and not direct_labeled and not ancestor_labeled:
                 blanket_used.add(kind)
 
@@ -7699,6 +7959,7 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
     base = ""
     if md_text:
         base = check_front_matter(md_text, items, version, stage, f)
+        check_version_refs(md_text, version, f)
         check_stage_uri_reachability(md_text, f)
     if html_text:
         # anchors are source-side artifacts on Word renders: WARN there
@@ -8008,10 +8269,10 @@ CONDITION_DOCS: list[dict] = [
          condition="Latest-stage URLs are under the package's version directory",
          pulls="each URL in the Latest-stage block",
          compares_to="the package's /<version>/ path segment"),
-    dict(check="front-matter", sig="confirm this is an intentional external reference", applies="md",
-         condition="Any docs.oasis-open.org URL declaring a different version is intentional",
-         pulls="every docs.oasis-open.org URL in the markdown outside Previous/Related-work blocks",
-         compares_to="the package's own version; a different version is a stale-draft tell unless external"),
+    dict(check="version-refs", sig="of this work product (package is", applies="md",
+         condition="A docs.oasis-open.org link to another version of this work product is intended",
+         pulls="every docs.oasis-open.org URL in the markdown under this work product's own /<tc-shortname>/<WP-abbrev>/ path, outside the cover's Previous stage and Related work blocks and outside References sections",
+         compares_to="the package's own version; another version of this work product cited elsewhere is a stale-draft tell"),
     dict(check="front-matter", sig="'Latest'-labelled URL carries the stage segment", applies="md",
          condition="No Latest-labelled line cites a stage-pinned URL for this spec",
          pulls="URLs on lines labelled 'Latest' in the prose",
@@ -8116,11 +8377,7 @@ CONDITION_DOCS: list[dict] = [
     dict(check="fence-collapse", sig="collapses to inline code", applies="md",
          condition="No opening code fence carries trailing text in its info string",
          pulls="each opening fence line's info string",
-         compares_to="a bare language token or curly-attribute form; trailing text collapses the block (lint D6). BLOCKER when the package has no HTML, or the HTML does not carry the block as a <pre> block"),
-    dict(check="fence-collapse", sig="renders only with a gfm/commonmark reader", applies="md",
-         condition="A fence with trailing text in its info string, which the published HTML nonetheless shows as a code block, is reported once as a portability warning",
-         pulls="the opening line of each fence with trailing info-string text, and the HTML's <pre> blocks (the same comparison html-code-sync makes)",
-         compares_to="pandoc's gfm and commonmark readers render such a fence as code; its default markdown reader (the OASIS pipeline's step 1) collapses it, so the Markdown renders only with a gfm/commonmark reader or a preprocessor"),
+         compares_to="a bare language token or curly-attribute form; trailing text collapses the block under pandoc's markdown reader (lint D6). BLOCKER when the package has no HTML, or the HTML does not carry the block as a <pre> block; a block the HTML does carry is noted once as INFO, with no action needed. The remedy offered is the note as an HTML comment on its own line above the fence, which pandoc, gfm and commonmark all render"),
     # image-policy
     dict(check="image-policy", sig="Empty <img src>", applies="all",
          condition="No empty img src attributes",
@@ -8221,8 +8478,8 @@ CONDITION_DOCS: list[dict] = [
          compares_to="the this-stage base URL declared by the package front matter"),
     dict(check="pdf-sync", sig="expected only as a previous-stage reference", applies="all", requires="pdftotext",
          condition="The PDF cites no unexpected other version of this spec",
-         pulls="every this-spec version URL in the extracted PDF text",
-         compares_to="the package's own version (previous-stage citations expected, anything else confirmed)"),
+         pulls="every this-spec version URL in the first three pages of extracted PDF text, wrapped URLs rejoined",
+         compares_to="the package's own version (other versions excused inside the Previous stage and Related work blocks, anything else confirmed)"),
     # template
     dict(check="template", sig="Required front-matter section missing", applies="md",
          condition="All required template front-matter sections are present",
@@ -8697,9 +8954,12 @@ def main() -> int:
     run(target, f, package_zip=os.path.abspath(args.target) if tmp else "")
 
     if args.json:
-        print(json.dumps({"target": args.target, "findings": f.items,
+        findings = [{**x, "message": cite_publicly(x["message"])} for x in f.items]
+        conditions = [{k: (cite_publicly(v) if k in ("condition", "pulls", "compares_to") else v)
+                       for k, v in c.items()} for c in conditions_inventory()]
+        print(json.dumps({"target": args.target, "findings": findings,
                           "blockers": f.blockers,
-                          "conditions": conditions_inventory(),
+                          "conditions": conditions,
                           "observed": f.observed}, indent=2))
     else:
         # Aggregate repeated same-class warnings so blockers stay readable:
@@ -8719,7 +8979,7 @@ def main() -> int:
                 display.extend(group)
         order = {BLOCKER: 0, WARN: 1, INFO: 2}
         for item in sorted(display, key=lambda x: order[x["severity"]]):
-            print(f"[{item['severity']:7}] {item['check']:13} {item['message']}")
+            print(f"[{item['severity']:7}] {item['check']:13} {cite_publicly(item['message'])}")
         n_warn = sum(1 for x in f.items if x["severity"] == WARN)
         verdict = "NOT PUBLISHABLE" if f.blockers else "publishable"
         print(f"\n{f.blockers} blocker(s), {n_warn} warning(s) -> {verdict}")

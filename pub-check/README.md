@@ -33,7 +33,7 @@ Characteristics:
 - No configuration. Every expectation is derived from the package itself:
   its own front matter, its own CSS, its own schema `$id`s, its own publish
   path.
-- 187 individual checks across 61 check classes. `--list-checks` asserts
+- 186 individual checks across 62 check classes. `--list-checks` asserts
   that inventory against the code, and every count advertised anywhere in
   this repository comes from it.
 - It combines the intake acceptance criteria with the publication
@@ -136,9 +136,9 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | double-slash | 1 | BLOCKER | A double slash inside a relative path 404s on the CDN. |
 | extension-conformance | 1 | WARN | Principal and Multi-Part named-part filename extensions should match a common OASIS publication rendering format, not an invented or proprietary token. |
 | extension-count | 4 | BLOCKER/WARN | A delivery item must carry exactly one file extension after its document-identifier stem: BLOCKER, relaxed to WARN at wd stage (Naming Directives v1.7 s4/s9). Compound archive extensions (`tar.gz`, `tar.bz2`, `tar.xz`) count as one. Every other file in the package gets the same double-extension and missing-extension test as a non-blocking advisory. |
-| fence-collapse | 2 | BLOCKER/WARN | An opening code fence with trailing text collapses the whole block under pandoc. |
+| fence-collapse | 1 | BLOCKER | An opening code fence with trailing text collapses the whole block under pandoc's markdown reader run on its own. |
 | filenames | 6 | BLOCKER/WARN | Delivery items are named for the published stage, one basename, all formats present. |
-| front-matter | 12 | BLOCKER/WARN | The This/Latest stage URL blocks must match the package's actual publish path. |
+| front-matter | 11 | BLOCKER/WARN | The This/Latest stage URL blocks must match the package's actual publish path. |
 | generator | 1 | BLOCKER | DOCX-native renders must come from Microsoft Word, matching the TC's precedent. |
 | html-anchors | 3 | BLOCKER/WARN | Every internal fragment link must resolve to an anchor in the document, and no link may be a cross-reference written without its `#`. |
 | html-code-sync | 2 | BLOCKER/WARN | Every fenced code block of the Markdown source is published in the HTML unchanged, tabs and indentation included. |
@@ -181,6 +181,7 @@ pulled and the value compared against, is [CHECKS.md](CHECKS.md).
 | uri-alias | 9 | BLOCKER/WARN | No unauthorized URI aliasing within a stage/revision package: META-refresh, byte-identical duplicate files, or a redirect/URL-shortening domain citing a canonical OASIS resource (Naming Directives v1.7 s6.5). |
 | uri-chars | 1 | BLOCKER | No underscore may appear in a document (cover-page) URI (Naming Directives v1.7 s3). |
 | version-naming | 3 | BLOCKER/WARN | The version directory and delivery filenames must agree on one vN.N(.N) version. |
+| version-refs | 1 | WARN | A link to another version of this work product must be one the document cites on purpose. |
 | vml-fallback | 1 | BLOCKER | VML-only images in Word HTML renders are invisible in every modern browser. |
 | xml-namespace | 6 | BLOCKER/WARN | Every namespace a packaged .xsd/.wsdl/.rng declares as its own must be a docs.oasis-open.org/[tc-shortname]/ns/xxxx URI (consistent scheme) or an allowlisted urn:. |
 
