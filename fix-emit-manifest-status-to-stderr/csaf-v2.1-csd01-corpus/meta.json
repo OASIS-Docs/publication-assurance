@@ -1,0 +1,13 @@
+{
+  "folder": "fix-emit-manifest-status-to-stderr/csaf-v2.1-csd01-corpus",
+  "pdf": true,
+  "publication_ready": false,
+  "published": "2026-10-28 16:03:28",
+  "published_at": "2026-10-28T16:03:28.514417+00:00",
+  "ref": "fix/emit-manifest-status-to-stderr",
+  "run_url": "https://github.com/OASIS-Docs/publication-assurance/actions/runs/40722049555",
+  "source_sha": "f76c637fb7a626c8c808823e198899ccb8ae97cc",
+  "target": "examples/csaf/v2.1/csd01",
+  "title": "CSAF v2.1 CSD01 (corpus)",
+  "verdict": "NOT publication-ready: 1 blocker(s). 51 of 60 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 14 warning, 6 informational."
+}
