@@ -104,6 +104,33 @@ def test_emit_manifest_writes_both_companion_files(tmp_path):
         )
 
 
+def test_emit_manifest_with_json_keeps_stdout_pure_json(tmp_path):
+    """The composite action passes its args (often --emit-manifest) through to
+    a --json run and parses stdout as JSON. The "wrote <path>" status lines
+    printed ahead of the payload broke every Publication Console step 4.0 run
+    that emitted a manifest (CSAF TC, 28 Oct 2026). Status lines belong on
+    stderr; the manifest files must still be written."""
+    stage = stage_from_corpus(tmp_path, CSAF_CSD01)
+    result = run_cli("--emit-manifest", "--json", str(stage))
+
+    assert result.returncode in (0, 1), (
+        f"--emit-manifest --json failed (exit {result.returncode}):\n{result.stderr}"
+    )
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        pytest.fail(f"stdout is not JSON ({exc}); first line: "
+                    f"{result.stdout.splitlines()[0] if result.stdout else ''!r}")
+    assert "findings" in payload, "the JSON payload lost its findings"
+    assert (stage / "manifest.json").exists(), "manifest.json was not written"
+    assert len(list(stage.glob("*-manifest.txt"))) == 1, (
+        "the Work Product Manifest File was not written"
+    )
+    assert "wrote " in result.stderr, (
+        f"the status lines should still be reported, on stderr:\n{result.stderr}"
+    )
+
+
 def test_a_missing_target_exits_two_without_a_traceback(tmp_path):
     result = run_cli(str(tmp_path / "no-such-dir"))
 

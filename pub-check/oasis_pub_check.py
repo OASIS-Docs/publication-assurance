@@ -8948,8 +8948,10 @@ def main() -> int:
 
     if args.emit_manifest:
         version, stage = parse_stage(target)
-        print(f"wrote {emit_manifest(target, version, stage)}")
-        print(f"wrote {emit_manifest_txt(target, version, stage)}")
+        # Status lines go to stderr: with --json, stdout must be the JSON
+        # payload alone (the composite action parses it).
+        print(f"wrote {emit_manifest(target, version, stage)}", file=sys.stderr)
+        print(f"wrote {emit_manifest_txt(target, version, stage)}", file=sys.stderr)
 
     run(target, f, package_zip=os.path.abspath(args.target) if tmp else "")
 
