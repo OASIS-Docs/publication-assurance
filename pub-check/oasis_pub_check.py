@@ -8902,6 +8902,13 @@ def main() -> int:
     # resolve to absolute: stage/version tokens are derived from path segments,
     # and a relative target ('.', 'cnd01') yields empty tokens and false blockers
     target = os.path.abspath(args.target)
+    if target.endswith(".zip") and args.emit_manifest:
+        # A ZIP is checked in a temporary extraction that is deleted on exit,
+        # so manifests written there would be lost while reported as written.
+        print("error: --emit-manifest needs a stage directory, not a ZIP: the "
+              "manifests would be written into a temporary extraction and "
+              "deleted. Unpack the package and pass its directory.", file=sys.stderr)
+        return 2
     if target.endswith(".zip"):
         tmp = tempfile.mkdtemp(prefix="pub_check_")
         try:

@@ -131,6 +131,29 @@ def test_emit_manifest_with_json_keeps_stdout_pure_json(tmp_path):
     )
 
 
+def test_emit_manifest_on_a_zip_is_refused_not_silently_lost(tmp_path):
+    """A ZIP is checked in a temporary extraction deleted on exit, so the
+    manifests it reported as written were thrown away. --emit-manifest on a
+    ZIP must refuse with exit 2 (bad invocation), say why, and print no JSON."""
+    import zipfile
+
+    stage = stage_from_corpus(tmp_path / "src", CSAF_CSD01)
+    pkg = tmp_path / "csaf-v2.1-csd01.zip"
+    with zipfile.ZipFile(pkg, "w") as z:
+        for p in stage.rglob("*"):
+            if p.is_file():
+                z.write(p, p.relative_to(stage.parent))
+    result = run_cli("--emit-manifest", "--json", str(pkg))
+
+    assert result.returncode == 2, (
+        f"--emit-manifest on a ZIP should exit 2, got {result.returncode}:\n"
+        f"{result.stderr}"
+    )
+    assert "--emit-manifest needs a stage directory" in result.stderr, result.stderr
+    assert "wrote " not in result.stderr, "it claimed to write manifests it deleted"
+    assert result.stdout.strip() == "", "a refused run must not print a report"
+
+
 def test_a_missing_target_exits_two_without_a_traceback(tmp_path):
     result = run_cli(str(tmp_path / "no-such-dir"))
 
