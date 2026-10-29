@@ -41,7 +41,9 @@ identical before and after.
   Latest-stage URLs (`.../v4.02/odata-v4.02-part1-protocol.html`) are accepted.
   Each part's findings carry its folder name ("part2-url-conventions: Editor
   TODO left in ..."); the package-wide checks (names, hygiene, manifest,
-  schemas) run once against the stage directory.
+  schemas) run once against the stage directory. A part folder whose files
+  are named for another stage is checked too, and the filenames check
+  reports it, rather than the part being skipped.
 - **A Multi-Part Option 1 zip reads its stage from the zip name.** A zip whose
   members start with the part folders was checked with the first part folder
   as its stage ("Stage 'part1-protocol' is not a recognized stage token"). The

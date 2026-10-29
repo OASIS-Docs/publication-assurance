@@ -7927,7 +7927,7 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
         if not parts:
             f.add(BLOCKER, "filenames", f"No delivery items found in {stage_dir}")
             return
-        f.observe("filenames", multi_part_option_1_parts=[n for n, _ in parts])
+        f.observe("filenames", multi_part_option_1_parts=", ".join(n for n, _ in parts))
         pkg_names = {os.path.basename(p) for _, it in parts for p in it.values()}
         first_name, first_items = parts[0]
         pkg_stem = os.path.splitext(os.path.basename(
@@ -7948,17 +7948,27 @@ def multipart_parts(stage_dir: str, stage: str,
     """Naming Directives s6.1 Multi-Part Option 1 parts of a stage directory:
     (part directory name, its delivery items) for each subdirectory matching
     [partNumber]-[partName] (_PART_SEGMENT) that holds files named
-    <stem>-<stage>-<partNumber>-<partName>.<ext>, in part-number order."""
-    out = []
+    <stem>-<stage>-<partNumber>-<partName>.<ext>, in part-number order.
+    Once one part is named that way, a part folder whose files are named for
+    something else (another stage) is returned with those files, so the
+    filenames check reports it rather than the part going unchecked. With
+    no part named for the stage, the package is not read as Multi-Part."""
+    named, other = [], []
     for name in os.listdir(stage_dir):
         d = os.path.join(stage_dir, name)
         if not (os.path.isdir(d) and _PART_SEGMENT.fullmatch(name)):
             continue
-        items = {k: p for k, p in find_delivery_items(d, exts).items()
+        found = find_delivery_items(d, exts)
+        items = {k: p for k, p in found.items()
                  if os.path.splitext(os.path.basename(p))[0].endswith(f"-{stage}-{name}")}
         if items:
-            out.append((name, items))
-    return sorted(out, key=lambda t: (int(re.match(r"part(\d+)", t[0], re.I).group(1)), t[0]))
+            named.append((name, items))
+        elif found:
+            other.append((name, found))
+    if not named:
+        return []
+    return sorted(named + other,
+                  key=lambda t: (int(re.match(r"part(\d+)", t[0], re.I).group(1)), t[0]))
 
 
 def _check_document(stage_dir: str, doc_dir: str, items: dict[str, str], version: str,

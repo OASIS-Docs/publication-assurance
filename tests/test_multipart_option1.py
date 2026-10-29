@@ -94,3 +94,32 @@ def test_a_multi_part_option_1_zip_reads_its_stage_from_the_zip_name(tmp_path):
     findings, observed = _findings(zpath)
     assert not any("part1-intro' is not a recognized stage" in m for _s, _c, m in findings)
     _assert_checked_as_parts_of_the_stage(findings, observed)
+
+
+def test_a_part_named_for_another_stage_is_reported_not_skipped(tmp_path):
+    """pr81-reviewer counterexample b2: part 1 named for cs01, part 2 for
+    csd01. Part 2 must be checked and its filenames reported, not dropped."""
+    stage = _stage(tmp_path)
+    part2 = stage / "part2-core"
+    for p in list(part2.iterdir()):
+        p.rename(part2 / p.name.replace("-cs01-", "-csd01-"))
+    findings, observed = _findings(stage)
+    assert observed["filenames"]["multi_part_option_1_parts"] == "part1-intro, part2-core"
+    assert ("BLOCKER", "filenames",
+            "part2-core: Delivery filename 'wp-v1.0-csd01-part2-core' does not end in "
+            "'-cs01' (the stage directory name).") in findings, findings
+    # part 2 is still checked: its planted TODO is reported
+    assert any(m.startswith("part2-core: Editor TODO") for _s, _c, m in findings), findings
+
+
+def test_parts_are_checked_in_part_number_order(tmp_path):
+    """pr81-reviewer counterexample d: part10 comes after part2."""
+    stage = _stage(tmp_path)
+    d = stage / "part10-extra"
+    d.mkdir()
+    for ext in ("md", "html", "pdf"):
+        src = stage / "part1-intro" / f"wp-v1.0-cs01-part1-intro.{ext}"
+        (d / f"wp-v1.0-cs01-part10-extra.{ext}").write_bytes(src.read_bytes())
+    _findings_list, observed = _findings(stage)
+    assert (observed["filenames"]["multi_part_option_1_parts"]
+            == "part1-intro, part2-core, part10-extra")
