@@ -132,6 +132,19 @@ class Findings:
                 v = ", ".join(str(x) for x in sorted(v)) if v else "(none)"
             slot[k] = str(v)
 
+    def merge(self, other: "Findings", part: str) -> None:
+        """Add another Findings' items and observations, each message and
+        observation key prefixed with the Multi-Part part directory they
+        came from, so two parts' identical findings stay two findings."""
+        for item in other.items:
+            item = {**item, "message": f"{part}: {item['message']}"}
+            if item not in self.items:
+                self.items.append(item)
+        for check, kv in other.observed.items():
+            slot = self.observed.setdefault(check, {})
+            for k, v in kv.items():
+                slot[f"{part}: {k}"] = v
+
     @property
     def blockers(self) -> int:
         return sum(1 for f in self.items if f["severity"] == BLOCKER)
@@ -7895,11 +7908,73 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
     _errata_parent = os.path.basename(os.path.dirname(os.path.normpath(stage_dir)))
     _errata_dir = _errata_parent if re.fullmatch(r"errata\d*", _errata_parent, re.I) else ""
     check_stage_name(stage, f, errata_dir=_errata_dir)
-    items = find_delivery_items(stage_dir, ("md", "docx", "odt", "html", "pdf"))
+    exts = ("md", "docx", "odt", "html", "pdf")
+    items = find_delivery_items(stage_dir, exts)
     if not items:
-        f.add(BLOCKER, "filenames", f"No delivery items found in {stage_dir}")
+        # Naming Directives v1.7 s6.1, "Multi-Part Work Products: Option 1":
+        # "URIs serving as primary identifiers for distinct separately-titled
+        # prose parts in a Multi-Part Work Product must (typically) have the
+        # following structure ... this pattern simply adds one path component
+        # preceding the filename using [partNumber]-[partName], as in the case
+        # of the filename itself:
+        # https://docs.oasis-open.org/[tc-shortname]/[WP-abbrev]/[version-id]/
+        # [stage-abbrev][revisionNumber]/[partNumber]-[partName]/[doc-id].[ext]"
+        # So the stage directory of such a package holds no document of its
+        # own (no root PDF either): each part's documents sit one level down.
+        # Every part is checked as a document of THIS stage, so stage and
+        # version come from the stage directory, never from the part folder.
+        parts = multipart_parts(stage_dir, stage, exts)
+        if not parts:
+            f.add(BLOCKER, "filenames", f"No delivery items found in {stage_dir}")
+            return
+        f.observe("filenames", multi_part_option_1_parts=[n for n, _ in parts])
+        pkg_names = {os.path.basename(p) for _, it in parts for p in it.values()}
+        first_name, first_items = parts[0]
+        pkg_stem = os.path.splitext(os.path.basename(
+            next(iter(first_items.values()))))[0][:-len(f"-{first_name}")]
+        for i, (name, part_items) in enumerate(parts):
+            part_f = Findings()
+            _check_document(stage_dir, os.path.join(stage_dir, name), part_items,
+                            version, stage, _errata_dir, _errata_parent, package_zip,
+                            part_f, f if i == 0 else None, pkg_names, pkg_stem)
+            f.merge(part_f, name)
         return
+    _check_document(stage_dir, stage_dir, items, version, stage, _errata_dir,
+                    _errata_parent, package_zip, f, f)
 
+
+def multipart_parts(stage_dir: str, stage: str,
+                    exts: tuple[str, ...]) -> list[tuple[str, dict[str, str]]]:
+    """Naming Directives s6.1 Multi-Part Option 1 parts of a stage directory:
+    (part directory name, its delivery items) for each subdirectory matching
+    [partNumber]-[partName] (_PART_SEGMENT) that holds files named
+    <stem>-<stage>-<partNumber>-<partName>.<ext>, in part-number order."""
+    out = []
+    for name in os.listdir(stage_dir):
+        d = os.path.join(stage_dir, name)
+        if not (os.path.isdir(d) and _PART_SEGMENT.fullmatch(name)):
+            continue
+        items = {k: p for k, p in find_delivery_items(d, exts).items()
+                 if os.path.splitext(os.path.basename(p))[0].endswith(f"-{stage}-{name}")}
+        if items:
+            out.append((name, items))
+    return sorted(out, key=lambda t: (int(re.match(r"part(\d+)", t[0], re.I).group(1)), t[0]))
+
+
+def _check_document(stage_dir: str, doc_dir: str, items: dict[str, str], version: str,
+                    stage: str, _errata_dir: str, _errata_parent: str, package_zip: str,
+                    f: Findings, pkg_f: Findings | None,
+                    pkg_names: set[str] | None = None, pkg_stem: str = "") -> None:
+    """The checks for one document (a single-document package, or one part
+    of a Multi-Part Option 1 package) against its stage. `doc_dir` holds the
+    document's files; `stage_dir` is the stage directory. Package-wide
+    checks (files, names, manifest) report to `pkg_f` and run against the
+    stage directory; None skips them (a later part of the same package).
+    For a single-document package doc_dir is stage_dir and pkg_f is f. A
+    Multi-Part package also passes pkg_names, every part's delivery
+    filenames, and pkg_stem, the stem the parts share (<stem>-<stage>), so
+    the package-wide checks do not read another part's documents, or the
+    <stem>-<stage>.zip, as stray artifacts."""
     # A source file not named for the stage is not the package's source when
     # one that is named for it sits beside it (a Word package with a stray
     # README.md); it is left to the checks that report auxiliary files.
@@ -7924,7 +7999,7 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
         required.append("docx")      # Word-track contract preserves the source
     elif "odt" in items:
         required.append("odt")       # ODT-track contract preserves the source
-    stem = check_filenames(items, stage, f, required=tuple(required), stage_dir=stage_dir,
+    stem = check_filenames(items, stage, f, required=tuple(required), stage_dir=doc_dir,
                            errata_dir=_errata_dir, package_zip=package_zip)
     f.observe("filenames", delivery_files=[os.path.basename(p) for p in items.values()],
               formats_present=sorted(items), required_formats=sorted(required))
@@ -7944,12 +8019,12 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
               "package suites run, plus the ODT source-integrity checks; the "
               "cover is parsed from the rendered HTML.")
     odt_paths = sorted(
-        os.path.join(r, n) for r, _, fs in os.walk(stage_dir) for n in fs
+        os.path.join(r, n) for r, _, fs in os.walk(doc_dir) for n in fs
         if n.lower().endswith(".odt"))
     if odt_paths:
         mimetypes = set()
         for op in odt_paths:
-            mt = check_odt(op, os.path.relpath(op, stage_dir), f)
+            mt = check_odt(op, os.path.relpath(op, doc_dir), f)
             if mt:
                 mimetypes.add(mt)
         f.observe("odt-integrity", odt_files=len(odt_paths),
@@ -7972,7 +8047,7 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
         if is_word:
             check_generator_meta(html_text, f)
         check_vml_fallback(html_text, f)
-        check_asset_refs(stage_dir, items["html"], html_text, f)
+        check_asset_refs(doc_dir, items["html"], html_text, f)
         if not md_text:
             prose = re.sub(r"<[^>]+>", " ", strip_code_blocks(html_text, "html"))
             f.observe("dead-lists", html_lists_addresses=sorted(set(
@@ -7994,15 +8069,15 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
     # single defects as doubles: residue ran twice, image-policy twelve
     # times. Findings.add now also suppresses identical repeats as a
     # backstop, but the call list itself stays deduplicated.)
-    check_not_evaluated(base, stage_dir, version, stage, items, f)
+    check_not_evaluated(base, doc_dir, version, stage, items, f)
     check_revision_collision(base, version, stage, f)
     check_residue(md_text, html_text, f)
     check_member_uri(md_text, html_text, f)
     check_link_text(html_text, f)
     check_ref_rfc(md_text, html_text, f)
     check_comments_boilerplate(md_text, html_text, f)
-    check_conformance_structure(md_text, html_text, stage_dir, stage, f)
-    check_image_policy(stage_dir, html_text, f)
+    check_conformance_structure(md_text, html_text, doc_dir, stage, f)
+    check_image_policy(doc_dir, html_text, f)
     check_references_split(stage, md_text, html_text, f)
     check_content_labels(md_text, html_text, stage, f)
     check_stage_token(md_text, html_text, stage, f)
@@ -8016,17 +8091,22 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
                         errata=_m_errata.group(1) if _m_errata else "")
     check_frontmatter_title_oasis_prefix(html_text, stage, f)
     check_authors(md_text, is_word, is_odt, f)
-    check_name_chars(stage_dir, version, stage, stem, f)
-    check_extension_count(stage_dir, items, stem, stage, f)
-    check_extension_conformance(stage_dir, stage, stem, f)
-    check_stable_artifact_names(stage_dir, items, stem, f)
-    check_multipart_naming(stage_dir, f)
-    check_multipart_part_identifiers(stage_dir, version, stage, f)
+    if pkg_f is not None:
+        check_name_chars(stage_dir, version, stage, pkg_stem or stem, pkg_f)
+        check_extension_count(stage_dir, items, stem, stage, pkg_f)
+        check_extension_conformance(stage_dir, stage, stem, pkg_f)
+        check_stable_artifact_names(
+            stage_dir, {n: n for n in pkg_names} if pkg_names else items,
+            pkg_stem or stem, pkg_f)
+        check_multipart_naming(stage_dir, pkg_f)
+        check_multipart_part_identifiers(stage_dir, version, stage, pkg_f)
     check_public_review_metadata(base, stage, stem, f)
-    check_comment_resolution_log(stage_dir, stage, stem, f)
-    check_normdef_refs(stage_dir, items, md_text, html_text, stage, f)
-    check_uri_alias(stage_dir, items, md_text, html_text, f)
-    check_xml_namespaces(stage_dir, base, f)
+    if pkg_f is not None:
+        check_comment_resolution_log(stage_dir, stage, stem, pkg_f)
+    check_normdef_refs(doc_dir, items, md_text, html_text, stage, f)
+    check_uri_alias(doc_dir, items, md_text, html_text, f)
+    if pkg_f is not None:
+        check_xml_namespaces(stage_dir, base, pkg_f)
     check_ns_segment(md_text, html_text, f)
 
     # ---- output suite: PDF -----------------------------------------------
@@ -8037,8 +8117,8 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
             tm = re.search(r"<title>(.*?)</title>", html_text, re.I | re.S)
             title = re.sub(r"\s+", " ", tm.group(1)).strip() if tm else ""
         check_pdf_cover(items["pdf"], title, f)
-        check_pdf_fonts(stage_dir, items["pdf"], html_text, f)
-        check_pdf_legibility(items["pdf"], stage_dir, html_text, f)
+        check_pdf_fonts(doc_dir, items["pdf"], html_text, f)
+        check_pdf_legibility(items["pdf"], doc_dir, html_text, f)
         check_pdf_toc_pages(items["pdf"], f)
 
     # ---- source add-ons ---------------------------------------------------
@@ -8049,12 +8129,14 @@ def run(stage_dir: str, f: Findings, package_zip: str = "") -> None:
             check_html_code_sync(md_text, html_text, f)
         check_policy(md_text, html_text, version, stage, f)
         check_template(md_text, html_text, f)
-        check_correction_classes(md_text, stage_dir, base, stage, f)
+        check_correction_classes(md_text, doc_dir, base, stage, f)
 
     # ---- package suite ----------------------------------------------------
-    check_schemas(stage_dir, base, version, stage, f)
-    check_hygiene(stage_dir, f, {os.path.basename(p) for p in items.values()})
-    check_manifest(stage_dir, f)
+    if pkg_f is not None:
+        check_schemas(stage_dir, base, version, stage, pkg_f)
+        check_hygiene(stage_dir, pkg_f,
+                      pkg_names or {os.path.basename(p) for p in items.values()})
+        check_manifest(stage_dir, pkg_f)
 
 
 def _safe_path_segment(segment: str) -> bool:
@@ -8104,10 +8186,15 @@ def zip_stage_layout(zip_path: str, names: list[str]) -> tuple[str, str, str, st
 
 
 def locate_stage_dir(root: str) -> str:
-    """Inside an extracted zip, find the deepest dir holding the delivery items."""
+    """Inside an extracted zip, find the deepest dir holding the delivery items.
+    A Multi-Part Option 1 part folder (partN-name/, Naming Directives s6.1) is
+    not a stage: its parent, which holds the parts, is. Its name then comes
+    from the zip's own <stem>-<stage>.zip through zip_stage_layout."""
     for dirpath, _dirs, files in os.walk(root):
         exts = {os.path.splitext(n)[1].lstrip(".").lower() for n in files}
         if {"md", "html"} <= exts:
+            if _PART_SEGMENT.fullmatch(os.path.basename(dirpath)) and dirpath != root:
+                return os.path.dirname(dirpath)
             return dirpath
     return root
 
