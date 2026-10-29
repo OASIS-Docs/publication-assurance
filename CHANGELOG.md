@@ -26,7 +26,29 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+PATCH: two fixes inside existing checks for Multi-Part Work Products laid out
+as Naming Directives v1.7 s6.1 Option 1 (each part in its own
+`[partNumber]-[partName]/` folder under the stage directory). Prompted by OData
+Version 4.02 CS01, Oct 2026. Single-document packages are unchanged: on seven
+CSAF and CSAF CVRF stages in examples/ the findings and observed values are
+identical before and after.
+
+- **A Multi-Part Option 1 stage directory is checked part by part.** Its stage
+  directory holds no document of its own, so the checker reported "No
+  delivery items found" and checked nothing. It now checks each part folder's
+  documents (`<stem>-<stage>-partN-name.md/.html/.pdf`) as documents of the
+  stage, so stage and version come from the stage directory and the parts'
+  Latest-stage URLs (`.../v4.02/odata-v4.02-part1-protocol.html`) are accepted.
+  Each part's findings carry its folder name ("part2-url-conventions: Editor
+  TODO left in ..."); the package-wide checks (names, hygiene, manifest,
+  schemas) run once against the stage directory. A part folder whose files
+  are named for another stage is checked too, and the filenames check
+  reports it, rather than the part being skipped.
+- **A Multi-Part Option 1 zip reads its stage from the zip name.** A zip whose
+  members start with the part folders was checked with the first part folder
+  as its stage ("Stage 'part1-protocol' is not a recognized stage token"). The
+  stage directory is now the folder that holds the parts, named from the
+  zip's `<stem>-<stage>.zip`.
 
 ## v1.16.0 - 2026-10-22
 
