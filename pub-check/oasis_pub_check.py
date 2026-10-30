@@ -3060,21 +3060,45 @@ def emit_manifest_txt(stage_dir: str, version: str, stage: str,
         if k in items:
             stem = os.path.splitext(os.path.basename(items[k]))[0]
             break
+    parts = [] if items else multipart_parts(stage_dir, stage,
+                                             ("md", "docx", "odt", "html", "pdf"))
+    multi_part = bool(parts)
+    part_items: list[dict[str, str]] = []
+    if parts:
+        # Multi-Part Option 1 (s6.1): the stage directory holds no document of its
+        # own. The manifest takes the stem the parts share (<stem>-<stage>, the
+        # package zip's name) from the first part whose files are named for this
+        # stage, and its title and URIs from the first part that carries them.
+        for pname, pitems in parts:
+            named = {k: v for k, v in pitems.items()
+                     if os.path.splitext(os.path.basename(v))[0].endswith(f"-{stage}-{pname}")}
+            if named:
+                part_items.append(named)
+                if not stem:
+                    first = os.path.splitext(os.path.basename(next(iter(named.values()))))[0]
+                    stem = first[: -len(pname) - 1]
     name = (stem + "-manifest.txt") if stem else "manifest.txt"
     out = os.path.join(stage_dir, name)
 
     title = ""
     base_uri = ""
-    if "html" in items:
-        html = read_text(items["html"])
+    for its in ([items] if not multi_part else part_items):
+        if "html" not in its:
+            continue
+        html = read_text(its["html"])
         m = re.search(r"<title[^>]*>(.*?)</title>", html, re.I | re.S)
-        if m:
+        if m and not title:
             title = re.sub(r"\s+", " ",
                            html_lib.unescape(m.group(1))).strip()
+            if multi_part:
+                # the work product, not its first part: "X. Part 1: Protocol" -> "X"
+                title = re.sub(r"[.:,]?\s*Part\s+\d+\b.*$", "", title).strip() or title
         m = re.search(r"https://docs\.oasis-open\.org/[^\s\"'<>]*?/"
                       + re.escape(stage) + "/", html)
-        if m:
+        if m and not base_uri:
             base_uri = m.group(0)
+        if title and base_uri:
+            break
 
     zips = sorted(n for n in os.listdir(stage_dir) if n.lower().endswith(".zip"))
     lines = [

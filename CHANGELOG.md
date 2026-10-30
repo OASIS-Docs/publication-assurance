@@ -26,6 +26,12 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+PATCH: `--emit-manifest` on a Multi-Part Option 1 stage directory wrote a bare
+`manifest.txt` with no title, Release URI or Manifest URI, because the stage
+directory holds no document of its own. It now names the file for the package
+(`<stem>-<stage>-manifest.txt`, as the zip) and reads the title and URIs from the
+first part (OData Version 4.02 CS01, 30 Oct 2026).
+
 PATCH: two fixes inside existing checks for Multi-Part Work Products laid out
 as Naming Directives v1.7 s6.1 Option 1 (each part in its own
 `[partNumber]-[partName]/` folder under the stage directory). Prompted by OData
