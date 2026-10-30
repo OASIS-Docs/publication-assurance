@@ -1,0 +1,13 @@
+{
+  "folder": "fix-multipart-manifest/csaf-v2.1-csd01-corpus",
+  "pdf": true,
+  "publication_ready": false,
+  "published": "2026-10-30 00:16:23",
+  "published_at": "2026-10-30T00:16:23.595458+00:00",
+  "ref": "fix/multipart-manifest",
+  "run_url": "https://github.com/OASIS-Docs/publication-assurance/actions/runs/40978538181",
+  "source_sha": "a4c35e3d6e7e096e3c5d972738983a7b90855d97",
+  "target": "examples/csaf/v2.1/csd01",
+  "title": "CSAF v2.1 CSD01 (corpus)",
+  "verdict": "NOT publication-ready: 1 blocker(s). 51 of 60 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 14 warning, 6 informational."
+}
