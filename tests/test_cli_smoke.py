@@ -104,6 +104,56 @@ def test_emit_manifest_writes_both_companion_files(tmp_path):
         )
 
 
+def test_emit_manifest_with_json_keeps_stdout_pure_json(tmp_path):
+    """The composite action passes its args (often --emit-manifest) through to
+    a --json run and parses stdout as JSON. The "wrote <path>" status lines
+    printed ahead of the payload broke every Publication Console step 4.0 run
+    that emitted a manifest (CSAF TC, 28 Oct 2026). Status lines belong on
+    stderr; the manifest files must still be written."""
+    stage = stage_from_corpus(tmp_path, CSAF_CSD01)
+    result = run_cli("--emit-manifest", "--json", str(stage))
+
+    assert result.returncode in (0, 1), (
+        f"--emit-manifest --json failed (exit {result.returncode}):\n{result.stderr}"
+    )
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        pytest.fail(f"stdout is not JSON ({exc}); first line: "
+                    f"{result.stdout.splitlines()[0] if result.stdout else ''!r}")
+    assert "findings" in payload, "the JSON payload lost its findings"
+    assert (stage / "manifest.json").exists(), "manifest.json was not written"
+    assert len(list(stage.glob("*-manifest.txt"))) == 1, (
+        "the Work Product Manifest File was not written"
+    )
+    assert "wrote " in result.stderr, (
+        f"the status lines should still be reported, on stderr:\n{result.stderr}"
+    )
+
+
+def test_emit_manifest_on_a_zip_is_refused_not_silently_lost(tmp_path):
+    """A ZIP is checked in a temporary extraction deleted on exit, so the
+    manifests it reported as written were thrown away. --emit-manifest on a
+    ZIP must refuse with exit 2 (bad invocation), say why, and print no JSON."""
+    import zipfile
+
+    stage = stage_from_corpus(tmp_path / "src", CSAF_CSD01)
+    pkg = tmp_path / "csaf-v2.1-csd01.zip"
+    with zipfile.ZipFile(pkg, "w") as z:
+        for p in stage.rglob("*"):
+            if p.is_file():
+                z.write(p, p.relative_to(stage.parent))
+    result = run_cli("--emit-manifest", "--json", str(pkg))
+
+    assert result.returncode == 2, (
+        f"--emit-manifest on a ZIP should exit 2, got {result.returncode}:\n"
+        f"{result.stderr}"
+    )
+    assert "--emit-manifest needs a stage directory" in result.stderr, result.stderr
+    assert "wrote " not in result.stderr, "it claimed to write manifests it deleted"
+    assert result.stdout.strip() == "", "a refused run must not print a report"
+
+
 def test_a_missing_target_exits_two_without_a_traceback(tmp_path):
     result = run_cli(str(tmp_path / "no-such-dir"))
 
