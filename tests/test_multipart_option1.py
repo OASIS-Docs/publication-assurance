@@ -132,11 +132,30 @@ def test_emit_manifest_on_a_multi_part_stage_names_it_for_the_package(tmp_path):
     for part in PARTS:
         stem = f"wp-v1.0-cs01-{part}"
         (stage / part / f"{stem}.html").write_text(
-            f"<!DOCTYPE html><html><head><title>Widget Protocol Version 1.0. {part}</title></head>"
+            f"<!DOCTYPE html><html><head><title>Widget Protocol Version 1.0. Part {part[4]}: {part}</title></head>"
             f"<body><a href=\"{SITE}/cs01/{part}/{stem}.html\">this stage</a></body></html>",
             encoding="utf-8")
     run_cli(str(stage), "--emit-manifest")
     assert not (stage / "manifest.txt").exists()
     txt = (stage / "wp-v1.0-cs01-manifest.txt").read_text(encoding="utf-8")
-    assert "Title:          Widget Protocol Version 1.0. part1-intro" in txt
+    assert "Title:          Widget Protocol Version 1.0\n" in txt  # the work product, not part 1
+    assert f"Manifest URI:   {SITE}/cs01/wp-v1.0-cs01-manifest.txt" in txt
+
+
+def test_emit_manifest_skips_a_misnamed_or_url_less_first_part(tmp_path):
+    """Review of PR 82: the manifest took stem, title and URIs from parts[0]
+    even when part 1 was named for another stage or carried no stage URL."""
+    stage = _stage(tmp_path)
+    d1 = stage / "part1-intro"
+    for f in list(d1.iterdir()):                       # part 1 named for csd01, no stage URL
+        f.rename(d1 / f.name.replace("-cs01-", "-csd01-"))
+    stem2 = "wp-v1.0-cs01-part2-core"
+    (stage / "part2-core" / f"{stem2}.html").write_text(
+        "<!DOCTYPE html><html><head><title>Widget Protocol Version 1.0. Part 2: Core</title></head>"
+        f"<body><a href=\"{SITE}/cs01/part2-core/{stem2}.html\">this stage</a></body></html>",
+        encoding="utf-8")
+    run_cli(str(stage), "--emit-manifest")
+    txt = (stage / "wp-v1.0-cs01-manifest.txt").read_text(encoding="utf-8")
+    assert not list(stage.glob("*csd01*manifest*")) and not (stage / "manifest.txt").exists()
+    assert "Title:          Widget Protocol Version 1.0\n" in txt
     assert f"Manifest URI:   {SITE}/cs01/wp-v1.0-cs01-manifest.txt" in txt
