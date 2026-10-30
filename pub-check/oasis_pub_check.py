@@ -3060,6 +3060,15 @@ def emit_manifest_txt(stage_dir: str, version: str, stage: str,
         if k in items:
             stem = os.path.splitext(os.path.basename(items[k]))[0]
             break
+    parts = [] if items else multipart_parts(stage_dir, stage,
+                                             ("md", "docx", "odt", "html", "pdf"))
+    if parts:
+        # Multi-Part Option 1 (s6.1): the stage directory holds no document of its
+        # own. The manifest takes the stem the parts share (<stem>-<stage>, the
+        # package zip's name) and its title and URIs from the first part.
+        items = parts[0][1]
+        first = os.path.splitext(os.path.basename(next(iter(items.values()))))[0]
+        stem = first[: -len(parts[0][0]) - 1]
     name = (stem + "-manifest.txt") if stem else "manifest.txt"
     out = os.path.join(stage_dir, name)
 

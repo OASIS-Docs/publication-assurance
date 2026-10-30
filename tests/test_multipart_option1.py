@@ -123,3 +123,20 @@ def test_parts_are_checked_in_part_number_order(tmp_path):
     _findings_list, observed = _findings(stage)
     assert (observed["filenames"]["multi_part_option_1_parts"]
             == "part1-intro, part2-core, part10-extra")
+
+
+def test_emit_manifest_on_a_multi_part_stage_names_it_for_the_package(tmp_path):
+    """--emit-manifest wrote a bare manifest.txt with no title or URIs on a
+    Multi-Part Option 1 stage directory (OData Version 4.02 CS01, 30 Oct 2026)."""
+    stage = _stage(tmp_path)
+    for part in PARTS:
+        stem = f"wp-v1.0-cs01-{part}"
+        (stage / part / f"{stem}.html").write_text(
+            f"<!DOCTYPE html><html><head><title>Widget Protocol Version 1.0. {part}</title></head>"
+            f"<body><a href=\"{SITE}/cs01/{part}/{stem}.html\">this stage</a></body></html>",
+            encoding="utf-8")
+    run_cli(str(stage), "--emit-manifest")
+    assert not (stage / "manifest.txt").exists()
+    txt = (stage / "wp-v1.0-cs01-manifest.txt").read_text(encoding="utf-8")
+    assert "Title:          Widget Protocol Version 1.0. part1-intro" in txt
+    assert f"Manifest URI:   {SITE}/cs01/wp-v1.0-cs01-manifest.txt" in txt
