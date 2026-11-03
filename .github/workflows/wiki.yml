@@ -1,0 +1,61 @@
+# Copyright 2026 OASIS Open
+# SPDX-License-Identifier: Apache-2.0
+# Authored by Michael Coletta, Technical Advisor to OASIS Open.
+
+# Publish the repository's markdown to the GitHub Wiki.
+#
+# The markdown in the repository is the single source; the wiki is generated
+# from it by .github/scripts/build_wiki.py and nobody edits it by hand. Every
+# page in the wiki is replaced on each run, and a page whose source has gone
+# is removed. The wiki repository's branch is master.
+
+name: Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - ".github/scripts/build_wiki.py"
+      - ".github/workflows/wiki.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build the wiki pages
+        run: python3 .github/scripts/build_wiki.py --out "$RUNNER_TEMP/pages" --repo "$GITHUB_REPOSITORY" --ref main
+
+      - name: Publish the pages to the wiki
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ACTOR: ${{ github.actor }}
+          ACTOR_ID: ${{ github.actor_id }}
+        run: |
+          set -euo pipefail
+          wiki="$RUNNER_TEMP/wiki"
+          git clone --quiet --branch master \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" "$wiki"
+          find "$wiki" -maxdepth 1 -name '*.md' -delete
+          cp "$RUNNER_TEMP"/pages/*.md "$wiki"/
+          cd "$wiki"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "The wiki already matches the repository; nothing to publish."
+            exit 0
+          fi
+          git -c user.name="$ACTOR" \
+              -c user.email="${ACTOR_ID}+${ACTOR}@users.noreply.github.com" \
+              commit --quiet -m "Wiki generated from ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
+          git push --quiet origin master
+          echo "Published $(git ls-files '*.md' | wc -l) pages to the wiki."
