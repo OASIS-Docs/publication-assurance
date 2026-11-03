@@ -1,0 +1,13 @@
+{
+  "folder": "fix-vml-fallback-src-only/csaf-v2.1-csd01-corpus",
+  "pdf": true,
+  "publication_ready": false,
+  "published": "2026-11-03 15:36:59",
+  "published_at": "2026-11-03T15:36:59.190138+00:00",
+  "ref": "fix/vml-fallback-src-only",
+  "run_url": "https://github.com/OASIS-Docs/publication-assurance/actions/runs/41665600849",
+  "source_sha": "2b9c73a8c04af16e2fcace556a06d729f28988d8",
+  "target": "examples/csaf/v2.1/csd01",
+  "title": "CSAF v2.1 CSD01 (corpus)",
+  "verdict": "NOT publication-ready: 1 blocker(s). 51 of 60 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 14 warning, 6 informational."
+}
