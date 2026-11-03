@@ -650,7 +650,7 @@ VML-only images in Word HTML renders are invisible in every modern browser.
 
 | # | Condition verified | Value pulled (observed) | Compared against | Severity | Applies | Requires |
 |---|---|---|---|---|---|---|
-| 180 | Every VML image has an &lt;![if !vml]&gt; img fallback | the counts of v:imagedata elements and vml-fallback img tags | fallback count must cover VML count (the invisible-cover-logo class) | BLOCKER | all | - |
+| 180 | Every VML image has an &lt;![if !vml]&gt; img fallback | the counts of v:imagedata elements with a src and vml-fallback img tags | fallback count must cover VML count (the invisible-cover-logo class) | BLOCKER | all | - |
 
 ### xml-namespace
 
