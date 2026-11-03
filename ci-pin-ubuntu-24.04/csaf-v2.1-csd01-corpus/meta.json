@@ -1,0 +1,13 @@
+{
+  "folder": "ci-pin-ubuntu-24.04/csaf-v2.1-csd01-corpus",
+  "pdf": true,
+  "publication_ready": false,
+  "published": "2026-11-03 23:28:27",
+  "published_at": "2026-11-03T23:28:27.626445+00:00",
+  "ref": "ci/pin-ubuntu-24.04",
+  "run_url": "https://github.com/OASIS-Docs/publication-assurance/actions/runs/41739357170",
+  "source_sha": "78b866dfff64954f9434c21af0d755c25bc0e5f5",
+  "target": "examples/csaf/v2.1/csd01",
+  "title": "CSAF v2.1 CSD01 (corpus)",
+  "verdict": "NOT publication-ready: 1 blocker(s). 51 of 60 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 14 warning, 6 informational."
+}
