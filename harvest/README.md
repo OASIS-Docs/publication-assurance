@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 Authored by Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-# harvest: learn from every publication-checks run
+# Learning from check records (`harvest/`)
 
 Every run of the publication checks leaves records. `harvest.py` reads them and says what
 they mean for the checks themselves, so no run's output is wasted:

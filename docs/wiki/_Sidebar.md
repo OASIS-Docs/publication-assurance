@@ -43,6 +43,6 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
 
 - [Publication quality](../../PUBLICATION-QUALITY.md)
 - [Repository overview](../../README.md)
-- [Harvesting check records](../../harvest/README.md)
+- [Learning from check records](../../harvest/README.md)
 - [Architecture diagrams](../../assets/architecture/README.md)
 - [Changelog](../../CHANGELOG.md)

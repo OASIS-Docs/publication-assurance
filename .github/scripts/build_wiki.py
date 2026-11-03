@@ -55,7 +55,7 @@ PAGES: dict[str, str] = {
     "render/README.md": "Rendering",
     "verify/README.md": "Verifying-a-conversion",
     "converters/docbook-to-markdown/README.md": "DocBook-to-Markdown-converter",
-    "harvest/README.md": "Harvesting-check-records",
+    "harvest/README.md": "Learning-from-check-records",
     "assets/architecture/README.md": "Architecture-diagrams",
     "examples/eox-core-v1.0-csd01/README.md": "Example-validation-report",
     "CHANGELOG.md": "Changelog",

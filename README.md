@@ -90,6 +90,11 @@ URL shapes and what happens when nothing is published:
 
 ## The documents
 
+The same guides are published as the repository's
+[wiki](https://github.com/OASIS-Docs/publication-assurance/wiki), arranged by
+what a TC editor wants to do. The wiki is generated from these files on every
+change to `main`, so the files here remain the source.
+
 | File | Open it when |
 |---|---|
 | **[docs/ADOPTING.md](docs/ADOPTING.md)** | TC setting the checks up in its own repository: the three-step quick start, reading the report, and every option. |
@@ -238,6 +243,7 @@ publication-assurance/
 ├── docs/CONVERT-AND-VERIFY.md       # Convert, render, verify and check in one GitHub workflow, with screenshots
 ├── docs/WORKED-EXAMPLES.md          # Findings from recent publications and the fix at source for each
 ├── docs/images/                     # The screenshots the guides use
+├── docs/wiki/                       # The wiki's Home, sidebar and footer (the wiki is generated)
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all checks
 ├── examples/                        # Worked example + the regression corpus
 │   ├── consumer-workflow.yml        #   the drop-in TC workflow (copy this)
@@ -275,14 +281,15 @@ publication-assurance/
 ├── .github/
 │   ├── src/                         # Pipeline source (pandoc + BeautifulSoup post-processing,
 │   │                                #   HTML preprocessor, wkhtmltopdf renderer)
-│   ├── scripts/                     # Shell entry points used by the workflows
+│   ├── scripts/                     # Entry points used by the workflows, including build_wiki.py
 │   ├── styles/                      # OASIS markdown-styles CSS lineage (v1.1 → v1.8.1)
 │   └── workflows/                   # ci (this repo's own test suite), step_1 (MD→HTML),
 │                                    #   step_2 (HTML→PDF), step_3 (zip), pub-check (the
 │                                    #   publication checks), make-manifest (the release manifests),
 │                                    #   convert-and-verify (the reusable workflow TCs call),
 │                                    #   gate-change-review (a checker change records its review),
-│                                    #   move-v1 (moves the v1 tag to each release)
+│                                    #   move-v1 (moves the v1 tag to each release),
+│                                    #   wiki (publishes the guides to the wiki)
 ├── LICENSE                          # Apache-2.0 (software tier)
 └── NOTICE                           # The three-tier IP statement
 ```
@@ -367,7 +374,7 @@ The OASIS name and logo are trademarks of OASIS Open.
 
 **Repository maintained by**: Michael Coletta, Technical Advisor, OASIS Open  
 **Contact**: michael.coletta@oasis-open.org (OASIS TC Administration)  
-**Documentation**: [PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md) for the full guide, [TRANSFORMS.md](TRANSFORMS.md) for the pipeline, [pub-check/](pub-check/) for the publication checks, individual specification folders for spec-level detail
+**Documentation**: [PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md) for the full guide, [TRANSFORMS.md](TRANSFORMS.md) for the pipeline, [pub-check/](pub-check/) for the publication checks, and the [wiki](https://github.com/OASIS-Docs/publication-assurance/wiki) for all of them arranged by task
 
 ---
 
