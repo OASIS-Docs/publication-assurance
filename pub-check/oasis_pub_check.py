@@ -9069,8 +9069,11 @@ def main() -> int:
 
     if args.emit_manifest:
         version, stage = parse_stage(target)
-        print(f"wrote {emit_manifest(target, version, stage)}")
-        print(f"wrote {emit_manifest_txt(target, version, stage)}")
+        # With --json, stdout is the JSON report and nothing else: the
+        # action re-runs the caller's args with --json and parses stdout.
+        progress = sys.stderr if args.json else sys.stdout
+        print(f"wrote {emit_manifest(target, version, stage)}", file=progress)
+        print(f"wrote {emit_manifest_txt(target, version, stage)}", file=progress)
 
     run(target, f, package_zip=os.path.abspath(args.target) if tmp else "")
 
