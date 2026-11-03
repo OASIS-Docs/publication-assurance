@@ -82,9 +82,9 @@ env:
 
 jobs:
   convert-and-verify:
-    # Pinned, not ubuntu-latest: 26.04 dropped the Liberation fonts the
-    # renderer reads, and the DMLex PDF came out 195 pages against the
-    # published 218 (#88).
+    # Pinned, not ubuntu-latest: on 26.04 the DMLex PDF comparison lost the
+    # text of its UML diagram (poppler 26.01, and no fonts-liberation2 for
+    # Graphviz), so the rendered PDFs no longer match the published ones (#88).
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5

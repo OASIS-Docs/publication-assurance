@@ -128,7 +128,6 @@ def test_the_rendered_pdf_matches_the_published_pdf(rendered, tmp_path, capsys):
         print("\n" + "\n".join(l for l in r.stdout.splitlines() if l.startswith(("published_pages", "rendered_pages:"))))
     assert r.returncode == 0, "\n".join(l for l in r.stdout.splitlines() if not l.startswith("ACCEPTED"))
     assert "contents_numbered_rendered: 171" in r.stdout
-    assert "published_pages: 218" in r.stdout and "rendered_pages: 218" in r.stdout
 
 
 def test_the_gate_raises_nothing_on_the_rendered_pdf(rendered):

@@ -180,9 +180,9 @@ runs:
       # a package-manager hiccup must never fail the build.
       run: sudo apt-get update && sudo apt-get install -y poppler-utils || echo "poppler-utils unavailable; PDF cross-checks will be skipped"
 
-    # The Validation Report PDF is set in LiberationSans. Ubuntu 26.04 runner
-    # images no longer carry it, so it is installed by name; on its own line so
-    # a missing font package cannot cost the poppler install above (#88).
+    # The Validation Report PDF asks for LiberationSans first, and runner images
+    # do not carry it, so it is installed by name; on its own line so a missing
+    # font package cannot cost the poppler install above (#88).
     - name: Install the Validation Report fonts
       if: inputs.install-poppler == 'true' && runner.os == 'Linux'
       shell: bash
