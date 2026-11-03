@@ -3324,7 +3324,7 @@ def check_vml_fallback(html_text: str, f: Findings) -> None:
     carry a v:imagedata with no src and need no fallback (AKN Core v2.0 OS
     Part 2, Nov 2026: eight of them blocked a cover logo that had its img)."""
     flat = html_text.replace("\r", "").replace("\n", " ")
-    vml = len(re.findall(r"<v:imagedata\b[^>]*\bsrc\s*=", flat))
+    vml = len(re.findall(r"<v:imagedata\b(?:[^>\"']|\"[^\"]*\"|'[^']*')*?\ssrc\s*=", flat, re.I))
     fallbacks = len(re.findall(r"<!\[if !vml\]>\s*<img\b", flat))
     f.observe("vml-fallback", vml_images=vml, img_fallbacks=fallbacks)
     if vml and fallbacks < vml:

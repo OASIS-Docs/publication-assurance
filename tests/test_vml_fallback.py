@@ -47,3 +47,12 @@ def test_a_vml_picture_with_no_fallback_still_blocks():
     """The class the check exists for (PKCS#11 v3.2 os, KMIP v3.0 csd01 covers)."""
     html = "<html><body>" + LOGO_WITHOUT_FALLBACK + HORIZONTAL_LINE * 8 + "</body></html>"
     assert len(_blockers(html)) == 1
+
+
+def test_a_picture_is_counted_whatever_the_attribute_case_or_a_quoted_bracket():
+    """Review counterexamples: SRC in capitals, and a '>' inside an earlier
+    quoted attribute, must still count as a picture with no fallback."""
+    for tag in ('<v:imagedata SRC="a.png"/>',
+                '<v:imagedata o:title="a>b" src="a.png"/>',
+                "<v:imagedata o:title='-->' src='a.png'/>"):
+        assert len(_blockers("<html><body>" + tag + "</body></html>")) == 1, tag
