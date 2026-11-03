@@ -28,6 +28,17 @@ Each version is anchored by a git tag on this repository.
 
 Nothing yet.
 
+## v1.16.1 - 2026-11-03
+
+PATCH: one fix, on top of v1.16.0 only. `--emit-manifest` with `--json`
+printed its two "wrote <path>" lines on stdout ahead of the JSON report, so the
+action's report readers failed with "Expecting value" and publisher-toolkit
+step 4.0 (Generate manifests) failed on every run (CSAF v2.1 csd04, SARIF v2.2
+csd01, NIEM NDR v6.0 psd02). The go-live workflow's "Generate missing
+manifests" step made the same call. With `--json` those lines now go to
+stderr; plain-text output is unchanged. No check, condition or finding
+changed. Pinned by three tests in tests/test_manifest_emitter.py (#83).
+
 ## v1.16.0 - 2026-10-22
 
 MINOR: a new check class (version-refs), one condition fewer (fence-collapse's

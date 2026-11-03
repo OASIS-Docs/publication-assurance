@@ -217,3 +217,22 @@ def test_emit_manifest_with_json_keeps_stdout_a_json_report(manifest_stage):
     report = json.loads(proc.stdout)
     assert "findings" in report
     assert "wrote " in proc.stderr, "the manifest paths should still be reported"
+
+
+def test_emit_manifest_on_a_zip_with_json_keeps_stdout_a_json_report(manifest_stage, tmp_path):
+    archive = shutil.make_archive(str(tmp_path / "pkg"), "zip", manifest_stage.parent.parent)
+    proc = subprocess.run(
+        [sys.executable, str(PUB_CHECK), archive, "--json", "--emit-manifest"],
+        capture_output=True, text=True, env={**os.environ, "PUB_CHECK_OFFLINE": "1"},
+    )
+    assert proc.returncode in (0, 1), proc.stderr
+    assert "findings" in json.loads(proc.stdout)
+
+
+def test_emit_manifest_without_json_still_prints_the_paths_on_stdout(manifest_stage):
+    """The plain-text run (the action's primary call, teed to the log) is unchanged."""
+    proc = subprocess.run(
+        [sys.executable, str(PUB_CHECK), str(manifest_stage), "--emit-manifest"],
+        capture_output=True, text=True, env={**os.environ, "PUB_CHECK_OFFLINE": "1"},
+    )
+    assert proc.stdout.startswith("wrote "), proc.stdout[:200]
