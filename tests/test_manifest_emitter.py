@@ -15,12 +15,14 @@ Two defects, both found staging UBL v2.5 as an OASIS Standard:
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
+import sys
 
 import pytest
 
-from conftest import FIXTURES, oasis_pub_check
+from conftest import FIXTURES, PUB_CHECK, oasis_pub_check
 
 emit_manifest_txt = oasis_pub_check.emit_manifest_txt
 
@@ -198,3 +200,39 @@ def test_only_the_source_is_authoritative_not_every_markdown_file(tmp_path):
     (stage / "kmip-ug-v3.0-cnd02-comment-resolution-log.md").write_bytes(b"x")
     roles = _roles(stage)
     assert [p for p, r in roles.items() if r == "authoritative"] == ["kmip-ug-v3.0-cnd02.docx"]
+
+
+# --emit-manifest with --json (CSAF v2.1 csd04 and SARIF v2.2 csd01, Oct 2026):
+# the "wrote <path>" lines went to stdout ahead of the JSON report, so every
+# reader of the report failed with "Expecting value: line 1 column 1". The
+# publication-assurance action re-runs the caller's args with --json appended,
+# so the Publication Console's step 4.0 (Generate manifests) failed on every run.
+def test_emit_manifest_with_json_keeps_stdout_a_json_report(manifest_stage):
+    proc = subprocess.run(
+        [sys.executable, str(PUB_CHECK), str(manifest_stage), "--emit-manifest", "--json"],
+        capture_output=True, text=True, env={**os.environ, "PUB_CHECK_OFFLINE": "1"},
+    )
+    assert proc.returncode in (0, 1), proc.stderr
+    assert (manifest_stage / "manifest.json").is_file()
+    report = json.loads(proc.stdout)
+    assert "findings" in report
+    assert "wrote " in proc.stderr, "the manifest paths should still be reported"
+
+
+def test_emit_manifest_on_a_zip_with_json_keeps_stdout_a_json_report(manifest_stage, tmp_path):
+    archive = shutil.make_archive(str(tmp_path / "pkg"), "zip", manifest_stage.parent.parent)
+    proc = subprocess.run(
+        [sys.executable, str(PUB_CHECK), archive, "--json", "--emit-manifest"],
+        capture_output=True, text=True, env={**os.environ, "PUB_CHECK_OFFLINE": "1"},
+    )
+    assert proc.returncode in (0, 1), proc.stderr
+    assert "findings" in json.loads(proc.stdout)
+
+
+def test_emit_manifest_without_json_still_prints_the_paths_on_stdout(manifest_stage):
+    """The plain-text run (the action's primary call, teed to the log) is unchanged."""
+    proc = subprocess.run(
+        [sys.executable, str(PUB_CHECK), str(manifest_stage), "--emit-manifest"],
+        capture_output=True, text=True, env={**os.environ, "PUB_CHECK_OFFLINE": "1"},
+    )
+    assert proc.stdout.startswith("wrote "), proc.stdout[:200]
