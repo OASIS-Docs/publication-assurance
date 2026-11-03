@@ -1199,7 +1199,7 @@
       "sig": "browsers that ignore VML show nothing",
       "applies": "all",
       "condition": "Every VML image has an <![if !vml]> img fallback",
-      "pulls": "the counts of v:imagedata elements and vml-fallback img tags",
+      "pulls": "the counts of v:imagedata elements with a src and vml-fallback img tags",
       "compares_to": "fallback count must cover VML count (the invisible-cover-logo class)",
       "severity": "BLOCKER"
     },
