@@ -8,16 +8,17 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
 
 `render.sh` turns one OASIS Markdown specification into the package OASIS
 would publish, laid out at its `docs.oasis-open.org` path, and runs the
-publication checks on it. A TC can see the verdict TC Administration will see while the document
-is still the TC's to change. The workflow that runs it with every other step
-is [docs/CONVERT-AND-VERIFY.md](../docs/CONVERT-AND-VERIFY.md); for a
-Markdown edition of a DocBook source, see
-[docs/MARKDOWN-EDITION.md](../docs/MARKDOWN-EDITION.md).
+publication checks on it. A TC can see the verdict TC Administration will see
+while the document is still the TC's to change. The workflow that runs it with
+every other step is described in the
+[convert and verify guide](../docs/CONVERT-AND-VERIFY.md); for a Markdown
+edition of a DocBook source, see the
+[Markdown edition guide](../docs/MARKDOWN-EDITION.md).
 
 | File | Role |
 |---|---|
 | `render.sh` | Stage, render (HTML, then PDF), number the contents, check |
-| `footer.py` | Read from the document: the stage path, and the PDF footer (name, track, copyright line, date) |
+| `footer.py` | Reads the stage path and the PDF footer (name, track, copyright line, date) from the document |
 | `print_pdf.mjs` | HTML to PDF in headless Chrome on the pipeline's A4 geometry, with that footer |
 | `compare.mjs` | The published and rendered HTML side by side at named anchors |
 | `review_pairs.py` | Published and rendered PDF pages paired for a reviewer, with a planted fault; then the review graded |
@@ -47,8 +48,9 @@ render/render.sh MD_DIR SCHEMAS_DIR OUT_ROOT     # SCHEMAS_DIR "-" when there ar
   left, the copyright line in the centre, the document's date and "Page x of
   y" on the right. Nothing in the footer comes from the day of the render.
 - **Contents.** Chrome cannot number a table of contents as it prints.
-  `.github/src/pipeline/toc_pages.py` (shared with step 2) reads each heading's page from the PDF and writes it in, and
-  the PDF is printed again until no number moves. Numbering can push a
+  `.github/src/pipeline/toc_pages.py` (shared with step 2) reads each
+  heading's page from the PDF and writes it in, and the PDF is printed again
+  until no number moves. Numbering can push a
   heading onto the next page, so this can take several prints. After four
   passes with numbers still moving, the script prints the PDF with its
   contents unnumbered and says so on stderr, so that no unchecked page
@@ -85,8 +87,8 @@ captured as `<n>-<anchor>-published.png` and `<n>-<anchor>-rendered.png`.
 `cover` is the top of the page, and `toc` finds either contents list. With
 no anchor list the default is `cover,toc`. An anchor missing on either side
 exits 1: the editions differ in structure there. Fewer than three arguments
-exits 2 with the usage line. The pictures are for a person to read. The verifier
-([`verify/`](../verify/README.md)) is the check on the words.
+exits 2 with the usage line. The pictures are for a person to read. The
+[verifier](../verify/README.md) checks the words.
 
 ## review_pairs.py
 
@@ -99,9 +101,9 @@ Requires poppler and Pillow. `make` pairs each rendered page it samples
 (every page with a figure or image, the cover, the contents, and `--sample`
 random pages) with the published page sharing most of its words, aligned in
 document order, and writes each pair as one image (published left) with the
-reviewer's brief, `PROMPT.md`. One more pair is a planted fault: a real page
-with its footer, a band of text, or (on a contents page) its page numbers
-erased on the right. `--plant` chooses the fault: `footer`, `right-column`
+reviewer's brief, `PROMPT.md`. One more pair holds a planted fault: a real
+page with its footer erased, a band of text erased or, on a contents page, its
+page numbers erased on the right. `--plant` chooses the fault: `footer`, `right-column`
 (on a contents page, its page numbers) or `text-lines` (a band of text);
 without it the kind is chosen at random. `--dpi` sets the resolution of the
 page images (default 100). `KEY.json` records the planted pair and fault;
@@ -113,15 +115,16 @@ every kind of element on each side. `grade` counts as evidence only a
 distinct line of eight or more letters and digits that is not on most pages
 (a bracket, "1" or a footer proves nothing), needs three of those per side
 (fewer on a page with fewer), and rejects a pair when fewer than four in five
-of its copied lines are on its pages. It accepts the review only when the planted fault is named for what it
-is ("page numbers", "footer", "missing"), and not by a word the reviewer
-writes about most pairs.
-It prints every other difference for a person to rule on. Pass a re-run of
-the rejected pairs after the first review: later answers replace earlier.
+of its copied lines are on its pages. It accepts the review only when the
+planted fault is named for what it is ("page numbers", "footer", "missing"),
+and not by a word the reviewer writes about most pairs. It prints every other
+difference for a person to rule on. Pass a re-run of the rejected pairs after
+the first review: later answers replace earlier ones.
 
-Why so strict: on the DMLex pairs a Haiku reviewer copied lines that are not on
-the page for 21 of 36 pairs, and its "difference" on the planted pair described text that is
-not on the page. A grader that counted any difference as a catch passed it.
+Why the grading is strict: on the DMLex pairs a Haiku reviewer copied lines
+that are not on the page for 21 of 36 pairs, and its "difference" on the
+planted pair described text that is not on the page. A grader that counted any
+difference as a catch passed it.
 
 ## Tests
 

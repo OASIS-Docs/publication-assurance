@@ -11,12 +11,12 @@ licensed under the Apache License 2.0 (see LICENSE at the repository root).
 Author: Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-# Pipeline transforms, run locally
+# Pipeline command reference
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
 The three document-transform workflows in this repository (`step_1`, `step_2`,
-`step_3`) are thin CI wrappers. Each one wraps a small number of plain
+`step_3`) are thin CI wrappers. Each one runs a small number of plain
 commands. This page lists those commands so the transforms can be read and run
 locally with no GitHub Actions involved. The repository has six other
 workflows:
@@ -30,23 +30,22 @@ workflows:
 | `gate-change-review.yml` | Requires a pull request that changes the checker to record an adversarial review. |
 | `move-v1.yml` | Moves the floating `v1` tag to each v1.x.y release when it is published. |
 
-The rest of each transform workflow is CI plumbing and does not change the
-document:
-repository checkout, venv creation, `chmod`, input validation, git commit and
-push, and `touch`-based timestamp management.
+The rest of each transform workflow is CI plumbing that does not change the
+document: repository checkout, venv creation, `chmod`, input validation, git
+commit and push, and `touch`-based timestamp management.
 
 ## Map
 
-| Workflow file | What it actually runs | Output |
+| Workflow file | What it runs | Output |
 |---|---|---|
 | `step_1_format_md_and_convert_to_html.yml` | `prettier`, then `pandoc`, then one Python post-processor | `spec.html` |
 | `step_2_convert_md_to_html_pdf_final.yml` | one Python HTML preprocessor, then `wkhtmltopdf` | `spec.pdf` |
 | `step_3_create_zipfile.yml` | `zip` | `spec.zip` |
 
 Before these, a specification published in DocBook can be converted to
-Markdown and checked word for word against its publication
-(`converters/docbook-to-markdown/build.sh`, `verify/verify_md.py`), and after
-them `render/render.sh` runs Stage 1 and Stage 2's preprocessor for one
+Markdown and checked word for word against the published HTML
+(`converters/docbook-to-markdown/build.sh`, `verify/verify_md.py`). After
+them, `render/render.sh` runs Stage 1 and Stage 2's preprocessor for one
 document, prints the PDF in Chrome and checks it. See
 [Conversion and local rendering](#conversion-and-local-rendering).
 
@@ -116,8 +115,8 @@ carries a hand-authored Table of Contents at its own position in the source.
 
 The Python post-processor (`HtmlConverter._post_process_html` in
 `.github/src/pipeline/html_converter.py`, reached through the
-`step_1_markdown_to_html_converter_V3_0.py` shim) is where the OASIS-specific
-knowledge lives. Its 13 transforms are listed in `HtmlConverter.TRANSFORMS`
+`step_1_markdown_to_html_converter_V3_0.py` shim) holds the OASIS-specific
+rules. Its 13 transforms are listed in `HtmlConverter.TRANSFORMS`
 and run in this order:
 
 1. `strip-pandoc-header`: removes pandoc's title block
@@ -231,7 +230,7 @@ reached, and the error names the tool. A `wkhtmltopdf` that runs out of time
 fails the render. A `pdfinfo` or `pdftotext` that runs out of time, or fails,
 leaves the contents unnumbered, and the `pdf-toc-pages` check reports it.
 
-Where TC PDFs are made matters here. The step 2 workflow in this repository
+The route a TC's PDF takes matters. The step 2 workflow in this repository
 runs only when started by hand, and no TC repository calls it. TC PDFs built
 through the Publication Console come from publisher-toolkit's step 2, which
 copies this stage's code into `lib/pa_pipeline` (the release it copied is

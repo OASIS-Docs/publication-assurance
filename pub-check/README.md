@@ -43,13 +43,13 @@ Characteristics:
 
 Three companion documents:
 
-- [CHECKS.md](CHECKS.md): the per-condition catalog, one row per check with
+- [Check catalog](CHECKS.md): the per-condition catalog, one row per check with
   the value the tool pulls and what it compares that value against.
   Generated from the code's own condition registry by
   [render_checks_md.py](render_checks_md.py).
-- [../PUBLICATION-QUALITY.md](../PUBLICATION-QUALITY.md): the TC-facing
+- [TC guide](../PUBLICATION-QUALITY.md): the TC-facing
   guide to the validation and audit layers.
-- [../examples/eox-core-v1.0-csd01/](../examples/eox-core-v1.0-csd01/):
+- [Example Validation Report](../examples/eox-core-v1.0-csd01/):
   the Validation Report from a publication.
 
 ## Usage
@@ -116,7 +116,7 @@ the criteria in force are the ones the tool runs.
 
 Every check class the tool runs, with the number of individual conditions in it
 and the severity it can reach. The full per-condition catalog, with the value
-pulled and the value compared against, is [CHECKS.md](CHECKS.md).
+pulled and the value compared against, is the [check catalog](CHECKS.md).
 
 <!-- BEGIN generated class table: render_checks_md.py -->
 
@@ -230,7 +230,7 @@ Roles: `authoritative`, `delivery`, `schema`, `example`, `other`.
 ## CI
 
 `.github/workflows/pub-check.yml` in this repository shows the whole CI
-story: checkout, Python, `apt-get install poppler-utils` for the optional
+setup: checkout, Python, `apt-get install poppler-utils` for the optional
 PDF cross-check, then one command. There is nothing else in it. A makefile
 target works just as well:
 
@@ -245,17 +245,17 @@ pub-check:
 A pull request that changes `oasis_pub_check.py`, or any other Python file in
 `pub-check/` (a rename included), must carry an `## Adversarial review`
 section in its body (the pull request template has one). An independent reviewer, not the author, is told to build an input on
-which the change hides a real defect or raises a false one. The section names
+which the change hides a real defect or reports one that is not there. The section names
 the test that pins each counterexample (`tests/test_x.py::test_y`), and the
 pull request must add or modify each named test: a test pytest collects, that
 asserts something (an `assert`, a `raise`, `pytest.raises` or `pytest.warns`,
 directly or through a helper defined in the same file), and whose code changed
-(a comment or whitespace edit does not count). The check stops a review from
+(a comment or whitespace edit does not count). The rule stops a review from
 being forgotten; it cannot stop a deliberately evasive test, which is what the
 independent reviewer is for. Node ids inside HTML comments or code fences are ignored. For a pure refactor or a
 message-text change, write `not applicable: <reason>`.
 `.github/workflows/gate-change-review.yml` enforces this on every pull request
-and re-runs when the body is edited. Its rule lives in
+and re-runs when the body is edited. The rule lives in
 `.github/scripts/check_gate_change_review.py`. The rule exists because the
 first draft of PR #9 passed its own tests and CI while hiding a broken Latest
 URI, and only a voluntary review found it.
@@ -308,8 +308,8 @@ slash, or written as `v2.1%2Fcsd01`, is not seen.
 `--out DIR` writes the new file to another directory, and `--formats md,html,pdf`
 sets the This stage formats when they differ from the source's.
 
-Its stage vocabulary is imported from `oasis_pub_check.py`. Stage the result
-and run the checks on it.
+The script imports its stage vocabulary from `oasis_pub_check.py`. Stage the
+result and run the checks on it.
 
 ## Scope and track detection
 
@@ -327,17 +327,17 @@ add-ons applied to whatever the package carries:
 - Word source present, no markdown (KMIP, PKCS#11 style): the Word
   render-fidelity add-ons (Microsoft Word generator, VML image fallbacks),
   with the front-matter blocks parsed from the rendered HTML cover. Dangling
-  internal anchors report as warnings here: they are source-DOCX artifacts
-  whose fix path is the TC's next revision.
+  internal anchors report as warnings here: they come from the Word source,
+  and the fix belongs in the TC's next revision.
 - ODT source present, no markdown or Word: the `.odt` is the
-  authoritative source and satisfies the source-travels contract (the
-  OpenDocument TC publishes from the format it defines:
+  authoritative source and satisfies the requirement that the source travel
+  with the renderings (the OpenDocument TC publishes from the format it defines:
   [OpenDocument v1.4](https://docs.oasis-open.org/office/OpenDocument/v1.4/)).
   The full output and package suites run, the cover is parsed from the
   rendered HTML, and the ODT source-integrity checks verify the container
   itself: a valid OpenDocument archive, the declared mimetype, a parseable
   document body, and no embedded macros. Deeper render-fidelity add-ons
-  grow the same way the existing tracks did, calibrated against the
+  will be developed the way the existing tracks were, calibrated against the
   published corpus.
 - None of the above (DocBook/XML, LaTeX, and other TC-rendered formats):
   the full output and package suites still run; a warning asks for the
@@ -356,4 +356,4 @@ format. Render class is judged against the TC's own publication precedent.
 
 ---
 
-**The documentation set:** [Repository overview](../README.md) · [TC guide](../PUBLICATION-QUALITY.md) · [The criteria catalog](CHECKS.md) · [Worked example](../examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](../TRANSFORMS.md) · [Architecture diagrams](../assets/architecture/README.md)
+**The documentation set:** [Repository overview](../README.md) · [TC guide](../PUBLICATION-QUALITY.md) · [Check catalog](CHECKS.md) · [Example Validation Report](../examples/eox-core-v1.0-csd01/README.md) · [Pipeline command reference](../TRANSFORMS.md) · [Architecture diagrams](../assets/architecture/README.md)

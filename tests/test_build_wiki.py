@@ -36,7 +36,7 @@ BLOB = re.compile(rf"^https://github\.com/{REPO}/(?:blob|tree)/main/([^?#]+)")
 
 
 def _strip_code(text):
-    text = re.sub(r"(?ms)^[ \t]*(```|~~~).*?^[ \t]*\1[^\n]*$", "", text)
+    text = re.sub(r"(?ms)^[ \t]*(`{3,}|~{3,})(?!`)[^`\n]*\n.*?^[ \t]*\1[ \t]*$", "", text)
     return re.sub(r"`[^`\n]*`", "", text)
 
 
@@ -47,7 +47,7 @@ def _targets(text):
 
 def _slug(heading):
     # GitHub's heading anchors: lowercase, drop punctuation, spaces to hyphens.
-    s = re.sub(r"[`*_]", "", heading.strip().lower())
+    s = re.sub(r"[`*]", "", heading.strip().lower())
     s = re.sub(r"[^\w\- ]", "", s)
     return s.replace(" ", "-")
 

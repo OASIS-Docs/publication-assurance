@@ -16,7 +16,7 @@ Every page here is generated from the markdown in the
 [publication-assurance repository](https://github.com/OASIS-Docs/publication-assurance), so it matches the
 current code on `main`.
 
-## Adopt the checks in a TC repository
+## Adoption in a TC repository
 
 - [Adoption guide](../ADOPTING.md): the three-step quick start, with the
   workflow file to copy.
@@ -25,7 +25,7 @@ current code on `main`.
   and [version pinning](../ADOPTING.md#version-pinning-and-upgrades).
 - [Local runs](../ADOPTING.md#local-runs): the same checks on your own machine.
 
-## Read a check result
+## Check results
 
 - [What a committee sees](../ADOPTING.md#what-a-committee-sees): the job
   summary, the pull request comment and the line annotations.
@@ -34,13 +34,13 @@ current code on `main`.
 - [Example Validation Report](../../examples/eox-core-v1.0-csd01/README.md)
   from a live publication.
 
-## Fix a finding
+## Findings and fixes
 
 - [Worked examples](../WORKED-EXAMPLES.md): recent findings, each with the
   message, what it meant and the fix at source.
 - [Troubleshooting](../ADOPTING.md#troubleshooting) for the workflow itself.
 
-## Look up a check or rule
+## Check and rule reference
 
 - [Check catalog](../../pub-check/CHECKS.md): every check, generated from the code.
 - [Policy authorities](../../pub-check/AUTHORITIES.md): the OASIS rule behind
@@ -50,7 +50,7 @@ current code on `main`.
 - [The checker](../../pub-check/README.md): what each check class covers,
   severities, and how a check is changed.
 
-## Convert and verify a document
+## Conversion and verification
 
 - [Convert and verify](../CONVERT-AND-VERIFY.md): one workflow that converts,
   renders, verifies and checks a specification.
@@ -61,6 +61,6 @@ current code on `main`.
 
 ## Background
 
-- [Publication quality](../../PUBLICATION-QUALITY.md): how OASIS validates and
-  audits a specification, in two layers.
+- [Publication quality](../../PUBLICATION-QUALITY.md): validation and audit of a
+  specification, in two layers.
 - [Repository overview](../../README.md) and the [changelog](../../CHANGELOG.md).

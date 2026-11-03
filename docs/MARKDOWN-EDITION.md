@@ -6,7 +6,7 @@ restriction, provided it is reproduced verbatim and this notice is retained.
 Author: Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-# A Markdown Edition of Your DocBook Specification
+# Markdown Edition of a DocBook Specification
 
 Your DocBook source already produces HTML and PDF. The `docbook-markdown`
 action adds one more output from the same source: the specification in the
@@ -24,7 +24,7 @@ from the DMLex specification (LEXIDMA TC), which uses this action.
 | **2** | Annotation | The file name and the result of the check against the published HTML |
 | **3** | Artifact | The Markdown edition, with HTML and PDF, to download |
 
-## 1. Add the workflow
+## Step 1: Workflow file
 
 In your TC repository, create `.github/workflows/markdown-edition.yml` with
 this content, and change the three values marked **1**, **2** and **3**:
@@ -68,7 +68,7 @@ DMLex's file has one extra step at the end, because DMLex also keeps its
 edition in the repository and wants to know when it is out of date. You do
 not need it.
 
-## 2. Run it
+## Step 2: First run
 
 Commit the file. The workflow runs whenever your DocBook source changes. To
 run it at any other time, open the **Actions** tab, select **Markdown
@@ -76,7 +76,7 @@ edition** (1), then **Run workflow**. Each run is listed with its result (2).
 
 ![The Markdown edition workflow (1) and its runs (2) in the Actions tab](images/markdown-edition/actions-list.png)
 
-## 3. Read the result
+## Step 3: Result of the run
 
 Open a run. The annotation (1) names the file and gives the result of the
 check against the published HTML:
@@ -93,7 +93,7 @@ The job's steps show what ran. The OASIS action is one step (1):
 
 ![The steps of the job](images/markdown-edition/job-steps.png)
 
-## 4. Download the edition
+## Step 4: Downloaded edition
 
 At the bottom of the run page, under **Artifacts**, download
 **markdown-edition** (1). It holds:
@@ -132,8 +132,8 @@ A profile is a `profile.json` of a few lines, described in the
 Later steps can use the action's outputs: `markdown` (the file's path),
 `verification` (`PASS`, `FAIL` or `skipped`) and `package` (the rendered
 folder). To check the rendered package against the OASIS publication
-criteria too, add the OASIS publication checks after it, as the
-[adoption guide](ADOPTING.md) shows.
+criteria too, add a step that runs the OASIS publication checks after it, as
+the [adoption guide](ADOPTING.md) shows.
 
 ## Further reading
 

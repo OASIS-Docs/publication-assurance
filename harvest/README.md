@@ -6,8 +6,9 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
 
 # Learning from check records (`harvest/`)
 
-Every run of the publication checks leaves records. `harvest.py` reads them and says what
-they mean for the checks themselves, so no run's output is wasted:
+Every run of the publication checks leaves records. `harvest.py` reads them and
+reports what they show about the checks themselves, so that the output of each
+run is put to use:
 
 | It reads | It proposes |
 |---|---|
@@ -21,8 +22,8 @@ python3 harvest/harvest.py RECORDS_DIR... [--rerun] [--adjudications FILE] \
         [--proposals DIR] [--json OUT] [--pub-check PATH]
 ```
 
-It changes nothing in the publication checks. `--proposals DIR` writes each candidate
-group as a draft proposal, `Status: speculative`, numbered after the highest
+It changes nothing in the publication checks. `--proposals DIR` writes each
+candidate group as a draft proposal, `Status: speculative`, numbered after the highest
 `NNN-` file in `DIR`, for a person to attach the incident to and review.
 
 Its first run, over TC Administration's records of August and September 2026

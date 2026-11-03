@@ -11,7 +11,7 @@ licensed under the Apache License 2.0 (see LICENSE at the repository root).
 Author: Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-# Publication quality: how OASIS validates and audits a specification
+# Publication quality: validation and audit of a specification
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
@@ -31,7 +31,7 @@ Administration runs the second.
 Python file, [`pub-check/oasis_pub_check.py`](pub-check/oasis_pub_check.py), runs the
 acceptance checks against your package: the files you are about to submit,
 exactly as you would submit them. The set grows, so `--list-checks` reports
-the live count and [CHECKS.md](pub-check/CHECKS.md) is the generated
+the live count and the [check catalog](pub-check/CHECKS.md) is the generated
 inventory. Every condition is reported; one that does not apply to your
 package's source format, or whose prerequisite is absent, reports NA with the
 reason. It needs no configuration, because every expectation is derived from
@@ -63,8 +63,8 @@ must pass before the audit closes.
 
 **The dovetail.** Step 4b of the intake checklist is: re-run oasis-pub-check, on
 our side, with the identical code, and triage every finding. Your entire
-186-check validation layer plugs into the audit as one step. Both sides run
-the same code, so acceptance is mechanical on both ends. Your green run
+186-check validation layer fits into the audit as a single step. Both sides
+run the same code, so acceptance is mechanical on both ends. Your green run
 predicts our green run; TC Administration still runs its own.
 
 ![The OASIS publication quality stack](assets/architecture/two-layer-stack.png?v=181)
@@ -122,8 +122,8 @@ them. The other 88 are operational rules from correction rounds, with no
 single written clause behind them; `pub-check/crosswalk.json` says which are
 which.
 
-The bar is the output, whatever your TC authors in: conformant HTML and
-PDF at the canonical URLs, with the authoritative source alongside. Each
+The standard applies to the output, whatever your TC authors in: conformant
+HTML and PDF at the canonical URLs, with the authoritative source alongside. Each
 source format then brings its own add-ons. A markdown package gets the
 markdown checks. A DOCX-native package (KMIP and PKCS#11 style) skips those
 and gets the Word render-fidelity checks instead. An ODT package carries the
@@ -140,10 +140,10 @@ checks, in the order they appear in every audit record:
 
 | Check | What it verifies |
 |---|---|
-| 1 | GitHub truth: the bytes on the live site equal the pushed repository HEAD |
-| 1a | Live equals GitHub: any HTML difference (for example CDN rewrites) is diffed and classified |
+| 1 | Repository match: the bytes on the live site equal the pushed repository HEAD |
+| 1a | Differences from the repository: any HTML difference (for example CDN rewrites) is diffed and classified |
 | 2 | Render class vs precedent: the rendering matches the TC's own prior publications, same toolchain, same look |
-| 3 | Front matter vs reality: chairs and editors against the live roster, the companion documents, and the request ticket |
+| 3 | Front matter against live facts: chairs and editors against the live roster, the companion documents, and the request ticket |
 | 3a | Stage name per the current Naming Directives; no revision collision on the live site |
 | 4 | Index chain: every directory listing from the TC root down to the stage directory lists the publication |
 | 5 | Zip and manifest: the archive is byte-identical to the tree, no junk members, all extras present |
@@ -166,7 +166,7 @@ TC's own run as well as from intake: the GitHub action renders it on every run
 and, when the run can write to the repository, publishes it to the
 `pubcheck-reports` branch, and
 `pub-check/validation_report.py` renders it locally from a `--json` record
-([docs/ADOPTING.md](docs/ADOPTING.md) has both). TC Administration renders it
+(the [adoption guide](docs/ADOPTING.md) has both). TC Administration renders it
 again at intake, from the identical checks, and files it with the Publication
 Audit Report to your TCADMIN ticket and to the TC's `_audit/` record:
 
@@ -208,7 +208,7 @@ to exchange an email about it.
 CSAF v2.1 and the DMLex Markdown edition, each with the finding, what it meant
 and the fix at source.
 
-## Running it yourself
+## Running the checks
 
 ```bash
 # against a stage directory
@@ -232,7 +232,7 @@ Single file, Python 3.10+, standard library only. `poppler-utils`
 (`pdftotext`, `pdffonts`) is optional and enables the PDF cross-checks. In a
 TC repository's CI, the checks run through this repository's GitHub action:
 [`examples/consumer-workflow.yml`](examples/consumer-workflow.yml) is the
-workflow to copy, and [docs/ADOPTING.md](docs/ADOPTING.md) walks through it.
+workflow to copy, and the [adoption guide](docs/ADOPTING.md) walks through it.
 
 If your build also emits a `manifest.json` conforming to
 [`pub-check/manifest-schema.json`](pub-check/manifest-schema.json) (per-file
@@ -260,4 +260,4 @@ documentation keeps pace with the tool.
 
 ---
 
-**The documentation set:** [Repository overview](README.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)
+**The documentation set:** [Repository overview](README.md) · [The checker](pub-check/README.md) · [Check catalog](pub-check/CHECKS.md) · [Example Validation Report](examples/eox-core-v1.0-csd01/README.md) · [Pipeline command reference](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)

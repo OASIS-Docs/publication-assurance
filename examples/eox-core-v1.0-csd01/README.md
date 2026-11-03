@@ -23,7 +23,7 @@ report). The GitHub action renders this same report on every run, and
 `pub-check/validation_report.py` renders it from a `--json` record; TC
 Administration renders it again at intake and files it to your ticket.
 
-The publication is also audited at the event level (15 mandatory audit checks:
+The publication event itself is also audited (15 mandatory audit checks:
 byte identity, index chains, announcements, an independent adversarial
 verifier); that Publication Audit Report is a TC Administration operational
 record filed to the ticket. This example carries only the Validation Report.
@@ -37,4 +37,4 @@ so a report is always read against the inventory named in its own header.
 
 ---
 
-**The documentation set:** [Repository overview](../../README.md) · [TC guide](../../PUBLICATION-QUALITY.md) · [The acceptance criteria tool](../../pub-check/README.md) · [The criteria catalog](../../pub-check/CHECKS.md) · [The pipeline, command by command](../../TRANSFORMS.md) · [Architecture diagrams](../../assets/architecture/README.md)
+**The documentation set:** [Repository overview](../../README.md) · [TC guide](../../PUBLICATION-QUALITY.md) · [The checker](../../pub-check/README.md) · [Check catalog](../../pub-check/CHECKS.md) · [Pipeline command reference](../../TRANSFORMS.md) · [Architecture diagrams](../../assets/architecture/README.md)

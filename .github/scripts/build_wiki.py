@@ -51,7 +51,7 @@ PAGES: dict[str, str] = {
     "pub-check/CHECKS.md": "Check-catalog",
     "pub-check/AUTHORITIES.md": "Policy-authorities",
     "pub-check/rules/README.md": "Source-text-rules",
-    "pub-check/corpus/README.md": "Regression-corpus",
+    "pub-check/corpus/README.md": "Policy-corpus",
     "render/README.md": "Rendering",
     "verify/README.md": "Verifying-a-conversion",
     "converters/docbook-to-markdown/README.md": "DocBook-to-Markdown-converter",
@@ -67,7 +67,7 @@ NO_SOURCE_NOTE = {"_Sidebar", "_Footer"}
 
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
 
-FENCE = re.compile(r"(?ms)^([ \t]*)(```|~~~).*?^[ \t]*\2[^\n]*$")
+FENCE = re.compile(r"(?ms)^([ \t]*)(`{3,}|~{3,})(?!`)[^`\n]*\n.*?^[ \t]*\2[ \t]*$")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 MD_LINK = re.compile(r"(!?)\[((?:[^\[\]]|\[[^\]]*\])*)\]\(([^)\s]+)((?:\s+\"[^\"]*\")?)\)")
 HTML_ATTR = re.compile(r"""(\b(?:href|src)=)(["'])([^"']+)\2""")
