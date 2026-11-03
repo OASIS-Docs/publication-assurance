@@ -26,6 +26,12 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+PATCH: `vml-fallback` counts only VML pictures, a `v:imagedata` with a `src`.
+Word's horizontal-line shapes carry a `v:imagedata` with no `src` and no
+picture, so they need no fallback image. On the AKN Core v2.0 OS Part 2 Word
+HTML (3 Nov 2026) eight of them made the check block a cover logo that had its
+fallback; it now counts one picture and one fallback.
+
 PATCH (also released as v1.16.1 on v1.16.0): `--emit-manifest` with `--json`
 printed its two `wrote <path>` lines on stdout ahead of the JSON report, so the
 action's report readers failed with "Expecting value" and publisher-toolkit

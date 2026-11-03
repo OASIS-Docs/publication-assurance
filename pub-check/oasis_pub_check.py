@@ -3318,9 +3318,13 @@ def check_vml_fallback(html_text: str, f: Findings) -> None:
     """A VML-only image is invisible in every modern browser. Word exports it
     when the source DOCX carries 'rely on VML'; each v:imagedata needs a
     paired <![if !vml]><img> fallback. Shipped live twice before this check
-    (PKCS#11 v3.2 os cover, KMIP v3.0 csd01 cover)."""
+    (PKCS#11 v3.2 os cover, KMIP v3.0 csd01 cover).
+
+    Only a v:imagedata with a src is a picture. Word's horizontal-line shapes
+    carry a v:imagedata with no src and need no fallback (AKN Core v2.0 OS
+    Part 2, Nov 2026: eight of them blocked a cover logo that had its img)."""
     flat = html_text.replace("\r", "").replace("\n", " ")
-    vml = len(re.findall(r"<v:imagedata\b", flat))
+    vml = len(re.findall(r"<v:imagedata\b(?:[^>\"']|\"[^\"]*\"|'[^']*')*?\ssrc\s*=", flat, re.I))
     fallbacks = len(re.findall(r"<!\[if !vml\]>\s*<img\b", flat))
     f.observe("vml-fallback", vml_images=vml, img_fallbacks=fallbacks)
     if vml and fallbacks < vml:
@@ -8812,7 +8816,7 @@ CONDITION_DOCS: list[dict] = [
     # vml-fallback
     dict(check="vml-fallback", sig="browsers that ignore VML show nothing", applies="all",
          condition="Every VML image has an <![if !vml]> img fallback",
-         pulls="the counts of v:imagedata elements and vml-fallback img tags",
+         pulls="the counts of v:imagedata elements with a src and vml-fallback img tags",
          compares_to="fallback count must cover VML count (the invisible-cover-logo class)"),
     # asset-refs
     dict(check="asset-refs", sig="which is not in the package; it 404s", applies="all",
