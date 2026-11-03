@@ -26,6 +26,13 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+PATCH (also released as v1.16.1 on v1.16.0): `--emit-manifest` with `--json`
+printed its two "wrote <path>" lines on stdout ahead of the JSON report, so the
+action's report readers failed with "Expecting value" and publisher-toolkit
+step 4.0 (Generate manifests) failed on every run (CSAF v2.1 csd04, SARIF v2.2
+csd01, NIEM NDR v6.0 psd02). With `--json` those lines now go to stderr;
+plain-text output is unchanged.
+
 PATCH: `--emit-manifest` on a Multi-Part Option 1 stage directory wrote a bare
 `manifest.txt` with no title, Release URI or Manifest URI, because the stage
 directory holds no document of its own. It now names the file for the package
