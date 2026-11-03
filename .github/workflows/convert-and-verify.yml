@@ -82,7 +82,10 @@ env:
 
 jobs:
   convert-and-verify:
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: 26.04 dropped the Liberation fonts the
+    # renderer reads, and the DMLex PDF came out 195 pages against the
+    # published 218 (#88).
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
@@ -96,7 +99,7 @@ jobs:
       - name: Install pandoc, poppler, the converter's tools and Python packages
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q poppler-utils libxml2-utils graphviz m4
+          sudo apt-get install -y -q poppler-utils libxml2-utils graphviz m4 fonts-liberation2
           curl -fsSL -o "$RUNNER_TEMP/pandoc.deb" \
             "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-1-amd64.deb"
           sudo dpkg -i "$RUNNER_TEMP/pandoc.deb"

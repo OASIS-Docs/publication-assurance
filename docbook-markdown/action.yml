@@ -82,7 +82,7 @@ runs:
         PANDOC_VERSION: ${{ inputs.pandoc-version }}
       run: |
         sudo apt-get update -qq
-        sudo apt-get install -y -qq libxml2-utils graphviz m4 poppler-utils >/dev/null
+        sudo apt-get install -y -qq libxml2-utils graphviz m4 poppler-utils fonts-liberation2 >/dev/null
         curl -fsSL -o "$RUNNER_TEMP/pandoc.deb" \
           "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-1-amd64.deb"
         sudo dpkg -i "$RUNNER_TEMP/pandoc.deb" >/dev/null
