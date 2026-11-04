@@ -9040,7 +9040,7 @@ def main() -> int:
               "manifests would be written into a temporary extraction and "
               "deleted. Unpack the package and pass its directory.", file=sys.stderr)
         return 2
-    if target.endswith(".zip") and not os.path.isdir(target):
+    if target.lower().endswith(".zip") and not os.path.isdir(target):
         tmp =tempfile.mkdtemp(prefix="pub_check_")
         try:
             with zipfile.ZipFile(target) as z:

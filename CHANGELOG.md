@@ -26,7 +26,9 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+- A package whose name ends in `.ZIP`, `.Zip` or any other case of the
+  extension is now unpacked and checked exactly like a `.zip` one, instead of
+  being refused as "not a directory" (#98).
 
 ## v1.17.0 - 2026-11-04
 

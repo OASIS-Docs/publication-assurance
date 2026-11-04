@@ -119,7 +119,8 @@ def _manifests_under(root):
                   or p.name.endswith("-manifest.txt"))
 
 
-@pytest.mark.parametrize("name", ["csaf-v2.1-csd01.zip", "CSAF-V2.1-CSD01.ZIP"])
+@pytest.mark.parametrize("name", ["csaf-v2.1-csd01.zip", "CSAF-V2.1-CSD01.ZIP",
+                                  "csaf-v2.1-csd01.Zip"])
 def test_emit_manifest_on_a_zip_is_refused_not_silently_lost(tmp_path, name):
     """A ZIP is checked in a temporary extraction deleted on exit, so the
     manifests it reported as written were thrown away (#95). --emit-manifest
@@ -156,11 +157,34 @@ def test_emit_manifest_on_a_stage_directory_named_like_a_zip_still_writes(tmp_pa
     assert (renamed / "manifest.json").is_file(), result.stderr
 
 
+def _findings(result):
+    return sorted((x["severity"], x["check"], x["message"])
+                  for x in json.loads(result.stdout)["findings"])
+
+
+@pytest.mark.parametrize("name", ["pkg.ZIP", "pkg.Zip"])
+def test_an_uppercase_zip_extension_is_unpacked_like_a_lowercase_one(tmp_path, name):
+    """Only a lowercase .zip used to be unpacked; pkg.ZIP was refused as
+    "not a directory" while --emit-manifest called it a ZIP (#98). Any case
+    of the extension is a package, checked exactly as pkg.zip is."""
+    stage = stage_from_corpus(tmp_path / "src", CSAF_CSD01)
+    (tmp_path / "lower").mkdir()
+    (tmp_path / "other").mkdir()
+    lower = run_cli("--json", str(_zip_stage(stage, tmp_path / "lower" / "pkg.zip")))
+    other = run_cli("--json", str(_zip_stage(stage, tmp_path / "other" / name)))
+
+    assert lower.returncode in (0, 1), lower.stderr
+    assert "is not a directory" not in other.stderr, other.stderr
+    assert other.returncode == lower.returncode, other.stderr
+    assert _findings(other) == _findings(lower)
+
+
 @pytest.mark.parametrize("flags", [(), ("--emit-manifest",)])
-def test_a_missing_zip_exits_two_without_a_traceback(tmp_path, flags):
+@pytest.mark.parametrize("name", ["no-such-package.zip", "no-such-package.ZIP"])
+def test_a_missing_zip_exits_two_without_a_traceback(tmp_path, flags, name):
     """Exit 1 means blockers were found, so a missing .zip must not crash
     into it with a traceback, and the message names the real problem."""
-    result = run_cli(*flags, str(tmp_path / "no-such-package.zip"))
+    result = run_cli(*flags, str(tmp_path / name))
 
     assert result.returncode == 2, (
         f"expected exit 2 for a missing zip, got {result.returncode}:\n{result.stderr}"
