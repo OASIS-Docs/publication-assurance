@@ -156,15 +156,17 @@ def test_emit_manifest_on_a_stage_directory_named_like_a_zip_still_writes(tmp_pa
     assert (renamed / "manifest.json").is_file(), result.stderr
 
 
-def test_a_missing_zip_exits_two_without_a_traceback(tmp_path):
+@pytest.mark.parametrize("flags", [(), ("--emit-manifest",)])
+def test_a_missing_zip_exits_two_without_a_traceback(tmp_path, flags):
     """Exit 1 means blockers were found, so a missing .zip must not crash
-    into it with a traceback."""
-    result = run_cli(str(tmp_path / "no-such-package.zip"))
+    into it with a traceback, and the message names the real problem."""
+    result = run_cli(*flags, str(tmp_path / "no-such-package.zip"))
 
     assert result.returncode == 2, (
         f"expected exit 2 for a missing zip, got {result.returncode}:\n{result.stderr}"
     )
     assert "Traceback" not in result.stderr, result.stderr
+    assert "does not exist" in result.stderr, result.stderr
 
 
 def test_a_missing_target_exits_two_without_a_traceback(tmp_path):
