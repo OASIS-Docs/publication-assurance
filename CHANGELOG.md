@@ -29,6 +29,10 @@ Each version is anchored by a git tag on this repository.
 - A package whose name ends in `.ZIP`, `.Zip` or any other case of the
   extension is now unpacked and checked exactly like a `.zip` one, instead of
   being refused as "not a directory" (#98).
+- An empty ZIP is now refused with a plain message and exit 2, instead of a
+  traceback and exit 1, and the "Delivery items do not share one basename"
+  finding names a package's extension as it was given, so `x.ZIP` is no
+  longer shown as `x.zip` (#101).
 
 ## v1.17.0 - 2026-11-04
 

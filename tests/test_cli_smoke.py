@@ -193,6 +193,44 @@ def test_a_missing_zip_exits_two_without_a_traceback(tmp_path, flags, name):
     assert "does not exist" in result.stderr, result.stderr
 
 
+@pytest.mark.parametrize("flags", [(), ("--json",)])
+@pytest.mark.parametrize("name", ["empty.zip", "empty.ZIP"])
+def test_an_empty_zip_exits_two_without_a_traceback(tmp_path, flags, name):
+    """A ZIP with no entries crashed in os.rename with a traceback and exit 1,
+    the code for blockers found (#101). It is an unusable target: exit 2."""
+    import zipfile
+
+    folder = tmp_path / name.replace(".", "_")  # case variants never share a folder
+    folder.mkdir()
+    zipfile.ZipFile(folder / name, "w").close()
+    result = run_cli(*flags, str(folder / name))
+
+    assert result.returncode == 2, (
+        f"expected exit 2 for an empty zip, got {result.returncode}:\n{result.stderr}"
+    )
+    assert "Traceback" not in result.stderr, result.stderr
+    assert "empty zip" in result.stderr, result.stderr
+
+
+def test_the_basename_finding_names_an_uppercase_zip_as_given(tmp_path):
+    """The "do not share one basename" finding printed csaf-v2.0-os-x.ZIP as
+    csaf-v2.0-os-x.zip. It names the package exactly as it was given."""
+    import zipfile
+
+    src = CORPUS / "csaf" / "v2.0" / "errata01" / "os"
+    pkg = tmp_path / "csaf-v2.0-os-x.ZIP"
+    with zipfile.ZipFile(pkg, "w") as z:
+        for p in src.rglob("*"):
+            if p.is_file():
+                z.write(p, p.relative_to(src))
+    result = run_cli("--json", str(pkg))
+
+    blockers = [x["message"] for x in json.loads(result.stdout)["findings"]
+                if x["severity"] == "BLOCKER"]
+    assert blockers == ["Delivery items do not share one basename: "
+                        "['csaf-v2.0-errata01-os', 'csaf-v2.0-os-x.ZIP']"], blockers
+
+
 def test_a_missing_target_exits_two_without_a_traceback(tmp_path):
     result = run_cli(str(tmp_path / "no-such-dir"))
 
