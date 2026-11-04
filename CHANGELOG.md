@@ -32,7 +32,9 @@ Each version is anchored by a git tag on this repository.
 - An empty ZIP is now refused with a plain message and exit 2, instead of a
   traceback and exit 1, and the "Delivery items do not share one basename"
   finding names a package's extension as it was given, so `x.ZIP` is no
-  longer shown as `x.zip` (#101).
+  longer shown as `x.zip` (#101). A ZIP entry `./` is no longer refused as
+  escaping the extraction folder, and a refused ZIP no longer leaves its
+  temporary extraction behind.
 
 ## v1.17.0 - 2026-11-04
 
