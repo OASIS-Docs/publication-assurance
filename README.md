@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 Authored by Michael Coletta, Technical Advisor to OASIS Open.
 -->
 
-![OASIS Publication Assurance](assets/hero.png?v=181)
+![OASIS Publication Assurance](assets/hero.png?v=186)
 
 <p align="center">
   <a href="LICENSE"><img alt="Code: Apache-2.0" src="https://img.shields.io/badge/code-Apache--2.0-2c4a8a"></a>
@@ -47,7 +47,7 @@ Add `--json` for machine-readable output, or `--emit-manifest` to also
 write the two release manifests: `manifest.json` and the `<stem>-manifest.txt`
 Work Product Manifest File.
 
-![oasis-pub-check output](assets/gate.png?v=181)
+![oasis-pub-check output](assets/gate.png?v=186)
 
 ### 2. In your TC repo on GitHub
 
@@ -144,7 +144,7 @@ candidate whose blocker set TC Administration had already established by hand.
 
 ## Criteria sources
 
-![How a criterion is sourced from policy](assets/authority.png?v=181)
+![How a criterion is sourced from policy](assets/authority.png?v=186)
 
 Every acceptance criterion cites the rule it enforces. 98 of the 186 checks
 trace to a verbatim clause in the policy corpus; the rest are operational
@@ -162,7 +162,7 @@ tool's own registry, on every run.
 
 ## Validation and audit
 
-![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=181)
+![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=186)
 
 Your TC runs oasis-pub-check in its own CI. It evaluates all 186 conditions and
 reports each as the value the tool pulled from the package next to the value it
@@ -193,7 +193,7 @@ emits a `nide-manifest` that pub-check hash-verifies at intake. A green
 manifest lets intake confirm the published bytes match the build the TC
 approved.
 
-![How pub-check dovetails with nide](assets/architecture/nide-bridge.png?v=181)
+![How pub-check dovetails with nide](assets/architecture/nide-bridge.png?v=186)
 
 ## Repository structure
 

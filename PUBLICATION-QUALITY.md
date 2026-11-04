@@ -23,7 +23,7 @@ itself before submitting.
 Quality control runs in two layers. Your TC runs the first; TC
 Administration runs the second.
 
-![How the two layers dovetail](assets/architecture/validation-audit-dovetail.png?v=181)
+![How the two layers dovetail](assets/architecture/validation-audit-dovetail.png?v=186)
 
 ## The two layers
 
@@ -67,7 +67,7 @@ our side, with the identical code, and triage every finding. Your entire
 run the same code, so acceptance is mechanical on both ends. Your green run
 predicts our green run; TC Administration still runs its own.
 
-![The OASIS publication quality stack](assets/architecture/two-layer-stack.png?v=181)
+![The OASIS publication quality stack](assets/architecture/two-layer-stack.png?v=186)
 
 ## Layer 1: the checks
 
@@ -87,7 +87,7 @@ form.
 
 The checks group into six areas:
 
-![pub-check validation flow](assets/gate.png?v=181)
+![pub-check validation flow](assets/gate.png?v=186)
 
 | Area | Checks | What it protects |
 |---|---|---|
