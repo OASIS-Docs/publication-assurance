@@ -81,6 +81,88 @@ rules:
       target: prose
       pattern: 'OASISLogo'
 
+  # ── Cover page ─────────────────────────────────────────────────────────────
+
+  # The three required URI blocks. The expressions are TEMPLATE_SECTIONS in
+  # pub-check/oasis_pub_check.py, anchored at the heading start as pub-check
+  # anchors them, so the two homes accept the same cover. Both template wordings
+  # pass: "This stage" (current) and "This version" (earlier templates, DPS). A
+  # first stage keeps its Previous heading and writes "N/A" under it, which a
+  # heading-presence rule accepts, so Previous can block like the other two.
+  - id: OASIS-COVER-THIS-STAGE
+    severity: BLOCKER
+    description: >-
+      The cover must carry a This stage (or This version) URI block (TC
+      Handbook, Editorial quality verification checklist, 'Cover page
+      completeness': the three required URIs)
+    check:
+      type: section-present
+      pattern: '^This (Stage|Version)'
+      flags: IGNORECASE
+
+  - id: OASIS-COVER-PREVIOUS-STAGE
+    severity: BLOCKER
+    description: >-
+      The cover must carry a Previous stage (or Previous version) URI block,
+      reading N/A on a first stage (TC Handbook, Editorial quality verification
+      checklist, 'Cover page completeness': the three required URIs)
+    check:
+      type: section-present
+      pattern: '^Previous (Stage|Version)'
+      flags: IGNORECASE
+
+  - id: OASIS-COVER-LATEST-STAGE
+    severity: BLOCKER
+    description: >-
+      The cover must carry a Latest stage (or Latest version) URI block (TC
+      Handbook, Editorial quality verification checklist, 'Cover page
+      completeness': the three required URIs)
+    check:
+      type: section-present
+      pattern: '^Latest (Stage|Version)'
+      flags: IGNORECASE
+
+  # nide has no title target, so this asks only that some heading carries a
+  # "Version <number>" identifier; on a cover that is the title. Whether the
+  # number agrees with the package's own version directory, and how the title
+  # is composed around it, stay in pub-check (title-version).
+  - id: OASIS-TITLE-VERSION
+    severity: WARN
+    description: >-
+      The title must carry a Version identifier, as in '<name> Version
+      <number>' (TC Handbook, Editorial quality verification checklist, 'Cover
+      page completeness': version identifier; Naming Directives v1.7 s5.1)
+    check:
+      type: section-present
+      pattern: '\bVersion\s+\d+(\.\d+)*\b'
+
+  # The stage line under the title, in the Technical Committee forms
+  # (Committee Specification Draft 02, Committee Note 01, OASIS Standard,
+  # Candidate OASIS Standard, OASIS Approved Errata) and the Open Project forms
+  # (Project Specification Draft 01, Project Note 01).
+  - id: OASIS-COVER-STAGE
+    severity: WARN
+    description: >-
+      The cover must name the stage of the work product, such as 'Committee
+      Specification Draft 02' or 'OASIS Standard' (TC Handbook, Editorial
+      quality verification checklist, 'Cover page completeness': stage)
+    check:
+      type: section-present
+      pattern: '^(?:(?:Committee|Project) (?:Specification|Note)(?: Draft)? \d{2}|(?:Candidate )?OASIS Standard|(?:OASIS )?Approved Errata)\b'
+
+  # The template titles the section that declares the IPR mode and copyright
+  # "Notices"; the current template folds it into "License, Document Status,
+  # and Notices". Any heading containing the word passes.
+  - id: OASIS-NOTICES
+    severity: WARN
+    description: >-
+      A Notices section must be present (TC Handbook, Editorial quality
+      verification checklist, 'IPR notice')
+    check:
+      type: section-present
+      pattern: 'Notices|License, Document Status'
+      flags: IGNORECASE
+
   # ── RFC 2119 / 8174 citation ───────────────────────────────────────────────
 
   - id: OASIS-RFC-2119-CITED
@@ -115,6 +197,28 @@ rules:
         type: any-match
         target: links
         pattern: '#RFC8174'
+
+  # The template declares the key words in their own section: "Key Words"
+  # (DPS, OpenEoX), "Terminology" (CSAF, KMIP, PKCS#11) or "Key words" on an
+  # Open Project cover (NIEMOpen). Same condition as OASIS-RFC-2119-CITED.
+  - id: OASIS-KEYWORDS-SECTION
+    severity: WARN
+    description: >-
+      When RFC 2119 normative keywords are used, they must be declared in a
+      Key Words (or Terminology) section (TC Handbook, Editorial quality
+      verification checklist, 'Keyword guidelines': declared in a keywords
+      section where employed)
+    check:
+      type: conditional
+      condition:
+        type: any-match
+        target: prose
+        # All-caps normative keyword; case matters, so no IGNORECASE here
+        pattern: '\b(MUST NOT|MUST|SHALL NOT|SHALL|SHOULD NOT|SHOULD|NOT RECOMMENDED|RECOMMENDED|OPTIONAL|REQUIRED)\b'
+      then:
+        type: section-present
+        pattern: 'Key ?words|Terminology'
+        flags: IGNORECASE
 
   # ── Editorial residue ──────────────────────────────────────────────────────
 
@@ -213,6 +317,25 @@ rules:
       type: all-match
       target: relative-links
       pattern: '//'
+      invert: true
+
+  # A [shown-url](target-url) link whose visible URL is not its target, the
+  # rename artifact of the prov-meta correction round: the cover showed the
+  # csd02 address and linked into csd01. The backreference compares the two
+  # within one pattern; the shown URL ends on a character other than '/' so a
+  # trailing slash on either side is ignored, as pub-check ignores it. Same
+  # pairs as the markdown half of link-mismatch in oasis_pub_check.py; the
+  # rendered-HTML half of that check stays in pub-check.
+  - id: OASIS-LINK-TEXT-MISMATCH
+    severity: WARN
+    description: >-
+      A link that displays a URL must link to that same URL (TC Handbook,
+      Editorial quality verification checklist, 'Document consistency':
+      cross-references current and internally consistent)
+    check:
+      type: all-match
+      target: prose
+      pattern: '\[(https?://[^\]\s]*[^\]\s/])/?\]\((?!\1/?\))https?://[^)\s]+\)'
       invert: true
 
   # -- Member-only URIs and reference-list hygiene ----------------------------

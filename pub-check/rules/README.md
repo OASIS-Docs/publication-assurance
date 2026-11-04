@@ -81,8 +81,15 @@ is added here only after it is evaluated against the published corpus.
 | OASIS-EDITORS | WARN | front-matter |
 | OASIS-ABSTRACT | BLOCKER | template |
 | OASIS-LOGO | WARN | logo |
+| OASIS-COVER-THIS-STAGE | BLOCKER | template, front-matter |
+| OASIS-COVER-PREVIOUS-STAGE | BLOCKER | template |
+| OASIS-COVER-LATEST-STAGE | BLOCKER | template, front-matter |
+| OASIS-TITLE-VERSION | WARN | title-version |
+| OASIS-COVER-STAGE | WARN | template |
+| OASIS-NOTICES | WARN | template |
 | OASIS-RFC-2119-CITED | BLOCKER | rfc-keywords |
 | OASIS-RFC-8174-PAIRED | WARN | rfc-keywords |
+| OASIS-KEYWORDS-SECTION | WARN | rfc-keywords |
 | OASIS-RESID-TODO | BLOCKER | residue |
 | OASIS-RESID-TBD | WARN | residue |
 | OASIS-RESID-FILL-IN | WARN | residue |
@@ -90,6 +97,7 @@ is added here only after it is evaluated against the published corpus.
 | OASIS-COMMENTS-PARA-DUP | WARN | boilerplate-dup |
 | OASIS-LINK-DEAD-LISTS | WARN | dead-lists |
 | OASIS-LINK-DOUBLE-SLASH | WARN | double-slash |
+| OASIS-LINK-TEXT-MISMATCH | WARN | link-mismatch |
 | OASIS-MEMBER-URI | BLOCKER | member-uri |
 | OASIS-REFERENCES-SPLIT | WARN | references-split |
 
@@ -97,9 +105,19 @@ The set grows the same way the acceptance criteria grow: a defect that
 reaches intake and is expressible as a source-side rule is added here so
 the next TC catches it at authoring time.
 
-Two source-text criteria from the same correction round as
-OASIS-COMMENTS-PARA-DUP stay pub-check-only because they compare two
-captured values, which a single-pattern rule cannot express: `ref-rfc`
-(an [RFCnnnn] references entry's label, body number, and URL number must
-agree) and the rendered-HTML half of `link-mismatch` (anchor text that
-displays a URL must agree with its href).
+The file holds 26 rules. The markdown half of `link-mismatch` is
+OASIS-LINK-TEXT-MISMATCH: a backreference compares the shown URL with its
+target inside one pattern. Two criteria stay pub-check-only: `ref-rfc` (an
+[RFCnnnn] references entry's label, body number, and URL number must agree,
+three captured values) and the rendered-HTML half of `link-mismatch`, which
+reads the HTML nide does not produce at this point.
+
+Three candidates were evaluated and left out. nide's `references-resolve`
+knows only heading labels, so it reports every citation anchor such as
+`#RFC2119` as unresolved, the very link OASIS-RFC-2119-CITED requires; it
+takes no pattern to exclude them. A title that does not begin with "OASIS"
+and a non-normative label on each Examples heading both need the title or
+one heading's own label, which no nide target addresses: a heading search
+would also match the stage line "OASIS Standard" or another heading's label.
+All three stay in pub-check (`html-anchors`, `title-oasis-prefix`,
+`content-labels`).

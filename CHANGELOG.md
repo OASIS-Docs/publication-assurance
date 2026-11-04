@@ -26,6 +26,37 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+MINOR: eight new rules in `pub-check/rules/oasis.rules.yaml`, which nide reads,
+taking the file from 18 rules to 26. They carry the cover-page, keyword and IPR
+notice areas of the TC Handbook's editorial quality verification checklist,
+and the markdown half of `link-mismatch`, to authoring time:
+
+- `OASIS-COVER-THIS-STAGE`, `OASIS-COVER-PREVIOUS-STAGE` and
+  `OASIS-COVER-LATEST-STAGE` (BLOCKER): the three required URI blocks, with the
+  expressions pub-check's `template` check already blocks on. A first stage
+  keeps its Previous heading and writes N/A under it, so all three can block.
+- `OASIS-TITLE-VERSION` (WARN): some heading carries a `Version <number>`
+  identifier. Agreement with the package version stays in pub-check.
+- `OASIS-COVER-STAGE` (WARN): the cover names the stage, in the TC and Open
+  Project forms.
+- `OASIS-NOTICES` (WARN): a heading containing "Notices".
+- `OASIS-KEYWORDS-SECTION` (WARN): where RFC 2119 key words are used, a Key
+  Words or Terminology section declares them.
+- `OASIS-LINK-TEXT-MISMATCH` (WARN): a link that shows a URL links to that URL,
+  the same pairs pub-check's `link-mismatch` reads in the markdown.
+
+The rules were run with nide 2026.11.1 over the nide sources of CSAF v2.1,
+DPS prov-meta, MQTT-SN, OpenEoX Core and SARIF v2.2, and over 75 published
+Markdown specifications (CSAF, DPS, NIEMOpen, OData, AMQP, SARIF, TOSCA); the
+cover-heading patterns were also matched against 327 Word- and LaTeX-native
+covers (KMIP, PKCS#11, VirtIO, LegalDocML, ECF). No rule fired on a correct
+document. `references-resolve` was left out: nide registers only heading
+labels, so every `[RFC2119](#RFC2119)` citation that `OASIS-RFC-2119-CITED`
+requires would be reported unresolved. Two further candidates from the
+mapping brief were also left out because nide cannot address the title or a
+single heading's label: the title not beginning with "OASIS", and the
+non-normative label on an Examples heading.
+
 PATCH: `vml-fallback` counts only VML pictures, a `v:imagedata` with a `src`.
 Word's horizontal-line shapes carry a `v:imagedata` with no `src` and no
 picture, so they need no fallback image. On the AKN Core v2.0 OS Part 2 Word
