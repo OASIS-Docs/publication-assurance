@@ -122,8 +122,9 @@ oasis-tcs/csaf repository.
 ```
 
 This is Markdown's own autolink syntax, so it does not depend on whether a
-renderer links bare URLs, and the check accepts it. Real anchor text, `[the aggregator schema](https://...)`, is also accepted. From
-v1.13.1 the warning recommends the angle-bracket form:
+renderer links bare URLs, and the check accepts it. Real anchor text,
+`[the aggregator schema](https://...)`, is also accepted. From v1.13.1 the
+warning recommends the angle-bracket form:
 
 ```text
 [WARN   ] md-links      Dual link [url](url); write the URL in angle brackets,
@@ -161,17 +162,18 @@ it compares profile names and clause text. On the same draft, at commit
 changed. A real removal, or a real wording change between a Committee
 Specification and an OASIS Standard, is still reported.
 
-**For TC editors.** A run of "removed" warnings that covers
-every clause of one profile, after an edit that only touched punctuation,
-points at the profile's name rather than its clauses. Check which release of
+**For TC editors.** A run of "removed" warnings that covers every clause of
+one profile, after an edit that only touched punctuation, points at the
+profile's name rather than its clauses. Check which release of
 the checks the run used before changing the text.
 
 ## Code fences with text after the language
 
 **Work product.** CSAF v2.1 CSD03.
 
-**What the checks reported.** Before release v1.13.0, 96 `fence-collapse`
-blockers. From v1.13.0, one warning that lists all 96 lines:
+**What the checks reported.** Before release v1.13.0, they raised 96
+`fence-collapse` blockers. From v1.13.0, they raised one warning that lists
+all 96 lines:
 
 ```text
 [INFO   ] fence-collapse 96 code fence(s) carry trailing text in the info string
@@ -305,11 +307,11 @@ the pages, for a figure off the page or a caption beside the wrong block.
 one fault the reviewer is not told about. `grade` rejects a pair when fewer
 than four in five of the lines the reviewer copied are on its pages, and
 accepts the review only when every pair passes and the planted fault is named
-for what it is.
-On DMLex one model copied lines that are not on the page for 21 of 36 pairs
-and missed the planted fault, so its review was rejected. Another named the
-fault, and was accepted after five pairs were reviewed again. [`render/README.md`](../render/README.md) and
-[`verify/README.md`](../verify/README.md) give the commands.
+for what it is. On DMLex one model copied lines that are not on the page for
+21 of 36 pairs and missed the planted fault, so its review was rejected.
+Another named the fault, and was accepted after five pairs were reviewed
+again. The [renderer reference](../render/README.md) and the
+[verifier reference](../verify/README.md) give the commands.
 
 ---
 

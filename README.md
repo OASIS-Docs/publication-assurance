@@ -17,11 +17,11 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
 
 **Author: Michael Coletta, Technical Advisor, OASIS Open**
 
-**Setup guide for TC repositories: [docs/ADOPTING.md](docs/ADOPTING.md)** (three steps, about five minutes)
+**Setup guide for TC repositories: [Adoption guide](docs/ADOPTING.md)** (three steps, about five minutes)
 
 Before a TC Specification is published to `docs.oasis-open.org`, it is run
-through the publication acceptance tests. This repository contains the
-actively maintained, latest set of those tests (`oasis-pub-check`). For TC
+through the publication acceptance checks. This repository contains the
+current, actively maintained set of those checks (`oasis-pub-check`). For TC
 convenience, it also provides example GitHub workflows to add to a TC's own
 repository, so the TC can validate a draft before submitting it to OASIS for
 publication. Run them before your TC votes, and fix what they find while the
@@ -61,7 +61,7 @@ Work Product Manifest File.
    build unless you run report-only (`fail-on-blockers: false`); warnings
    never do.
 
-[docs/ADOPTING.md](docs/ADOPTING.md#quick-start) has the steps in full with
+The [adoption guide](docs/ADOPTING.md#quick-start) has the steps in full with
 the workflow to copy, how to read the report, and the reference: every
 input and output, Markdown rendering before the checks, report-only runs,
 several documents in one repository, fork pull requests, pinning and
@@ -74,7 +74,7 @@ publishable: N blockers, M warnings", then a table of the blockers: where each
 one is (file and line), what is wrong in plain English, and how to fix it. On
 a pull request the same findings are marked on the changed lines, and one
 comment, updated on every run, carries the table and what was fixed since the
-last run: [docs/ADOPTING.md](docs/ADOPTING.md#what-a-committee-sees).
+last run. See [What a committee sees](docs/ADOPTING.md#what-a-committee-sees).
 
 ### Finding the report
 
@@ -82,34 +82,39 @@ Each run commits its report files to the `pubcheck-reports` branch and
 opens the job summary with labelled links to them (PDF, Markdown, the
 run's folder, and the HTML report, which renders as a page once GitHub
 Pages serves the branch). Where the links appear, the branch layout, the
-URL shapes and what happens when nothing is published:
-[docs/ADOPTING.md](docs/ADOPTING.md#step-3-first-report) and its
-[Report branch layout](docs/ADOPTING.md#report-branch-layout).
+URL shapes and what happens when nothing is published are in
+[Step 3: First report](docs/ADOPTING.md#step-3-first-report) and
+[Report branch layout](docs/ADOPTING.md#report-branch-layout) of the adoption guide.
 
 ---
 
 ## The documents
 
+The same guides are published as the repository's
+[wiki](https://github.com/OASIS-Docs/publication-assurance/wiki), arranged by
+what a TC editor wants to do. The wiki is generated from these files on every
+change to `main`, so the files here remain the source.
+
 | File | Open it when |
 |---|---|
-| **[docs/ADOPTING.md](docs/ADOPTING.md)** | TC setting the checks up in its own repository: the three-step quick start, reading the report, and every option. |
-| **[PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit checks, a worked example. **Start here for the review model.** |
-| **[pub-check/README.md](pub-check/README.md)** | The class-level summary of what it checks, with severities and the regression corpus. |
-| **[pub-check/CHECKS.md](pub-check/CHECKS.md)** | A check fired and you want the exact one. Full catalog, generated from the code. |
-| **[docs/WORKED-EXAMPLES.md](docs/WORKED-EXAMPLES.md)** | A finding you have not met before: recent CSAF and DMLex cases, each with the message, what it meant and the fix at source. |
-| **[TRANSFORMS.md](TRANSFORMS.md)** | Building from Markdown and want the pipeline command by command. |
-| **[docs/MARKDOWN-EDITION.md](docs/MARKDOWN-EDITION.md)** | A Markdown edition of a DocBook specification, as one more output of its source (the `docbook-markdown` action). |
-| **[docs/CONVERT-AND-VERIFY.md](docs/CONVERT-AND-VERIFY.md)** | The whole check of a converted specification in one copy-me GitHub workflow: convert, render, verify the HTML and PDF against the published originals, run the OASIS publication checks, build page pairs for review. |
-| **[harvest/README.md](harvest/README.md)** | You run the publication checks often and want each run's records turned into candidate improvements to the checks. |
-| **[pub-check/AUTHORITIES.md](pub-check/AUTHORITIES.md)** | The OASIS rule behind a check, quoted verbatim with its source. The criterion-to-clause map. |
-| **[examples/eox-core-v1.0-csd01/](examples/eox-core-v1.0-csd01/README.md)** | A real Validation Report from a live publication. |
+| **[Adoption guide](docs/ADOPTING.md)** | TC setting the checks up in its own repository: the three-step quick start, reading the report, and every option. |
+| **[TC guide](PUBLICATION-QUALITY.md)** | Editor or chair who wants the whole picture: both review layers, all 15 audit checks, a worked example. **Start here for the review model.** |
+| **[Checker reference](pub-check/README.md)** | A summary, by check class, of what the checker covers, with severities and the regression corpus. |
+| **[Check catalog](pub-check/CHECKS.md)** | A check reported a result and you want its exact definition. Full catalog, generated from the code. |
+| **[Worked examples](docs/WORKED-EXAMPLES.md)** | A finding you have not met before: recent CSAF and DMLex cases, each with the message, what it meant and the fix at source. |
+| **[Pipeline command reference](TRANSFORMS.md)** | Building from Markdown and want the pipeline command by command. |
+| **[Markdown edition of a DocBook specification](docs/MARKDOWN-EDITION.md)** | A Markdown edition of a DocBook specification, as one more output of its source (the `docbook-markdown` action). |
+| **[Convert and verify](docs/CONVERT-AND-VERIFY.md)** | The whole check of a converted specification in one GitHub workflow to copy: convert, render, verify the HTML and PDF against the published originals, run the OASIS publication checks, build page pairs for review. |
+| **[Learning from check records](harvest/README.md)** | You run the publication checks often and want the records of those runs turned into candidate improvements to the checks. |
+| **[Policy authorities](pub-check/AUTHORITIES.md)** | The OASIS rule behind a check, quoted verbatim with its source. The criterion-to-clause map. |
+| **[Example Validation Report](examples/eox-core-v1.0-csd01/README.md)** | A real Validation Report from a live publication. |
 
 ---
 
-## Publication acceptance test cases: an overview
+## Areas covered by the checks
 
-The 186 individual checks (62 check classes; `--list-checks` asserts the
-inventory from the code) cover six areas:
+The 186 individual checks (62 check classes; `--list-checks` asserts that
+inventory against the code) cover six areas:
 
 - **Naming and stages**: stage tokens, version directories, filename
   conventions, live revision-collision probing, case sensitivity
@@ -117,7 +122,7 @@ inventory from the code) cover six areas:
   cited-but-missing files, link-target mismatches, double-slash paths,
   dead `lists.oasis-open.org` addresses
 - **Content residue**: editor placeholders, stale headers, working titles,
-  the pandoc autolink trap
+  bare URLs that pandoc turns into links on its own
 - **Rendering and sync**: PDF-vs-source sync, embedded fonts vs the
   package's own stylesheet, printed body text size vs the declared size, image
   policy and figure width, page numbers in the PDF's contents, code blocks
@@ -142,7 +147,7 @@ candidate whose blocker set TC Administration had already established by hand.
 ![How a criterion is sourced from policy](assets/authority.png?v=181)
 
 Every acceptance criterion cites the rule it enforces. 98 of the 186 checks
-trace to a verbatim clause in the governing corpus; the rest are operational
+trace to a verbatim clause in the policy corpus; the rest are operational
 rules from correction rounds. The full criterion-to-clause map, with the exact
 quoted text and its source, is [`AUTHORITIES.md`](pub-check/AUTHORITIES.md).
 
@@ -155,14 +160,15 @@ take the catalog's word for any of it, and neither does CI:
 a verbatim substring of the page it cites, and every crosswalk entry against the
 tool's own registry, on every run.
 
-## Where the checks sit: validation and audit
+## Validation and audit
 
 ![Validation and audit dovetail](assets/architecture/validation-audit-dovetail.png?v=181)
 
-Your TC runs oasis-pub-check in its own CI to check all 186 conditions, each reported as the value the tool pulled from the
-package set against the value it was compared to, in full. TC Administration
-re-runs the identical code at intake (checklist step 4b) and wraps it with the
-15 mandatory audit checks only a human or a live check can do: byte identity
+Your TC runs oasis-pub-check in its own CI. It evaluates all 186 conditions and
+reports each as the value the tool pulled from the package next to the value it
+was compared to, both in full. TC Administration
+re-runs the identical code at intake (checklist step 4b) and adds the
+15 mandatory audit checks, which only a person or a live check can do: byte identity
 against the published site, render class against the TC's own precedent, the
 live roster, directory index chains, announcement channels, and an independent
 adversarial verifier. Both reports are filed to the TC's ticket and the
@@ -174,7 +180,7 @@ sha256 and role; plus source commit and tool versions), OASIS intake can verify
 it directly: the TC's build records what it produced, the publication checks
 verify it against the criteria, and the manifest lets every later step verify both.
 
-## Interoperating with nide
+## Interoperation with nide
 
 The acceptance criteria are also consumed at authoring time.
 [Stefan Hagen](https://github.com/sthagen)'s
@@ -238,6 +244,7 @@ publication-assurance/
 ├── docs/CONVERT-AND-VERIFY.md       # Convert, render, verify and check in one GitHub workflow, with screenshots
 ├── docs/WORKED-EXAMPLES.md          # Findings from recent publications and the fix at source for each
 ├── docs/images/                     # The screenshots the guides use
+├── docs/wiki/                       # The wiki's Home, sidebar and footer (the wiki is generated)
 ├── PUBLICATION-QUALITY.md           # The TC-facing guide: both layers, all checks
 ├── examples/                        # Worked example + the regression corpus
 │   ├── consumer-workflow.yml        #   the drop-in TC workflow (copy this)
@@ -275,21 +282,22 @@ publication-assurance/
 ├── .github/
 │   ├── src/                         # Pipeline source (pandoc + BeautifulSoup post-processing,
 │   │                                #   HTML preprocessor, wkhtmltopdf renderer)
-│   ├── scripts/                     # Shell entry points used by the workflows
+│   ├── scripts/                     # Entry points used by the workflows, including build_wiki.py
 │   ├── styles/                      # OASIS markdown-styles CSS lineage (v1.1 → v1.8.1)
 │   └── workflows/                   # ci (this repo's own test suite), step_1 (MD→HTML),
 │                                    #   step_2 (HTML→PDF), step_3 (zip), pub-check (the
 │                                    #   publication checks), make-manifest (the release manifests),
 │                                    #   convert-and-verify (the reusable workflow TCs call),
 │                                    #   gate-change-review (a checker change records its review),
-│                                    #   move-v1 (moves the v1 tag to each release)
+│                                    #   move-v1 (moves the v1 tag to each release),
+│                                    #   wiki (publishes the guides to the wiki)
 ├── LICENSE                          # Apache-2.0 (software tier)
 └── NOTICE                           # The three-tier IP statement
 ```
 
 </details>
 
-## Running the tests
+## Test suite
 
 A defect in the checks mis-grades somebody's publication, so `tests/` is the
 regression net: a fixture per fixed defect, plus smoke coverage over the CLI
@@ -319,7 +327,7 @@ A test that reads docs.oasis-open.org is skipped when the site cannot be
 reached.
 
 The suite runs on every push and pull request
-([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), and a red run
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), and a failing run
 blocks.
 
 Fixtures come from the archived CSAF corpus under `examples/` wherever a
@@ -367,8 +375,8 @@ The OASIS name and logo are trademarks of OASIS Open.
 
 **Repository maintained by**: Michael Coletta, Technical Advisor, OASIS Open  
 **Contact**: michael.coletta@oasis-open.org (OASIS TC Administration)  
-**Documentation**: [PUBLICATION-QUALITY.md](PUBLICATION-QUALITY.md) for the full guide, [TRANSFORMS.md](TRANSFORMS.md) for the pipeline, [pub-check/](pub-check/) for the publication checks, individual specification folders for spec-level detail
+**Documentation**: the [TC guide](PUBLICATION-QUALITY.md) for the full picture, the [pipeline command reference](TRANSFORMS.md), the [checker](pub-check/) for the publication checks, and the [wiki](https://github.com/OASIS-Docs/publication-assurance/wiki), which arranges all of them by task
 
 ---
 
-**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [Markdown edition of a DocBook specification](docs/MARKDOWN-EDITION.md) · [TC guide](PUBLICATION-QUALITY.md) · [The acceptance criteria tool](pub-check/README.md) · [The criteria catalog](pub-check/CHECKS.md) · [Worked example](examples/eox-core-v1.0-csd01/README.md) · [Worked examples from recent publications](docs/WORKED-EXAMPLES.md) · [The pipeline, command by command](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)
+**The documentation set:** [Adoption guide](docs/ADOPTING.md) · [Markdown edition of a DocBook specification](docs/MARKDOWN-EDITION.md) · [TC guide](PUBLICATION-QUALITY.md) · [The checker](pub-check/README.md) · [Check catalog](pub-check/CHECKS.md) · [Example Validation Report](examples/eox-core-v1.0-csd01/README.md) · [Worked examples from recent publications](docs/WORKED-EXAMPLES.md) · [Pipeline command reference](TRANSFORMS.md) · [Architecture diagrams](assets/architecture/README.md)

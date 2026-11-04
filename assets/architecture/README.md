@@ -17,17 +17,18 @@ are drawn on the OASIS design system (Poppins, ink `#0a2540`, accent
 
 How the two layers of the OASIS publication quality architecture dovetail:
 
-- Layer 1, validation (pub-check), is mechanical and tool-side.
+- Layer 1, validation (pub-check), is mechanical and done by the tool.
   `oasis_pub_check.py` runs the acceptance checks (`--list-checks` reports
   the live count). The TC runs it in its own CI before submission, and TC
   Administration re-runs the identical code at intake. It reads the package
   files, and four of its checks also probe the live site. Its output is the
   Validation Report, which lists every
-  condition with the observed value the tool pulled set against the expected
-  value it was compared to, shown in full (rendered landscape so the
+  condition with the observed value the tool pulled and the expected
+  value it was compared to, both shown in full (rendered landscape so the
   values stay legible).
-- Layer 2, the publication audit, is human and adversarial, event-side. 15
-  mandatory audit checks run against live ground truth the tool cannot see: byte
+- Layer 2, the publication audit, is human and adversarial, and covers the
+  publication event. 15
+  mandatory audit checks run against live facts the tool cannot see: byte
   identity, render class vs precedent, live roster, Naming Directives, index
   chain, zip integrity, four announcement channels, ticket record, an
   independent adversarial verifier, and a visual inspection of the live
@@ -36,11 +37,11 @@ How the two layers of the OASIS publication quality architecture dovetail:
   Its output is the Publication Audit Report.
 - The dovetail is intake checklist step 4b, which requires running
   oasis-pub-check and triaging every finding, so the whole validation layer
-  plugs into the audit as one step. Both reports are filed to the TC's ticket
+  fits into the audit as a single step. Both reports are filed to the TC's ticket
   and the internal `_audit/` directory.
 
 The prose companion to these diagrams is
-[../../PUBLICATION-QUALITY.md](../../PUBLICATION-QUALITY.md).
+the [TC guide](../../PUBLICATION-QUALITY.md).
 
 ## Files
 
@@ -50,7 +51,7 @@ Two swim lanes, TC side (Layer 1) and TC Administration side (Layer 2). The
 shared `pub-check` engine sits in the seam between them with dovetail keys
 seating into both lanes: the identical code running on both sides, the TC in
 CI on the left, checklist step 4b on the right. The audit checks that need
-live ground truth are laid out as a chip grid, the independent adversarial
+live facts are laid out as a chip grid, the independent adversarial
 verifier is called out separately, and both report artifacts flow down to
 the shared TCADMIN ticket and `_audit/` record. Primary explainer figure for
 TC editors and for TC Administration process documentation.
@@ -76,4 +77,4 @@ above, which show the *internal* dovetail of validation into the human audit.
 
 ---
 
-**The documentation set:** [Repository overview](../../README.md) · [TC guide](../../PUBLICATION-QUALITY.md) · [The acceptance criteria tool](../../pub-check/README.md) · [The criteria catalog](../../pub-check/CHECKS.md) · [Worked example](../../examples/eox-core-v1.0-csd01/README.md) · [The pipeline, command by command](../../TRANSFORMS.md)
+**The documentation set:** [Repository overview](../../README.md) · [TC guide](../../PUBLICATION-QUALITY.md) · [The checker](../../pub-check/README.md) · [Check catalog](../../pub-check/CHECKS.md) · [Example Validation Report](../../examples/eox-core-v1.0-csd01/README.md) · [Pipeline command reference](../../TRANSFORMS.md)

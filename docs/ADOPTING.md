@@ -9,8 +9,8 @@ Author: Michael Coletta, Technical Advisor to OASIS Open.
 # OASIS publication checks: adoption guide
 
 Before a TC Specification is published to `docs.oasis-open.org`, it is run
-through the publication acceptance tests (`oasis-pub-check`). This guide adds
-those tests to a TC's own GitHub repository, so every push validates the
+through the OASIS publication checks (`oasis-pub-check`). This guide adds
+those checks to a TC's own GitHub repository, so every push validates the
 draft against the same 186 conditions applied at submission, and each run
 publishes a Validation Report you can open in a browser.
 
@@ -23,7 +23,7 @@ publishes a Validation Report you can open in a browser.
 | [Environment variables](#environment-variables) | You need offline runs or a specific browser for the PDF |
 | [Report branch layout](#report-branch-layout) | You want to know where each report is kept |
 | [Markdown rendering before the checks](#markdown-rendering-before-the-checks) | Your repository holds Markdown sources, not a rendered package |
-| [A Markdown edition of your DocBook specification](MARKDOWN-EDITION.md) | Your specification is written in DocBook and you want its Markdown edition |
+| [Markdown edition of a DocBook specification](MARKDOWN-EDITION.md) | Your specification is written in DocBook and you want its Markdown edition |
 | [Convert and verify in one workflow](CONVERT-AND-VERIFY.md) | You want conversion, rendering, the HTML and PDF verification and the publication checks in one copy-me workflow |
 | [Enforcing and report-only runs](#enforcing-and-report-only-runs) | A blocker should not fail the build, for example on a published standard |
 | [Several documents in one repository](#several-documents-in-one-repository) | The TC publishes more than one specification from this repository |
@@ -205,8 +205,8 @@ against the file it names. A `.zip` target gets no file locations.
 
 It is the report OASIS staff produce at intake, from the same code. It has
 a header, a table of the 62 check classes and a table of all 186
-conditions. The job summary shows the same two tables, above them the
-findings list, which ends with the verdict in a second form,
+conditions. The job summary shows the same two tables with the findings list
+above them; the list ends with the verdict in a second form,
 `N blocker(s), M warning(s) -> NOT PUBLISHABLE`. The header lines described
 below are in the report files.
 
@@ -224,8 +224,7 @@ almost always because the `target` path is wrong.
 
 ### Check class table
 
-
-One row per check class, 61 rows, whether or not the class raised
+One row for each of the 62 check classes, whether or not the class raised
 anything, plus a row for any finding that belongs to no registered class (its
 condition count reads 0). Each row gives the class result, the number of
 individual conditions inside the class, and up to five findings in full.
@@ -237,9 +236,8 @@ individual conditions inside the class, and up to five findings in full.
 | `WARN`, `BLOCKER` or `INFO`, with the same count when some conditions were NA | The most severe finding in the class. A finding always outranks NA, so a class can read `INFO (0 of 3 evaluated)` |
 | `NA` | No condition in the class applied and it raised nothing; the Findings cell gives the reason |
 
- A class with more findings says how many more
-and points at the JSON record, `pubcheck-report.json`, which lists all of
-them.
+A class with more findings says how many more and points at the JSON record,
+`pubcheck-report.json`, which lists all of them.
 
 The header's result line counts the classes the same way, for example
 `45 of 54 evaluated check classes fully clean; 5 not evaluated; findings:
@@ -357,7 +355,8 @@ writes one folder, `<checked-branch>/<document>/`:
 | `<document>` | `summary-title`, or the `target` path when there is none |
 
 Both are lower-cased, and every run of other characters (a `/` in a path,
-a space in a title) becomes one hyphen; a name is cut at 80 characters. Each folder holds `pubcheck-validation.pdf`, `.md` and `.html`,
+a space in a title) becomes one hyphen; a name is cut at 80 characters. Each
+folder holds `pubcheck-validation.pdf`, `.md` and `.html`,
 `pubcheck-report.json` and `.txt`, and `meta.json`. A later run of the same
 branch and document replaces the folder; the branch's own history keeps
 every earlier run. The branch root holds `index.html`, every folder newest
@@ -439,14 +438,16 @@ release as the action. It has three steps in one job:
    cover agree.
 3. **Check.** Point `target` at the staged directory.
 
+The commands behind each stage are listed in the
 [Pipeline command reference](../TRANSFORMS.md).
 
 **Worked example: DMLex.** The reusable workflow
 [`convert-and-verify.yml`](../.github/workflows/convert-and-verify.yml) runs
 this pattern with the HTML and PDF verification added; the LexiDMA TC's
 [`.github/workflows/publication-assurance.yml`](https://github.com/MColetta-OASIS/lexidma/blob/markdown-conversion/.github/workflows/publication-assurance.yml)
-calls it for two documents, and [CONVERT-AND-VERIFY.md](CONVERT-AND-VERIFY.md)
-sets it up. Written out for one document, the pattern is:
+calls it for two documents, and the
+[convert and verify guide](CONVERT-AND-VERIFY.md) sets it up. Written out for
+one document, the pattern is:
 
 ```yaml
 name: pub-check
@@ -758,13 +759,13 @@ those conditions report NA and the rest run unchanged.
 
 | Document | Content |
 |---|---|
-| [pub-check/CHECKS.md](../pub-check/CHECKS.md) | Every condition: what is checked, the value pulled, what it is compared against, its severity, and when it applies. Generated from the code |
-| [pub-check/AUTHORITIES.md](../pub-check/AUTHORITIES.md) | The OASIS rule behind each check, quoted verbatim with its source |
-| [pub-check/README.md](../pub-check/README.md) | The check classes grouped by area, with severities and the regression corpus |
-| [PUBLICATION-QUALITY.md](../PUBLICATION-QUALITY.md) | How the checks fit with the 15 audit checks TC Administration runs at intake |
-| [TRANSFORMS.md](../TRANSFORMS.md) | The Markdown to HTML to PDF pipeline, command by command |
-| [examples/eox-core-v1.0-csd01/](../examples/eox-core-v1.0-csd01/README.md) | A Validation Report from a real publication |
-| [CHANGELOG.md](../CHANGELOG.md) | Every release, with the checks it added or changed |
+| [Criteria catalog](../pub-check/CHECKS.md) | Every condition: what is checked, the value pulled, what it is compared against, its severity, and when it applies. Generated from the code |
+| [Authorities catalog](../pub-check/AUTHORITIES.md) | The OASIS rule behind each check, quoted verbatim with its source |
+| [Checker reference](../pub-check/README.md) | The check classes grouped by area, with severities and the regression corpus |
+| [TC guide](../PUBLICATION-QUALITY.md) | How the checks fit with the 15 audit checks TC Administration runs at intake |
+| [Pipeline command reference](../TRANSFORMS.md) | The Markdown to HTML to PDF pipeline, command by command |
+| [Example Validation Report](../examples/eox-core-v1.0-csd01/README.md) | A Validation Report from a real publication |
+| [Changelog](../CHANGELOG.md) | Every release, with the checks it added or changed |
 
 Questions: michael.coletta@oasis-open.org. Findings you believe are
 wrong: see [Blocker ownership](#blocker-ownership).

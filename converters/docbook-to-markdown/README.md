@@ -6,8 +6,8 @@ Authored by Michael Coletta, Technical Advisor to OASIS Open.
 
 # DocBook to OASIS Markdown
 
-Converts an OASIS DocBook 4.5 specification into a single Markdown file in
-the OASIS Markdown template (the layout of CSAF and NIEM: logo, title block,
+This converter turns an OASIS DocBook 4.5 specification into a single Markdown
+file in the OASIS Markdown template (the layout of CSAF and NIEM: logo, title block,
 front matter as level-4 headings, Notices, table of contents, numbered
 sections with explicit anchors), then checks the result against the
 published HTML with [`verify/verify_md.py`](../../verify/README.md). A TC
@@ -37,7 +37,7 @@ converters/docbook-to-markdown/build.sh --profile dmlex SPEC_DIR OUT_DIR [PUBLIS
 
 | Argument | Meaning |
 |---|---|
-| `--profile` | A profile name under `profiles/`, or a profile directory of your own |
+| `--profile` | A profile name under `profiles/`, or a profile directory of the TC's own |
 | `SPEC_DIR` | The DocBook source directory (DMLex: `dmlex-v1.0/specification` in oasis-tcs/lexidma) |
 | `OUT_DIR` | Receives `<basename>.md`, the images it references and, when verifying, `<basename>-verification.json` |
 | `PUBLISHED_HTML` | Optional. The published HTML, a file or a URL. Omitted, verification is skipped |
@@ -56,8 +56,8 @@ converters/docbook-to-markdown/build.sh --profile dmlex lexidma/dmlex-v1.0/speci
 ```
 
 `tests/test_docbook_to_markdown.py` runs exactly this against oasis-tcs/lexidma
-at `e3c0626` and requires the Markdown edition committed in
-MColetta-OASIS/lexidma, byte for byte.
+at `e3c0626` and requires the result to match the Markdown edition committed in
+MColetta-OASIS/lexidma exactly.
 
 `build.sh` calls the converter itself. To run it on a DocBook file whose
 XIncludes are already resolved:
@@ -93,7 +93,7 @@ The DMLex profile (`profiles/dmlex/`) is the first. A second specification
 adds its own directory; the converter changes only when that specification
 uses DocBook the converter does not yet handle.
 
-## What the converter does
+## Conversion rules
 
 - `<glossterm>` is uppercased when the profile says so.
 - A section or appendix with `role="normative"` or `role="informative"` gets
@@ -114,7 +114,7 @@ uses DocBook the converter does not yet handle.
   (`2024.`) or a heading (`#`). Superscript and subscript become `<sup>` and
   `<sub>`. A cross-reference takes its target's number and title, its
   `xreflabel`, or its `endterm`.
-- Program listings are fenced code blocks copied byte for byte.
+- Program listings are fenced code blocks, copied exactly.
 - An ordered list is numbered as the DocBook stylesheet prints it: by its
   `numeration`, or else by how many ordered lists enclose it (`1.`, `a.`,
   `i.`, `A.`, `I.`, then round again). The pipeline's pandoc `markdown` reader
@@ -129,7 +129,7 @@ uses DocBook the converter does not yet handle.
   pixels at `figure_dpi`. Without the width an SVG draws at its natural size
   and a large diagram runs off the page.
 
-## What it refuses
+## Refused input
 
 The converter refuses (exit 1, the reason on stderr) rather than pass on
 something that reads differently from the publication. It writes the `.md`
@@ -168,7 +168,7 @@ the Markdown too, except the first, which is a markup error, not content.
    already expands to `OASIS Standard`, so the citation reads "OASIS OASIS
    Standard".
 4. The Makefile builds `dmlex_uml.svg` with GNU `head -n-1` and
-   `#!/usr/bin/python`, neither on a stock macOS. The DMLex prebuild does the
+   `#!/usr/bin/python`, neither of which a stock macOS has. The DMLex prebuild does the
    same with `python3`, `sed` and `tail`.
 5. `nvh2dot.py` walks a Python set, so the diagram's cluster order and layout
    change from run to run. The prebuild fixes the hash seed, so a run is
@@ -211,8 +211,8 @@ the Markdown too, except the first, which is a markup error, not content.
   PDF, and record such a defect in the allow file with its reason.
 - **The contents need page numbers.** A PDF printed from HTML has none unless
   something writes them. The pipeline's PDF step and `render.sh` both do, and
-  the `pdf-toc-pages` check reports a PDF whose contents have none, or
-  point at the wrong pages.
+  the `pdf-toc-pages` check reports a PDF whose contents have no page
+  numbers or whose numbers point at the wrong pages.
 - **Tabs in code.** pandoc expands tabs to spaces unless told not to. The
   pipeline's HTML converter now passes `--preserve-tabs`; the `html-code-sync` check
   reports a published code block that is not the source's.

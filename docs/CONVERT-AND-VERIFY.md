@@ -18,7 +18,7 @@ below is from its run.
 
 For a Markdown edition produced alongside a DocBook source that stays the
 authoritative one, the shorter `docbook-markdown` action is described in
-[MARKDOWN-EDITION.md](MARKDOWN-EDITION.md).
+[Markdown edition guide](MARKDOWN-EDITION.md).
 
 ## Setup
 
@@ -26,7 +26,7 @@ One file in the TC's repository runs every step below on each push. No
 software is installed on anyone's machine.
 
 **1. Copy the workflow file.** Open
-[examples/converting-workflow.yml](../examples/converting-workflow.yml),
+[the example workflow file, `examples/converting-workflow.yml`](../examples/converting-workflow.yml),
 copy it with the copy button, and in the TC's repository choose **Add file >
 Create new file**, name it `.github/workflows/convert-and-verify.yml`, paste,
 and edit the lines under `with:`:
@@ -71,7 +71,7 @@ job, then open the step.
 |---|---|
 | `<name>-rendered` | the HTML and PDF at their `docs.oasis-open.org` path, with the full reports of every check |
 | `<name>-page-pairs` | each sampled page next to its published counterpart, and `PROMPT.md`, the brief for a reviewer |
-| `<name>-page-review-key` | which pair holds the planted fault; keep it from the reviewer; grade the review with it as [render/README.md](../render/README.md#review_pairspy) describes |
+| `<name>-page-review-key` | which pair holds the planted fault. Keep it from the reviewer, and grade the review with it as [the page-pair guide](../render/README.md#review_pairspy) describes |
 
 The rendered PDF carries the OASIS footer and numbers its contents:
 
@@ -91,10 +91,10 @@ uncomment `fail-on-blockers: true` so a new blocker fails the run.
 ## Reference
 
 - What each verifier checks, and how to read a difference:
-  [verify/README.md](../verify/README.md).
+  [Verifier reference](../verify/README.md).
 - Rendering, and the page pairs for a review with their grading:
-  [render/README.md](../render/README.md).
+  [Renderer reference](../render/README.md).
 - The converter and its profiles:
-  [converters/docbook-to-markdown/README.md](../converters/docbook-to-markdown/README.md).
+  [Converter reference](../converters/docbook-to-markdown/README.md).
 - Cutting the next stage (for example v1.1 WD01) from the Markdown:
-  [pub-check/README.md](../pub-check/README.md#cutting-the-next-stage).
+  [Cutting the next stage](../pub-check/README.md#cutting-the-next-stage).

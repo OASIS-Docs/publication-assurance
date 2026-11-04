@@ -45,7 +45,7 @@ Exit `0` when every check passes, `1` when any fails, `2` when an input
 cannot be read (a missing file, no pandoc, an allow rule without a reason).
 The last line printed is `RESULT: PASS` or `RESULT: FAIL`.
 
-## What it checks
+## Checks performed
 
 | Check | Passes when |
 |---|---|
@@ -114,17 +114,18 @@ The DMLex rules are in
 [`converters/docbook-to-markdown/profiles/dmlex/allow.json`](../converters/docbook-to-markdown/profiles/dmlex/allow.json).
 With them, the DMLex v1.0 OASIS Standard Markdown edition matches
 [the published HTML](https://docs.oasis-open.org/lexidma/dmlex/v1.0/os/dmlex-v1.0-os.html) on
-61,260 tokens (words and punctuation marks), 311 headings, 316 code blocks, 1,133 list items, 93 external
-links and 50 images
+61,260 tokens (words and punctuation marks), 311 headings, 316 code blocks,
+1,133 list items, 93 external links and 50 images
 (`tests/test_verify_md.py`).
 
-## What it does not check
+## Not checked
 
-Styling and page layout, which are the publication checks' job (`pub-check/`) and the
-pipeline's; the rendered PDF, which `verify_pdf.py` compares. Nor structure
-that keeps the words in order: a heading's level, a list item moved to
-another nesting level, emphasis or a code span removed. Review those on the
-pages (`render/review_pairs.py`), or read the diff of the Markdown itself.
+`verify_md.py` does not check styling or page layout, which belong to the
+publication checks (`pub-check/`) and the pipeline, or the rendered PDF, which
+`verify_pdf.py` compares. It also does not check structure that keeps the
+words in order: a heading's level, a list item moved to another nesting level,
+emphasis or a code span removed. Review those on the pages
+(`render/review_pairs.py`), or read the diff of the Markdown itself.
 
 ## verify_pdf: the rendered PDF against the published PDF
 
@@ -148,9 +149,9 @@ compares the HTML, every page:
 |---|---|
 | Words | Every published word is in the rendered PDF in the same order, apart from allowed deviations. List letters and numbers are text in a PDF, so a lettered list printed `1.`, `2.` is a difference |
 | Contents | Each contents entry's page number is read as `<page>`: the two editions paginate differently, so the numbers need not match, but an entry numbered on one side and not the other is a difference |
-| Running lines | The header and footer lines (a line near the page edge that repeats, digits aside, on two pages or more and half of them) are the same on both sides, and every rendered page carries one. Only the numbers that change from page to page and the page count after them are masked, so a footer with the wrong version, date or year is a difference |
+| Running lines | The header and footer lines (a line near the page edge that repeats, digits aside, on at least two pages and on at least half of the pages) are the same on both sides, and every rendered page carries one. Only the numbers that change from page to page and the page count after them are masked, so a footer with the wrong version, date or year is a difference |
 
-What it takes as layout and counts rather than reports:
+Differences it takes as layout, and counts rather than reports:
 - line wrapping: the two sides are equal once spaces go and a hyphen that
   ends a line between two letters may vanish (FOP hyphenates, Chrome breaks
   a URL). Any other hyphen counts, so a lost minus sign is a difference;
@@ -159,7 +160,7 @@ What it takes as layout and counts rather than reports:
 - list bullets, which a renderer may draw outside the text layer, and
   ligature glyphs, read as their letters.
 
-Nothing else is waved through: two numbers that swap places, or a "NOT"
+Nothing else is accepted: two numbers that swap places, or a "NOT"
 that moves from one sentence to another, is a difference.
 
 The allow file is `verify_md.py`'s, with two more kinds.
