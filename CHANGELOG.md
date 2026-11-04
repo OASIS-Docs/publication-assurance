@@ -63,13 +63,6 @@ picture, so they need no fallback image. On the AKN Core v2.0 OS Part 2 Word
 HTML (3 Nov 2026) eight of them made the check block a cover logo that had its
 fallback; it now counts one picture and one fallback.
 
-PATCH (also released as v1.16.1 on v1.16.0): `--emit-manifest` with `--json`
-printed its two `wrote <path>` lines on stdout ahead of the JSON report, so the
-action's report readers failed with "Expecting value" and publisher-toolkit
-step 4.0 (Generate manifests) failed on every run (CSAF v2.1 csd04, SARIF v2.2
-csd01, NIEM NDR v6.0 psd02). With `--json` those lines now go to stderr;
-plain-text output is unchanged.
-
 PATCH: `--emit-manifest` on a Multi-Part Option 1 stage directory wrote a bare
 `manifest.txt` with no title, Release URI or Manifest URI, because the stage
 directory holds no document of its own. It now names the file for the package
@@ -99,6 +92,17 @@ identical before and after.
   as its stage ("Stage 'part1-protocol' is not a recognized stage token"). The
   stage directory is now the folder that holds the parts, named from the
   zip's `<stem>-<stage>.zip`.
+
+## v1.16.1 - 2026-11-03
+
+PATCH: one fix, on top of v1.16.0 only. `--emit-manifest` with `--json`
+printed its two `wrote <path>` lines on stdout ahead of the JSON report, so the
+action's report readers failed with "Expecting value" and publisher-toolkit
+step 4.0 (Generate manifests) failed on every run (CSAF v2.1 csd04, SARIF v2.2
+csd01, NIEM NDR v6.0 psd02). The go-live workflow's "Generate missing
+manifests" step made the same call. With `--json` those lines now go to
+stderr; plain-text output is unchanged. No check, condition or finding
+changed. Pinned by three tests in tests/test_manifest_emitter.py (#83).
 
 ## v1.16.0 - 2026-10-22
 
