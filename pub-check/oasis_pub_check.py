@@ -821,7 +821,7 @@ def check_filenames(items: dict[str, str], stage: str, f: Findings,
         inner = ({os.path.splitext(n)[0] for n in os.listdir(stage_dir)}
                  if stage_dir and os.path.isdir(stage_dir) else set())
         if zparts and zparts != mine and zstem not in inner:
-            others.add(zstem + ".zip")
+            others.add(os.path.basename(package_zip))
     if others:
         f.observe("filenames", other_document_identifiers=others)
     if len(stems | others) > 1:
@@ -9044,16 +9044,25 @@ def main() -> int:
         tmp =tempfile.mkdtemp(prefix="pub_check_")
         try:
             with zipfile.ZipFile(target) as z:
+                if not z.namelist():
+                    shutil.rmtree(tmp, ignore_errors=True)
+                    print(f"error: {args.target} is an empty zip: it holds no "
+                          "files to check", file=sys.stderr)
+                    return 2
                 for name in z.namelist():
                     dest = os.path.realpath(os.path.join(tmp, "raw", name))
-                    if not dest.startswith(os.path.realpath(os.path.join(tmp, "raw")) + os.sep):
+                    root = os.path.realpath(os.path.join(tmp, "raw"))
+                    # "./" names the extraction root itself, which is inside it.
+                    if dest != root and not dest.startswith(root + os.sep):
                         print(f"error: zip entry escapes extraction dir: {name}",
                               file=sys.stderr)
+                        shutil.rmtree(tmp, ignore_errors=True)
                         return 2
                 z.extractall(os.path.join(tmp, "raw"))
                 layout = zip_stage_layout(target, z.namelist())
         except zipfile.BadZipFile as e:
             print(f"error: not a readable zip: {e}", file=sys.stderr)
+            shutil.rmtree(tmp, ignore_errors=True)
             return 2
         raw = os.path.join(tmp, "raw")
         target = locate_stage_dir(raw)
