@@ -26,6 +26,10 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.17.0 - 2026-11-04
+
 MINOR: eight new rules in `pub-check/rules/oasis.rules.yaml`, which nide reads,
 taking the file from 18 rules to 26. They carry the cover-page, keyword and IPR
 notice areas of the TC Handbook's editorial quality verification checklist,
@@ -104,6 +108,12 @@ identical before and after.
   as its stage ("Stage 'part1-protocol' is not a recognized stage token"). The
   stage directory is now the folder that holds the parts, named from the
   zip's `<stem>-<stage>.zip`.
+
+PATCH: documentation and CI. The rendering workflows run on ubuntu-24.04 and
+install fonts-liberation2 by name, so a runner image change cannot swap the
+PDF fonts (#89). The documentation was polished and a wiki is generated from
+the repository markdown (#90). The diagram PNGs were re-rendered at 186
+checks, with the script that renders them, `assets/render_pngs.py` (#93).
 
 ## v1.16.1 - 2026-11-03
 
