@@ -69,6 +69,18 @@ directory holds no document of its own. It now names the file for the package
 (`<stem>-<stage>-manifest.txt`, as the zip) and reads the title and URIs from the
 first part (OData Version 4.02 CS01, 30 Oct 2026).
 
+PATCH: `--emit-manifest` on a ZIP target is refused (#95). A ZIP is checked in
+a temporary extraction that is deleted when the run ends, so both manifests
+were written there, reported as written, and lost. The run now stops with exit
+2 and a message on stderr, prints no report and writes nothing. The refusal
+also covers `.ZIP` and other spellings of the extension, which are not opened
+as packages either. Unpack the package and pass its directory. A workflow that
+passed a ZIP with `--emit-manifest` now fails with exit 2 where it used to
+pass; it was never getting manifests. Two neighbouring faults went with it: a
+missing `.zip` target, which raised a traceback with exit 1 (the blockers
+exit), now exits 2 with a message, and a stage directory whose name ends in
+`.zip` is checked as a directory instead of being opened as an archive.
+
 PATCH: two fixes inside existing checks for Multi-Part Work Products laid out
 as Naming Directives v1.7 s6.1 Option 1 (each part in its own
 `[partNumber]-[partName]/` folder under the stage directory). Prompted by OData

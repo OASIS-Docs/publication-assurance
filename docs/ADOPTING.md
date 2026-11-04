@@ -313,7 +313,7 @@ All inputs except `target` are optional.
 | Input | Default | Meaning |
 |---|---|---|
 | `target` | (required) | Stage directory or package `.zip`, relative to the repository root after checkout |
-| `args` | `''` | Extra flags passed to the checks, for example `--emit-manifest`. Do not pass `--json`: the action already writes `pubcheck-report.json`, and adding it makes `pubcheck-report.txt` JSON as well |
+| `args` | `''` | Extra flags passed to the checks, for example `--emit-manifest`, which needs a stage directory as `target`, not a `.zip`. Do not pass `--json`: the action already writes `pubcheck-report.json`, and adding it makes `pubcheck-report.txt` JSON as well |
 | `python-version` | `3.x` | Python version the checks run on |
 | `install-poppler` | `true` | Installs `pdftotext` and `pdffonts` on Linux runners for the PDF cross-checks. Without them those conditions report NA |
 | `report-dir` | `pubcheck-report` | Where the report files are written in the job's working directory. `''` writes none |
@@ -706,7 +706,9 @@ same as the action's: `0`, `1` or `2`.
 In a workflow, see [Environment variables](#environment-variables).
 
 `--emit-manifest` writes into the stage directory, so run it on the
-directory you intend to submit. The checks read the directory's own name
+directory you intend to submit. Given a `.zip` it stops with exit 2 and
+writes nothing, because a package is checked in a temporary copy that is
+deleted afterwards. The checks read the directory's own name
 and path, so a renamed copy (such as `csd01-copy`) raises naming blockers
 the real directory does not.
 

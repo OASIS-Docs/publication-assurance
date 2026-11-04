@@ -73,7 +73,7 @@ inputs:
     description: "Stage directory or package .zip to check, relative to the calling repo's checkout (e.g. work/v1.0/csd01 or dist/mytc-v1.0-csd01.zip)."
     required: true
   args:
-    description: "Extra flags passed through to oasis_pub_check.py (e.g. '--emit-manifest'). The action always writes the --json report itself; '--json' here also turns pubcheck-report.txt into JSON."
+    description: "Extra flags passed through to oasis_pub_check.py (e.g. '--emit-manifest', which needs a stage directory as the target, not a .zip). The action always writes the --json report itself; '--json' here also turns pubcheck-report.txt into JSON."
     required: false
     default: ""
   python-version:
@@ -220,11 +220,12 @@ runs:
           | tee "$RUNNER_TEMP/oasis-pub-check.txt"
         exit_code="${PIPESTATUS[0]}"
 
-        # Exit 2: the target could not be read (almost always a wrong path).
+        # Exit 2: the target could not be read (almost always a wrong path),
+        # or the arguments were refused (--emit-manifest on a .zip).
         # There is no JSON to count or render, so say so once, plainly, and
         # stop here; the "Enforce the check result" step still fails with 2.
         if [ "$exit_code" = 2 ]; then
-          echo "::error::oasis-pub-check could not read the target '${TARGET}' (exit code 2). The target path is relative to the repository root and case-sensitive."
+          echo "::error::oasis-pub-check could not read the target '${TARGET}' (exit code 2); the error above says why. The target path is relative to the repository root and case-sensitive, and --emit-manifest needs a stage directory, not a .zip."
           echo "exit_code=2" >> "$GITHUB_OUTPUT"
           for k in blockers warnings report_txt report_json report_validation_md report_validation_html report_validation_pdf; do
             echo "${k}=" >> "$GITHUB_OUTPUT"

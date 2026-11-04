@@ -104,6 +104,71 @@ def test_emit_manifest_writes_both_companion_files(tmp_path):
         )
 
 
+def _zip_stage(stage, pkg):
+    import zipfile
+
+    with zipfile.ZipFile(pkg, "w") as z:
+        for p in stage.rglob("*"):
+            if p.is_file():
+                z.write(p, p.relative_to(stage.parent))
+    return pkg
+
+
+def _manifests_under(root):
+    return sorted(p for p in root.rglob("*") if p.name == "manifest.json"
+                  or p.name.endswith("-manifest.txt"))
+
+
+@pytest.mark.parametrize("name", ["csaf-v2.1-csd01.zip", "CSAF-V2.1-CSD01.ZIP"])
+def test_emit_manifest_on_a_zip_is_refused_not_silently_lost(tmp_path, name):
+    """A ZIP is checked in a temporary extraction deleted on exit, so the
+    manifests it reported as written were thrown away (#95). --emit-manifest
+    on a ZIP must refuse with exit 2 (bad invocation), say why, print no
+    report and write nothing, whatever the case of the extension."""
+    stage = stage_from_corpus(tmp_path / "src", CSAF_CSD01)
+    for p in _manifests_under(stage):
+        p.unlink()   # the corpus ships its own; start from none
+    pkg = _zip_stage(stage, tmp_path / name)
+    result = run_cli("--emit-manifest", "--json", str(pkg))
+
+    assert result.returncode == 2, (
+        f"--emit-manifest on a ZIP should exit 2, got {result.returncode}:\n"
+        f"{result.stderr}"
+    )
+    assert "--emit-manifest needs a stage directory" in result.stderr, result.stderr
+    assert "wrote " not in result.stderr + result.stdout, (
+        "it claimed to write manifests it deleted")
+    assert result.stdout.strip() == "", "a refused run must not print a report"
+    assert _manifests_under(tmp_path) == [], "a refused run must write nothing"
+
+
+def test_emit_manifest_on_a_stage_directory_named_like_a_zip_still_writes(tmp_path):
+    """A directory is a stage directory whatever its name ends in."""
+    stage = stage_from_corpus(tmp_path, CSAF_CSD01)
+    for p in _manifests_under(stage):
+        p.unlink()
+    renamed = stage.with_name(stage.name + ".zip")
+    stage.rename(renamed)
+    result = run_cli("--emit-manifest", "--json", str(renamed))
+
+    assert result.returncode in (0, 1), result.stderr
+    assert "findings" in json.loads(result.stdout)
+    assert (renamed / "manifest.json").is_file(), result.stderr
+
+
+@pytest.mark.parametrize("flags", [(), ("--emit-manifest",)])
+def test_a_missing_zip_exits_two_without_a_traceback(tmp_path, flags):
+    """Exit 1 means blockers were found, so a missing .zip must not crash
+    into it with a traceback, and the message names the real problem."""
+    result = run_cli(*flags, str(tmp_path / "no-such-package.zip"))
+
+    assert result.returncode == 2, (
+        f"expected exit 2 for a missing zip, got {result.returncode}:\n{result.stderr}"
+    )
+    assert "Traceback" not in result.stderr, result.stderr
+    assert "does not exist" in result.stderr, result.stderr
+
+
 def test_a_missing_target_exits_two_without_a_traceback(tmp_path):
     result = run_cli(str(tmp_path / "no-such-dir"))
 
