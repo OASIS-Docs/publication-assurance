@@ -23,7 +23,10 @@ on:
 
 jobs:
   convert-and-commit:
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: on 26.04 the DMLex PDF comparison lost the
+    # text of its UML diagram (poppler 26.01, and no fonts-liberation2 for
+    # Graphviz), so the rendered PDFs no longer match the published ones (#88).
+    runs-on: ubuntu-24.04
 
     permissions:
       contents: write
@@ -104,7 +107,7 @@ jobs:
         sudo apt-get remove -y wkhtmltopdf || true
 
         # Install dependencies required by wkhtmltopdf
-        sudo apt-get install -y xfonts-75dpi fonts-liberation fonts-dejavu poppler-utils
+        sudo apt-get install -y xfonts-75dpi fonts-liberation fonts-liberation2 fonts-dejavu poppler-utils
 
 
       shell: bash
