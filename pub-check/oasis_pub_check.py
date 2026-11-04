@@ -9011,7 +9011,8 @@ def main() -> int:
     ap.add_argument("--emit-manifest", action="store_true",
                     help="write the two release manifests into the stage dir before "
                          "checking: manifest.json (sha256, source commit, tool versions) "
-                         "and <stem>-manifest.txt, the Work Product Manifest File")
+                         "and <stem>-manifest.txt, the Work Product Manifest File. "
+                         "Needs a stage directory; a .zip target is refused")
     ap.add_argument("--list-checks", action="store_true",
                     help="print every check class with its individual-condition count "
                          "(AST-derived from this file; the source of the advertised numbers)")
@@ -9027,7 +9028,18 @@ def main() -> int:
     # resolve to absolute: stage/version tokens are derived from path segments,
     # and a relative target ('.', 'cnd01') yields empty tokens and false blockers
     target = os.path.abspath(args.target)
-    if target.endswith(".zip"):
+    # A directory named like a zip ('csd01.zip/') is a stage directory.
+    if args.emit_manifest and target.lower().endswith(".zip") and not os.path.isdir(target):
+        # A ZIP is checked in a temporary extraction that is deleted on exit,
+        # so manifests written there would be lost while reported as written.
+        print("error: --emit-manifest needs a stage directory, not a ZIP: the "
+              "manifests would be written into a temporary extraction and "
+              "deleted. Unpack the package and pass its directory.", file=sys.stderr)
+        return 2
+    if target.endswith(".zip") and not os.path.isdir(target):
+        if not os.path.isfile(target):
+            print(f"error: {target} does not exist or is not a file", file=sys.stderr)
+            return 2
         tmp = tempfile.mkdtemp(prefix="pub_check_")
         try:
             with zipfile.ZipFile(target) as z:
