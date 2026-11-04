@@ -1,0 +1,13 @@
+{
+  "folder": "release-v1.17.0/csaf-v2.1-csd01-corpus",
+  "pdf": true,
+  "publication_ready": false,
+  "published": "2026-11-04 05:32:03",
+  "published_at": "2026-11-04T05:32:03.591843+00:00",
+  "ref": "release/v1.17.0",
+  "run_url": "https://github.com/OASIS-Docs/publication-assurance/actions/runs/41779762273",
+  "source_sha": "b73b9548f0d98ecbe80d4efa12fa828a9974714d",
+  "target": "examples/csaf/v2.1/csd01",
+  "title": "CSAF v2.1 CSD01 (corpus)",
+  "verdict": "NOT publication-ready: 1 blocker(s). 51 of 60 evaluated check classes fully clean; 2 not evaluated; findings: 1 blocker, 14 warning, 6 informational."
+}
