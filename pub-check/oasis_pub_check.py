@@ -9051,7 +9051,9 @@ def main() -> int:
                     return 2
                 for name in z.namelist():
                     dest = os.path.realpath(os.path.join(tmp, "raw", name))
-                    if not dest.startswith(os.path.realpath(os.path.join(tmp, "raw")) + os.sep):
+                    root = os.path.realpath(os.path.join(tmp, "raw"))
+                    # "./" names the extraction root itself, which is inside it.
+                    if dest != root and not dest.startswith(root + os.sep):
                         print(f"error: zip entry escapes extraction dir: {name}",
                               file=sys.stderr)
                         shutil.rmtree(tmp, ignore_errors=True)
