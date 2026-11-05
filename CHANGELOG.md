@@ -26,6 +26,12 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.17.1 - 2026-11-05
+
+PATCH: two fixes inside existing checks, on top of v1.17.0. No new criteria.
+
 - A package whose name ends in `.ZIP`, `.Zip` or any other case of the
   extension is now unpacked and checked exactly like a `.zip` one, instead of
   being refused as "not a directory" (#98).
