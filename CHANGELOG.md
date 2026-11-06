@@ -26,7 +26,23 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
-Nothing yet.
+PATCH: two fixes inside existing checks, for errata file names and the
+mixed-case names ODF uses. No new criteria.
+
+- `stage-token`: an Errata package's Latest-stage URL may carry its own
+  errataNN in the filename when it sits at the package's own
+  `[WP]/vN.N/errataNN/` and is named `[WP]-vN.N-errataNN` (optionally with a
+  `-partN-name` or `-complete` tail). Naming Directives v1.7 Section 4 makes
+  `/errata01/` a required directory, so errataNN there names the Errata, not
+  a stage; OData published that way (`odata/odata/v4.0/errata03/odata-v4.0-errata03.html`).
+  Any other stage token, another Errata number, version or Work Product, or a
+  bare stage word such as `-os` still blocks.
+- `case`: a filename whose only upper case is a WP-abbrev spelled exactly like
+  the package's Work Product directory (`OpenDocument/v1.4/.../OpenDocument-v1.4-errata01-csd01.odt`)
+  is no longer refused. The Naming Directives permit mixed case and camel
+  case; the version, errata and stage tokens and the extension must still be
+  lower case. In a flat ZIP the directory is built from the filename, so there
+  only the shape and lower-case rules apply.
 
 ## v1.17.1 - 2026-11-05
 

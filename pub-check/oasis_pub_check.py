@@ -3163,16 +3163,62 @@ JUNK_NAMES = {".DS_Store", "Thumbs.db", "desktop.ini"}
 JUNK_DIRS = {"__MACOSX", ".git", ".venv", "venv", "node_modules"}
 
 
+def _wp_abbrev_dir(stage_dir: str) -> str:
+    """The Work Product directory of a stage directory laid out as
+    [WP]/vN.N/[stage] or [WP]/vN.N/errataNN/[stage] (office/OpenDocument/
+    v1.4/errata01/csd01 gives 'OpenDocument'), or '' for any other layout.
+    Only those two positions are read, never a more distant ancestor, so a
+    vN.N directory higher up a working path is not taken for the package's."""
+    parent = os.path.dirname(os.path.normpath(stage_dir))
+    if re.fullmatch(r"errata\d{2}", os.path.basename(parent)):
+        parent = os.path.dirname(parent)
+    if re.fullmatch(r"v\d+(\.\d+)+", os.path.basename(parent)):
+        return os.path.basename(os.path.dirname(parent))
+    return ""
+
+
+def _mixed_case_wp_abbrev_name(name: str, wp_dir: str) -> bool:
+    """True when the only upper-case characters in `name` belong to a
+    WP-abbrev that is spelled exactly like the package's own Work Product
+    directory. naming-directives.txt Section 4 lets TCs use mixed case,
+    including camel case, in filenames and directory names; it requires
+    lower case only for the 'v' of the version, the stage abbreviation and
+    the errata token. ODF has published that way for years
+    (office/OpenDocument/v1.3/OpenDocument-v1.3-part1-introduction.html).
+    Everything after the WP-abbrev, the extension included, must still be
+    lower case, and the WP-abbrev must match the directory case-exactly, so
+    a citation built from the path and one built from the filename agree.
+    A flat ZIP has no directory of its own (zip_pkg_destination names it
+    from the filename), so there the directory agreement holds by
+    construction and only the shape and lower-case rules do any work."""
+    if not wp_dir or wp_dir == wp_dir.lower():
+        return False
+    stem, dot, ext = name.rpartition(".")
+    if not dot or not stem:
+        return False
+    parts = parse_package_stem(stem)
+    if not parts or parts[0] != wp_dir:
+        return False
+    rest = name[len(parts[0]):]
+    return rest == rest.lower()
+
+
 def check_hygiene(stage_dir: str, f: Findings, delivery_names: set | None = None) -> None:
     """OS junk and case problems. The publication origin is case-sensitive:
-    a mixed-case filename means every lowercase citation of it 404s."""
+    a mixed-case filename means every lowercase citation of it 404s, unless
+    the upper case is the TC's own mixed-case WP-abbrev, carried identically
+    by the Work Product directory (_mixed_case_wp_abbrev_name)."""
     delivery_names = delivery_names or set()
+    wp_dir = _wp_abbrev_dir(stage_dir)
     _all = [os.path.relpath(os.path.join(r, n), stage_dir)
             for r, _d, fs in os.walk(stage_dir) for n in fs]
     f.observe("junk-files", files_walked=len(_all))
     f.observe("case", mixed_case_files=[p for p in _all
               if os.path.basename(p) != os.path.basename(p).lower()
-              and os.path.basename(p) != "OASISLogo-v3.0.png"] or "(none)")
+              and os.path.basename(p) != "OASISLogo-v3.0.png"] or "(none)",
+              mixed_case_wp_abbrev_allowed=[p for p in _all
+              if os.path.basename(p) != os.path.basename(p).lower()
+              and _mixed_case_wp_abbrev_name(os.path.basename(p), wp_dir)] or "(none)")
     f.observe("symlinks", symlinks_found=sum(
         1 for r, ds, fs in os.walk(stage_dir) for n in ds + fs
         if os.path.islink(os.path.join(r, n))))
@@ -3201,7 +3247,8 @@ def check_hygiene(stage_dir: str, f: Findings, delivery_names: set | None = None
             if name in JUNK_NAMES or name.endswith(("~", ".bak", ".orig", ".swp")):
                 f.add(BLOCKER, "junk-files",
                       f"Junk file in package: {os.path.relpath(os.path.join(root, name), stage_dir)}")
-            elif name != name.lower() and name != "OASISLogo-v3.0.png":
+            elif (name != name.lower() and name != "OASISLogo-v3.0.png"
+                  and not _mixed_case_wp_abbrev_name(name, wp_dir)):
                 rel = os.path.relpath(os.path.join(root, name), stage_dir)
                 sev = BLOCKER if name in delivery_names else WARN
                 f.add(sev, "case",
@@ -4724,7 +4771,50 @@ def _md_previous_block_text(md_text: str) -> str | None:
                   md_text, re.M | re.S | re.I)
     return m.group(1) if m else None
 
-def check_stage_token(md_text: str, html_text: str, stage: str, f: Findings) -> None:
+def _own_errata_latest(url: str, errata_dir: str, wp_dir: str = "",
+                       version: str = "") -> bool:
+    """True when a Latest-stage URL is the Errata package's own Latest
+    location: .../vN.N/errataNN/[WP-abbrev]-vN.N-errataNN.[ext], where
+    errataNN is the package's own Errata directory, the URL's last
+    directory is that same errataNN, and errataNN is the ONLY stage token
+    in the filename stem. naming-directives.txt Section 4 makes /errata01/
+    a required directory with its own progression of stages, so errataNN
+    there names the Errata Work Product, not a stage of it; the Latest
+    stage of an Errata lives in that directory under that name (published
+    precedent: odata/odata/v4.0/errata03/odata-v4.0-errata03.html, named
+    as Latest version on the errata03 csd01 cover). A second token
+    (...-errata01-csd01.html), another Errata number, or an errataNN in a
+    package that is not that Errata still blocks.
+
+    The URL must sit at the package's own .../[WP]/vN.N/errataNN/ (WP
+    directory and version read from the package layout, case-exact), and
+    its filename stem must be exactly [WP]-vN.N-errataNN, optionally followed
+    by a Multi-Part '-partN-name' and/or '-complete' (the Errata
+    'complete-incorporating-errata' variant), with no stage word anywhere in
+    that tail, numbered or bare ('-os', '-csd')."""
+    if not (re.fullmatch(r"errata\d{2}", errata_dir or "") and wp_dir and version):
+        return False
+    path = uri_path(url)
+    segs = [s for s in path.split("/") if s]
+    if len(segs) < 4 or path.endswith("/") or segs[-4:-1] != [wp_dir, version, errata_dir]:
+        return False
+    fn = segs[-1]
+    last_dot = fn.rfind(".")
+    if last_dot <= 0 or not re.fullmatch(r"[a-z]{1,5}", fn[last_dot + 1:]):
+        return False
+    stem = fn[:last_dot]
+    prefix = f"{wp_dir}-{version}-{errata_dir}"
+    if not stem.startswith(prefix):
+        return False
+    tail = stem[len(prefix):]
+    if not re.fullmatch(r"(?:-part\d+(?:-[a-z0-9]+)+?)?(?:-complete)?", tail):
+        return False
+    stage_words = VALID_STAGE_PREFIXES | RETIRED_STAGE_TOKENS
+    return not any(re.sub(r"\d+$", "", c) in stage_words for c in tail.split("-") if c)
+
+
+def check_stage_token(md_text: str, html_text: str, stage: str, f: Findings,
+                      errata_dir: str = "", wp_dir: str = "", version: str = "") -> None:
     """AC-FRONTMATTER-07: while the package's own current stage is csd/cnd, a
     Previous-stage cover URI SHOULD carry a matching, non-retired stage token
     (WARN -- it may legitimately be a pre-Naming-Directives-v1.7 legacy URI,
@@ -4813,6 +4903,8 @@ def check_stage_token(md_text: str, html_text: str, stage: str, f: Findings) -> 
     for raw_u in latest_urls:
         u = _clean_url(raw_u)
         _dir_cand, stem_cand = _extract_stage_tokens(u)
+        if stem_cand and _own_errata_latest(u, errata_dir, wp_dir, version):
+            continue
         if stem_cand:
             fired = True
             f.add(BLOCKER, "stage-token",
@@ -8118,7 +8210,8 @@ def _check_document(stage_dir: str, doc_dir: str, items: dict[str, str], version
     check_image_policy(doc_dir, html_text, f)
     check_references_split(stage, md_text, html_text, f)
     check_content_labels(md_text, html_text, stage, f)
-    check_stage_token(md_text, html_text, stage, f)
+    check_stage_token(md_text, html_text, stage, f, errata_dir=_errata_dir,
+                      wp_dir=_wp_abbrev_dir(stage_dir), version=version)
     # A package is an Errata package only by its OWN layout: the stage
     # directory's own name (.../v2.0/errata01) or its immediate parent
     # (.../v2.0/errata01/os, .../v2.0/errata01/csd01) -- never any more
@@ -8730,9 +8823,9 @@ CONDITION_DOCS: list[dict] = [
     # case
     dict(check="case", sig="Mixed-case filename", applies="all",
          severity="BLOCKER/WARN",  # dynamic at the call site: delivery files block, auxiliary files warn
-         condition="Every filename in the package is lowercase",
-         pulls="every filename in the package tree",
-         compares_to="its lowercase form (the publication origin is case-sensitive; the canonical logo filename is exempt)"),
+         condition="Every filename in the package is lowercase, except a TC's own mixed-case WP-abbrev",
+         pulls="every filename in the package tree, and the Work Product directory above the version directory",
+         compares_to="its lowercase form (the publication origin is case-sensitive; the canonical logo filename is exempt). A [WP-abbrev]-[version-id][-errataNN]-[stage] name passes when its only upper case is a WP-abbrev spelled exactly like the Work Product directory, since the OASIS Naming Directives v1.7 Section 4 permits mixed case and camel case (ODF: office/OpenDocument/v1.3/OpenDocument-v1.3-part1-introduction.html)"),
     dict(check="case", sig="Mixed-case path in docs.oasis-open.org URL", applies="all", sites=2,
          condition="Every self-referential docs.oasis-open.org URL path is lowercase",
          pulls="every docs.oasis-open.org URL in the prose (markdown source on the md track, rendered HTML on the DOCX track)",
@@ -8837,7 +8930,7 @@ CONDITION_DOCS: list[dict] = [
     dict(check='content-labels', sig='the Handbook classifies Examples as non-normative content', applies='all', condition='Every Examples/Illustrative-Examples/Sample-<noun> heading carries a structural content-type label (heading suffix, first-sentence lead/predicate, labeled ancestor heading, or document-wide blanket statement)', pulls='markdown ATX/setext headings (or, DOCX-native track, rendered HTML h1-h6 elements via an HTMLParser walk, entities decoded), in document order, each with its heading text, nesting level, and the first sentence of the body block immediately following it', compares_to="handbook-Conformance.txt 'Normative versus non-normative content': Examples content is classified non-normative and 'should be clearly labelled'"),
     dict(check='stage-token', sig='carries a retired stage token', applies='all', condition='Previous-stage URL stage token is not a retired abbreviation', pulls="the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem", compares_to='retired token set (csprd, cnprd, cos, csdpr, cndpr) per Naming Directives v1.7; WARN with a legacy-URI verification caveat since a pre-2024 Previous-stage URI may permanently retain a retired token (naming-directives.txt 6.3 Resource Permanence)'),
     dict(check='stage-token', sig="carries stage token '", applies='all', condition="Previous-stage URL stage token matches the document's own current csd/cnd stage abbreviation or the track's approved-stage counterpart", pulls="the stage-abbreviation token extracted from the Previous-stage URL's directory segment and/or filename stem", compares_to="the document's own current stage token, or the track's approved-stage set (csd: cs/os/errata; cnd: cn) when the block links a previous VERSION at its own approved stage (handbook-PublicReviews.txt: the cover page URIs 'should all reflect the csd stage abbreviation')"),
-    dict(check='stage-token', sig='embeds a stage-abbreviation token', applies='all', condition="Latest-stage URL's filename embeds no stage-abbreviation/revision token at all", pulls='the filename-stem-position stage-abbreviation token (if any) extracted from the Latest-stage URL', compares_to="naming-directives.txt 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', an absolute prohibition independent of whether the token matches the current stage"),
+    dict(check='stage-token', sig='embeds a stage-abbreviation token', applies='all', condition="Latest-stage URL's filename embeds no stage-abbreviation/revision token at all, except an Errata package's own errataNN in its own errataNN directory", pulls='the filename-stem-position stage-abbreviation token (if any) extracted from the Latest-stage URL', compares_to="naming-directives.txt 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', independent of whether the token matches the current stage; an Errata package's Latest location .../errataNN/[WP-abbrev]-vN.N-errataNN.[ext] carries the Errata's own name, not a stage (Naming Directives Section 4 required /errata01/ directory; precedent odata/odata/v4.0/errata03/odata-v4.0-errata03.html)"),
     dict(check='title-version', sig='does not incorporate a Version identifier', applies='all', condition="The rendered cover-page title incorporates the package's own Version identifier", pulls='the resolved cover-page title text (HTML <title>/<h1> on the markdown track, the MsoTitle-styled or first non-empty non-logo cover paragraph on the DOCX-native track)', compares_to="naming-directives.txt 5.1: 'A Version identifier must also be incorporated into a Work Product name/title'"),
     dict(check='title-version', sig="cites a different Version than the package's own Version identifier", applies='all', condition="The Version cited in the title agrees with the package's own Version identifier", pulls="the numeric run of the rightmost 'Version <n>' token in the resolved title", compares_to="the package's own Version identifier (the version directory segment, with a leading 'v' stripped per naming-directives.txt Section 4's [version-id] grammar)"),
     dict(check='title-version', sig='Version composition does not follow the required', applies='all', condition="The title's Version token is composed as '<name/identifier> Version <number>' with no forbidden punctuation before it and only a sanctioned continuation after it (a '. Part N: <part title>' suffix; on a package whose own stage directory or immediate parent is named errataNN, also an 'Errata NN' or 'Plus Errata NN' suffix whose number matches the package's own errata number, per naming-directives.txt Section 4's separate Errata construction)", pulls="the characters immediately preceding and following the rightmost 'Version <n>' token in the resolved title, the stage token's track classification, and the package's own Errata number derived from its stage directory layout", compares_to="naming-directives.txt Section 7: MUST for Standards Track (csd/cs/os/errata) -> BLOCKER; SHOULD for Non-Standards Track (cnd/cn) -> WARN with the 'reasonable grounds for alternate constructions' exception; WARN also for any stage token outside the six Section-5.2-enumerated tokens (track unresolved, no corpus citation, never escalated to BLOCKER on an uncited classification)", severity='BLOCKER/WARN'),
