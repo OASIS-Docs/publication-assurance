@@ -1010,9 +1010,9 @@
       "sig": "Mixed-case filename",
       "applies": "all",
       "severity": "BLOCKER/WARN",
-      "condition": "Every filename in the package is lowercase",
-      "pulls": "every filename in the package tree",
-      "compares_to": "its lowercase form (the publication origin is case-sensitive; the canonical logo filename is exempt)"
+      "condition": "Every filename in the package is lowercase, except a TC's own mixed-case WP-abbrev",
+      "pulls": "every filename in the package tree, and the Work Product directory above the version directory",
+      "compares_to": "its lowercase form (the publication origin is case-sensitive; the canonical logo filename is exempt). A [WP-abbrev]-[version-id][-errataNN]-[stage] name passes when its only upper case is a WP-abbrev spelled exactly like the Work Product directory, since the OASIS Naming Directives v1.7 Section 4 permits mixed case and camel case (ODF: office/OpenDocument/v1.3/OpenDocument-v1.3-part1-introduction.html)"
     },
     {
       "check": "case",
@@ -1342,9 +1342,9 @@
       "check": "stage-token",
       "sig": "embeds a stage-abbreviation token",
       "applies": "all",
-      "condition": "Latest-stage URL's filename embeds no stage-abbreviation/revision token at all",
+      "condition": "Latest-stage URL's filename embeds no stage-abbreviation/revision token at all, except an Errata package's own errataNN in its own errataNN directory",
       "pulls": "the filename-stem-position stage-abbreviation token (if any) extracted from the Latest-stage URL",
-      "compares_to": "The OASIS Naming Directives v1.7 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', an absolute prohibition independent of whether the token matches the current stage",
+      "compares_to": "The OASIS Naming Directives v1.7 6.2: the Latest-stage locator URI 'does not contain the path component [stage-abbrev][revisionNumber] or stage identifier in the filename', independent of whether the token matches the current stage; an Errata package's Latest location .../errataNN/[WP-abbrev]-vN.N-errataNN.[ext] carries the Errata's own name, not a stage (Naming Directives Section 4 required /errata01/ directory; precedent odata/odata/v4.0/errata03/odata-v4.0-errata03.html)",
       "severity": "BLOCKER"
     },
     {
@@ -2050,7 +2050,8 @@
     },
     "case": {
       "md_docs_urls_scanned": "27",
-      "mixed_case_files": "(none)"
+      "mixed_case_files": "(none)",
+      "mixed_case_wp_abbrev_allowed": "(none)"
     },
     "date-sync": {
       "document_date": "28 May 2025",
