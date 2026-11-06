@@ -26,8 +26,12 @@ Each version is anchored by a git tag on this repository.
 
 ## Unreleased
 
+Nothing yet.
+
+## v1.17.2 - 2026-11-06
+
 PATCH: two fixes inside existing checks, for errata file names and the
-mixed-case names ODF uses. No new criteria.
+mixed-case names ODF uses (#106). No new criteria.
 
 - `stage-token`: an Errata package's Latest-stage URL may carry its own
   errataNN in the filename when it sits at the package's own
